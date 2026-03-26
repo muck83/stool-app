@@ -1,0 +1,92 @@
+/**
+ * School name alias map — bad/variant → canonical name.
+ *
+ * Covers three categories:
+ *  1. Formatting errors: wrong case, "The" prefix, punctuation, Int'l abbreviation
+ *  2. Acronym noise: name (ACRONYM) → name
+ *  3. Confirmed same-school variants: word-order flips, shortened names
+ *
+ * Campus-specific suffixes (Pudong, Bangkok, Hsinchu, Pattaya, etc.) are
+ * intentionally KEPT because campuses may have different salaries.
+ *
+ * To add a new alias: 'Submitted variant' : 'Canonical name'
+ */
+export const SCHOOL_ALIASES = {
+  // ── Formatting & case ─────────────────────────────────────────────────────
+  'American college of sofia':                    'American College of Sofia',
+  'The American College of Sofia':                'American College of Sofia',
+  'Lincoln school':                               'Lincoln School',
+  'Vienna international school':                  'Vienna International School',
+  'Ayeyarwaddy international school':             'Ayeyarwaddy International School',
+  'Metropolitan school of Panama':                'Metropolitan School of Panama',
+  'American International school':                'American International School',
+  'Garden international school':                  'Garden International School',
+  "Yew Chung Int'l School":                       'Yew Chung International School',
+  'PaRK International School':                    'Park International School',
+  'International school of Singapore':            'International School of Singapore',
+  'Colegio Americano de Torreon':                 'Colegio Americano de Torreón',
+  'STAMFORD AMERICA SCHOOL':                      'Stamford American International School',
+  'Yasmina British academy (Aldar)':              'Yasmina British Academy',
+  'tsinghua international':                       'Tsinghua International School',
+
+  // ── "The" prefix removal ──────────────────────────────────────────────────
+  'The British school of kuwait':                 'British School of Kuwait',
+  'The American School Foundation':               'American School Foundation',
+  'The International school of Kuala Lumpur':     'International School of Kuala Lumpur',
+
+  // ── Parenthetical acronym removal ────────────────────────────────────────
+  'Osaka YMCA International School (OYIS)':       'Osaka YMCA International School',
+  'Myanmar International School Yangon (MISY)':   'Myanmar International School Yangon',
+  'Verdala International School (ISL)':           'Verdala International School',
+  'International School of Dakar (ISD)':          'International School of Dakar',
+  'American School Dhahran (ISG Group)':          'American School Dhahran',
+  'The International School of Macao(TIS)':       'The International School of Macao',
+  'TIS Macao':                                    'The International School of Macao',
+
+  // ── Punctuation / abbreviated words ──────────────────────────────────────
+  'St. Andrews international school Green Valley':'St Andrews International School Green Valley',
+
+  // ── Confirmed same-school variants ───────────────────────────────────────
+  // Japan
+  'British School in Tokyo':                      'British School Tokyo',
+
+  // Thailand
+  'Concordian':                                   'Concordian International School',
+  'Regents Int School':                           'Regents International School',
+  'UWC Thailand International School':            'UWC Thailand',
+
+  // China — YCIS network (ambiguous campus → full name; campus variants preserved)
+  'YCIS':                                         'Yew Chung International School',
+  'YCIS (Yew Chung International School)':        'Yew Chung International School',
+  'YCIS Pudong':                                  'Yew Chung International School Pudong',
+  'BASIS':                                        'BASIS International School',
+
+  // Vietnam
+  'Vietnam Australia School':                     'Vietnam Australia International School',
+  'Pennsylvania International School':            'Pennsylvania American International School',
+  'TAS':                                          'The American School (TAS)',
+  'American International school':                'American International School',
+}
+
+/**
+ * Resolve a submitted school name to its canonical form.
+ * Returns the canonical if found, otherwise returns the original.
+ */
+export function resolveSchoolName(name) {
+  if (!name) return name
+  return SCHOOL_ALIASES[name] ?? name
+}
+
+/**
+ * Soft-normalise for search/comparison only (not for storage).
+ * Strips "The", lowercases, collapses whitespace.
+ */
+export function normaliseForSearch(name) {
+  if (!name) return ''
+  return name
+    .toLowerCase()
+    .replace(/^the\s+/, '')
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
