@@ -41,7 +41,7 @@ export async function fetchSalarySubmissions() {
 }
 
 export async function insertSalarySubmission(rec) {
-  if (!supabase) return null
+  if (!supabase) return { error: 'not-configured' }
   const { data, error } = await supabase
     .from('salary_submissions')
     .insert([{
@@ -58,8 +58,11 @@ export async function insertSalarySubmission(rec) {
     }])
     .select()
     .single()
-  if (error) { console.error('Supabase insert error:', error); return null }
-  return data
+  if (error) {
+    console.error('Supabase insert error:', error)
+    return { error: error.message }
+  }
+  return { data }
 }
 
 // ─── School reviews ───────────────────────────────────────────────────────────

@@ -122,11 +122,9 @@ export default function Salaries() {
       housing: form.hous || 'Not stated', flights: form.flt || 'Not stated',
       tax: form.tax || 'Not stated', _new: true, _id: id,
     }
-    // Persist to Supabase (fire-and-forget — local state updates immediately)
-    insertSalarySubmission(rec)
+    // Update local state immediately so it feels instant
     setLiveDB(prev => [rec, ...prev])
     setNewIds(prev => new Set([...prev, id]))
-    // Reset form — keep profile-sourced fields so user doesn't re-enter them
     setForm({
       country: profile.cc   || '',
       city:    profile.city || '',
@@ -139,8 +137,20 @@ export default function Salaries() {
       tax:     normaliseTax(profile.tax)      || '',
       extras:  '',
     })
-    setMsg(`✓ Added: ${school}, ${city}, ${country} — $${rec.usd.toLocaleString()}/mo. Now ${liveDB.length + 1} total records.`)
     setTimeout(() => setNewIds(prev => { const n = new Set(prev); n.delete(id); return n }), 8000)
+
+    // Persist to Supabase and report result
+    insertSalarySubmission(rec).then(result => {
+      if (result?.error) {
+        if (result.error === 'not-configured') {
+          setMsg(`✓ Saved locally — Supabase not connected (check Vercel env vars).`)
+        } else {
+          setMsg(`⚠ Saved locally but Supabase error: ${result.error}`)
+        }
+      } else {
+        setMsg(`✓ Saved: ${school}, ${city}, ${country} — $${rec.usd.toLocaleString()}/mo. Now ${liveDB.length + 1} total records.`)
+      }
+    })
   }
 
   const currClass = c => c === 'IB' ? 'pt' : c === 'British' ? 'pp' : 'pb2'
