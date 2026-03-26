@@ -34,7 +34,7 @@ export default function ProfileBar() {
             {i > 0 && <span style={{ color: 'rgba(26,25,23,.15)', margin: '0 4px' }}>·</span>}
             <span className="pbi">
               <span className="pbil">{p.label}:</span>
-              {p.value}
+              {' '}{p.value}
             </span>
           </span>
         ))}

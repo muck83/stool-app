@@ -12,6 +12,7 @@ import Diagnostic from './components/tabs/Diagnostic.jsx'
 import Culture from './components/tabs/Culture.jsx'
 import Financial from './components/tabs/Financial.jsx'
 import Research from './components/tabs/Research.jsx'
+import Admin from './components/Admin.jsx'
 
 const TABS = [
   { id: 'overview',    label: 'Overview' },
@@ -57,6 +58,7 @@ function AppInner() {
 }
 
 export default function App() {
+  if (window.location.pathname === '/admin') return <Admin />
   return (
     <ProfileProvider>
       <AppInner />

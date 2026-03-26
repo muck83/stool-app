@@ -1,10 +1,22 @@
 // MyMove.jsx
+import { useState } from 'react'
 import { useProfile } from '../../context/ProfileContext.jsx'
 import { HOF, DLBLS, DCOLS } from '../../data/hofstede.js'
 import { CTRY_DATA } from '../../data/geo.js'
+import { SALARY_DB_SEED } from '../../data/salaryDb.js'
+
+const DIM_DESCRIPTIONS = {
+  'Power Distance':         'How much people accept unequal distribution of power. High = hierarchical workplaces where authority is rarely questioned. Low = flat structures where staff challenge leadership.',
+  'Individualism':          'Whether people act as individuals or as part of a group. High = personal achievement and autonomy valued. Low = group loyalty, consensus, and collective harmony come first.',
+  'Masculinity':            'Preference for competition vs cooperation. High = assertiveness, achievement, and results-orientation dominate. Low = collaboration, work-life balance, and caring for others are prioritised.',
+  'Uncertainty Avoidance':  'Tolerance for ambiguity. High = strong need for rules, structure, and predictability. Low = comfortable with improvisation, flexibility, and not knowing what comes next.',
+  'Long-term Orientation':  'Focus on the future vs the present. High = thrift, perseverance, and investing for the long run. Low = respect for tradition, short-term results, and fulfilling social obligations.',
+  'Indulgence':             'How much people try to control impulses and desires. High = enjoy life, leisure, and having fun. Low = restraint, regulation of gratification, and strict social norms.',
+}
 
 export default function MyMove() {
   const { profile, setActiveTab, editProfile } = useProfile()
+  const [hoveredDim, setHoveredDim] = useState(null)
   const { cc, dc, dcity, pkg: curPkg, plc: curPlc, sch: curSch } = profile
 
   if (!dc) return (
@@ -47,7 +59,7 @@ export default function MyMove() {
     <div className="tp active">
       <div style={{ fontFamily: 'var(--serif)', fontSize: '1.5rem', marginBottom: '.35rem' }}>Forecast my move</div>
       <div style={{ fontSize: 13, color: 'var(--ink-3)', marginBottom: '1.5rem', lineHeight: 1.5 }}>
-        Predicted stool at {dcity ? dcity + ', ' : ''}{dc} — based on 603 educator salary records, cultural research data, and quality-of-life indices.
+        Predicted stool at {dcity ? dcity + ', ' : ''}{dc} — based on {SALARY_DB_SEED.length.toLocaleString()} educator salary records, cultural research data, and quality-of-life indices.
       </div>
       <div className="g3" style={{ marginBottom: '1.5rem' }}>
         {legs.map(leg => {
@@ -72,16 +84,40 @@ export default function MyMove() {
       {hCur && hDest && (
         <div className="card">
           <div className="ct">Cultural adjustment risk</div>
-          <div className="cs">Moving from {cc} → {dc}. Biggest cultural adjustments:</div>
+          <div className="cs">Moving from {cc} → {dc}. Hover any dimension to see what it means.</div>
           {DLBLS.map((d, i) => {
             const gap = Math.abs(hCur[i] - hDest[i])
+            const isHovered = hoveredDim === d
             return (
-              <div key={d} className="hbar">
+              <div
+                key={d}
+                className="hbar"
+                style={{ cursor: 'default', position: 'relative' }}
+                onMouseEnter={() => setHoveredDim(d)}
+                onMouseLeave={() => setHoveredDim(null)}
+              >
                 <div className="hbh">
-                  <span className="hbn">{d} adjustment</span>
-                  <span className="hbsc" style={{ color: gap > 30 ? 'var(--coral)' : 'var(--teal)' }}>{gap > 30 ? 'High' : gap > 15 ? 'Moderate' : 'Low'} — {gap}pt gap</span>
+                  <span className="hbn" style={{ borderBottom: '1px dotted var(--ink-4)' }}>{d}</span>
+                  <span className="hbsc" style={{ color: gap > 30 ? 'var(--coral)' : 'var(--teal)' }}>
+                    {gap > 30 ? 'High' : gap > 15 ? 'Moderate' : 'Low'} — {gap}pt gap
+                  </span>
                 </div>
-                <div className="hbt"><div className="hbf" style={{ width: `${Math.min(gap, 100)}%`, background: gap > 30 ? 'var(--coral)' : gap > 15 ? 'var(--amber)' : 'var(--teal)' }} /></div>
+                <div className="hbt">
+                  <div className="hbf" style={{ width: `${Math.min(gap, 100)}%`, background: gap > 30 ? 'var(--coral)' : gap > 15 ? 'var(--amber)' : 'var(--teal)' }} />
+                </div>
+                {isHovered && DIM_DESCRIPTIONS[d] && (
+                  <div style={{
+                    position: 'absolute', left: 0, top: '100%', zIndex: 10,
+                    background: 'var(--ink)', color: 'white',
+                    fontSize: 12, lineHeight: 1.55, padding: '8px 12px',
+                    borderRadius: 'var(--r)', maxWidth: 340,
+                    boxShadow: '0 4px 16px rgba(0,0,0,.18)',
+                    pointerEvents: 'none',
+                  }}>
+                    <strong style={{ display: 'block', marginBottom: 3, color: DCOLS[i] }}>{d}</strong>
+                    {DIM_DESCRIPTIONS[d]}
+                  </div>
+                )}
               </div>
             )
           })}
