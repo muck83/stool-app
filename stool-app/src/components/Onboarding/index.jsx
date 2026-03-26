@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useProfile } from '../../context/ProfileContext.jsx'
 import { COUNTRIES } from '../../data/countries.js'
+import { CURRICULUM_OPTS, HOUSING_OPTS, FLIGHTS_OPTS, TAX_OPTS } from '../../data/options.js'
 
 const COUNTRY_OPTS = COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)
 
@@ -149,7 +150,7 @@ export default function Onboarding() {
                   <div className="fg"><label>Primary curriculum</label>
                     <select value={form.curr} onChange={e => set('curr', e.target.value)}>
                       <option value="">Select</option>
-                      {['IB','British Curriculum','US-oriented','Multiple'].map(o => <option key={o}>{o}</option>)}
+                      {CURRICULUM_OPTS.map(o => <option key={o}>{o}</option>)}
                     </select>
                   </div>
                 </div>
@@ -172,9 +173,7 @@ export default function Onboarding() {
                   <div className="fg"><label>Housing</label>
                     <select value={form.hous} onChange={e => set('hous', e.target.value)}>
                       <option value="">Select</option>
-                      <option value="provided">School provides housing</option>
-                      <option value="allowance">Monthly allowance</option>
-                      <option value="none">No housing benefit</option>
+                      {HOUSING_OPTS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                     </select>
                   </div>
                 </div>
@@ -182,17 +181,13 @@ export default function Onboarding() {
                   <div className="fg"><label>Flights allowance</label>
                     <select value={form.flt} onChange={e => set('flt', e.target.value)}>
                       <option value="">Select</option>
-                      <option value="yes">Yes — covered</option>
-                      <option value="no">No</option>
+                      {FLIGHTS_OPTS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                     </select>
                   </div>
                   <div className="fg"><label>Tax status</label>
                     <select value={form.tax} onChange={e => set('tax', e.target.value)}>
                       <option value="">Select</option>
-                      <option value="taxfree">Tax-free</option>
-                      <option value="low">Low (&lt;15%)</option>
-                      <option value="moderate">Moderate (15–25%)</option>
-                      <option value="high">High (25%+)</option>
+                      {TAX_OPTS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                     </select>
                   </div>
                 </div>

@@ -129,11 +129,15 @@ export default function Overview() {
         </div>
       </div>
 
-      {/* Five questions */}
+      {/* Five questions — 2-column tile grid */}
       <div style={{ marginBottom: '1.25rem' }}>
         <div style={{ fontSize: 10, fontWeight: 500, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.1em', marginBottom: '.875rem' }}>The questions worth answering</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '.75rem' }}>
-          {questions.map((q, i) => <QuestionCard key={i} {...q} />)}
+        <div className="q-tiles" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '.75rem' }}>
+          {questions.map((q, i) => (
+            <div key={i} style={i === questions.length - 1 && questions.length % 2 !== 0 ? { gridColumn: 'span 2' } : undefined}>
+              <QuestionCard {...q} />
+            </div>
+          ))}
         </div>
       </div>
 
@@ -150,9 +154,9 @@ export default function Overview() {
               </div>
               <div style={{ marginTop: '.75rem', fontSize: 12.5, color: 'var(--ink-3)', lineHeight: 1.6 }}>
                 You are <strong style={{ color: salGap >= 0 ? 'var(--teal-dark)' : 'var(--coral-dark)' }}>{salGap >= 0 ? '+' : ''}{salGap}%</strong> vs. the regional median.
-                {hous === 'provided' && <span style={{ color: 'var(--teal-dark)' }}> + Housing provided.</span>}
-                {flt === 'yes' && <span style={{ color: 'var(--teal-dark)' }}> + Flights covered.</span>}
-                {tax === 'taxfree' && <span style={{ color: 'var(--teal-dark)' }}> + Tax-free.</span>}
+                {hous === 'Provided' && <span style={{ color: 'var(--teal-dark)' }}> + Housing provided.</span>}
+                {flt === 'Yes' && <span style={{ color: 'var(--teal-dark)' }}> + Flights covered.</span>}
+                {tax === 'Tax-free' && <span style={{ color: 'var(--teal-dark)' }}> + Tax-free.</span>}
               </div>
               <div onClick={() => setActiveTab('data')} style={{ marginTop: '.75rem', fontSize: 12, fontWeight: 500, color: 'var(--teal-dark)', cursor: 'pointer' }}>See full salary database →</div>
             </>

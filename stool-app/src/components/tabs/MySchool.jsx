@@ -1,5 +1,9 @@
 import { useState } from 'react'
 import { SR_QS, SR_DIAGNOSES, SR_DIM_COLORS } from '../../data/srQuestions.js'
+import { useProfile } from '../../context/ProfileContext.jsx'
+import { SALARY_DB_SEED } from '../../data/salaryDb.js'
+import SchoolAutocomplete from '../SchoolAutocomplete.jsx'
+import { insertSchoolReview } from '../../lib/supabase.js'
 
 const DIM_LABELS = { q1: 'Leadership', q2: 'Honesty', q3: 'Workload', q4: 'Autonomy', q5: 'Colleagues', q6: 'Mission', q7: 'Overall' }
 
@@ -87,9 +91,10 @@ function ProfileCard({ school, country, answers, hours }) {
 }
 
 export default function MySchool() {
+  const { profile } = useProfile()
   const [step, setStep] = useState(0) // 0=identity, 1-7=questions, 8=result
   const [school, setSchool] = useState('')
-  const [country, setCountry] = useState('')
+  const [country, setCountry] = useState(profile.cc || '')
   const [answers, setAnswers] = useState({})
   const [hours, setHours] = useState('')
   const [reviews, setReviews] = useState([])
@@ -103,7 +108,10 @@ export default function MySchool() {
     } else if (step < SR_QS.length) {
       setStep(step + 1)
     } else {
-      setReviews(r => [...r, { school, country, answers: { ...answers }, hours }])
+      const review = { school, country, answers: { ...answers }, hours }
+      setReviews(r => [...r, review])
+      // Persist to Supabase (fire-and-forget)
+      insertSchoolReview(review)
       setStep(SR_QS.length + 1)
     }
   }
@@ -111,7 +119,7 @@ export default function MySchool() {
   const back = () => { if (step > 0) setStep(step - 1) }
 
   const reset = () => {
-    setStep(0); setSchool(''); setCountry(''); setAnswers({}); setHours('')
+    setStep(0); setSchool(''); setCountry(profile.cc || ''); setAnswers({}); setHours('')
   }
 
   const q = step >= 1 && step <= SR_QS.length ? SR_QS[step - 1] : null
@@ -162,8 +170,20 @@ export default function MySchool() {
 
           {step === 0 && (
             <>
-              <div className="fg"><label>School name</label><input value={school} onChange={e => setSchool(e.target.value)} placeholder="e.g. Bangkok Patana School" /></div>
-              <div className="fg"><label>Country</label><input value={country} onChange={e => setCountry(e.target.value)} placeholder="e.g. Thailand" /></div>
+              <div className="fg">
+                <label>Country</label>
+                <input value={country} onChange={e => setCountry(e.target.value)} placeholder="e.g. Thailand" />
+              </div>
+              <div className="fg">
+                <label>School name</label>
+                <SchoolAutocomplete
+                  value={school}
+                  onChange={v => setSchool(v)}
+                  schools={SALARY_DB_SEED}
+                  country={country}
+                  placeholder="e.g. Bangkok Patana School"
+                />
+              </div>
               <button className="btn btn-amber" style={{ maxWidth: 200, marginTop: '.5rem' }} onClick={next}>Start review →</button>
             </>
           )}

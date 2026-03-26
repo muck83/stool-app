@@ -148,6 +148,7 @@ body {
 @media(max-width:700px) {
   .g3, .g2, .g4 { grid-template-columns: 1fr; }
   .frow { grid-template-columns: 1fr; }
+  .q-tiles > div { grid-column: span 2 !important; }
 
   /* Tab panel — tighter padding on mobile */
   .tp { padding: 1rem; }

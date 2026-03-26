@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react'
 import { decodeShareParam, clearShareParam } from '../utils/shareUrl.js'
+import { normaliseHousing, normaliseFlights, normaliseTax, normaliseCurriculum } from '../data/options.js'
 
 const STORAGE_KEY = 'stool_profile_v1'
 const TAB_KEY = 'stool_active_tab_v1'
@@ -11,13 +12,25 @@ const DEFAULT_PROFILE = {
   sch: 5, plc: 5, pkg: 5,
 }
 
+function migrateProfile(p) {
+  // Normalise any values stored with old formats to current canonical values
+  return {
+    ...p,
+    hous: normaliseHousing(p.hous),
+    flt:  normaliseFlights(p.flt),
+    tax:  normaliseTax(p.tax),
+    curr: normaliseCurriculum(p.curr),
+  }
+}
+
 function loadSaved() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return null
     const parsed = JSON.parse(raw)
-    // Merge with defaults so new fields added later don't break existing saves
-    return { ...DEFAULT_PROFILE, ...parsed }
+    // Merge with defaults so new fields added later don't break existing saves,
+    // then migrate any legacy stored values to current canonical format
+    return migrateProfile({ ...DEFAULT_PROFILE, ...parsed })
   } catch {
     return null
   }

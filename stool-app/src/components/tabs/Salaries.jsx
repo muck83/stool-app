@@ -1,8 +1,14 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { SALARY_DB_SEED } from '../../data/salaryDb.js'
 import { REGION_MAP } from '../../data/geo.js'
 import { resolveSchoolName, normaliseForSearch } from '../../data/schoolAliases.js'
 import SchoolAutocomplete from '../SchoolAutocomplete.jsx'
+import { useProfile } from '../../context/ProfileContext.jsx'
+import {
+  CURRICULUM_OPTS, HOUSING_OPTS, FLIGHTS_OPTS, TAX_OPTS,
+  normaliseHousing, normaliseFlights, normaliseTax, normaliseCurriculum,
+} from '../../data/options.js'
+import { fetchSalarySubmissions, insertSalarySubmission, supabase, supabaseStatus } from '../../lib/supabase.js'
 
 function getCountryMedian(db, country) {
   const vals = db
@@ -26,14 +32,39 @@ function salaryWarning(sal, countryMedian) {
 }
 
 export default function Salaries() {
+  const { profile } = useProfile()
   const [liveDB, setLiveDB] = useState(SALARY_DB_SEED)
   const [region, setRegion] = useState('')
   const [curr, setCurr] = useState('')
   const [search, setSearch] = useState('')
-  const [form, setForm] = useState({ country: '', city: '', school: '', curr: '', role: '', sal: '', hous: '', flt: '', tax: '', extras: '' })
+  const [form, setForm] = useState(() => ({
+    country: profile.cc   || '',
+    city:    profile.city || '',
+    school:  '',
+    curr:    normaliseCurriculum(profile.curr) || '',
+    role:    '',
+    sal:     profile.sal  || '',
+    hous:    normaliseHousing(profile.hous)   || '',
+    flt:     normaliseFlights(profile.flt)    || '',
+    tax:     normaliseTax(profile.tax)        || '',
+    extras:  '',
+  }))
   const [msg, setMsg] = useState('')
   const [newIds, setNewIds] = useState(new Set())
   const [warnAck, setWarnAck] = useState(false)
+  const [dbLoading, setDbLoading] = useState(!!supabase)
+
+  // Fetch community submissions from Supabase and merge with seed data
+  useEffect(() => {
+    if (!supabase) return
+    fetchSalarySubmissions().then(remote => {
+      if (remote.length > 0) {
+        // Prepend remote records; seed data stays as the historical baseline
+        setLiveDB(prev => [...remote, ...prev])
+      }
+      setDbLoading(false)
+    })
+  }, [])
 
   const setF = (k, v) => {
     setForm(f => ({ ...f, [k]: v }))
@@ -91,9 +122,23 @@ export default function Salaries() {
       housing: form.hous || 'Not stated', flights: form.flt || 'Not stated',
       tax: form.tax || 'Not stated', _new: true, _id: id,
     }
+    // Persist to Supabase (fire-and-forget — local state updates immediately)
+    insertSalarySubmission(rec)
     setLiveDB(prev => [rec, ...prev])
     setNewIds(prev => new Set([...prev, id]))
-    setForm({ country: '', city: '', school: '', curr: '', role: '', sal: '', hous: '', flt: '', tax: '', extras: '' })
+    // Reset form — keep profile-sourced fields so user doesn't re-enter them
+    setForm({
+      country: profile.cc   || '',
+      city:    profile.city || '',
+      school:  '',
+      curr:    normaliseCurriculum(profile.curr) || '',
+      role:    '',
+      sal:     '',
+      hous:    normaliseHousing(profile.hous) || '',
+      flt:     normaliseFlights(profile.flt)  || '',
+      tax:     normaliseTax(profile.tax)      || '',
+      extras:  '',
+    })
     setMsg(`✓ Added: ${school}, ${city}, ${country} — $${rec.usd.toLocaleString()}/mo. Now ${liveDB.length + 1} total records.`)
     setTimeout(() => setNewIds(prev => { const n = new Set(prev); n.delete(id); return n }), 8000)
   }
@@ -111,10 +156,22 @@ export default function Salaries() {
 
       <div className="card" style={{ marginBottom: '1rem' }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '.5rem', marginBottom: '.25rem' }}>
-          <div className="ct" style={{ margin: 0 }}>Live salary database — {liveDB.length} records</div>
-          <span style={{ fontSize: 10, fontWeight: 500, background: '#F3F4F6', color: 'var(--ink-3)', padding: '2px 8px', borderRadius: 10, whiteSpace: 'nowrap' }}>
-            Community-submitted · Unverified
-          </span>
+          <div className="ct" style={{ margin: 0 }}>
+            Live salary database — {liveDB.length} records
+            {dbLoading && <span style={{ fontSize: 11, fontWeight: 400, color: 'var(--ink-4)', marginLeft: 8 }}>loading community data…</span>}
+          </div>
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 10, fontWeight: 500, background: '#F3F4F6', color: 'var(--ink-3)', padding: '2px 8px', borderRadius: 10, whiteSpace: 'nowrap' }}>
+              Community-submitted · Unverified
+            </span>
+            <span style={{
+              fontSize: 10, fontWeight: 500, padding: '2px 8px', borderRadius: 10, whiteSpace: 'nowrap',
+              background: supabaseStatus === 'connected' ? '#E1F5EE' : supabaseStatus === 'misconfigured' ? '#FEF3C7' : '#F3F4F6',
+              color:      supabaseStatus === 'connected' ? 'var(--teal-dark)' : supabaseStatus === 'misconfigured' ? '#92400E' : 'var(--ink-4)',
+            }}>
+              {supabaseStatus === 'connected' ? '● Live DB' : supabaseStatus === 'misconfigured' ? '⚠ DB misconfigured' : '○ Seed data only'}
+            </span>
+          </div>
         </div>
         <div className="cs">Self-reported by international educators. Data is anonymised and unverified — treat as a directional guide, not a definitive benchmark. Filter by region, curriculum, or role.</div>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: '1rem' }}>
@@ -172,7 +229,7 @@ export default function Salaries() {
           <div className="fg"><label>Curriculum</label>
             <select value={form.curr} onChange={e => setF('curr', e.target.value)}>
               <option value="">Select</option>
-              {['IB','British Curriculum','US-oriented curriculum','Multiple'].map(o => <option key={o}>{o}</option>)}
+              {CURRICULUM_OPTS.map(o => <option key={o}>{o}</option>)}
             </select>
           </div>
         </div>
@@ -202,18 +259,27 @@ export default function Salaries() {
           </div>
         </div>
         <div className="frow">
-          <div className="fg"><label>Tax status</label>
-            <select value={form.tax} onChange={e => setF('tax', e.target.value)}>
-              <option value="">Select</option>
-              {['Tax-free','School pays tax','0% — no local income tax','Low — under 10%','Moderate — 10–20%','Standard — 20–30%','High — over 30%'].map(o => <option key={o}>{o}</option>)}
-            </select>
-          </div>
           <div className="fg"><label>Housing</label>
             <select value={form.hous} onChange={e => setF('hous', e.target.value)}>
               <option value="">Select</option>
-              {['Provided','Allowance','None'].map(o => <option key={o}>{o}</option>)}
+              {HOUSING_OPTS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
             </select>
           </div>
+          <div className="fg"><label>Flights allowance</label>
+            <select value={form.flt} onChange={e => setF('flt', e.target.value)}>
+              <option value="">Select</option>
+              {FLIGHTS_OPTS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+            </select>
+          </div>
+        </div>
+        <div className="frow">
+          <div className="fg"><label>Tax status</label>
+            <select value={form.tax} onChange={e => setF('tax', e.target.value)}>
+              <option value="">Select</option>
+              {TAX_OPTS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+            </select>
+          </div>
+          <div className="fg" />
         </div>
         <button className="btn btn-primary" style={{ maxWidth: 220, marginTop: '.5rem' }} onClick={submit}>Submit anonymously →</button>
         {msg && <div style={{ fontSize: 12, color: msg.startsWith('✓') ? 'var(--teal-dark)' : 'var(--coral-dark)', marginTop: '.5rem' }}>{msg}</div>}
