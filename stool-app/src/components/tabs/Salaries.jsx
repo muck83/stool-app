@@ -147,6 +147,7 @@ export default function Salaries() {
 
   return (
     <div className="tp active">
+      {/* Stats row */}
       <div className="g4" style={{ marginBottom: '1.25rem' }}>
         <div className="chip"><div className="chl">Total records</div><div className="chv">{liveDB.length}</div><div className="chs">Crowdsourced, anonymised</div></div>
         <div className="chip"><div className="chl">Countries</div><div className="chv">{new Set(liveDB.map(r => r.country)).size}</div><div className="chs">Represented</div></div>
@@ -154,77 +155,74 @@ export default function Salaries() {
         <div className="chip"><div className="chl">Stool ratings</div><div className="chv">{liveDB.filter(r => r.pkg != null).length}</div><div className="chs">Schools rated</div></div>
       </div>
 
-      <div className="card" style={{ marginBottom: '1rem' }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '.5rem', marginBottom: '.25rem' }}>
-          <div className="ct" style={{ margin: 0 }}>
-            Live salary database — {liveDB.length} records
-            {dbLoading && <span style={{ fontSize: 11, fontWeight: 400, color: 'var(--ink-4)', marginLeft: 8 }}>loading community data…</span>}
-          </div>
-          <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 10, fontWeight: 500, background: '#F3F4F6', color: 'var(--ink-3)', padding: '2px 8px', borderRadius: 10, whiteSpace: 'nowrap' }}>
-              Community-submitted · Unverified
-            </span>
-            <span style={{
-              fontSize: 10, fontWeight: 500, padding: '2px 8px', borderRadius: 10, whiteSpace: 'nowrap',
-              background: supabaseStatus === 'connected' ? '#E1F5EE' : supabaseStatus === 'misconfigured' ? '#FEF3C7' : '#F3F4F6',
-              color:      supabaseStatus === 'connected' ? 'var(--teal-dark)' : supabaseStatus === 'misconfigured' ? '#92400E' : 'var(--ink-4)',
-            }}>
-              {supabaseStatus === 'connected' ? '● Live DB' : supabaseStatus === 'misconfigured' ? '⚠ DB misconfigured' : '○ Seed data only'}
-            </span>
-          </div>
-        </div>
-        <div className="cs">Self-reported by international educators. Data is anonymised and unverified — treat as a directional guide, not a definitive benchmark. Filter by region, curriculum, or role.</div>
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: '1rem' }}>
-          <select value={region} onChange={e => setRegion(e.target.value)} style={{ padding: '8px 12px', border: '1px solid var(--border-2)', borderRadius: 'var(--r)', fontSize: 13, background: 'white', color: 'var(--ink)' }}>
-            <option value="">All regions</option>
-            {['SE Asia','East Asia','Middle East','Europe','Americas'].map(r => <option key={r}>{r}</option>)}
-          </select>
-          <select value={curr} onChange={e => setCurr(e.target.value)} style={{ padding: '8px 12px', border: '1px solid var(--border-2)', borderRadius: 'var(--r)', fontSize: 13, background: 'white', color: 'var(--ink)' }}>
-            <option value="">All curricula</option>
-            {['IB','British','US'].map(c => <option key={c}>{c}</option>)}
-          </select>
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search school or city..." style={{ padding: '8px 12px', border: '1px solid var(--border-2)', borderRadius: 'var(--r)', fontSize: 13, flex: 1, minWidth: 160 }} />
-        </div>
-        <div className="dt-scroll">
-          <table className="data-table">
-            <thead><tr><th>Year</th><th>Country</th><th>City</th><th>School</th><th>Curriculum</th><th>Role</th><th>USD/mo</th><th>Housing</th><th>Flights</th><th>Tax</th></tr></thead>
-            <tbody>
-              {filtered.map((r, i) => (
-                <tr key={r._id || i} style={newIds.has(r._id) ? { background: '#E1F5EE', animation: 'rowFlash 2s ease forwards' } : undefined}>
-                  <td>{r.y}{newIds.has(r._id) && <span className="pill pt" style={{ fontSize: 10, padding: '1px 7px' }}>NEW</span>}</td>
-                  <td>{r.country}</td><td>{r.city}</td>
-                  <td style={{ fontWeight: 500 }}>{r.school}</td>
-                  <td><span className={`pill ${currClass(r.curr)}`}>{r.curr}</span></td>
-                  <td>{r.role}</td>
-                  <td style={{ color: 'var(--teal-dark)', fontWeight: 500 }}>${r.usd.toLocaleString()}</td>
-                  <td>{r.housing}</td><td>{r.flights}</td><td>{r.tax}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <div style={{ fontSize: 12, color: 'var(--ink-4)', marginTop: '.75rem' }}>
-          Showing <strong>{filtered.length}</strong> of <strong>{liveDB.length}</strong> records
-        </div>
-      </div>
+      {/* Table + Contribute side by side */}
+      <div className="sal-layout" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) 300px', gap: '1rem', alignItems: 'start' }}>
 
-      <div style={{ background: 'var(--surface-2)', borderRadius: 'var(--rl)', padding: '1.5rem', marginTop: '1rem' }}>
-        <div className="ct" style={{ marginBottom: '.5rem' }}>Contribute your data</div>
-        <div className="cs">Your submission helps other educators make informed decisions. All data is anonymised.</div>
-        <div className="frow">
+        {/* Left — salary database */}
+        <div className="card">
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '.5rem', marginBottom: '.25rem' }}>
+            <div className="ct" style={{ margin: 0 }}>
+              Live salary database — {liveDB.length} records
+              {dbLoading && <span style={{ fontSize: 11, fontWeight: 400, color: 'var(--ink-4)', marginLeft: 8 }}>loading community data…</span>}
+            </div>
+            <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: 10, fontWeight: 500, background: '#F3F4F6', color: 'var(--ink-3)', padding: '2px 8px', borderRadius: 10, whiteSpace: 'nowrap' }}>
+                Community-submitted · Unverified
+              </span>
+              <span style={{
+                fontSize: 10, fontWeight: 500, padding: '2px 8px', borderRadius: 10, whiteSpace: 'nowrap',
+                background: supabaseStatus === 'connected' ? '#E1F5EE' : supabaseStatus === 'misconfigured' ? '#FEF3C7' : '#F3F4F6',
+                color:      supabaseStatus === 'connected' ? 'var(--teal-dark)' : supabaseStatus === 'misconfigured' ? '#92400E' : 'var(--ink-4)',
+              }}>
+                {supabaseStatus === 'connected' ? '● Live DB' : supabaseStatus === 'misconfigured' ? '⚠ DB misconfigured' : '○ Seed data only'}
+              </span>
+            </div>
+          </div>
+          <div className="cs">Self-reported by international educators. Anonymised and unverified — treat as a directional guide, not a definitive benchmark.</div>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: '1rem', marginTop: '.75rem' }}>
+            <select value={region} onChange={e => setRegion(e.target.value)} style={{ padding: '7px 10px', border: '1px solid var(--border-2)', borderRadius: 'var(--r)', fontSize: 13, background: 'white', color: 'var(--ink)' }}>
+              <option value="">All regions</option>
+              {['SE Asia','East Asia','Middle East','Europe','Americas'].map(r => <option key={r}>{r}</option>)}
+            </select>
+            <select value={curr} onChange={e => setCurr(e.target.value)} style={{ padding: '7px 10px', border: '1px solid var(--border-2)', borderRadius: 'var(--r)', fontSize: 13, background: 'white', color: 'var(--ink)' }}>
+              <option value="">All curricula</option>
+              {['IB','British','US'].map(c => <option key={c}>{c}</option>)}
+            </select>
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search school or city…" style={{ padding: '7px 10px', border: '1px solid var(--border-2)', borderRadius: 'var(--r)', fontSize: 13, flex: 1, minWidth: 140 }} />
+          </div>
+          <div className="dt-scroll">
+            <table className="data-table">
+              <thead><tr><th>Year</th><th>Country</th><th>City</th><th>School</th><th>Curriculum</th><th>Role</th><th>USD/mo</th><th>Housing</th><th>Flights</th><th>Tax</th></tr></thead>
+              <tbody>
+                {filtered.map((r, i) => (
+                  <tr key={r._id || i} style={newIds.has(r._id) ? { background: '#E1F5EE', animation: 'rowFlash 2s ease forwards' } : undefined}>
+                    <td>{r.y}{newIds.has(r._id) && <span className="pill pt" style={{ fontSize: 10, padding: '1px 7px' }}>NEW</span>}</td>
+                    <td>{r.country}</td><td>{r.city}</td>
+                    <td style={{ fontWeight: 500 }}>{r.school}</td>
+                    <td><span className={`pill ${currClass(r.curr)}`}>{r.curr}</span></td>
+                    <td>{r.role}</td>
+                    <td style={{ color: 'var(--teal-dark)', fontWeight: 500 }}>${r.usd.toLocaleString()}</td>
+                    <td>{r.housing}</td><td>{r.flights}</td><td>{r.tax}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--ink-4)', marginTop: '.75rem' }}>
+            Showing <strong>{filtered.length}</strong> of <strong>{liveDB.length}</strong> records
+          </div>
+        </div>
+
+        {/* Right — contribute form (single-column, sticky) */}
+        <div className="card" style={{ position: 'sticky', top: '1rem' }}>
+          <div className="ct" style={{ marginBottom: '.25rem' }}>Contribute your data</div>
+          <div className="cs" style={{ marginBottom: '1rem' }}>Anonymised. Helps other educators make informed decisions.</div>
+
           <div className="fg"><label>Country</label><input value={form.country} onChange={e => setF('country', e.target.value)} placeholder="e.g. Thailand" /></div>
           <div className="fg"><label>City</label><input value={form.city} onChange={e => setF('city', e.target.value)} placeholder="e.g. Bangkok" /></div>
-        </div>
-        <div className="frow">
           <div className="fg">
             <label>School name</label>
-            <SchoolAutocomplete
-              value={form.school}
-              onChange={v => setF('school', v)}
-              schools={liveDB}
-              country={form.country}
-              placeholder="e.g. Bangkok Patana School"
-            />
+            <SchoolAutocomplete value={form.school} onChange={v => setF('school', v)} schools={liveDB} country={form.country} placeholder="e.g. Bangkok Patana" />
           </div>
           <div className="fg"><label>Curriculum</label>
             <select value={form.curr} onChange={e => setF('curr', e.target.value)}>
@@ -232,33 +230,23 @@ export default function Salaries() {
               {CURRICULUM_OPTS.map(o => <option key={o}>{o}</option>)}
             </select>
           </div>
-        </div>
-        <div className="frow">
           <div className="fg"><label>Your role / subject</label><input value={form.role} onChange={e => setF('role', e.target.value)} placeholder="e.g. IB DP Mathematics" /></div>
           <div className="fg">
             <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              Monthly salary (USD equiv.)
-              <span style={{ fontSize: 10, background: '#FEF3C7', color: '#92400E', padding: '1px 6px', borderRadius: 8, fontWeight: 500 }}>USD monthly only</span>
+              Monthly salary (USD)
+              <span style={{ fontSize: 10, background: '#FEF3C7', color: '#92400E', padding: '1px 6px', borderRadius: 8, fontWeight: 500 }}>monthly only</span>
             </label>
             <input type="number" value={form.sal} onChange={e => setF('sal', e.target.value)} placeholder="e.g. 4500" min={0} />
             {warning && !warnAck && (
-              <div style={{ marginTop: 6, padding: '8px 10px', background: warning.type === 'high' ? '#FEF9E7' : '#FEF3C7', border: `1px solid ${warning.type === 'high' ? '#F0C060' : '#FBBF24'}`, borderRadius: 6 }}>
+              <div style={{ marginTop: 6, padding: '8px 10px', background: '#FEF9E7', border: '1px solid #F0C060', borderRadius: 6 }}>
                 <div style={{ fontSize: 12, color: '#92400E', lineHeight: 1.5, marginBottom: 6 }}>⚠ {warning.msg}</div>
-                <button
-                  type="button"
-                  onClick={() => setWarnAck(true)}
-                  style={{ fontSize: 11, fontWeight: 600, color: '#92400E', background: 'white', border: '1px solid #F0C060', borderRadius: 6, padding: '3px 10px', cursor: 'pointer' }}
-                >
-                  Yes, this is correct — submit anyway
+                <button type="button" onClick={() => setWarnAck(true)} style={{ fontSize: 11, fontWeight: 600, color: '#92400E', background: 'white', border: '1px solid #F0C060', borderRadius: 6, padding: '3px 10px', cursor: 'pointer' }}>
+                  Yes, this is correct
                 </button>
               </div>
             )}
-            {warning && warnAck && (
-              <div style={{ fontSize: 11, color: 'var(--teal-dark)', marginTop: 4 }}>✓ Confirmed</div>
-            )}
+            {warning && warnAck && <div style={{ fontSize: 11, color: 'var(--teal-dark)', marginTop: 4 }}>✓ Confirmed</div>}
           </div>
-        </div>
-        <div className="frow">
           <div className="fg"><label>Housing</label>
             <select value={form.hous} onChange={e => setF('hous', e.target.value)}>
               <option value="">Select</option>
@@ -271,18 +259,16 @@ export default function Salaries() {
               {FLIGHTS_OPTS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
             </select>
           </div>
-        </div>
-        <div className="frow">
           <div className="fg"><label>Tax status</label>
             <select value={form.tax} onChange={e => setF('tax', e.target.value)}>
               <option value="">Select</option>
               {TAX_OPTS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
             </select>
           </div>
-          <div className="fg" />
+          <button className="btn btn-primary" style={{ width: '100%', marginTop: '.25rem' }} onClick={submit}>Submit anonymously →</button>
+          {msg && <div style={{ fontSize: 12, color: msg.startsWith('✓') ? 'var(--teal-dark)' : 'var(--coral-dark)', marginTop: '.5rem' }}>{msg}</div>}
         </div>
-        <button className="btn btn-primary" style={{ maxWidth: 220, marginTop: '.5rem' }} onClick={submit}>Submit anonymously →</button>
-        {msg && <div style={{ fontSize: 12, color: msg.startsWith('✓') ? 'var(--teal-dark)' : 'var(--coral-dark)', marginTop: '.5rem' }}>{msg}</div>}
+
       </div>
     </div>
   )

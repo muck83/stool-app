@@ -149,6 +149,7 @@ body {
   .g3, .g2, .g4 { grid-template-columns: 1fr; }
   .frow { grid-template-columns: 1fr; }
   .q-tiles > div { grid-column: span 2 !important; }
+  .sal-layout { grid-template-columns: 1fr !important; position: static !important; }
 
   /* Tab panel — tighter padding on mobile */
   .tp { padding: 1rem; }
