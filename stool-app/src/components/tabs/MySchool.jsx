@@ -129,9 +129,9 @@ export default function MySchool() {
     <div className="tp active">
       <div className="g2" style={{ marginBottom: '1.25rem', alignItems: 'start' }}>
         <div>
-          <div style={{ fontFamily: 'var(--serif)', fontSize: '1.5rem', marginBottom: '.35rem' }}>What's actually wrong with your school?</div>
+          <div style={{ fontFamily: 'var(--serif)', fontSize: '1.5rem', marginBottom: '.35rem' }}>How was your experience at your school?</div>
           <div style={{ fontSize: 13, color: 'var(--ink-3)', maxWidth: 480, lineHeight: 1.65, marginBottom: '1.25rem' }}>
-            Seven behavioural questions that name the real issue — leadership, honesty, workload, autonomy, colleagues, mission. You get a named diagnosis, a prognosis, and practical advice. As a by-product, your responses contribute to an aggregated school profile that helps other teachers make the same decision you're navigating now.
+            Seven questions that surface the real picture — leadership, honesty, workload, autonomy, colleagues, mission. You get a named diagnosis, a prognosis, and practical advice. Your responses also contribute to an aggregated school profile that helps other teachers make the same decision you're navigating now.
           </div>
           <div className="g3" style={{ marginBottom: '1.25rem' }}>
             {[['3','reviews needed before a school profile becomes visible'],['10','reviews needed to feed the destination prediction model'],['7','behavioural questions — takes about 4 minutes']].map(([n, desc]) => (
