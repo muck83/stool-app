@@ -1,6 +1,6 @@
 export const FAQ_DATA = [
   {
-    id:'f1', behavior:'Students stay silent - nobody speaks up in class',
+    id:'f1', behavior:'Students stay silent - class discussion feels hard to unlock',
     dims:['Group culture','Respect for authority'], category:'participation',
     dim_key:'IDV',
     dest_key:'IDV',
@@ -18,7 +18,7 @@ export const FAQ_DATA = [
     dest_low:'In equally or more group-oriented destinations, the same dynamic intensifies. Build protective participation structures early and lean into collaborative formats as real pedagogy, not just a workaround.',
   },
   {
-    id:'f2', behavior:"Students say 'yes' but do not follow through",
+    id:'f2', behavior:"Students say 'yes' but follow-through is uneven",
     dims:['Group culture','Communication style'], category:'communication',
     dim_key:'IDV',
     dest_key:'IDV',
@@ -37,7 +37,7 @@ export const FAQ_DATA = [
     dest_low:"In more group-oriented destinations, this pattern gets stronger. The answer is not to demand more verbal compliance - it is to create better follow-through structures.",
   },
   {
-    id:'f3', behavior:'Parents are intensely involved and academically demanding',
+    id:'f3', behavior:'Parents seem highly involved and very focused on outcomes',
     dims:['Future focus','Academic pressure'], category:'parents',
     dim_key:'LTO',
     dest_key:'LTO',
@@ -56,7 +56,7 @@ export const FAQ_DATA = [
     dest_low:'Moving to a more present-focused destination often reduces exam-driven pressure, but may increase advocacy around a child\'s individual preferences, wellbeing, or fit.',
   },
   {
-    id:'f4', behavior:'Students resist open-ended tasks and want definite answers',
+    id:'f4', behavior:'Students seem uneasy with open-ended tasks and want clearer answers',
     dims:['Certainty preference','Clear structure'], category:'learning',
     dim_key:'UAI',
     dest_key:'UAI',
@@ -74,7 +74,7 @@ export const FAQ_DATA = [
     dest_low:'Destinations more comfortable with ambiguity can feel liberating. Students are more willing to experiment, but you may need to work harder on rigor and follow-through.',
   },
   {
-    id:'f5', behavior:'Students avoid expressing individual opinions - group harmony comes first',
+    id:'f5', behavior:'Students hold back individual opinions when the group is present',
     dims:['Group culture'], category:'participation',
     dim_key:'IDV',
     dest_key:'IDV',
@@ -92,7 +92,7 @@ export const FAQ_DATA = [
     dest_low:'In more collectivist destinations, group harmony remains central. Treat consensus-seeking as a real cultural logic, not as passivity.',
   },
   {
-    id:'f6', behavior:'Grade pushback - parents and students challenge your assessments constantly',
+    id:'f6', behavior:'Grades are questioned often by students or families',
     dims:['Academic pressure','Authority distance'], category:'parents',
     dim_key:'MAS',
     dest_key:'MAS',
@@ -111,7 +111,7 @@ export const FAQ_DATA = [
     dest_low:'Lower-competition destinations often reduce the volume and intensity of grade pushback, though expectations around fairness and clarity remain high.',
   },
   {
-    id:'f7', behavior:'Students call you by your first name - or never call you anything at all',
+    id:'f7', behavior:'Students use very informal names for you - or avoid using any name at all',
     dims:['Authority distance','Teacher-student formality'], category:'relationships',
     dim_key:'PDI',
     dest_key:'PDI',
@@ -129,7 +129,7 @@ export const FAQ_DATA = [
     dest_low:'In lower-PDI destinations, first names or relaxed address are common. Students may show respect through tone, punctuality, and honesty rather than formal title use.',
   },
   {
-    id:'f8', behavior:'Students are intensely focused on exams but check out after them',
+    id:'f8', behavior:'Students pour energy into exams, then seem to disengage afterward',
     dims:['Future focus','Assessment orientation'], category:'learning',
     dim_key:'LTO',
     dest_key:'LTO',
@@ -147,7 +147,7 @@ export const FAQ_DATA = [
     dest_low:'In lower-LTO destinations, students may place less identity weight on the exam itself, which can make broader learning goals easier to sustain.',
   },
   {
-    id:'f9', behavior:"Students want the rubric before they'll start - creative tasks cause anxiety",
+    id:'f9', behavior:"Students want the rubric before they begin - creative tasks feel risky",
     dims:['Certainty preference','Task ambiguity'], category:'communication',
     dim_key:'UAI',
     dest_key:'UAI',
@@ -165,7 +165,7 @@ export const FAQ_DATA = [
     dest_low:'In lower-UAI destinations, students are more likely to improvise, experiment, and tolerate incomplete instructions. The challenge may shift toward consistency and polish.',
   },
   {
-    id:'f10', behavior:'A few students dominate while others never speak',
+    id:'f10', behavior:'A few students dominate while others rarely enter the conversation',
     dims:['Competition norms','Classroom assertiveness'], category:'participation',
     dim_key:'MAS',
     dest_key:'MAS',
@@ -183,7 +183,7 @@ export const FAQ_DATA = [
     dest_low:'In lower-MAS destinations, students are often more collaborative and less eager to compete for airtime, which makes balanced participation easier to build.',
   },
   {
-    id:'f11', behavior:'Parents defer completely to your judgment - you never hear from them',
+    id:'f11', behavior:'Parents seem to defer to your judgment and rarely contact you',
     dims:['Authority distance','Parent-school roles'], category:'parents',
     dim_key:'PDI',
     dest_key:'PDI',
@@ -201,7 +201,7 @@ export const FAQ_DATA = [
     dest_low:'In lower-PDI destinations, parents are more likely to contact you early, advocate actively, and expect visible responsiveness from the school.',
   },
   {
-    id:'f12', behavior:'Students bring you food, gifts, and personal items constantly',
+    id:'f12', behavior:'Students bring food, gifts, or personal tokens more often than you expect',
     dims:['Warmth','Social expressiveness'], category:'relationships',
     dim_key:'IVR',
     dest_key:'IVR',

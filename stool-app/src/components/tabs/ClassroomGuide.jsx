@@ -125,7 +125,7 @@ function homeConfig(yrs) {
     return { label: 'Your original culture', note: null }
   }
 
-  return { label: 'Your home country', note: null }
+  return { label: 'Country you grew up in', note: null }
 }
 
 function JourneyPanel({ label, sublabel, country, hof, color, bg, getSummary, note }) {
@@ -169,11 +169,11 @@ function BehaviorItem({ f }) {
       {open && (
         <div style={{ padding: '0 1.25rem 1rem 1.25rem', borderTop: '1px dashed var(--border)' }}>
           <div style={{ marginBottom: '.875rem', marginTop: '.75rem' }}>
-            <div style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.07em', color: 'var(--ink-4)', marginBottom: '.3rem' }}>Why this happens</div>
+            <div style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.07em', color: 'var(--ink-4)', marginBottom: '.3rem' }}>Possible interpretation</div>
             <div style={{ fontSize: 13, color: 'var(--ink-2)', lineHeight: 1.65 }}>{f.why}</div>
           </div>
           <div>
-            <div style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.07em', color: 'var(--ink-4)', marginBottom: '.3rem' }}>How to respond effectively</div>
+            <div style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.07em', color: 'var(--ink-4)', marginBottom: '.3rem' }}>What to try before concluding too much</div>
             <div style={{ fontSize: 13, color: 'var(--ink-2)', lineHeight: 1.65 }}>{f.respond}</div>
           </div>
           <div style={{ fontSize: 11, color: 'var(--ink-4)', marginTop: '.75rem', fontStyle: 'italic', borderTop: '1px solid var(--border)', paddingTop: '.5rem' }}>{f.research}</div>
@@ -213,12 +213,12 @@ function CategorySection({ config, behaviors, profile }) {
         <div style={{ borderTop: '1px solid var(--border)' }}>
           <div style={{ padding: '1rem 1.25rem', background: 'var(--surface-2)' }}>
             <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.07em', color: 'var(--ink-4)', marginBottom: '.75rem' }}>
-              How this usually feels across your three countries
+              How this can feel across the three places in your profile
             </div>
             <div style={{ display: 'flex', gap: '.75rem', flexWrap: 'wrap' }}>
               <JourneyPanel
                 label={hc.label}
-                sublabel="home country"
+                sublabel="country you grew up in"
                 country={profile.home}
                 hof={hHome}
                 color="#888780"
@@ -250,7 +250,7 @@ function CategorySection({ config, behaviors, profile }) {
           {behaviors.length > 0 && (
             <div>
               <div style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.07em', color: 'var(--ink-4)', padding: '.75rem 1.25rem .25rem', background: 'white' }}>
-                {behaviors.length} specific behavior{behaviors.length !== 1 ? 's' : ''} - open one to see why it happens and what to do
+                {behaviors.length} classroom moment{behaviors.length !== 1 ? 's' : ''} - open one for a possible explanation and a practical next move
               </div>
               {behaviors.map((f) => <BehaviorItem key={f.id} f={f} />)}
             </div>
@@ -263,6 +263,7 @@ function CategorySection({ config, behaviors, profile }) {
 
 export default function ClassroomGuide() {
   const { profile } = useProfile()
+  const hc = homeConfig(profile.yrs)
 
   const categorizedBehaviors = Object.keys(CATEGORY_CONFIG).reduce((acc, catId) => {
     acc[catId] = FAQ_DATA.filter((f) => f.category === catId)
@@ -273,7 +274,27 @@ export default function ClassroomGuide() {
     <div className="tp active">
       <div style={{ fontFamily: 'var(--serif)', fontSize: '1.5rem', marginBottom: '.35rem' }}>Classroom guide</div>
       <div style={{ fontSize: 13, color: 'var(--ink-3)', marginBottom: '1.5rem', maxWidth: 640, lineHeight: 1.6 }}>
-        Five parts of classroom life, shown in plain language across your home country, where you are now, and where you may be heading next. Open a category to see the bigger pattern, then drill into specific behaviors for practical advice.
+        Five parts of classroom life, shown in plain language across the three places in your profile: the country you grew up in, where you are now, and where you may be heading next. Open a category to see the bigger pattern, then drill into specific classroom moments for practical advice.
+      </div>
+
+      <div style={{ background: 'white', border: '1px solid var(--border)', borderRadius: 10, padding: '1rem 1.25rem', marginBottom: '1rem' }}>
+        <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.07em', color: 'var(--ink-4)', marginBottom: '.65rem' }}>
+          The guide is currently using these places
+        </div>
+        <div style={{ display: 'flex', gap: '.5rem', flexWrap: 'wrap', marginBottom: '.75rem' }}>
+          <span style={{ fontSize: 12, color: 'var(--ink-3)', background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 999, padding: '5px 10px' }}>
+            {hc.label}: {profile.home || 'Not added yet'}
+          </span>
+          <span style={{ fontSize: 12, color: 'var(--ink-3)', background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 999, padding: '5px 10px' }}>
+            Where you are now: {profile.cc || 'Not added yet'}
+          </span>
+          <span style={{ fontSize: 12, color: 'var(--ink-3)', background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 999, padding: '5px 10px' }}>
+            Where you may be going: {profile.dc || 'Not added yet'}
+          </span>
+        </div>
+        <div style={{ fontSize: 12.5, color: 'var(--ink-3)', lineHeight: 1.65 }}>
+          These are broad cultural patterns, not predictions about individual students or families. Use them as prompts to observe, ask better questions, and test your interpretation before making assumptions.
+        </div>
       </div>
 
       {Object.entries(CATEGORY_CONFIG).map(([catId, config]) => (
