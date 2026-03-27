@@ -48,6 +48,33 @@ const MONEY = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 0,
 })
 
+const LIFE_LABELS = {
+  single: 'Solo move',
+  partner: 'Partner, flexible',
+  partner_career: 'Partner with career needs',
+  children: 'Moving with children',
+}
+
+const PRIORITY_LABELS = {
+  balance: 'Work-life balance',
+  growth: 'Career growth',
+  adventure: 'Adventure and lifestyle',
+  financial: 'Financial security',
+}
+
+const FRICTION_LABELS = {
+  leadership: 'Bad leadership and culture',
+  workload: 'Workload and burnout',
+  isolation: 'Isolation and social life',
+  financial: 'Financial reality vs promise',
+}
+
+const EXIT_LABELS = {
+  easy: 'Could leave if needed',
+  hard: 'Hard but possible to leave',
+  no: 'Need this posting to work',
+}
+
 function gapLevel(gap) {
   if (gap > 30) return 'big'
   if (gap > 15) return 'noticeable'
@@ -226,6 +253,26 @@ export default function MyMove() {
     },
   ]
 
+  const baselineFacts = [
+    profile.home ? { label: 'Home baseline', value: profile.home } : null,
+    cc || profile.city ? { label: 'Current post', value: [profile.school, profile.city, cc].filter(Boolean).join(', ') } : null,
+    profile.curr ? { label: 'Curriculum', value: profile.curr } : null,
+    profile.yrs ? { label: 'Years abroad', value: profile.yrs } : null,
+    dc || dcity ? { label: 'Destination', value: [dcity, dc].filter(Boolean).join(', ') } : null,
+    profile.sal ? { label: 'Current salary', value: `${MONEY.format(profile.sal)} / month` } : null,
+    profile.hous ? { label: 'Housing', value: profile.hous } : null,
+    profile.flt ? { label: 'Flights', value: profile.flt } : null,
+    profile.tax ? { label: 'Tax', value: profile.tax } : null,
+  ].filter(Boolean)
+
+  const personalFacts = [
+    profile.life ? { label: 'Life setup', value: LIFE_LABELS[profile.life] || profile.life } : null,
+    profile.savings ? { label: 'Savings target', value: profile.savings } : null,
+    profile.priority ? { label: 'Main priority', value: PRIORITY_LABELS[profile.priority] || profile.priority } : null,
+    profile.friction ? { label: 'Biggest concern', value: FRICTION_LABELS[profile.friction] || profile.friction } : null,
+    profile.exit ? { label: 'Exit flexibility', value: EXIT_LABELS[profile.exit] || profile.exit } : null,
+  ].filter(Boolean)
+
   return (
     <div className="tp active">
       <div style={{ fontFamily: 'var(--serif)', fontSize: '1.5rem', marginBottom: '.35rem' }}>Forecast my move</div>
@@ -243,6 +290,46 @@ export default function MyMove() {
           <div>The adjustment section below compares {cc || 'your current country'} with {dc} and shows where daily life may feel different if you move.</div>
         </div>
       </div>
+
+      {(baselineFacts.length > 0 || personalFacts.length > 0) && (
+        <div className="card" style={{ marginBottom: '1rem', padding: '1rem 1.1rem' }}>
+          <div style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--ink-4)', marginBottom: '.45rem' }}>
+            What this forecast is using from your profile
+          </div>
+
+          {baselineFacts.length > 0 && (
+            <div style={{ marginBottom: personalFacts.length > 0 ? '.85rem' : 0 }}>
+              <div style={{ fontSize: 11, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: '.4rem' }}>
+                Baseline
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '.45rem' }}>
+                {baselineFacts.map((fact) => (
+                  <span key={fact.label} className="pbi" style={{ background: 'var(--surface-2)' }}>
+                    <span className="pbil">{fact.label}:</span>
+                    <span>{fact.value}</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {personalFacts.length > 0 && (
+            <div>
+              <div style={{ fontSize: 11, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: '.4rem' }}>
+                Personal filters
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '.45rem' }}>
+                {personalFacts.map((fact) => (
+                  <span key={fact.label} className="pbi" style={{ background: 'var(--surface-2)' }}>
+                    <span className="pbil">{fact.label}:</span>
+                    <span>{fact.value}</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="ibox info" style={{ marginBottom: yrsBuffer > 0 ? '.75rem' : '1.25rem' }}>
         Use this as a starting point, not a promise. One school, neighborhood, or contract can still differ a lot from the country-level picture.
