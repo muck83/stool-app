@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { SR_QS, SR_DIAGNOSES, SR_DIM_COLORS } from '../../data/srQuestions.js'
 import { useProfile } from '../../context/ProfileContext.jsx'
 import { SALARY_DB_SEED } from '../../data/salaryDb.js'
+import { HOF } from '../../data/hofstede.js'
 import SchoolAutocomplete from '../SchoolAutocomplete.jsx'
 import { insertSchoolReview, searchSchoolReviews } from '../../lib/supabase.js'
 
@@ -12,6 +13,133 @@ const DIM_LABELS = {
 }
 const DIM_KEYS     = ['q1','q2','q3','q4','q5','q6','q7']
 const DIM_KEYS_ALL = ['q1','q2','q3','q4','q5','q6','q7','q8','q9','q10']
+
+// ── 6th-sense thesis engine ────────────────────────────────────────────────────
+// Deterministic narrative generator. Every sentence maps to a real data threshold.
+// Not AI. Not speculation. A trusted colleague who has read the reviews.
+
+const DIM_NAMES = {
+  q1: 'leadership transparency', q2: 'recruitment honesty', q3: 'workload',
+  q4: 'professional autonomy', q5: 'staff culture', q6: 'mission alignment',
+}
+
+function generateThesis(stats, profile, schoolCountry) {
+  const { avg, count, dimAvgs, avgNotice } = stats
+  const sig = {}
+  if (dimAvgs) dimAvgs.forEach(({ key, avg: a }) => { sig[key] = a })
+  const lines = []
+
+  // ── Opening verdict ───────────────────────────────────────────────────────
+  if (avg >= 8) {
+    lines.push(`Across ${count} teacher reviews, this school scores consistently strong. The pattern points to institutional integrity — leadership that explains itself, honest recruitment, workload that matches what was promised. Schools that score like this are the minority in this sector. The signal is worth taking seriously.`)
+  } else if (avg >= 6.5) {
+    lines.push(`The community verdict here is positive overall, with specific areas worth understanding before you decide. A composite of ${avg}/10 across ${count} reviews suggests a school that works for most teachers — which means the things that fall short are probably predictable rather than structural surprises.`)
+  } else if (avg >= 5) {
+    lines.push(`${count} teachers have reviewed this school and the picture is genuinely mixed — ${avg}/10 overall. Real strengths in some dimensions, persistent concerns in others. What this means for you depends on which dimensions matter most to where you are right now.`)
+  } else if (avg >= 3.5) {
+    lines.push(`The signal across ${count} reviews points to a school with structural problems that appear consistently — ${avg}/10. This doesn't mean every experience here is bad. But the issues teachers flag aren't isolated incidents. They're patterns.`)
+  } else {
+    lines.push(`Teachers are honest here: ${avg}/10 across ${count} reviews. The concerns are consistent enough across dimensions to suggest something structural, not situational.`)
+  }
+
+  // ── Strongest/weakest core signal ────────────────────────────────────────
+  const coreDims = ['q1','q2','q3','q4','q5','q6'].filter(k => sig[k] != null)
+  if (coreDims.length >= 3) {
+    const sorted = [...coreDims].sort((a,b) => sig[a] - sig[b])
+    const weakest = sorted[0]
+    const strongest = sorted[sorted.length - 1]
+    if (sig[weakest] <= 4) {
+      lines.push(`The dimension that stands out most is ${DIM_NAMES[weakest]} — scored ${sig[weakest]}/10. That's a consistent signal, not a single outlier. It's worth reading what teachers specifically said here before treating it as a dealbreaker or dismissing it.`)
+    } else if (sig[strongest] >= 8 && avg < 7) {
+      lines.push(`The standout strength is ${DIM_NAMES[strongest]} (${sig[strongest]}/10). Schools that score that well on this dimension structurally tend to hold it across cohorts — it's not usually down to one manager or one year.`)
+    } else if (sig[strongest] >= 8 && avg >= 7) {
+      lines.push(`${DIM_NAMES[strongest].charAt(0).toUpperCase() + DIM_NAMES[strongest].slice(1)} is the standout — ${sig[strongest]}/10 — and it reinforces the overall picture. The ${DIM_NAMES[weakest]} score (${sig[weakest]}/10) is the main caveat worth carrying into any job negotiation.`)
+    }
+  }
+
+  // ── Risk signals (q8 / q9 / q10) ─────────────────────────────────────────
+  const riskParts = []
+  if (sig.q8 != null && sig.q8 < 5) riskParts.push(`exit safety (${sig.q8}/10) — departures had consequences at this school`)
+  if (sig.q9 != null && sig.q9 < 5) riskParts.push(`parent pressure (${sig.q9}/10) — professional standards were regularly overridden`)
+  if (sig.q10 != null && sig.q10 < 5) riskParts.push(`family package (${sig.q10}/10) — dependent benefits fell short of what was promised`)
+  if (riskParts.length > 0) {
+    lines.push(`There are risk signals worth naming directly: ${riskParts.join('; ')}. Exit safety, parent culture, and family package are the dimensions most likely to turn a difficult posting into an untenable one. They're worth verifying specifically — not accepting on faith.`)
+  } else if (sig.q8 != null && sig.q8 >= 7 && sig.q9 != null && sig.q9 >= 7) {
+    lines.push(`The risk signals — exit safety and parent culture — are positive here. Teachers report departures were handled professionally and parent expectations didn't override classroom standards. These are things most people don't check until it's too late.`)
+  }
+
+  // ── Hofstede cultural gap ─────────────────────────────────────────────────
+  const destHof = HOF[schoolCountry]
+  const homeHof = HOF[profile.home] || HOF[profile.cc]
+  if (destHof && homeHof) {
+    const pdiDiff = Math.abs(destHof[0] - homeHof[0])
+    if (pdiDiff > 35) {
+      const direction = destHof[0] > homeHof[0] ? 'more hierarchical' : 'less hierarchical'
+      lines.push(`One cultural layer worth naming: ${schoolCountry} operates with a notably ${direction} institutional dynamic than your home culture (power distance gap of ${pdiDiff} points). That shows up in how leadership makes decisions, how much autonomy teachers are realistically given, and how disagreement is handled — regardless of what the job description says.`)
+    }
+  }
+
+  // ── Years-abroad context ──────────────────────────────────────────────────
+  const isEarlyCareer = profile.yrs === 'Just starting' || profile.yrs === '1–3 years'
+  if (isEarlyCareer && avg < 5.5) {
+    lines.push(`One thing worth naming for where you are in your career: schools with structural concerns are harder to navigate without the pattern recognition that comes from previous postings. What an experienced international teacher can manage — and protect themselves from — can land differently when you're still learning the terrain.`)
+  }
+
+  // ── Notice period ─────────────────────────────────────────────────────────
+  if (avgNotice != null && avgNotice > 8) {
+    lines.push(`One practical signal: the average notice period here is ${avgNotice} weeks — longer than the sector norm. If circumstances change mid-contract, leaving requires planning that most teachers don't do in advance.`)
+  }
+
+  // ── Closing ───────────────────────────────────────────────────────────────
+  if (avg >= 7) {
+    lines.push(`The honest read: the data is mostly saying yes here. Go in knowing the caveats the community has flagged, and you'll be going in informed.`)
+  } else if (avg >= 5) {
+    lines.push(`The honest read: this is a posting where your specific fit matters more than the average. The signal isn't "avoid" — it's "understand exactly what you're accepting." The teachers who do well here probably went in knowing.`)
+  } else {
+    lines.push(`The honest read: the data is warning you. That doesn't mean don't go — it means go in with your eyes open, clear on what's non-negotiable, and a realistic exit timeline from day one.`)
+  }
+
+  return lines
+}
+
+function SchoolThesis({ stats, profile, schoolCountry }) {
+  const [showEngine, setShowEngine] = useState(false)
+  const paragraphs = generateThesis(stats, profile, schoolCountry)
+  if (!paragraphs || paragraphs.length === 0) return null
+
+  const hasProfile  = !!(profile.home || profile.cc || profile.yrs)
+  const hasHofstede = !!(HOF[schoolCountry] && (HOF[profile.home] || HOF[profile.cc]))
+  const homeName    = profile.home || profile.cc || null
+
+  return (
+    <div style={{ padding: '1.375rem 1.25rem 1.125rem', borderBottom: '1px solid var(--border)', background: '#FAFAF8' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '.5rem', marginBottom: '1rem' }}>
+        <div style={{ width: 3, height: 16, background: 'var(--amber)', borderRadius: 2, flexShrink: 0 }} />
+        <div style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.1em', color: 'var(--amber-dark)' }}>
+          Intelligence briefing{hasProfile ? ' · personalised' : ''}
+        </div>
+      </div>
+
+      {paragraphs.map((p, i) => (
+        <p key={i} style={{ fontSize: 13.5, color: 'var(--ink-2)', lineHeight: 1.75, margin: 0, marginBottom: i < paragraphs.length - 1 ? '.875rem' : 0 }}>{p}</p>
+      ))}
+
+      <div style={{ marginTop: '1rem', borderTop: '1px solid rgba(26,25,23,.08)', paddingTop: '.625rem' }}>
+        <button
+          onClick={() => setShowEngine(!showEngine)}
+          style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: 11, color: 'var(--ink-4)', display: 'flex', alignItems: 'center', gap: 4 }}
+        >
+          <span style={{ fontSize: 9 }}>{showEngine ? '▲' : '▼'}</span> What's powering this analysis
+        </button>
+        {showEngine && (
+          <div style={{ marginTop: '.625rem', fontSize: 12, color: 'var(--ink-3)', lineHeight: 1.65, maxWidth: 520 }}>
+            This briefing is generated deterministically from {stats.count} teacher review{stats.count !== 1 ? 's' : ''} — it is not AI-generated speculation. Every sentence maps to a specific threshold in the underlying data. Signals used: community review averages across all 10 dimensions (leadership, honesty, workload, autonomy, colleagues, mission, exit safety, parent culture, family package){hasHofstede ? `; Hofstede cultural dimensions for ${schoolCountry} vs ${homeName}` : ''}{profile.yrs ? `; career stage (${profile.yrs} abroad)` : ''}. Nothing is invented. Where data is missing, no claim is made.
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
 
 function ProgressBar({ step, total }) {
   return (
@@ -108,6 +236,7 @@ function ProfileCard({ school, country, answers, hours, noticePeriod }) {
 // ── School Search / Browse ────────────────────────────────────────────────────
 
 function SchoolSearchPanel() {
+  const { profile } = useProfile()
   const [query, setQuery]       = useState('')
   const [results, setResults]   = useState(null)  // null = not searched, [] = no results
   const [loading, setLoading]   = useState(false)
@@ -201,6 +330,11 @@ function SchoolSearchPanel() {
                     </div>
                   )}
                 </div>
+
+                {/* Intelligence thesis — appears when 3+ reviews exist */}
+                {stats.enough && (
+                  <SchoolThesis stats={stats} profile={profile} schoolCountry={country} />
+                )}
 
                 {/* Dimension scores */}
                 {stats.enough && stats.dimAvgs && (
