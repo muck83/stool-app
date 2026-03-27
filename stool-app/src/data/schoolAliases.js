@@ -53,6 +53,8 @@ export const SCHOOL_ALIASES = {
   // Thailand
   'Concordian':                                   'Concordian International School',
   'Regents Int School':                           'Regents International School',
+  'ISB':                                          'International School Bangkok',
+  'NIST':                                         'NIST International School',
   'UWC Thailand International School':            'UWC Thailand',
 
   // China — YCIS network (ambiguous campus → full name; campus variants preserved)
@@ -60,12 +62,21 @@ export const SCHOOL_ALIASES = {
   'YCIS (Yew Chung International School)':        'Yew Chung International School',
   'YCIS Pudong':                                  'Yew Chung International School Pudong',
   'BASIS':                                        'BASIS International School',
+  'WAB':                                          'Western Academy of Beijing',
 
   // Vietnam
   'Vietnam Australia School':                     'Vietnam Australia International School',
   'Pennsylvania International School':            'Pennsylvania American International School',
   'TAS':                                          'The American School (TAS)',
   'American International school':                'American International School',
+  'BSKL':                                         'British International School of Kuala Lumpur',
+  'ISKL':                                         'International School of Kuala Lumpur',
+  'SAS':                                          'Singapore American School',
+  'UWCSEA':                                       'UWC South East Asia',
+  'ASD':                                          'American School of Dubai',
+  'HKIS':                                         'Hong Kong International School',
+  'ISM':                                          'International School Manila',
+  'JIS':                                          'Jakarta Intercultural School',
 }
 
 /**
