@@ -3,87 +3,152 @@ import { useProfile } from '../../context/ProfileContext.jsx'
 import { HOF, DLBLS, DCOLS } from '../../data/hofstede.js'
 import { CTRY_DATA, CITIES } from '../../data/geo.js'
 import { SALARY_DB_SEED } from '../../data/salaryDb.js'
-import { PLACE_ATTRS, ATTR_CATEGORIES } from '../../data/places.js'
+import { PLACE_ATTRS } from '../../data/places.js'
 import StoolViz from '../StoolViz.jsx'
 
-// Translate a Hofstede score into a practical lived experience for a teacher
+// ─── Hofstede lived-experience tooltips ───────────────────────────────────────
 function getDimExperience(dim, score) {
   if (score == null) return ''
   const hi = score >= 70
   const lo = score < 40
-
   const exp = {
     'Power Distance': hi
       ? `Your authority is rarely questioned. Students expect you to have all the answers — saying "I don't know" can genuinely surprise them. Decisions flow from the top down, and parents and students will accept your judgment without much pushback. Formal titles matter.`
       : lo
       ? `Students treat you as a facilitator, not an authority. Expect to be challenged openly — sometimes bluntly. First-name terms are common. Students will negotiate grades, question methods, and advocate for themselves without hesitation.`
-      : `A mix: students respect your role but will voice disagreement when they feel strongly. Some hierarchy is expected but it isn't rigid. Formal titles are polite but not always required.`,
-
+      : `A mix: students respect your role but will voice disagreement when they feel strongly. Some hierarchy is expected but it isn't rigid.`,
     'Individualism': hi
-      ? `Students advocate for themselves and expect individual recognition. Competition between classmates is normal and motivating. Group work can cause frustration if individual contributions aren't tracked. Direct feedback is welcomed and expected.`
+      ? `Students advocate for themselves and expect individual recognition. Competition between classmates is normal and motivating. Group work can cause frustration if individual contributions aren't tracked. Direct feedback is welcomed.`
       : lo
       ? `Group harmony comes before individual achievement. Students may avoid standing out — even with a correct answer. Design tasks so the group succeeds or fails together. Never single out a student publicly for a mistake.`
-      : `A balance of individual and group motivations. Some students will push to stand out; others work best when the group succeeds. Read the room and adapt.`,
-
+      : `A balance of individual and group motivations. Some students will push to stand out; others work best when the group succeeds.`,
     'Masculinity': hi
-      ? `Results and achievement are what students, parents, and the school judge you by. Competition is motivating. Extra hours and visible effort are respected. Work-life balance is a lower priority — don't be surprised by demanding schedules.`
+      ? `Results and achievement are what students, parents, and the school judge you by. Competition is motivating. Extra hours and visible effort are respected. Work-life balance is a lower priority.`
       : lo
-      ? `Relationships and wellbeing come first. Students value a caring classroom as much as academic results. Competition can feel uncomfortable. Cooperation and empathy matter — and your own work-life balance will likely be better respected here.`
-      : `A blend of achievement focus and genuine care for relationships. Some students are competitive; others collaborative. Both approaches are respected.`,
-
+      ? `Relationships and wellbeing come first. Students value a caring classroom as much as academic results. Competition can feel uncomfortable. Your own work-life balance will likely be better respected here.`
+      : `A blend of achievement focus and genuine care for relationships. Some students are competitive; others collaborative.`,
     'Uncertainty Avoidance': hi
-      ? `Students need clear rubrics, detailed instructions, and predictable routines. Open-ended tasks generate real anxiety. Establish your classroom structure early — students will rely on it. Ambiguity reads as incompetence, not creativity.`
+      ? `Students need clear rubrics, detailed instructions, and predictable routines. Open-ended tasks generate real anxiety. Establish your classroom structure early — ambiguity reads as incompetence, not creativity.`
       : lo
-      ? `Students are comfortable with open-ended tasks and improvisation. Too much structure can feel patronising. Creative freedom is welcomed. Students can handle "figure it out" without panic.`
-      : `Some structure helps but students can manage ambiguity. Clear expectations are polite, not essential. Flexibility is appreciated.`,
-
+      ? `Students are comfortable with open-ended tasks and improvisation. Too much structure can feel patronising. Creative freedom is welcomed.`
+      : `Some structure helps but students can manage ambiguity. Clear expectations are polite, not essential.`,
     'Long-term Orientation': hi
-      ? `Education is a serious long-term investment — often the primary vehicle for family social mobility. Students are patient and persistent. Parents may prioritise exam results over current wellbeing. The pressure is real and intentional.`
+      ? `Education is a serious long-term investment. Students are patient and persistent. Parents may prioritise exam results over current wellbeing. The pressure is real and intentional.`
       : lo
-      ? `Students and families focus on present experience and immediate results. Tradition and loyalty matter. Make the value of your lessons visible now — abstract future benefits don't land. Quick wins motivate.`
+      ? `Students and families focus on present experience and immediate results. Make the value of your lessons visible now — abstract future benefits don't land.`
       : `A mix of present enjoyment and future planning. Students respond to both immediate relevance and longer-term goals.`,
-
     'Indulgence': hi
-      ? `People enjoy life and leisure is genuinely valued. Students expect school to be engaging, even fun. A relaxed, energetic classroom is respected here — not seen as unserious. There's a strong social culture outside school.`
+      ? `People enjoy life and leisure is genuinely valued. Students expect school to be engaging, even fun. A relaxed, energetic classroom is respected here.`
       : lo
-      ? `Restraint and discipline are cultural norms. Students take school seriously and expect you to as well. A loose, fun-first approach may be seen as lacking rigour. Hard work and self-control are respected values.`
-      : `A moderate balance between enjoyment and discipline. Students appreciate engaging lessons but also respect structure and visible effort.`,
+      ? `Restraint and discipline are cultural norms. Students take school seriously. A loose, fun-first approach may be seen as lacking rigour.`
+      : `A moderate balance between enjoyment and discipline. Students appreciate engaging lessons but also respect structure.`,
   }
-
   return exp[dim] || ''
 }
 
-const LEG_COLS = { package: '#1D9E75', school: '#BA7517', place: '#534AB7' }
+// ─── Teaching Environment score ───────────────────────────────────────────────
+// Answers: "How conducive is the school culture in this country to effective,
+// fulfilling teaching — for a teacher coming from YOUR background?"
+// Based on Hofstede research. Explicitly NOT a rating of any specific school.
 
-function scoreLegs(focusCity, focusCountry, homeCountry, placePrefs, schoolSal, schoolLegOverride) {
+function scoreTeachingEnv(focusCountry, homeCountry) {
+  const hDest = HOF[focusCountry]
+  const hHome = HOF[homeCountry]
+  if (!hDest) return { score: null, factors: [], descriptor: '' }
+
+  let score = 6.5
+  const factors = []
+
+  // PDI: high hierarchy = less teacher autonomy, more directive management
+  const pdi = hDest[0]
+  if (pdi > 80) {
+    score -= 1.5
+    factors.push({ icon: '⬆️', label: 'Very high hierarchy', impact: -1, detail: 'Schools tend to be top-down. Expect less professional autonomy and more directive management style from leadership.' })
+  } else if (pdi > 65) {
+    score -= 0.75
+    factors.push({ icon: '↑', label: 'High hierarchy', impact: -1, detail: 'Significant authority distance. Your autonomy in the classroom may be constrained by strong hierarchy expectations.' })
+  } else if (pdi < 35) {
+    score += 0.5
+    factors.push({ icon: '✓', label: 'Flat hierarchy', impact: 1, detail: 'Schools tend to be collaborative and less directive. Teachers typically have strong professional autonomy.' })
+  }
+
+  // UAI: high uncertainty avoidance = rigid systems, resist change, rule-bound
+  const uai = hDest[3]
+  if (uai > 80) {
+    score -= 1.0
+    factors.push({ icon: '⬆️', label: 'Rigid systems', impact: -1, detail: 'Strong preference for rules and correct answers. Open-ended or inquiry-based teaching methods can face real resistance.' })
+  } else if (uai > 65) {
+    score -= 0.5
+    factors.push({ icon: '↑', label: 'Structured environment', impact: -1, detail: 'Schools prefer clear processes. Flexibility is possible but change requires patience and institutional buy-in.' })
+  } else if (uai < 35) {
+    score += 0.5
+    factors.push({ icon: '✓', label: 'Open to innovation', impact: 1, detail: 'Schools are comfortable with ambiguity and new approaches. Good environment for creative, inquiry-based teaching.' })
+  }
+
+  // MAS: high masculinity = competitive pressure, demanding schedules
+  const mas = hDest[2]
+  if (mas > 80) {
+    score -= 0.75
+    factors.push({ icon: '↑', label: 'High performance pressure', impact: -1, detail: 'Intense focus on results and achievement. Expect demanding schedules and strong emphasis on measurable outcomes.' })
+  } else if (mas < 35) {
+    score += 0.3
+    factors.push({ icon: '✓', label: 'Balanced work culture', impact: 1, detail: 'Relationships and wellbeing are valued alongside results. Work-life balance is more likely to be respected.' })
+  }
+
+  // Cultural fit: home vs destination gaps
+  if (hHome) {
+    const idvGap = Math.abs(hHome[1] - hDest[1])
+    const pdiGap = Math.abs(hHome[0] - hDest[0])
+
+    if (idvGap > 50) {
+      score -= 1.0
+      factors.push({ icon: '⬆️', label: 'Large cultural distance', impact: -1, detail: `Your home culture and ${focusCountry} approach individual vs group dynamics very differently (${idvGap}-point gap). Reading student behaviour will take real adjustment.` })
+    } else if (idvGap > 25) {
+      score -= 0.4
+      factors.push({ icon: '↑', label: 'Some cultural distance', impact: -1, detail: `Moderate cultural adjustment required. Student motivation styles and group dynamics will feel somewhat unfamiliar at first.` })
+    } else {
+      factors.push({ icon: '✓', label: 'Familiar cultural norms', impact: 1, detail: `Your home culture and ${focusCountry} share similar values around individual and group dynamics — a meaningful advantage when building classroom relationships.` })
+    }
+
+    if (pdiGap > 50) score -= 0.75
+    else if (pdiGap > 30) score -= 0.3
+  }
+
+  const finalScore = Math.min(10, Math.max(1, Math.round(score * 10) / 10))
+  const descriptor = finalScore >= 8 ? 'Strong fit'
+    : finalScore >= 6.5 ? 'Good fit'
+    : finalScore >= 5 ? 'Adjustment needed'
+    : 'Significant challenge'
+
+  return { score: finalScore, factors, descriptor }
+}
+
+// ─── Leg scoring ──────────────────────────────────────────────────────────────
+const LEG_COLS = { package: '#1D9E75', env: '#BA7517', place: '#534AB7' }
+
+function scoreLegs(focusCity, focusCountry, homeCountry, placePrefs, schoolSal) {
   const dest  = CTRY_DATA[focusCountry]
   const hDest = HOF[focusCountry]
   const hHome = HOF[homeCountry]
   if (!dest) return null
 
-  // Package: use school-specific salary if available, else country median
-  const sal = schoolSal || dest.medSal
+  // Package: real salary data — school-specific if selected, else country median
+  const sal      = schoolSal || dest.medSal
   const salScore = sal < 3000 ? 3 : sal < 4500 ? 5 : sal < 6000 ? 6 : sal < 8000 ? 7.5 : 9
   const pkgBonus = (dest.housingRate > 70 ? 1.2 : dest.housingRate > 50 ? 0.6 : 0)
                  + (dest.taxFree ? 1.2 : 0)
                  + (dest.flightRate > 75 ? 0.4 : 0)
   const pkgScore = Math.min(10, Math.round((salScore + pkgBonus) * 10) / 10)
 
-  // School: use manual override if set, else calculate from Hofstede
-  let schScore = schoolLegOverride ?? 5
-  if (schoolLegOverride == null && hDest) {
-    const pdiS = hDest[0] > 80 ? 3 : hDest[0] > 60 ? 4 : hDest[0] > 40 ? 5 : 6
-    const masS = hDest[2] > 80 ? 3 : hDest[2] > 60 ? 4 : hDest[2] > 40 ? 5 : 6
-    const uaiS = hDest[3] > 80 ? 4 : hDest[3] > 60 ? 5 : hDest[3] > 40 ? 5 : 6
-    schScore = Math.min(9, Math.round((pdiS + masS + uaiS) / 3))
-  }
+  // Teaching environment: Hofstede-backed cultural school climate
+  const { score: envScore, factors, descriptor } = scoreTeachingEnv(focusCountry, homeCountry)
 
+  // Place: QoL indices + personal preferences
   const idvGap = hHome && hDest ? Math.abs(hHome[1] - hDest[1]) : 0
   const plcBase = Math.min(10, Math.max(1,
     ((dest.ql / 20) + (dest.safety / 25) + (dest.expat / 25)) / 3 * 10
     + (idvGap > 50 ? -0.8 : idvGap > 30 ? -0.4 : 0)
   ))
-
   const cityAttrs = PLACE_ATTRS[focusCity] || []
   let prefDelta = 0
   cityAttrs.forEach(attr => {
@@ -95,13 +160,15 @@ function scoreLegs(focusCity, focusCountry, homeCountry, placePrefs, schoolSal, 
 
   return {
     pkg: Math.round(pkgScore * 10) / 10,
-    sch: schScore,
+    env: envScore,
+    envFactors: factors,
+    envDescriptor: descriptor,
     plc: Math.round(plcScore * 10) / 10,
     salUsed: sal,
   }
 }
 
-// Build school list for a city from salary data — sorted by avg salary desc
+// ─── School salary reference ──────────────────────────────────────────────────
 function getCitySchools(city) {
   if (!city) return []
   const map = {}
@@ -112,23 +179,21 @@ function getCitySchools(city) {
     if (e.usd) map[e.school].salaries.push(e.usd)
   })
   return Object.values(map)
-    .map(s => ({
-      ...s,
-      avg: s.salaries.length ? Math.round(s.salaries.reduce((a, b) => a + b, 0) / s.salaries.length) : 0,
-    }))
+    .map(s => ({ ...s, avg: s.salaries.length ? Math.round(s.salaries.reduce((a, b) => a + b, 0) / s.salaries.length) : 0 }))
     .filter(s => s.avg > 0)
     .sort((a, b) => b.avg - a.avg)
 }
 
 const ALL_CITIES = Object.keys(PLACE_ATTRS)
+const IMPACT_COL = { '-1': '#C0392B', '1': '#1D9E75' }
 
 export default function MyMove() {
-  const { profile, updateProfile } = useProfile()
-  const [hoveredDim, setHoveredDim]           = useState(null)
-  const [search, setSearch]                   = useState('')
-  const [explored, setExplored]               = useState(null)
-  const [selectedSchool, setSelectedSchool]   = useState(null)
-  const [schoolLegOverride, setSchoolLegOverride] = useState(null)
+  const { profile, updateProfile, setActiveTab } = useProfile()
+  const [hoveredDim, setHoveredDim]         = useState(null)
+  const [hoveredFactor, setHoveredFactor]   = useState(null)
+  const [search, setSearch]                 = useState('')
+  const [explored, setExplored]             = useState(null)
+  const [selectedSchool, setSelectedSchool] = useState(null)
 
   const placePrefs = profile.placePrefs || {}
 
@@ -139,52 +204,33 @@ export default function MyMove() {
   }
 
   const focusCity    = explored || profile.dcity || null
-  const focusCountry = focusCity
-    ? (CITIES[focusCity]?.country || profile.dc || null)
-    : null
+  const focusCountry = focusCity ? (CITIES[focusCity]?.country || profile.dc || null) : null
 
-  // Reset selected school when city changes
-  const handleCityChange = (city) => {
-    setExplored(city)
-    setSelectedSchool(null)
-    setSchoolLegOverride(null)
-    setSearch('')
-  }
-
-  const handleSchoolSelect = (name) => {
-    if (selectedSchool === name) {
-      setSelectedSchool(null)
-      setSchoolLegOverride(null)
-    } else {
-      setSelectedSchool(name)
-      setSchoolLegOverride(null) // reset override when switching schools
-    }
-  }
+  const handleCityChange = (city) => { setExplored(city); setSelectedSchool(null); setSearch('') }
+  const handleSchoolToggle = (name) => setSelectedSchool(prev => prev === name ? null : name)
 
   const citySchools = useMemo(() => getCitySchools(focusCity), [focusCity])
   const schoolSal   = selectedSchool ? citySchools.find(s => s.name === selectedSchool)?.avg : null
 
   const scores = useMemo(
     () => (focusCity && focusCountry)
-      ? scoreLegs(focusCity, focusCountry, profile.home, placePrefs, schoolSal, schoolLegOverride)
+      ? scoreLegs(focusCity, focusCountry, profile.home, placePrefs, schoolSal)
       : null,
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [focusCity, focusCountry, profile.home, JSON.stringify(placePrefs), schoolSal, schoolLegOverride]
+    [focusCity, focusCountry, profile.home, JSON.stringify(placePrefs), schoolSal]
   )
 
-  const cityAttrs       = PLACE_ATTRS[focusCity] || []
-  const hDest           = HOF[focusCountry]
-  const hHome           = HOF[profile.home]
-  const prefsSetCount   = Object.values(placePrefs).filter(v => v !== 0).length
-
-  const pkgSublabel = selectedSchool
-    ? `$${(schoolSal || 0).toLocaleString()}/mo`
-    : `~$${(CTRY_DATA[focusCountry]?.medSal || 0).toLocaleString()}/mo`
+  const cityAttrs     = PLACE_ATTRS[focusCity] || []
+  const hDest         = HOF[focusCountry]
+  const hHome         = HOF[profile.home]
+  const prefsSetCount = Object.values(placePrefs).filter(v => v !== 0).length
 
   const stoolLegs = scores ? [
-    { label: 'Package', score: scores.pkg, color: LEG_COLS.package, sublabel: pkgSublabel },
-    { label: 'School',  score: scores.sch, color: LEG_COLS.school },
-    { label: 'Place',   score: scores.plc, color: LEG_COLS.place,
+    { label: 'Package',  score: scores.pkg, color: LEG_COLS.package,
+      sublabel: selectedSchool ? `$${(schoolSal || 0).toLocaleString()}/mo` : `~$${(CTRY_DATA[focusCountry]?.medSal || 0).toLocaleString()}/mo` },
+    { label: 'Teaching', score: scores.env, color: LEG_COLS.env,
+      sublabel: scores.envDescriptor || '' },
+    { label: 'Place',    score: scores.plc, color: LEG_COLS.place,
       sublabel: prefsSetCount > 0 ? `${prefsSetCount} prefs set` : 'set preferences →' },
   ] : []
 
@@ -201,7 +247,7 @@ export default function MyMove() {
         Search a city to explore its stool. Tell us what matters to you — the Place leg updates in real time.
       </div>
 
-      {/* City search */}
+      {/* ── City search ── */}
       <div style={{ position: 'relative', marginBottom: '1.5rem', maxWidth: 380 }}>
         <input
           value={search}
@@ -212,17 +258,12 @@ export default function MyMove() {
         {results.length > 0 && (
           <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 20, background: 'white', border: '1px solid var(--border-2)', borderRadius: 'var(--r)', boxShadow: '0 8px 24px rgba(0,0,0,.1)', marginTop: 4, overflow: 'hidden' }}>
             {results.map(city => (
-              <div
-                key={city}
-                onClick={() => handleCityChange(city)}
+              <div key={city} onClick={() => handleCityChange(city)}
                 style={{ padding: '10px 14px', cursor: 'pointer', fontSize: 14, borderBottom: '1px solid var(--border)' }}
                 onMouseEnter={e => e.currentTarget.style.background = '#f5f4f1'}
-                onMouseLeave={e => e.currentTarget.style.background = 'white'}
-              >
+                onMouseLeave={e => e.currentTarget.style.background = 'white'}>
                 {city}
-                <span style={{ fontSize: 11, color: 'var(--ink-4)', marginLeft: 8 }}>
-                  {CITIES[city]?.country}
-                </span>
+                <span style={{ fontSize: 11, color: 'var(--ink-4)', marginLeft: 8 }}>{CITIES[city]?.country}</span>
               </div>
             ))}
           </div>
@@ -232,8 +273,10 @@ export default function MyMove() {
       {focusCity ? (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', alignItems: 'start' }}>
 
-          {/* Left: Stool + school selector + quick stats */}
+          {/* ── LEFT: Stool + salary reference ── */}
           <div>
+
+            {/* Stool card */}
             <div style={{ background: 'white', border: '1px solid var(--border)', borderRadius: 'var(--rl)', padding: '1.5rem', marginBottom: '1rem' }}>
               <div style={{ fontFamily: 'var(--serif)', fontSize: '1.1rem', marginBottom: '.25rem' }}>{focusCity}</div>
               <div style={{ fontSize: 12, color: 'var(--ink-4)', marginBottom: '1.25rem' }}>
@@ -251,41 +294,30 @@ export default function MyMove() {
               </div>
             </div>
 
-            {/* School selector */}
+            {/* Salary reference — school list for Package only */}
             {citySchools.length > 0 && (
-              <>
               <div style={{ background: 'white', border: '1px solid var(--border)', borderRadius: 'var(--rl)', padding: '1.25rem', marginBottom: '1rem' }}>
                 <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--ink-4)', marginBottom: '.25rem' }}>
-                  Schools in {focusCity}
+                  Salary reference · {focusCity}
                 </div>
-                <div style={{ fontSize: 12, color: 'var(--ink-3)', marginBottom: '1rem' }}>
-                  Select a school to update the Package and School legs.
+                <div style={{ fontSize: 12, color: 'var(--ink-3)', marginBottom: '1rem', lineHeight: 1.55 }}>
+                  Select a school to update the Package leg with reported compensation.
                   {selectedSchool && (
-                    <button
-                      onClick={() => { setSelectedSchool(null); setSchoolLegOverride(null) }}
+                    <button onClick={() => setSelectedSchool(null)}
                       style={{ marginLeft: 8, fontSize: 11, color: 'var(--ink-4)', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', padding: 0 }}>
                       Clear
                     </button>
                   )}
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '.4rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '.35rem' }}>
                   {citySchools.map(school => {
                     const active = selectedSchool === school.name
                     return (
-                      <button
-                        key={school.name}
-                        onClick={() => handleSchoolSelect(school.name)}
-                        style={{
-                          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                          padding: '8px 12px', borderRadius: 8, cursor: 'pointer', textAlign: 'left',
-                          border: active ? '1.5px solid #1D9E75' : '1.5px solid var(--border)',
-                          background: active ? '#E1F5EE' : 'white',
-                          transition: 'all .15s',
-                        }}
+                      <button key={school.name} onClick={() => handleSchoolToggle(school.name)}
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '7px 11px', borderRadius: 7, cursor: 'pointer', textAlign: 'left', border: active ? '1.5px solid #1D9E75' : '1.5px solid var(--border)', background: active ? '#E1F5EE' : 'white', transition: 'all .15s' }}
                         onMouseEnter={e => { if (!active) e.currentTarget.style.borderColor = 'var(--border-2)' }}
-                        onMouseLeave={e => { if (!active) e.currentTarget.style.borderColor = 'var(--border)' }}
-                      >
-                        <span style={{ fontSize: 12.5, color: active ? '#1D9E75' : 'var(--ink-2)', fontWeight: active ? 600 : 400, flex: 1, paddingRight: 8, lineHeight: 1.3 }}>
+                        onMouseLeave={e => { if (!active) e.currentTarget.style.borderColor = 'var(--border)' }}>
+                        <span style={{ fontSize: 12, color: active ? '#1D9E75' : 'var(--ink-2)', fontWeight: active ? 600 : 400, flex: 1, paddingRight: 8, lineHeight: 1.3 }}>
                           {school.name}
                         </span>
                         <div style={{ flexShrink: 0, textAlign: 'right' }}>
@@ -300,54 +332,30 @@ export default function MyMove() {
                     )
                   })}
                 </div>
-              </div>
-
-              {/* School leg rating — manual override while community data builds */}
-              {selectedSchool && (
-                <div style={{ marginTop: '.75rem', padding: '1rem', background: '#FFFBF5', border: '1px solid #BA751730', borderRadius: 8 }}>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: '#633806', marginBottom: '.35rem' }}>
-                    Rate the school leg for {selectedSchool}
+                {/* School quality reviews coming soon */}
+                <div style={{ marginTop: '1rem', padding: '.75rem', background: '#FAEEDA', borderRadius: 7, border: '1px solid #BA751722' }}>
+                  <div style={{ fontSize: 11.5, color: '#633806', lineHeight: 1.6 }}>
+                    <strong>School quality ratings coming.</strong> Every review submitted in My School builds toward a score for that school here.{' '}
+                    <span onClick={() => setActiveTab('schools')} style={{ fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}>
+                      Rate your current school →
+                    </span>
                   </div>
-                  <div style={{ fontSize: 11.5, color: 'var(--ink-4)', lineHeight: 1.6, marginBottom: '.75rem' }}>
-                    No community rating yet — set your own estimate based on what you've heard. Teacher reviews will update this automatically as they come in.
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '.75rem' }}>
-                    <input
-                      type="range" min={1} max={10} step={1}
-                      value={schoolLegOverride ?? scores?.sch ?? 5}
-                      onChange={e => setSchoolLegOverride(Number(e.target.value))}
-                      style={{ flex: 1, accentColor: LEG_COLS.school }}
-                    />
-                    <div style={{ fontSize: '1.5rem', fontWeight: 300, color: LEG_COLS.school, minWidth: 28, textAlign: 'right' }}>
-                      {schoolLegOverride ?? scores?.sch ?? 5}
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--ink-4)', marginTop: 3 }}>
-                    <span>1 — Poor</span><span>10 — Excellent</span>
-                  </div>
-                  {schoolLegOverride !== null && (
-                    <button
-                      onClick={() => setSchoolLegOverride(null)}
-                      style={{ marginTop: '.5rem', fontSize: 11, color: 'var(--ink-4)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, textDecoration: 'underline' }}>
-                      Reset to calculated value ({scores?.sch ?? 5})
-                    </button>
-                  )}
                 </div>
-              )}
-              </>
+              </div>
             )}
 
+            {/* At a glance */}
             {CTRY_DATA[focusCountry] && (
               <div style={{ background: 'white', border: '1px solid var(--border)', borderRadius: 'var(--rl)', padding: '1.25rem' }}>
                 <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--ink-4)', marginBottom: '.75rem' }}>At a glance</div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '.4rem .75rem' }}>
                   {[
-                    ['Median salary',    `$${CTRY_DATA[focusCountry].medSal?.toLocaleString()}/mo`],
-                    ['Housing',          `${CTRY_DATA[focusCountry].housingRate}% incl.`],
-                    ['Flights',          `${CTRY_DATA[focusCountry].flightRate}% incl.`],
-                    ['Tax-free',         CTRY_DATA[focusCountry].taxFree ? 'Yes ✓' : 'No'],
-                    ['Quality of life',  `${CTRY_DATA[focusCountry].ql}/100`],
-                    ['Safety',           `${CTRY_DATA[focusCountry].safety}/100`],
+                    ['Median salary',   `$${CTRY_DATA[focusCountry].medSal?.toLocaleString()}/mo`],
+                    ['Housing',         `${CTRY_DATA[focusCountry].housingRate}% incl.`],
+                    ['Flights',         `${CTRY_DATA[focusCountry].flightRate}% incl.`],
+                    ['Tax-free',        CTRY_DATA[focusCountry].taxFree ? 'Yes ✓' : 'No'],
+                    ['Quality of life', `${CTRY_DATA[focusCountry].ql}/100`],
+                    ['Safety',          `${CTRY_DATA[focusCountry].safety}/100`],
                   ].map(([k, v]) => (
                     <div key={k} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, padding: '3px 0', borderBottom: '1px solid var(--border)' }}>
                       <span style={{ color: 'var(--ink-4)' }}>{k}</span>
@@ -359,16 +367,17 @@ export default function MyMove() {
             )}
           </div>
 
-          {/* Right: Place preferences + Hofstede */}
+          {/* ── RIGHT: Place prefs + Teaching environment + Culture ── */}
           <div>
 
+            {/* Place preferences */}
             {cityAttrs.length > 0 && (
               <div style={{ background: 'white', border: '1px solid var(--border)', borderRadius: 'var(--rl)', padding: '1.25rem', marginBottom: '1rem' }}>
                 <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--ink-4)', marginBottom: '.25rem' }}>
                   What {focusCity} is like
                 </div>
                 <div style={{ fontSize: 12, color: 'var(--ink-3)', marginBottom: '1rem' }}>
-                  Mark what appeals to you or puts you off — your Place score adjusts instantly.
+                  Mark what appeals or puts you off — your Place score adjusts instantly.
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '.5rem' }}>
                   {cityAttrs.map(attr => {
@@ -394,7 +403,54 @@ export default function MyMove() {
               </div>
             )}
 
-            {/* Cultural dimensions — with lived-experience tooltips */}
+            {/* Teaching environment breakdown */}
+            {scores?.env != null && (
+              <div style={{ background: 'white', border: '1px solid var(--border)', borderRadius: 'var(--rl)', padding: '1.25rem', marginBottom: '1rem' }}>
+                <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--ink-4)', marginBottom: '.25rem' }}>
+                  Teaching environment
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--ink-3)', marginBottom: '1rem', lineHeight: 1.55 }}>
+                  How the school culture in {focusCountry} tends to feel for a teacher from{' '}
+                  {profile.home ? <strong>{profile.home}</strong> : 'your background'}.
+                  Based on national culture research — not a rating of any specific school.
+                </div>
+
+                {/* Score + descriptor */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem', padding: '.75rem', background: LEG_COLS.env + '0E', borderRadius: 8, border: `1px solid ${LEG_COLS.env}22` }}>
+                  <div style={{ fontSize: '2rem', fontWeight: 300, color: LEG_COLS.env, lineHeight: 1 }}>{scores.env}</div>
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: LEG_COLS.env }}>{scores.envDescriptor}</div>
+                    <div style={{ fontSize: 11, color: 'var(--ink-4)', marginTop: 2 }}>out of 10</div>
+                  </div>
+                </div>
+
+                {/* Factors — hover for detail */}
+                {scores.envFactors?.length > 0 && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '.4rem' }}>
+                    {scores.envFactors.map((f, i) => (
+                      <div key={i}
+                        style={{ position: 'relative', display: 'flex', alignItems: 'flex-start', gap: '.5rem', padding: '7px 10px', borderRadius: 7, cursor: 'help', background: f.impact > 0 ? '#F0FBF6' : '#FBF3F0', border: `1px solid ${f.impact > 0 ? '#1D9E7530' : '#C0392B30'}` }}
+                        onMouseEnter={() => setHoveredFactor(i)}
+                        onMouseLeave={() => setHoveredFactor(null)}>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: f.impact > 0 ? '#1D9E75' : '#C0392B', flexShrink: 0, marginTop: 1 }}>
+                          {f.impact > 0 ? '↑' : '↓'}
+                        </span>
+                        <span style={{ fontSize: 12, fontWeight: 500, color: f.impact > 0 ? '#0F6E56' : '#922B21', flex: 1 }}>
+                          {f.label}
+                        </span>
+                        {hoveredFactor === i && (
+                          <div style={{ position: 'absolute', left: 0, right: 0, top: '100%', zIndex: 10, background: 'var(--ink)', color: 'white', fontSize: 12, padding: '10px 12px', borderRadius: 8, marginTop: 4, lineHeight: 1.65, boxShadow: '0 6px 20px rgba(0,0,0,.2)', pointerEvents: 'none' }}>
+                            {f.detail}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Culture in the classroom — Hofstede dims */}
             {hDest && (
               <div style={{ background: 'white', border: '1px solid var(--border)', borderRadius: 'var(--rl)', padding: '1.25rem' }}>
                 <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--ink-4)', marginBottom: '.25rem' }}>
@@ -408,12 +464,9 @@ export default function MyMove() {
                   const hVal = hHome?.[i]
                   const experience = getDimExperience(d, val)
                   return (
-                    <div
-                      key={d}
-                      style={{ marginBottom: '.875rem', position: 'relative', cursor: 'help' }}
+                    <div key={d} style={{ marginBottom: '.875rem', position: 'relative', cursor: 'help' }}
                       onMouseEnter={() => setHoveredDim(d)}
-                      onMouseLeave={() => setHoveredDim(null)}
-                    >
+                      onMouseLeave={() => setHoveredDim(null)}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, marginBottom: 4 }}>
                         <span style={{ fontWeight: 500 }}>{d}</span>
                         <span style={{ color: DCOLS[i], fontWeight: 600 }}>{val}/100</span>
@@ -446,11 +499,12 @@ export default function MyMove() {
           </div>
         </div>
       ) : (
+        /* Empty state */
         <div style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--ink-3)' }}>
           <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>🪑</div>
           <div style={{ fontFamily: 'var(--serif)', fontSize: '1.25rem', marginBottom: '.5rem' }}>Where are you thinking?</div>
           <div style={{ fontSize: 13, lineHeight: 1.6, maxWidth: 360, margin: '0 auto' }}>
-            Search any city above to see its stool — how compensation, school culture, and place stack up for you personally.
+            Search any city above to see its stool — package, teaching environment, and place, scored for your background.
           </div>
           <div style={{ display: 'flex', gap: '.5rem', justifyContent: 'center', flexWrap: 'wrap', marginTop: '1.5rem' }}>
             {['Dubai', 'Bangkok', 'Tokyo', 'Singapore', 'Tbilisi', 'Riyadh'].map(c => (
