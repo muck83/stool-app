@@ -64,7 +64,7 @@ export default function Overview() {
 
   const questions = [
     {
-      q: sch === 0 ? "What's making your school feel hard right now?"
+      q: sch === 0 ? "What's actually wrong with your school?"
         : sch < 4 ? `Your school score is ${sch}/10 — what's actually going on there?`
         : sch < 6 ? `Your school score is ${sch}/10. Is that sustainable long-term?`
         : `Your school scores ${sch}/10. Have you reviewed it for other teachers?`,
@@ -203,3 +203,5 @@ export default function Overview() {
         </div>
       </div>
     </div>
+  )
+}

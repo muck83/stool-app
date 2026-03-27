@@ -179,4 +179,31 @@ export default function MyMove() {
                     className="hbsc"
                     style={{
                       color: gapColor(gap),
-       
+                      background: level === 'big' ? '#FAECE7' : level === 'noticeable' ? '#FAEEDA' : '#E1F5EE',
+                      padding: '3px 10px',
+                      borderRadius: 999,
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {gapLabel(gap)}
+                  </span>
+                </div>
+
+                <div className="hbt" style={{ marginTop: 8 }}>
+                  <div
+                    className="hbf"
+                    style={{ width: `${Math.min(gap, 100)}%`, background: gapColor(gap) }}
+                  />
+                </div>
+
+                <div style={{ fontSize: 12.5, color: 'var(--ink-2)', lineHeight: 1.6, marginTop: 8 }}>
+                  {directionText || `This part of life may feel fairly familiar, with less day-to-day adjustment needed.`}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}

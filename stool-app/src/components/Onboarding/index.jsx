@@ -48,7 +48,8 @@ function Splash({ onNext, onSkip, onLoadFromCloud }) {
 
   return (
     <div style={{ textAlign: 'center', padding: '.5rem 0 1rem' }}>
-      <div className="spl-a" style={{ display: 'none' }}>
+      <StoolSVG />
+      <div className="spl-a" style={{ '--dd': '1620ms', '--sd': '600ms', fontSize: 11, color: 'var(--ink-4)', letterSpacing: '.13em', textTransform: 'uppercase', fontWeight: 500, marginBottom: '1.5rem' }}>
         school · place · package
       </div>
       <div className="spl-a" style={{ '--dd': '2100ms', '--sd': '600ms', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '.625rem', marginBottom: '1.5rem' }}>
@@ -558,4 +559,65 @@ export default function Onboarding() {
                   description="City quality, safety, family life, lifestyle, adventure"
                 />
                 <ComparisonLeg
-                  label="Pac
+                  label="Package"
+                  color="#1D9E75" bg="#E1F5EE"
+                  curVal={form.pkg} onChange={v => set('pkg', v)}
+                  pred={preds.pkgPred} dc={form.dc}
+                  description="Salary, housing, flights, tax, savings potential"
+                />
+              </>
+            )}
+
+            {step === 5 && (
+              <>
+                <div style={{ maxWidth: 440 }}>
+                  <input
+                    type="email"
+                    value={saveEmail}
+                    onChange={e => { setSaveEmail(e.target.value); if (saveState === 'error') setSaveState('idle') }}
+                    onKeyDown={e => e.key === 'Enter' && saveEmail.trim() && handleSaveAndContinue()}
+                    placeholder="your@email.com"
+                    autoFocus
+                    style={{ width: '100%', fontSize: 14, padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 'var(--r)', outline: 'none', boxSizing: 'border-box', marginBottom: '.875rem' }}
+                  />
+                  <button
+                    className="btn btn-primary"
+                    onClick={handleSaveAndContinue}
+                    disabled={!saveEmail.trim() || saveState === 'saving'}
+                    style={{ width: '100%' }}
+                  >
+                    {saveState === 'saving' ? 'Saving...' : 'Save and continue'}{' ->'}
+                  </button>
+                  <button
+                    onClick={handleSkipSave}
+                    style={{ marginTop: '.75rem', fontSize: 12, color: 'var(--ink-4)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                  >
+                    Skip for now{' ->'}
+                  </button>
+                  {saveState === 'error' && (
+                    <div style={{ marginTop: '.75rem', fontSize: 12, color: '#D85A30', lineHeight: 1.5 }}>
+                      We could not confirm the save right away, so your dashboard will still open. You can save again from the profile bar.
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1.75rem', gap: 12 }}>
+              {step > 1
+                ? <button className="btn btn-ghost" onClick={() => setStep(step - 1)}>{"<-"} Back</button>
+                : <span />}
+              {step < 5 ? (
+                <button className="btn btn-primary" onClick={advance}>
+                  Continue{' ->'}
+                </button>
+              ) : (
+                <span />
+              )}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}

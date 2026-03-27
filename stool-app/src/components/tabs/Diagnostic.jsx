@@ -290,4 +290,108 @@ export function Diagnostic() {
                 </div>
                 <div style={{ fontSize: 10.5, color: QUESTION_TONES[q.id].text, whiteSpace: 'nowrap', fontWeight: 600 }}>Q{qi + 1}</div>
               </div>
-              <div style={{ fontSize: 13.4, fontWeigh
+              <div style={{ fontSize: 13.4, fontWeight: 500, color: 'var(--ink)', lineHeight: 1.45 }}>{q.text}</div>
+            </div>
+            <div style={{ padding: '.85rem .95rem .95rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+              {q.opts.map((o, oi) => (
+                <button
+                  key={oi}
+                  style={{
+                    fontSize: 12,
+                    padding: '.7rem .8rem',
+                    marginBottom: 0,
+                    width: '100%',
+                    textAlign: 'left',
+                    borderRadius: 'var(--r)',
+                    border: `1px solid ${answers[q.id] === oi ? QUESTION_TONES[q.id].border : 'var(--border)'}`,
+                    background: answers[q.id] === oi ? QUESTION_TONES[q.id].bg : 'white',
+                    color: answers[q.id] === oi ? QUESTION_TONES[q.id].text : 'var(--ink-2)',
+                    fontWeight: answers[q.id] === oi ? 500 : 400,
+                    lineHeight: 1.45,
+                    cursor: 'pointer',
+                    transition: 'all .18s ease',
+                    boxShadow: answers[q.id] === oi ? `inset 0 0 0 1px ${QUESTION_TONES[q.id].border}22` : 'none',
+                  }}
+                  onClick={() => select(q.id, oi)}
+                >
+                  {o}
+                </button>
+              ))}
+            </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <button className="btn btn-primary" style={{ marginTop: '1rem', maxWidth: 240, boxShadow: '0 8px 18px rgba(29,158,117,.16)' }} onClick={run}>
+        Analyse my responses -&gt;
+      </button>
+
+      {result && (
+        <div style={{ marginTop: '1.5rem', background: 'white', border: '1px solid var(--border)', borderRadius: 'var(--rl)', padding: '1.5rem', boxShadow: '0 2px 20px rgba(0,0,0,.04)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '.75rem', flexWrap: 'wrap', marginBottom: '.5rem' }}>
+            <div style={{ fontFamily: 'var(--serif)', fontSize: '1.2rem' }}>Your diagnosis</div>
+            {saveState === 'saving' && <div style={{ fontSize: 11.5, color: 'var(--ink-4)' }}>Saving privately for admin review...</div>}
+            {saveState === 'saved' && <div style={{ fontSize: 11.5, color: '#1D9E75' }}>Saved privately for admin review.</div>}
+            {saveState === 'offline' && <div style={{ fontSize: 11.5, color: 'var(--ink-4)' }}>Supabase is not configured, so this result stays local only.</div>}
+            {saveState === 'error' && <div style={{ fontSize: 11.5, color: '#D85A30' }}>This result could not be saved to the admin dashboard.</div>}
+          </div>
+
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '.45rem', fontSize: 11, fontWeight: 600, color: 'var(--amber-dark)', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: '.55rem', background: 'var(--amber-bg)', border: '1px solid rgba(186,117,23,.18)', borderRadius: 999, padding: '5px 10px' }}>
+            {result.title}
+          </div>
+          <div style={{ fontSize: 13.5, color: 'var(--ink-2)', lineHeight: 1.7, marginBottom: '1rem' }}>{result.body}</div>
+          <div className="ibox" style={{ marginBottom: '1rem' }}>{result.urgency}</div>
+
+          <div className="csec">Recommended actions</div>
+          {result.actions.map((a, i) => (
+            <div key={i} className="ibox" style={{ marginBottom: '.5rem' }}>{a}</div>
+          ))}
+
+          {diagScore != null && (
+            <div style={{ marginTop: '1.25rem', borderTop: '1px solid var(--border)', paddingTop: '1.25rem' }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--amber-dark)', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: '.5rem' }}>
+                School leg score from this diagnostic
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '.75rem', flexWrap: 'wrap' }}>
+                <div style={{ fontSize: 13, color: 'var(--ink-3)' }}>
+                  Current profile score: <strong style={{ color: 'var(--amber)', fontSize: '1.2rem', fontWeight: 300 }}>{currentScore}</strong>
+                </div>
+                <div style={{ fontSize: 13, color: deltaColor, textTransform: 'uppercase', letterSpacing: '.06em' }}>{deltaArrow}</div>
+                <div style={{ fontSize: 13, color: 'var(--ink-3)' }}>
+                  Diagnostic score: <strong style={{ color: 'var(--amber)', fontSize: '1.2rem', fontWeight: 300 }}>{diagScore}</strong>
+                </div>
+              </div>
+              <div style={{ fontSize: 12, color: 'var(--ink-3)', marginBottom: '.75rem', lineHeight: 1.5 }}>
+                Based on your answers to the leadership, workload, transparency, and outlook questions.
+                {Math.abs(delta) > 1 && (
+                  <span style={{ color: deltaColor, fontWeight: 500 }}>
+                    {delta > 0 ? ' Your gut-feel score may be underestimating your current school.' : ' Your gut-feel score may be more optimistic than your answers suggest.'}
+                  </span>
+                )}
+              </div>
+              {!scoreApplied ? (
+                <button
+                  onClick={() => {
+                    updateProfile({ sch: diagScore })
+                    setScoreApplied(true)
+                  }}
+                  style={{ fontSize: 12.5, fontWeight: 500, color: 'white', background: 'var(--amber)', border: 'none', borderRadius: 'var(--r)', padding: '7px 16px', cursor: 'pointer', boxShadow: '0 8px 18px rgba(186,117,23,.16)' }}
+                >
+                  Update my School score to {diagScore} -&gt;
+                </button>
+              ) : (
+                <div style={{ fontSize: 12.5, color: 'var(--teal-dark)', background: '#E1F5EE', borderRadius: 'var(--r)', padding: '7px 14px', display: 'inline-block', fontWeight: 500 }}>
+                  School score updated to {diagScore}. It now flows through My Move and Overview.
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default Diagnostic

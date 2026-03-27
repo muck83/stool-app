@@ -170,4 +170,6 @@ export function ProfileProvider({ children }) {
 
 export function useProfile() {
   const ctx = useContext(ProfileContext)
-  if (!ctx) throw new Error('useProfile must be us
+  if (!ctx) throw new Error('useProfile must be used within ProfileProvider')
+  return ctx
+}
