@@ -1,11 +1,145 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { SR_QS, SR_DIAGNOSES, SR_DIM_COLORS } from '../../data/srQuestions.js'
 import { useProfile } from '../../context/ProfileContext.jsx'
 import { SALARY_DB_SEED } from '../../data/salaryDb.js'
+import { HOF } from '../../data/hofstede.js'
 import SchoolAutocomplete from '../SchoolAutocomplete.jsx'
-import { insertSchoolReview } from '../../lib/supabase.js'
+import { insertSchoolReview, searchSchoolReviews } from '../../lib/supabase.js'
 
-const DIM_LABELS = { q1: 'Leadership', q2: 'Honesty', q3: 'Workload', q4: 'Autonomy', q5: 'Colleagues', q6: 'Mission', q7: 'Overall' }
+const DIM_LABELS = {
+  q1: 'Leadership', q2: 'Honesty',  q3: 'Workload', q4: 'Autonomy',
+  q5: 'Colleagues', q6: 'Mission',  q7: 'Overall',
+  q8: 'Exit safety', q9: 'Parents', q10: 'Family pkg',
+}
+const DIM_KEYS     = ['q1','q2','q3','q4','q5','q6','q7']
+const DIM_KEYS_ALL = ['q1','q2','q3','q4','q5','q6','q7','q8','q9','q10']
+
+// ── 6th-sense thesis engine ────────────────────────────────────────────────────
+// Deterministic narrative generator. Every sentence maps to a real data threshold.
+// Not AI. Not speculation. A trusted colleague who has read the reviews.
+
+const DIM_NAMES = {
+  q1: 'leadership transparency', q2: 'recruitment honesty', q3: 'workload',
+  q4: 'professional autonomy', q5: 'staff culture', q6: 'mission alignment',
+}
+
+function generateThesis(stats, profile, schoolCountry) {
+  const { avg, count, dimAvgs, avgNotice } = stats
+  const sig = {}
+  if (dimAvgs) dimAvgs.forEach(({ key, avg: a }) => { sig[key] = a })
+  const lines = []
+
+  // ── Opening verdict ───────────────────────────────────────────────────────
+  if (avg >= 8) {
+    lines.push(`Across ${count} teacher reviews, this school scores consistently strong. The pattern points to institutional integrity — leadership that explains itself, honest recruitment, workload that matches what was promised. Schools that score like this are the minority in this sector. The signal is worth taking seriously.`)
+  } else if (avg >= 6.5) {
+    lines.push(`The community verdict here is positive overall, with specific areas worth understanding before you decide. A composite of ${avg}/10 across ${count} reviews suggests a school that works for most teachers — which means the things that fall short are probably predictable rather than structural surprises.`)
+  } else if (avg >= 5) {
+    lines.push(`${count} teachers have reviewed this school and the picture is genuinely mixed — ${avg}/10 overall. Real strengths in some dimensions, persistent concerns in others. What this means for you depends on which dimensions matter most to where you are right now.`)
+  } else if (avg >= 3.5) {
+    lines.push(`The signal across ${count} reviews points to a school with structural problems that appear consistently — ${avg}/10. This doesn't mean every experience here is bad. But the issues teachers flag aren't isolated incidents. They're patterns.`)
+  } else {
+    lines.push(`Teachers are honest here: ${avg}/10 across ${count} reviews. The concerns are consistent enough across dimensions to suggest something structural, not situational.`)
+  }
+
+  // ── Strongest/weakest core signal ────────────────────────────────────────
+  const coreDims = ['q1','q2','q3','q4','q5','q6'].filter(k => sig[k] != null)
+  if (coreDims.length >= 3) {
+    const sorted = [...coreDims].sort((a,b) => sig[a] - sig[b])
+    const weakest = sorted[0]
+    const strongest = sorted[sorted.length - 1]
+    if (sig[weakest] <= 4) {
+      lines.push(`The dimension that stands out most is ${DIM_NAMES[weakest]} — scored ${sig[weakest]}/10. That's a consistent signal, not a single outlier. It's worth reading what teachers specifically said here before treating it as a dealbreaker or dismissing it.`)
+    } else if (sig[strongest] >= 8 && avg < 7) {
+      lines.push(`The standout strength is ${DIM_NAMES[strongest]} (${sig[strongest]}/10). Schools that score that well on this dimension structurally tend to hold it across cohorts — it's not usually down to one manager or one year.`)
+    } else if (sig[strongest] >= 8 && avg >= 7) {
+      lines.push(`${DIM_NAMES[strongest].charAt(0).toUpperCase() + DIM_NAMES[strongest].slice(1)} is the standout — ${sig[strongest]}/10 — and it reinforces the overall picture. The ${DIM_NAMES[weakest]} score (${sig[weakest]}/10) is the main caveat worth carrying into any job negotiation.`)
+    }
+  }
+
+  // ── Risk signals (q8 / q9 / q10) ─────────────────────────────────────────
+  const riskParts = []
+  if (sig.q8 != null && sig.q8 < 5) riskParts.push(`exit safety (${sig.q8}/10) — departures had consequences at this school`)
+  if (sig.q9 != null && sig.q9 < 5) riskParts.push(`parent pressure (${sig.q9}/10) — professional standards were regularly overridden`)
+  if (sig.q10 != null && sig.q10 < 5) riskParts.push(`family package (${sig.q10}/10) — dependent benefits fell short of what was promised`)
+  if (riskParts.length > 0) {
+    lines.push(`There are risk signals worth naming directly: ${riskParts.join('; ')}. Exit safety, parent culture, and family package are the dimensions most likely to turn a difficult posting into an untenable one. They're worth verifying specifically — not accepting on faith.`)
+  } else if (sig.q8 != null && sig.q8 >= 7 && sig.q9 != null && sig.q9 >= 7) {
+    lines.push(`The risk signals — exit safety and parent culture — are positive here. Teachers report departures were handled professionally and parent expectations didn't override classroom standards. These are things most people don't check until it's too late.`)
+  }
+
+  // ── Hofstede cultural gap ─────────────────────────────────────────────────
+  const destHof = HOF[schoolCountry]
+  const homeHof = HOF[profile.home] || HOF[profile.cc]
+  if (destHof && homeHof) {
+    const pdiDiff = Math.abs(destHof[0] - homeHof[0])
+    if (pdiDiff > 35) {
+      const direction = destHof[0] > homeHof[0] ? 'more hierarchical' : 'less hierarchical'
+      lines.push(`One cultural layer worth naming: ${schoolCountry} operates with a notably ${direction} institutional dynamic than your home culture (power distance gap of ${pdiDiff} points). That shows up in how leadership makes decisions, how much autonomy teachers are realistically given, and how disagreement is handled — regardless of what the job description says.`)
+    }
+  }
+
+  // ── Years-abroad context ──────────────────────────────────────────────────
+  const isEarlyCareer = profile.yrs === 'Just starting' || profile.yrs === '1–3 years'
+  if (isEarlyCareer && avg < 5.5) {
+    lines.push(`One thing worth naming for where you are in your career: schools with structural concerns are harder to navigate without the pattern recognition that comes from previous postings. What an experienced international teacher can manage — and protect themselves from — can land differently when you're still learning the terrain.`)
+  }
+
+  // ── Notice period ─────────────────────────────────────────────────────────
+  if (avgNotice != null && avgNotice > 8) {
+    lines.push(`One practical signal: the average notice period here is ${avgNotice} weeks — longer than the sector norm. If circumstances change mid-contract, leaving requires planning that most teachers don't do in advance.`)
+  }
+
+  // ── Closing ───────────────────────────────────────────────────────────────
+  if (avg >= 7) {
+    lines.push(`The honest read: the data is mostly saying yes here. Go in knowing the caveats the community has flagged, and you'll be going in informed.`)
+  } else if (avg >= 5) {
+    lines.push(`The honest read: this is a posting where your specific fit matters more than the average. The signal isn't "avoid" — it's "understand exactly what you're accepting." The teachers who do well here probably went in knowing.`)
+  } else {
+    lines.push(`The honest read: the data is warning you. That doesn't mean don't go — it means go in with your eyes open, clear on what's non-negotiable, and a realistic exit timeline from day one.`)
+  }
+
+  return lines
+}
+
+function SchoolThesis({ stats, profile, schoolCountry }) {
+  const [showEngine, setShowEngine] = useState(false)
+  const paragraphs = generateThesis(stats, profile, schoolCountry)
+  if (!paragraphs || paragraphs.length === 0) return null
+
+  const hasProfile  = !!(profile.home || profile.cc || profile.yrs)
+  const hasHofstede = !!(HOF[schoolCountry] && (HOF[profile.home] || HOF[profile.cc]))
+  const homeName    = profile.home || profile.cc || null
+
+  return (
+    <div style={{ padding: '1.375rem 1.25rem 1.125rem', borderBottom: '1px solid var(--border)', background: '#FAFAF8' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '.5rem', marginBottom: '1rem' }}>
+        <div style={{ width: 3, height: 16, background: 'var(--amber)', borderRadius: 2, flexShrink: 0 }} />
+        <div style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.1em', color: 'var(--amber-dark)' }}>
+          Intelligence briefing{hasProfile ? ' · personalised' : ''}
+        </div>
+      </div>
+
+      {paragraphs.map((p, i) => (
+        <p key={i} style={{ fontSize: 13.5, color: 'var(--ink-2)', lineHeight: 1.75, margin: 0, marginBottom: i < paragraphs.length - 1 ? '.875rem' : 0 }}>{p}</p>
+      ))}
+
+      <div style={{ marginTop: '1rem', borderTop: '1px solid rgba(26,25,23,.08)', paddingTop: '.625rem' }}>
+        <button
+          onClick={() => setShowEngine(!showEngine)}
+          style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: 11, color: 'var(--ink-4)', display: 'flex', alignItems: 'center', gap: 4 }}
+        >
+          <span style={{ fontSize: 9 }}>{showEngine ? '▲' : '▼'}</span> What's powering this analysis
+        </button>
+        {showEngine && (
+          <div style={{ marginTop: '.625rem', fontSize: 12, color: 'var(--ink-3)', lineHeight: 1.65, maxWidth: 520 }}>
+            This briefing is generated deterministically from {stats.count} teacher review{stats.count !== 1 ? 's' : ''} — it is not AI-generated speculation. Every sentence maps to a specific threshold in the underlying data. Signals used: community review averages across all 10 dimensions (leadership, honesty, workload, autonomy, colleagues, mission, exit safety, parent culture, family package){hasHofstede ? `; Hofstede cultural dimensions for ${schoolCountry} vs ${homeName}` : ''}{profile.yrs ? `; career stage (${profile.yrs} abroad)` : ''}. Nothing is invented. Where data is missing, no claim is made.
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
 
 function ProgressBar({ step, total }) {
   return (
@@ -17,13 +151,12 @@ function ProgressBar({ step, total }) {
   )
 }
 
-function ProfileCard({ school, country, answers, hours }) {
-  const keys = ['q1','q2','q3','q4','q5','q6','q7']
-  const scores = keys.map(k => answers[k]?.score).filter(s => s != null)
+function ProfileCard({ school, country, answers, hours, noticePeriod }) {
+  const scores = DIM_KEYS_ALL.map(k => answers[k]?.score).filter(s => s != null)
   const overall = scores.length ? Math.round(scores.reduce((a,b) => a+b, 0) / scores.length * 10) / 10 : null
 
   const diagCounts = {}
-  keys.forEach(k => {
+  DIM_KEYS.forEach(k => {
     const d = answers[k]?.diag
     if (d && d !== 'none') diagCounts[d] = (diagCounts[d] || 0) + 1
   })
@@ -46,14 +179,15 @@ function ProfileCard({ school, country, answers, hours }) {
         <div style={{ fontSize: 11.5, color: 'var(--amber)', marginTop: 2 }}>{country} · {new Date().getFullYear()}</div>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', border: '1px solid var(--border)', borderTop: 'none', overflow: 'hidden' }}>
-        {['q1','q2','q3','q4','q5','q6'].map(k => {
+        {DIM_KEYS_ALL.filter(k => k !== 'q7').map(k => {
           const s = answers[k]?.score
           const c = SR_DIM_COLORS[k]
+          const isNew = ['q8','q9','q10'].includes(k)
           return (
-            <div key={k} style={{ padding: '.75rem 1rem', borderBottom: '1px solid var(--border)', borderRight: '1px solid var(--border)' }}>
-              <div style={{ fontSize: 10, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '.07em', color: 'var(--ink-4)', marginBottom: 3 }}>{DIM_LABELS[k]}</div>
+            <div key={k} style={{ padding: '.75rem 1rem', borderBottom: '1px solid var(--border)', borderRight: '1px solid var(--border)', background: isNew ? 'var(--surface-2)' : 'white' }}>
+              <div style={{ fontSize: 10, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '.07em', color: isNew ? c : 'var(--ink-4)', marginBottom: 3 }}>{DIM_LABELS[k]}</div>
               <div style={{ fontSize: '1.25rem', fontWeight: 300, color: s ? c : '#9b9b96', marginBottom: 3 }}>{s || '—'}</div>
-              <div style={{ height: 4, background: 'var(--surface-2)', borderRadius: 2, overflow: 'hidden' }}>
+              <div style={{ height: 4, background: 'rgba(26,25,23,.08)', borderRadius: 2, overflow: 'hidden' }}>
                 <div style={{ width: `${s ? s * 10 : 0}%`, height: 4, background: c, borderRadius: 2 }} />
               </div>
             </div>
@@ -71,9 +205,18 @@ function ProfileCard({ school, country, answers, hours }) {
           <div style={{ fontSize: 13, color: 'var(--ink-2)', lineHeight: 1.65 }}>{diag.advice}</div>
         </div>
       )}
-      {hours && (
-        <div className="ibox" style={{ marginTop: '.75rem' }}>
-          <strong>{hours} hrs/week</strong> · {parseInt(hours) < 42 ? 'Below the international school average — a real positive.' : parseInt(hours) < 50 ? 'Around the international school average.' : 'Above average — worth naming in any future contract negotiation.'}
+      {(hours || noticePeriod) && (
+        <div style={{ display: 'flex', gap: '.625rem', flexWrap: 'wrap', marginTop: '.75rem' }}>
+          {hours && (
+            <div className="ibox" style={{ flex: 1, minWidth: 160 }}>
+              <strong>{hours} hrs/week</strong> · {parseInt(hours) < 42 ? 'Below average — a real positive.' : parseInt(hours) < 50 ? 'Around the sector average.' : 'Above average — worth naming in any contract negotiation.'}
+            </div>
+          )}
+          {noticePeriod && (
+            <div className="ibox" style={{ flex: 1, minWidth: 160 }}>
+              <strong>{noticePeriod} weeks notice</strong> · {parseInt(noticePeriod) <= 4 ? 'Standard — reasonable exit flexibility.' : parseInt(noticePeriod) <= 8 ? 'Longer than average — factor this into any job search timeline.' : 'Long notice period — significant exit risk if circumstances change.'}
+            </div>
+          )}
         </div>
       )}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '.875rem 1rem', background: 'var(--surface-2)', borderRadius: 'var(--r)', marginTop: '1rem' }}>
@@ -90,13 +233,180 @@ function ProfileCard({ school, country, answers, hours }) {
   )
 }
 
+// ── School Search / Browse ────────────────────────────────────────────────────
+
+function SchoolSearchPanel() {
+  const { profile } = useProfile()
+  const [query, setQuery]       = useState('')
+  const [results, setResults]   = useState(null)  // null = not searched, [] = no results
+  const [loading, setLoading]   = useState(false)
+  const debounceRef = useRef(null)
+
+  const scoreColor = (s) => s >= 8 ? '#1D9E75' : s >= 6 ? '#BA7517' : s >= 4 ? '#D85A30' : '#A32D2D'
+  const scoreLabel = (s) => s >= 8 ? 'Strong posting' : s >= 6 ? 'Solid with caveats' : s >= 4 ? 'Significant concerns' : 'Serious warning signs'
+
+  const search = async (q) => {
+    if (!q.trim() || q.trim().length < 2) { setResults(null); return }
+    setLoading(true)
+    const data = await searchSchoolReviews(q.trim())
+    // Group by school name (ilike might return multiple schools)
+    const grouped = data.reduce((acc, r) => {
+      const key = r.school.toLowerCase()
+      if (!acc[key]) acc[key] = { school: r.school, country: r.country, reviews: [] }
+      acc[key].reviews.push(r)
+      return acc
+    }, {})
+    setResults(Object.values(grouped))
+    setLoading(false)
+  }
+
+  const handleChange = (e) => {
+    const val = e.target.value
+    setQuery(val)
+    clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => search(val), 400)
+  }
+
+  const getSchoolStats = (reviews) => {
+    const active = reviews.filter(r => !r.status || r.status === 'active' || r.status === 'verified')
+    if (active.length < 3) return { avg: null, count: active.length, enough: false }
+    const allScores = active.flatMap(r => {
+      if (!r.answers) return []
+      return Object.values(r.answers).map(a => a?.score).filter(s => s != null)
+    })
+    const avg = allScores.length ? Math.round(allScores.reduce((a,b) => a+b,0) / allScores.length * 10) / 10 : null
+    const dimAvgs = DIM_KEYS_ALL.map(k => {
+      const scores = active.map(r => r.answers?.[k]?.score).filter(s => s != null)
+      return { key: k, avg: scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length*10)/10 : null }
+    })
+    const avgNotice = (() => {
+      const vals = active.map(r => parseInt(r.noticePeriod)).filter(n => !isNaN(n) && n > 0)
+      return vals.length ? Math.round(vals.reduce((a,b)=>a+b,0)/vals.length) : null
+    })()
+    return { avg, count: active.length, enough: true, dimAvgs, avgNotice }
+  }
+
+  return (
+    <div style={{ marginBottom: '1.5rem' }}>
+      <div style={{ fontFamily: 'var(--serif)', fontSize: '1.1rem', marginBottom: '.35rem', color: 'var(--ink)' }}>Search school ratings</div>
+      <div style={{ fontSize: 12.5, color: 'var(--ink-3)', marginBottom: '.875rem', lineHeight: 1.6 }}>
+        See what teachers have said about a school before you sign. Ratings appear once 3+ teachers have reviewed a school.
+      </div>
+      <div style={{ display: 'flex', gap: 8, marginBottom: '1rem' }}>
+        <input
+          value={query}
+          onChange={handleChange}
+          placeholder="Search by school name, e.g. Bangkok Patana…"
+          style={{ flex: 1, padding: '10px 14px', border: '1px solid var(--border-2)', borderRadius: 'var(--r)', fontSize: 14 }}
+        />
+        {loading && <div style={{ display: 'flex', alignItems: 'center', fontSize: 12, color: 'var(--ink-4)', padding: '0 8px' }}>Searching…</div>}
+      </div>
+
+      {results !== null && results.length === 0 && !loading && (
+        <div style={{ padding: '1rem', background: 'var(--surface-2)', borderRadius: 'var(--r)', fontSize: 13, color: 'var(--ink-3)' }}>
+          No ratings yet for "{query}" — be the first to review this school below.
+        </div>
+      )}
+
+      {results && results.length > 0 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '.75rem' }}>
+          {results.map(({ school, country, reviews }) => {
+            const stats = getSchoolStats(reviews)
+            return (
+              <div key={school} style={{ background: 'white', border: '1px solid var(--border)', borderRadius: 'var(--r)', overflow: 'hidden' }}>
+                {/* School header */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.25rem', borderBottom: stats.enough ? '1px solid var(--border)' : 'none' }}>
+                  <div>
+                    <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--ink)' }}>{school}</div>
+                    <div style={{ fontSize: 11.5, color: 'var(--ink-4)', marginTop: 2 }}>
+                      {country} · {stats.count} review{stats.count !== 1 ? 's' : ''}
+                      {!stats.enough && ` · needs ${3 - stats.count} more to show ratings`}
+                    </div>
+                  </div>
+                  {stats.enough && stats.avg && (
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontSize: '2rem', fontWeight: 300, color: scoreColor(stats.avg), lineHeight: 1 }}>{stats.avg}</div>
+                      <div style={{ fontSize: 11, color: scoreColor(stats.avg), marginTop: 3 }}>{scoreLabel(stats.avg)}</div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Intelligence thesis — appears when 3+ reviews exist */}
+                {stats.enough && (
+                  <SchoolThesis stats={stats} profile={profile} schoolCountry={country} />
+                )}
+
+                {/* Dimension scores */}
+                {stats.enough && stats.dimAvgs && (
+                  <div style={{ padding: '.875rem 1.25rem' }}>
+                    {/* Core 6 dimensions */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '.5rem', marginBottom: '.75rem' }}>
+                      {stats.dimAvgs.filter(d => !['q7','q8','q9','q10'].includes(d.key)).map(({ key, avg: dimAvg }) => (
+                        <div key={key} style={{ textAlign: 'center' }}>
+                          <div style={{ fontSize: 10, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 4 }}>{DIM_LABELS[key]}</div>
+                          <div style={{ fontSize: '1.25rem', fontWeight: 300, color: dimAvg ? SR_DIM_COLORS[key] : '#ccc' }}>{dimAvg || '—'}</div>
+                          <div style={{ height: 3, background: 'var(--surface-2)', borderRadius: 2, marginTop: 4, overflow: 'hidden' }}>
+                            <div style={{ width: `${dimAvg ? dimAvg * 10 : 0}%`, height: 3, background: SR_DIM_COLORS[key], borderRadius: 2 }} />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    {/* Risk signals row */}
+                    {stats.dimAvgs.some(d => ['q8','q9','q10'].includes(d.key) && d.avg != null) && (
+                      <div style={{ borderTop: '1px solid var(--border)', paddingTop: '.625rem', marginBottom: '.5rem' }}>
+                        <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: '.5rem' }}>Risk signals</div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '.5rem' }}>
+                          {stats.dimAvgs.filter(d => ['q8','q9','q10'].includes(d.key)).map(({ key, avg: dimAvg }) => (
+                            <div key={key} style={{ textAlign: 'center', background: 'var(--surface-2)', borderRadius: 6, padding: '.5rem .25rem' }}>
+                              <div style={{ fontSize: 10, color: SR_DIM_COLORS[key], textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 4, fontWeight: 600 }}>{DIM_LABELS[key]}</div>
+                              <div style={{ fontSize: '1.15rem', fontWeight: 300, color: dimAvg ? SR_DIM_COLORS[key] : '#ccc' }}>{dimAvg || '—'}</div>
+                              <div style={{ height: 3, background: 'rgba(26,25,23,.1)', borderRadius: 2, marginTop: 4, overflow: 'hidden' }}>
+                                <div style={{ width: `${dimAvg ? dimAvg * 10 : 0}%`, height: 3, background: SR_DIM_COLORS[key], borderRadius: 2 }} />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        {stats.avgNotice && (
+                          <div style={{ marginTop: '.5rem', fontSize: 11.5, color: 'var(--ink-3)' }}>
+                            Avg notice period: <strong>{stats.avgNotice} weeks</strong>
+                            {stats.avgNotice > 8 ? ' — longer than sector average' : stats.avgNotice <= 4 ? ' — standard' : ''}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    <div style={{ fontSize: 11, color: 'var(--ink-4)', marginTop: '.25rem' }}>
+                      Based on {stats.count} teacher review{stats.count !== 1 ? 's' : ''} · Community-generated · Risk signals from reviews including exit safety, parent culture, and family package questions.
+                    </div>
+                  </div>
+                )}
+
+                {/* Not enough reviews */}
+                {!stats.enough && (
+                  <div style={{ padding: '.75rem 1.25rem', background: '#FAFAF9', borderTop: '1px solid var(--border)' }}>
+                    <div style={{ fontSize: 12, color: 'var(--ink-4)', fontStyle: 'italic' }}>
+                      Ratings hidden until 3 teachers have reviewed. {3 - stats.count} more review{3 - stats.count !== 1 ? 's' : ''} needed.
+                    </div>
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Main export ───────────────────────────────────────────────────────────────
+
 export default function MySchool() {
   const { profile } = useProfile()
-  const [step, setStep] = useState(0) // 0=identity, 1-7=questions, 8=result
+  const [step, setStep] = useState(0)
   const [school, setSchool] = useState('')
   const [country, setCountry] = useState(profile.cc || '')
   const [answers, setAnswers] = useState({})
   const [hours, setHours] = useState('')
+  const [noticePeriod, setNoticePeriod] = useState('')
   const [reviews, setReviews] = useState([])
 
   const selectOpt = (key, score, diag) => setAnswers(a => ({ ...a, [key]: { score, diag } }))
@@ -108,9 +418,8 @@ export default function MySchool() {
     } else if (step < SR_QS.length) {
       setStep(step + 1)
     } else {
-      const review = { school, country, answers: { ...answers }, hours }
+      const review = { school, country, answers: { ...answers }, hours, noticePeriod }
       setReviews(r => [...r, review])
-      // Persist to Supabase (fire-and-forget)
       insertSchoolReview(review)
       setStep(SR_QS.length + 1)
     }
@@ -119,7 +428,7 @@ export default function MySchool() {
   const back = () => { if (step > 0) setStep(step - 1) }
 
   const reset = () => {
-    setStep(0); setSchool(''); setCountry(profile.cc || ''); setAnswers({}); setHours('')
+    setStep(0); setSchool(''); setCountry(profile.cc || ''); setAnswers({}); setHours(''); setNoticePeriod('')
   }
 
   const q = step >= 1 && step <= SR_QS.length ? SR_QS[step - 1] : null
@@ -127,14 +436,18 @@ export default function MySchool() {
 
   return (
     <div className="tp active">
+      <div style={{ fontFamily: 'var(--serif)', fontSize: '1.5rem', marginBottom: '.35rem' }}>How was your experience at your school?</div>
+      <div style={{ fontSize: 13, color: 'var(--ink-3)', maxWidth: 480, lineHeight: 1.65, marginBottom: '1.25rem' }}>
+        Seven questions that surface the real picture — leadership, honesty, workload, autonomy, colleagues, mission. You get a named diagnosis and practical advice. Your responses also contribute to an aggregated school profile that helps other teachers make informed decisions.
+      </div>
+
+      {/* School search panel — always visible */}
+      <SchoolSearchPanel />
+
       <div className="g2" style={{ marginBottom: '1.25rem', alignItems: 'start' }}>
         <div>
-          <div style={{ fontFamily: 'var(--serif)', fontSize: '1.5rem', marginBottom: '.35rem' }}>What's actually wrong with your school?</div>
-          <div style={{ fontSize: 13, color: 'var(--ink-3)', maxWidth: 480, lineHeight: 1.65, marginBottom: '1.25rem' }}>
-            Seven behavioural questions that name the real issue — leadership, honesty, workload, autonomy, colleagues, mission. You get a named diagnosis, a prognosis, and practical advice. As a by-product, your responses contribute to an aggregated school profile that helps other teachers make the same decision you're navigating now.
-          </div>
           <div className="g3" style={{ marginBottom: '1.25rem' }}>
-            {[['3','reviews needed before a school profile becomes visible'],['10','reviews needed to feed the destination prediction model'],['7','behavioural questions — takes about 4 minutes']].map(([n, desc]) => (
+            {[['3','reviews needed before a school profile becomes visible'],['10','reviews needed to feed the destination prediction model'],['10','questions covering culture, exit safety, parent pressure, and family package']].map(([n, desc]) => (
               <div key={n} style={{ background: 'white', border: '1px solid var(--border)', borderRadius: 'var(--r)', padding: '1rem', textAlign: 'center' }}>
                 <div style={{ fontSize: '1.75rem', fontWeight: 300, color: n === '7' ? 'var(--amber)' : 'var(--ink)', marginBottom: 2 }}>{n}</div>
                 <div style={{ fontSize: 11, color: 'var(--ink-3)', lineHeight: 1.4 }}>{desc}</div>
@@ -165,7 +478,7 @@ export default function MySchool() {
 
         <div className="card" id="school-review-card">
           <div className="ct">School diagnostic</div>
-          <div className="cs">7 behavioural questions. You get a named diagnosis — leadership opacity, workload exploitation, mission drift — with a prognosis and specific advice.</div>
+          <div className="cs">10 questions covering school culture, exit safety, parent pressure, and family package reality. You get a named diagnosis with a prognosis and specific advice.</div>
           <ProgressBar step={step > 0 ? step - 1 : 0} total={SR_QS.length} />
 
           {step === 0 && (
@@ -212,6 +525,15 @@ export default function MySchool() {
                   </div>
                 </div>
               )}
+              {q.extra === 'notice' && (
+                <div style={{ marginBottom: '.875rem', padding: '.875rem 1rem', background: 'var(--surface-2)', borderRadius: 'var(--r)' }}>
+                  <label style={{ fontSize: 11, fontWeight: 500, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.06em', display: 'block', marginBottom: 8 }}>Notice period required — optional but important for future teachers</label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '.75rem' }}>
+                    <input type="number" value={noticePeriod} onChange={e => setNoticePeriod(e.target.value)} min={0} max={52} placeholder="e.g. 8" style={{ width: 100, padding: '10px 13px', border: '1px solid var(--border-2)', borderRadius: 'var(--r)', fontSize: 15, fontWeight: 500 }} />
+                    <span style={{ fontSize: 13, color: 'var(--ink-3)' }}>weeks notice required by contract</span>
+                  </div>
+                </div>
+              )}
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
                 <button className="btn btn-ghost" onClick={back}>← Back</button>
                 <button className="btn btn-amber" style={{ maxWidth: 160 }} onClick={next}>{step === SR_QS.length ? 'See diagnosis →' : 'Next →'}</button>
@@ -221,7 +543,7 @@ export default function MySchool() {
 
           {step === SR_QS.length + 1 && (
             <>
-              <ProfileCard school={school} country={country} answers={answers} hours={hours} />
+              <ProfileCard school={school} country={country} answers={answers} hours={hours} noticePeriod={noticePeriod} />
               <button className="btn btn-ghost" style={{ marginTop: '.875rem', fontSize: 13 }} onClick={reset}>Review another school</button>
             </>
           )}

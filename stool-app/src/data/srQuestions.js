@@ -76,6 +76,39 @@ export const SR_QS = [
       {t:'No. I\'d tell them to look elsewhere.',                                                    score:1, diag:'leave'},
     ], key:'q7'
   },
+  {
+    label:'Exit safety',
+    text:'When teachers left this school — voluntarily or not — how did the school handle their departure?',
+    why:'Reference weaponisation — schools using references to punish departures — is one of the most feared and least discussed risks in international teaching. What happened to colleagues who left tells you more about institutional character than almost any other signal.',
+    opts:[
+      {t:'Professionally. References were given fairly regardless of the circumstances of leaving.',  score:9, diag:'none'},
+      {t:'Quietly awkward. No overt punishment but departures were treated as a form of disloyalty.', score:6, diag:'exit_pressure'},
+      {t:'Punitive for some. There were visible consequences for people who left on bad terms.',       score:3, diag:'exit_risk'},
+      {t:'References were leverage. Teachers felt trapped by the threat of a damaging reference.',    score:1, diag:'exit_risk'},
+    ], key:'q8', extra:'notice'
+  },
+  {
+    label:'Parent culture',
+    text:'How much did parental pressure shape what was actually acceptable in your classroom day to day?',
+    why:'In elite international schools, parent expectations can override professional standards — affecting discipline, grades, and safeguarding. The TES has documented this as "affluent neglect." It\'s one of the most underreported structural problems in the sector and one of the hardest to see from outside.',
+    opts:[
+      {t:'Healthy. Parents were genuine partners and leadership backed professional decisions.',        score:9, diag:'none'},
+      {t:'Some pressure, but leadership drew clear lines and held them when needed.',                  score:7, diag:'none'},
+      {t:'Parent expectations regularly overrode professional standards in the classroom.',            score:3, diag:'parent_pressure'},
+      {t:'Customer-service culture. Complaints bypassed teachers and were escalated routinely.',       score:1, diag:'parent_pressure'},
+    ], key:'q9'
+  },
+  {
+    label:'Family package',
+    text:'How well did the school support the lives of partners and dependents — children\'s schooling, partner work opportunities, family logistics?',
+    why:'The international school sector has a K-shaped split: some schools still provide genuinely family-friendly packages; a growing number of for-profit schools are quietly cutting dependent benefits. This question captures whether the family picture matched what was promised.',
+    opts:[
+      {t:'Strong. Dependent benefits were real, staff children integrated, partners genuinely supported.', score:9, diag:'none'},
+      {t:'Adequate. Basic support existed but the lived reality required substantial self-management.',      score:7, diag:'none'},
+      {t:'Gaps. Key promises — tuition remission, dependent places, spouse visas — fell meaningfully short.', score:3, diag:'family_gap'},
+      {t:'N/A — I was at this school as a single teacher without dependents.',                             score:null, diag:'na'},
+    ], key:'q10'
+  },
 ];
 
 // Diagnostic profiles — named verdicts with prognosis and advice
@@ -144,6 +177,39 @@ export const SR_DIAGNOSES = {
     prognosis: 'When you\'d tell someone you respect not to take a job at your school, you already have your diagnosis. You\'re staying for reasons that probably have nothing to do with this school being good for you.',
     advice: 'Give yourself a concrete exit timeline — not "I\'ll see how next year goes" but a specific date by which you\'ll have applied elsewhere. The research on expatriate adjustment is clear: the teachers who stay too long in poor postings almost universally wish they\'d left sooner. The cost of leaving early is manageable. The cost of staying too long is not.',
   },
+  exit_pressure: {
+    name: 'Exit discomfort',
+    short: 'Departures treated as disloyalty',
+    color: '#BA7517', bg: '#FAEEDA',
+    prognosis: 'Schools that treat departures as betrayals create a quiet culture of entrapment. It\'s not overt enough to call weaponisation, but over time it shapes who stays and why — and the people who stay are often doing so out of fear rather than genuine commitment.',
+    advice: 'Document your work and relationships independently of school systems. Build external professional references before you need them. If you\'re thinking about moving, don\'t announce it until your plans are concrete.',
+  },
+  exit_risk: {
+    name: 'Reference weaponisation risk',
+    short: 'Leaving carries real professional consequences',
+    color: '#A32D2D', bg: '#FCEBEB',
+    prognosis: 'Schools that use references as leverage have built a power structure that depends on teacher captivity. This is one of the most serious structural problems in international schools — and one of the most underdiscussed. It almost never improves without a complete change in leadership.',
+    advice: 'Secure external references from people who know your work and will not be influenced by the school before you begin any job search. Understand your contract\'s resignation clause precisely. The community of international education is smaller than it seems — schools with this reputation are known to experienced recruiters.',
+  },
+  parent_pressure: {
+    name: 'Affluent neglect pressure',
+    short: 'Parent expectations override professional standards',
+    color: '#D85A30', bg: '#FAECE7',
+    prognosis: 'Customer-service culture in elite international schools is a structural problem, not a personal conflict. When leadership routinely sides with parents over professional staff, the system rewards complaint and erodes the conditions for real teaching. It escalates rather than stabilises.',
+    advice: 'Document specific incidents — not as ammunition but as clarity for yourself. The question to ask is whether the leadership *can\'t* or *won\'t* hold the line with parents. The first is a capacity problem; the second is a values problem. Both lead to the same place, but one is more hopeful than the other.',
+  },
+  family_gap: {
+    name: 'Family package shortfall',
+    short: 'Dependent benefits didn\'t match the promise',
+    color: '#534AB7', bg: '#EEEDFE',
+    prognosis: 'The K-shaped split in international school benefits is real and growing. For-profit school groups in particular have steadily reduced dependent benefits while maintaining headline salary figures. If the gap between promised and delivered benefits is large, it reflects a deliberate model — not an oversight.',
+    advice: 'Get everything in writing at offer stage — tuition remission, dependent visa support, partner employment assistance. Verbal promises are not enforceable. If a school is reluctant to commit these to a contract, that tells you something about their intention to deliver them.',
+  },
+  na: null,
 };
 
-export const SR_DIM_COLORS = {q1:'#BA7517',q2:'#D85A30',q3:'#D85A30',q4:'#534AB7',q5:'#185FA5',q6:'#3B6D11',q7:'#1a1917'};
+export const SR_DIM_COLORS = {
+  q1: '#BA7517', q2: '#D85A30',  q3: '#D85A30',  q4: '#534AB7',
+  q5: '#185FA5', q6: '#3B6D11',  q7: '#1a1917',
+  q8: '#A32D2D', q9: '#8B4513',  q10: '#2E6B9E',
+};
