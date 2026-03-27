@@ -18,7 +18,7 @@ export default function About() {
         {/* ── Personal story */}
         <div style={{ borderLeft: '3px solid var(--teal)', paddingLeft: '1.25rem', marginBottom: '2rem' }}>
           <p style={{ fontSize: 15, lineHeight: 1.8, color: 'var(--ink-2)', marginTop: 0, marginBottom: '1rem' }}>
-            I moved to Vietnam to lead an international school. Within months, I was watching talented teachers make enormous decisions — accepting contracts, moving families, uprooting careers — based on almost nothing. Salary ranges whispered in Facebook groups. Schools described only by their own marketing. Places reduced to a single line in a job posting.
+            I moved to Vietnam to teach middle school math at Saigon South International School. Within months, I was watching talented colleagues make enormous decisions — accepting contracts, moving families, uprooting careers — based on almost nothing. Salary ranges whispered in Facebook groups. Schools described only by their own marketing. Places reduced to a single line in a job posting.
           </p>
           <p style={{ fontSize: 15, lineHeight: 1.8, color: 'var(--ink-2)', marginTop: 0, marginBottom: '1rem' }}>
             I decided to study the problem properly. My PhD research at the University of the Cumberlands examined how nationality and culture shape the experience of working in international schools — specifically how teachers and assistants from different cultural backgrounds prefer to be led, using Hofstede's national culture framework across 96 educators at Saigon South International School. What I found confirmed what I'd been watching on the ground: culture isn't background noise in international education. It <em>is</em> the work.
@@ -94,7 +94,7 @@ export default function About() {
           <div>
             <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 2 }}>Mark Crowell, B.A., M.S.Ed, Ed.D</div>
             <div style={{ fontSize: 13, color: 'var(--ink-4)', marginBottom: '.5rem' }}>
-              International school leader · PhD in Educational Leadership, University of the Cumberlands · Former faculty, Saigon South International School, Ho Chi Minh City
+              Middle school math teacher · PhD research conducted at Saigon South International School, Ho Chi Minh City · University of the Cumberlands
             </div>
             <div style={{ fontSize: 13, color: 'var(--ink-3)', lineHeight: 1.65 }}>
               Research focus: leadership preferences of international school teachers across nationalities and cultures, using Hofstede's national culture framework.
