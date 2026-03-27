@@ -15,28 +15,25 @@ const DIM_DESCRIPTIONS = {
   'Indulgence':            'How much people try to control impulses and desires. High = enjoy life, leisure, and having fun. Low = restraint, regulation of gratification, and strict social norms.',
 }
 
-// Stool leg colours
-const LEG_COLS = {
-  package: '#1D9E75',
-  school:  '#BA7517',
-  place:   '#534AB7',
-}
+const LEG_COLS = { package: '#1D9E75', school: '#BA7517', place: '#534AB7' }
 
-// Score a destination's base stool legs from geo/hofstede data
-function scoreLegs(dc, cc, home, placePrefs) {
-  const dest    = CTRY_DATA[dc]
-  const hDest   = HOF[dc]
-  const hHome   = HOF[home]
+// Score a destination's stool legs from geo/hofstede data + personalised place prefs
+// focusCity  — the city name (key for PLACE_ATTRS)
+// focusCountry — the country name (key for CTRY_DATA / HOF)
+function scoreLegs(focusCity, focusCountry, homeCountry, placePrefs) {
+  const dest  = CTRY_DATA[focusCountry]
+  const hDest = HOF[focusCountry]
+  const hHome = HOF[homeCountry]
   if (!dest) return null
 
-  // ── Package leg (compensation)
-  const salScore  = dest.medSal < 3000 ? 3 : dest.medSal < 4500 ? 5 : dest.medSal < 6000 ? 6 : dest.medSal < 8000 ? 7.5 : 9
-  const pkgBonus  = (dest.housingRate > 70 ? 1.2 : dest.housingRate > 50 ? 0.6 : 0)
-                  + (dest.taxFree ? 1.2 : 0)
-                  + (dest.flightRate > 75 ? 0.4 : 0)
-  const pkgScore  = Math.min(10, Math.round((salScore + pkgBonus) * 10) / 10)
+  // ── Package leg
+  const salScore = dest.medSal < 3000 ? 3 : dest.medSal < 4500 ? 5 : dest.medSal < 6000 ? 6 : dest.medSal < 8000 ? 7.5 : 9
+  const pkgBonus = (dest.housingRate > 70 ? 1.2 : dest.housingRate > 50 ? 0.6 : 0)
+                 + (dest.taxFree ? 1.2 : 0)
+                 + (dest.flightRate > 75 ? 0.4 : 0)
+  const pkgScore = Math.min(10, Math.round((salScore + pkgBonus) * 10) / 10)
 
-  // ── School leg (culture/environment proxy)
+  // ── School leg (culture/environment proxy from Hofstede)
   let schScore = 5
   if (hDest) {
     const pdiS = hDest[0] > 80 ? 3 : hDest[0] > 60 ? 4 : hDest[0] > 40 ? 5 : 6
@@ -45,21 +42,18 @@ function scoreLegs(dc, cc, home, placePrefs) {
     schScore = Math.min(9, Math.round((pdiS + masS + uaiS) / 3))
   }
 
-  // ── Place leg (base from geo data)
-  let plcBase = 5
-  if (dest) {
-    const idvGap = hHome && hDest ? Math.abs(hHome[1] - hDest[1]) : 0
-    plcBase = Math.min(10, Math.max(1,
-      ((dest.ql / 20) + (dest.safety / 25) + (dest.expat / 25)) / 3 * 10
-      + (idvGap > 50 ? -0.8 : idvGap > 30 ? -0.4 : 0)
-    ))
-  }
+  // ── Place leg base (quality-of-life metrics)
+  const idvGap = hHome && hDest ? Math.abs(hHome[1] - hDest[1]) : 0
+  const plcBase = Math.min(10, Math.max(1,
+    ((dest.ql / 20) + (dest.safety / 25) + (dest.expat / 25)) / 3 * 10
+    + (idvGap > 50 ? -0.8 : idvGap > 30 ? -0.4 : 0)
+  ))
 
-  // Apply place preference modifiers
-  const cityAttrs = PLACE_ATTRS[dc] || []
+  // ── Apply personalised preference modifiers (keyed by CITY, not country)
+  const cityAttrs = PLACE_ATTRS[focusCity] || []
   let prefDelta = 0
   cityAttrs.forEach(attr => {
-    const pref = placePrefs?.[attr.id]
+    const pref = (placePrefs || {})[attr.id]
     if (pref === 1)  prefDelta += 0.4
     if (pref === -1) prefDelta -= 0.5
   })
@@ -67,61 +61,64 @@ function scoreLegs(dc, cc, home, placePrefs) {
 
   return {
     pkg: Math.round(pkgScore * 10) / 10,
-    sch: Math.round(schScore * 10) / 10,
+    sch: schScore,
     plc: Math.round(plcScore * 10) / 10,
   }
 }
 
-// All searchable city names
 const ALL_CITIES = Object.keys(PLACE_ATTRS)
 
 export default function MyMove() {
-  const { profile, setActiveTab, editProfile, updateProfile } = useProfile()
-  const [hoveredDim, setHoveredDim]   = useState(null)
-  const [search, setSearch]           = useState('')
-  const [explored, setExplored]       = useState(null) // city name being explored
+  const { profile, editProfile, updateProfile } = useProfile()
+  const [hoveredDim, setHoveredDim] = useState(null)
+  const [search, setSearch]         = useState('')
+  const [explored, setExplored]     = useState(null)
 
-  // placePrefs stored in profile: { [attrId]: 1 | -1 | 0 }
   const placePrefs = profile.placePrefs || {}
 
   const setPref = (attrId, val) => {
-    const cur = placePrefs[attrId] || 0
-    const next = cur === val ? 0 : val // toggle off if already set
+    const cur  = placePrefs[attrId] || 0
+    const next = cur === val ? 0 : val   // toggle off if same
     updateProfile({ placePrefs: { ...placePrefs, [attrId]: next } })
   }
 
-  // Determine which city to show stool for
-  const focusCity = explored || profile.dc
+  // Determine which city / country is in focus
+  const focusCity    = explored || profile.dcity || null
   const focusCountry = focusCity
-    ? (CITIES[focusCity]?.country || focusCity)
+    ? (CITIES[focusCity]?.country || profile.dc || null)
     : null
 
   const scores = useMemo(
-    () => focusCountry ? scoreLegs(focusCountry, profile.cc, profile.home, placePrefs) : null,
-    [focusCountry, profile.cc, profile.home, placePrefs]
+    () => (focusCity && focusCountry)
+      ? scoreLegs(focusCity, focusCountry, profile.home, placePrefs)
+      : null,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [focusCity, focusCountry, profile.home, JSON.stringify(placePrefs)]
   )
 
-  const cityAttrs = PLACE_ATTRS[focusCity] || []
+  const cityAttrs   = PLACE_ATTRS[focusCity] || []
+  const hDest       = HOF[focusCountry]
+  const hHome       = HOF[profile.home]
+
+  const prefsSetCount = Object.values(placePrefs).filter(v => v !== 0).length
+
+  const stoolLegs = scores ? [
+    { label: 'Package', score: scores.pkg, color: LEG_COLS.package,
+      sublabel: `~$${(CTRY_DATA[focusCountry]?.medSal || 0).toLocaleString()}/mo` },
+    { label: 'School',  score: scores.sch, color: LEG_COLS.school },
+    { label: 'Place',   score: scores.plc, color: LEG_COLS.place,
+      sublabel: prefsSetCount > 0 ? `${prefsSetCount} prefs set` : 'set preferences →' },
+  ] : []
 
   // Search results
   const results = search.length > 1
     ? ALL_CITIES.filter(c => c.toLowerCase().includes(search.toLowerCase())).slice(0, 8)
     : []
 
-  const { cc, dc, dcity } = profile
-  const hDest = HOF[focusCountry]
-  const hHome = HOF[profile.home]
-
-  const stoolLegs = scores ? [
-    { label: 'Package',  score: scores.pkg, color: LEG_COLS.package, sublabel: `~$${(CTRY_DATA[focusCountry]?.medSal || 0).toLocaleString()}/mo` },
-    { label: 'School',   score: scores.sch, color: LEG_COLS.school  },
-    { label: 'Place',    score: scores.plc, color: LEG_COLS.place,   sublabel: `${placePrefs ? Object.values(placePrefs).filter(v => v !== 0).length : 0} prefs set` },
-  ] : []
-
   return (
     <div className="tp active">
 
-      {/* ── Header */}
+      {/* Header */}
       <div style={{ fontFamily: 'var(--serif)', fontSize: '1.5rem', marginBottom: '.25rem' }}>
         Imagine your move
       </div>
@@ -129,7 +126,7 @@ export default function MyMove() {
         Search a city to explore its stool. Tell us what matters to you — the Place leg updates in real time.
       </div>
 
-      {/* ── City search */}
+      {/* City search */}
       <div style={{ position: 'relative', marginBottom: '1.5rem', maxWidth: 380 }}>
         <input
           value={search}
@@ -160,7 +157,7 @@ export default function MyMove() {
       {focusCity ? (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', alignItems: 'start' }}>
 
-          {/* ── Left: Stool + quick stats */}
+          {/* Left: Stool + quick stats */}
           <div>
             <div style={{ background: 'white', border: '1px solid var(--border)', borderRadius: 'var(--rl)', padding: '1.5rem', marginBottom: '1rem' }}>
               <div style={{ fontFamily: 'var(--serif)', fontSize: '1.1rem', marginBottom: '.25rem' }}>
@@ -170,11 +167,7 @@ export default function MyMove() {
                 {focusCountry} · {CTRY_DATA[focusCountry]?.region}
               </div>
 
-              <StoolViz
-                legs={stoolLegs}
-                title={focusCity}
-                size={260}
-              />
+              <StoolViz legs={stoolLegs} title={focusCity} size={260} />
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '.5rem', marginTop: '1rem' }}>
                 {stoolLegs.map(leg => (
@@ -194,11 +187,11 @@ export default function MyMove() {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '.4rem .75rem' }}>
                   {[
                     ['Median salary', `$${CTRY_DATA[focusCountry].medSal?.toLocaleString()}/mo`],
-                    ['Housing', `${CTRY_DATA[focusCountry].housingRate}% incl.`],
-                    ['Flights', `${CTRY_DATA[focusCountry].flightRate}% incl.`],
-                    ['Tax-free', CTRY_DATA[focusCountry].taxFree ? 'Yes ✓' : 'No'],
-                    ['Quality of life', `${CTRY_DATA[focusCountry].ql}/100`],
-                    ['Safety', `${CTRY_DATA[focusCountry].safety}/100`],
+                    ['Housing',       `${CTRY_DATA[focusCountry].housingRate}% incl.`],
+                    ['Flights',       `${CTRY_DATA[focusCountry].flightRate}% incl.`],
+                    ['Tax-free',      CTRY_DATA[focusCountry].taxFree ? 'Yes ✓' : 'No'],
+                    ['Quality of life',`${CTRY_DATA[focusCountry].ql}/100`],
+                    ['Safety',        `${CTRY_DATA[focusCountry].safety}/100`],
                   ].map(([k, v]) => (
                     <div key={k} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, padding: '3px 0', borderBottom: '1px solid var(--border)' }}>
                       <span style={{ color: 'var(--ink-4)' }}>{k}</span>
@@ -210,7 +203,7 @@ export default function MyMove() {
             )}
           </div>
 
-          {/* ── Right: Place preferences + Hofstede */}
+          {/* Right: Place preferences + Hofstede */}
           <div>
 
             {/* Place attributes */}
@@ -220,17 +213,16 @@ export default function MyMove() {
                   What {focusCity} is like
                 </div>
                 <div style={{ fontSize: 12, color: 'var(--ink-3)', marginBottom: '1rem' }}>
-                  Tell us what matters — your Place score updates instantly.
+                  Mark what appeals to you or puts you off — your Place score adjusts instantly.
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '.5rem' }}>
                   {cityAttrs.map(attr => {
                     const pref = placePrefs[attr.id] || 0
-                    const catCol = ATTR_CATEGORIES[attr.category]?.color || '#888'
                     return (
                       <div key={attr.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '.5rem' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '.5rem', flex: 1, minWidth: 0 }}>
-                          <span style={{ fontSize: 16, flexShrink: 0 }}>{attr.icon}</span>
-                          <span style={{ fontSize: 13, color: 'var(--ink-2)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          <span style={{ fontSize: 15, flexShrink: 0 }}>{attr.icon}</span>
+                          <span style={{ fontSize: 13, color: pref === 1 ? '#1D9E75' : pref === -1 ? '#D85A30' : 'var(--ink-2)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: pref !== 0 ? 500 : 400 }}>
                             {attr.label}
                           </span>
                         </div>
@@ -238,22 +230,12 @@ export default function MyMove() {
                           <button
                             onClick={() => setPref(attr.id, 1)}
                             title="Love this"
-                            style={{
-                              width: 30, height: 26, borderRadius: 6, border: '1px solid',
-                              borderColor: pref === 1 ? '#1D9E75' : 'var(--border-2)',
-                              background: pref === 1 ? '#E1F5EE' : 'white',
-                              cursor: 'pointer', fontSize: 13,
-                            }}
+                            style={{ width: 30, height: 26, borderRadius: 6, border: '1.5px solid', borderColor: pref === 1 ? '#1D9E75' : 'var(--border-2)', background: pref === 1 ? '#E1F5EE' : 'white', cursor: 'pointer', fontSize: 12 }}
                           >❤️</button>
                           <button
                             onClick={() => setPref(attr.id, -1)}
                             title="Not for me"
-                            style={{
-                              width: 30, height: 26, borderRadius: 6, border: '1px solid',
-                              borderColor: pref === -1 ? '#D85A30' : 'var(--border-2)',
-                              background: pref === -1 ? '#FAECE7' : 'white',
-                              cursor: 'pointer', fontSize: 13,
-                            }}
+                            style={{ width: 30, height: 26, borderRadius: 6, border: '1.5px solid', borderColor: pref === -1 ? '#D85A30' : 'var(--border-2)', background: pref === -1 ? '#FAECE7' : 'white', cursor: 'pointer', fontSize: 12 }}
                           >✗</button>
                         </div>
                       </div>
@@ -270,9 +252,8 @@ export default function MyMove() {
                   Cultural dimensions
                 </div>
                 {DLBLS.map((d, i) => {
-                  const val   = hDest[i]
-                  const hVal  = hHome?.[i]
-                  const isHovered = hoveredDim === d
+                  const val  = hDest[i]
+                  const hVal = hHome?.[i]
                   return (
                     <div
                       key={d}
@@ -290,7 +271,7 @@ export default function MyMove() {
                           <div style={{ position: 'absolute', top: 0, left: `${hVal}%`, transform: 'translateX(-50%)', width: 2, height: '100%', background: 'var(--ink-2)', opacity: .5 }} />
                         )}
                       </div>
-                      {isHovered && DIM_DESCRIPTIONS[d] && (
+                      {hoveredDim === d && DIM_DESCRIPTIONS[d] && (
                         <div style={{ position: 'absolute', left: 0, top: '100%', zIndex: 10, background: 'var(--ink)', color: 'white', fontSize: 12, padding: '10px 13px', borderRadius: 8, marginTop: 6, lineHeight: 1.55, maxWidth: 300, boxShadow: '0 4px 16px rgba(0,0,0,.18)', pointerEvents: 'none' }}>
                           <strong style={{ color: DCOLS[i], display: 'block', marginBottom: 4 }}>{d}</strong>
                           {DIM_DESCRIPTIONS[d]}
@@ -299,16 +280,17 @@ export default function MyMove() {
                     </div>
                   )
                 })}
-                <div style={{ fontSize: 11, color: 'var(--ink-4)', marginTop: '.5rem' }}>
-                  Vertical line = your home country ({profile.home || 'not set'})
-                </div>
+                {profile.home && (
+                  <div style={{ fontSize: 11, color: 'var(--ink-4)', marginTop: '.5rem' }}>
+                    Vertical line = your home country ({profile.home})
+                  </div>
+                )}
               </div>
             )}
-
           </div>
         </div>
       ) : (
-        /* ── No city selected yet */
+        /* No city selected */
         <div style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--ink-3)' }}>
           <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>🪑</div>
           <div style={{ fontFamily: 'var(--serif)', fontSize: '1.25rem', marginBottom: '.5rem' }}>
