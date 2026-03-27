@@ -55,7 +55,7 @@ function getDimExperience(dim, score) {
 
 const LEG_COLS = { package: '#1D9E75', school: '#BA7517', place: '#534AB7' }
 
-function scoreLegs(focusCity, focusCountry, homeCountry, placePrefs, schoolSal) {
+function scoreLegs(focusCity, focusCountry, homeCountry, placePrefs, schoolSal, schoolLegOverride) {
   const dest  = CTRY_DATA[focusCountry]
   const hDest = HOF[focusCountry]
   const hHome = HOF[homeCountry]
@@ -69,8 +69,9 @@ function scoreLegs(focusCity, focusCountry, homeCountry, placePrefs, schoolSal) 
                  + (dest.flightRate > 75 ? 0.4 : 0)
   const pkgScore = Math.min(10, Math.round((salScore + pkgBonus) * 10) / 10)
 
-  let schScore = 5
-  if (hDest) {
+  // School: use manual override if set, else calculate from Hofstede
+  let schScore = schoolLegOverride ?? 5
+  if (schoolLegOverride == null && hDest) {
     const pdiS = hDest[0] > 80 ? 3 : hDest[0] > 60 ? 4 : hDest[0] > 40 ? 5 : 6
     const masS = hDest[2] > 80 ? 3 : hDest[2] > 60 ? 4 : hDest[2] > 40 ? 5 : 6
     const uaiS = hDest[3] > 80 ? 4 : hDest[3] > 60 ? 5 : hDest[3] > 40 ? 5 : 6
@@ -123,10 +124,11 @@ const ALL_CITIES = Object.keys(PLACE_ATTRS)
 
 export default function MyMove() {
   const { profile, updateProfile } = useProfile()
-  const [hoveredDim, setHoveredDim]       = useState(null)
-  const [search, setSearch]               = useState('')
-  const [explored, setExplored]           = useState(null)
-  const [selectedSchool, setSelectedSchool] = useState(null)
+  const [hoveredDim, setHoveredDim]           = useState(null)
+  const [search, setSearch]                   = useState('')
+  const [explored, setExplored]               = useState(null)
+  const [selectedSchool, setSelectedSchool]   = useState(null)
+  const [schoolLegOverride, setSchoolLegOverride] = useState(null)
 
   const placePrefs = profile.placePrefs || {}
 
@@ -145,7 +147,18 @@ export default function MyMove() {
   const handleCityChange = (city) => {
     setExplored(city)
     setSelectedSchool(null)
+    setSchoolLegOverride(null)
     setSearch('')
+  }
+
+  const handleSchoolSelect = (name) => {
+    if (selectedSchool === name) {
+      setSelectedSchool(null)
+      setSchoolLegOverride(null)
+    } else {
+      setSelectedSchool(name)
+      setSchoolLegOverride(null) // reset override when switching schools
+    }
   }
 
   const citySchools = useMemo(() => getCitySchools(focusCity), [focusCity])
@@ -153,10 +166,10 @@ export default function MyMove() {
 
   const scores = useMemo(
     () => (focusCity && focusCountry)
-      ? scoreLegs(focusCity, focusCountry, profile.home, placePrefs, schoolSal)
+      ? scoreLegs(focusCity, focusCountry, profile.home, placePrefs, schoolSal, schoolLegOverride)
       : null,
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [focusCity, focusCountry, profile.home, JSON.stringify(placePrefs), schoolSal]
+    [focusCity, focusCountry, profile.home, JSON.stringify(placePrefs), schoolSal, schoolLegOverride]
   )
 
   const cityAttrs       = PLACE_ATTRS[focusCity] || []
@@ -240,15 +253,16 @@ export default function MyMove() {
 
             {/* School selector */}
             {citySchools.length > 0 && (
+              <>
               <div style={{ background: 'white', border: '1px solid var(--border)', borderRadius: 'var(--rl)', padding: '1.25rem', marginBottom: '1rem' }}>
                 <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--ink-4)', marginBottom: '.25rem' }}>
                   Schools in {focusCity}
                 </div>
                 <div style={{ fontSize: 12, color: 'var(--ink-3)', marginBottom: '1rem' }}>
-                  Select a school to see its reported salary in the Package leg.
+                  Select a school to update the Package and School legs.
                   {selectedSchool && (
                     <button
-                      onClick={() => setSelectedSchool(null)}
+                      onClick={() => { setSelectedSchool(null); setSchoolLegOverride(null) }}
                       style={{ marginLeft: 8, fontSize: 11, color: 'var(--ink-4)', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', padding: 0 }}>
                       Clear
                     </button>
@@ -260,7 +274,7 @@ export default function MyMove() {
                     return (
                       <button
                         key={school.name}
-                        onClick={() => setSelectedSchool(active ? null : school.name)}
+                        onClick={() => handleSchoolSelect(school.name)}
                         style={{
                           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                           padding: '8px 12px', borderRadius: 8, cursor: 'pointer', textAlign: 'left',
@@ -287,6 +301,40 @@ export default function MyMove() {
                   })}
                 </div>
               </div>
+
+              {/* School leg rating — manual override while community data builds */}
+              {selectedSchool && (
+                <div style={{ marginTop: '.75rem', padding: '1rem', background: '#FFFBF5', border: '1px solid #BA751730', borderRadius: 8 }}>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: '#633806', marginBottom: '.35rem' }}>
+                    Rate the school leg for {selectedSchool}
+                  </div>
+                  <div style={{ fontSize: 11.5, color: 'var(--ink-4)', lineHeight: 1.6, marginBottom: '.75rem' }}>
+                    No community rating yet — set your own estimate based on what you've heard. Teacher reviews will update this automatically as they come in.
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '.75rem' }}>
+                    <input
+                      type="range" min={1} max={10} step={1}
+                      value={schoolLegOverride ?? scores?.sch ?? 5}
+                      onChange={e => setSchoolLegOverride(Number(e.target.value))}
+                      style={{ flex: 1, accentColor: LEG_COLS.school }}
+                    />
+                    <div style={{ fontSize: '1.5rem', fontWeight: 300, color: LEG_COLS.school, minWidth: 28, textAlign: 'right' }}>
+                      {schoolLegOverride ?? scores?.sch ?? 5}
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--ink-4)', marginTop: 3 }}>
+                    <span>1 — Poor</span><span>10 — Excellent</span>
+                  </div>
+                  {schoolLegOverride !== null && (
+                    <button
+                      onClick={() => setSchoolLegOverride(null)}
+                      style={{ marginTop: '.5rem', fontSize: 11, color: 'var(--ink-4)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, textDecoration: 'underline' }}>
+                      Reset to calculated value ({scores?.sch ?? 5})
+                    </button>
+                  )}
+                </div>
+              )}
+              </>
             )}
 
             {CTRY_DATA[focusCountry] && (
