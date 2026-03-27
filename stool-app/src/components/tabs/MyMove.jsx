@@ -144,7 +144,7 @@ export default function MyMove() {
               <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--ink-2)', marginBottom: '.5rem' }}>{leg.l}</div>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '.75rem', marginBottom: '.5rem' }}>
                 <span style={{ fontSize: '1.2rem', color: 'var(--ink-3)' }}>Now: <strong>{leg.cur}</strong></span>
-                <span style={{ fontSize: '1.75rem', fontWeight: 300 }}>{arrow}</span>
+                <span style={{ fontSize: '0.9rem', fontWeight: 600, letterSpacing: '.04em', textTransform: 'uppercase', color: 'var(--ink-3)' }}>{changeLabel}</span>
                 <span style={{ fontSize: '1.75rem', fontWeight: 500, color: leg.col }}>{leg.pred}</span>
               </div>
               <div style={{ fontSize: 12, lineHeight: 1.55, opacity: .9 }}>
@@ -207,4 +207,5 @@ export default function MyMove() {
     </div>
   )
 }
+
 
