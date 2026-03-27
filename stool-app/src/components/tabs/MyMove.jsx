@@ -55,13 +55,15 @@ function getDimExperience(dim, score) {
 
 const LEG_COLS = { package: '#1D9E75', school: '#BA7517', place: '#534AB7' }
 
-function scoreLegs(focusCity, focusCountry, homeCountry, placePrefs) {
+function scoreLegs(focusCity, focusCountry, homeCountry, placePrefs, schoolSal) {
   const dest  = CTRY_DATA[focusCountry]
   const hDest = HOF[focusCountry]
   const hHome = HOF[homeCountry]
   if (!dest) return null
 
-  const salScore = dest.medSal < 3000 ? 3 : dest.medSal < 4500 ? 5 : dest.medSal < 6000 ? 6 : dest.medSal < 8000 ? 7.5 : 9
+  // Package: use school-specific salary if available, else country median
+  const sal = schoolSal || dest.medSal
+  const salScore = sal < 3000 ? 3 : sal < 4500 ? 5 : sal < 6000 ? 6 : sal < 8000 ? 7.5 : 9
   const pkgBonus = (dest.housingRate > 70 ? 1.2 : dest.housingRate > 50 ? 0.6 : 0)
                  + (dest.taxFree ? 1.2 : 0)
                  + (dest.flightRate > 75 ? 0.4 : 0)
@@ -94,16 +96,37 @@ function scoreLegs(focusCity, focusCountry, homeCountry, placePrefs) {
     pkg: Math.round(pkgScore * 10) / 10,
     sch: schScore,
     plc: Math.round(plcScore * 10) / 10,
+    salUsed: sal,
   }
+}
+
+// Build school list for a city from salary data — sorted by avg salary desc
+function getCitySchools(city) {
+  if (!city) return []
+  const map = {}
+  SALARY_DB_SEED.forEach(e => {
+    if (e.city !== city || !e.school) return
+    if (!map[e.school]) map[e.school] = { name: e.school, salaries: [], count: 0 }
+    map[e.school].count++
+    if (e.usd) map[e.school].salaries.push(e.usd)
+  })
+  return Object.values(map)
+    .map(s => ({
+      ...s,
+      avg: s.salaries.length ? Math.round(s.salaries.reduce((a, b) => a + b, 0) / s.salaries.length) : 0,
+    }))
+    .filter(s => s.avg > 0)
+    .sort((a, b) => b.avg - a.avg)
 }
 
 const ALL_CITIES = Object.keys(PLACE_ATTRS)
 
 export default function MyMove() {
   const { profile, updateProfile } = useProfile()
-  const [hoveredDim, setHoveredDim] = useState(null)
-  const [search, setSearch]         = useState('')
-  const [explored, setExplored]     = useState(null)
+  const [hoveredDim, setHoveredDim]       = useState(null)
+  const [search, setSearch]               = useState('')
+  const [explored, setExplored]           = useState(null)
+  const [selectedSchool, setSelectedSchool] = useState(null)
 
   const placePrefs = profile.placePrefs || {}
 
@@ -118,12 +141,22 @@ export default function MyMove() {
     ? (CITIES[focusCity]?.country || profile.dc || null)
     : null
 
+  // Reset selected school when city changes
+  const handleCityChange = (city) => {
+    setExplored(city)
+    setSelectedSchool(null)
+    setSearch('')
+  }
+
+  const citySchools = useMemo(() => getCitySchools(focusCity), [focusCity])
+  const schoolSal   = selectedSchool ? citySchools.find(s => s.name === selectedSchool)?.avg : null
+
   const scores = useMemo(
     () => (focusCity && focusCountry)
-      ? scoreLegs(focusCity, focusCountry, profile.home, placePrefs)
+      ? scoreLegs(focusCity, focusCountry, profile.home, placePrefs, schoolSal)
       : null,
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [focusCity, focusCountry, profile.home, JSON.stringify(placePrefs)]
+    [focusCity, focusCountry, profile.home, JSON.stringify(placePrefs), schoolSal]
   )
 
   const cityAttrs       = PLACE_ATTRS[focusCity] || []
@@ -131,9 +164,12 @@ export default function MyMove() {
   const hHome           = HOF[profile.home]
   const prefsSetCount   = Object.values(placePrefs).filter(v => v !== 0).length
 
+  const pkgSublabel = selectedSchool
+    ? `$${(schoolSal || 0).toLocaleString()}/mo`
+    : `~$${(CTRY_DATA[focusCountry]?.medSal || 0).toLocaleString()}/mo`
+
   const stoolLegs = scores ? [
-    { label: 'Package', score: scores.pkg, color: LEG_COLS.package,
-      sublabel: `~$${(CTRY_DATA[focusCountry]?.medSal || 0).toLocaleString()}/mo` },
+    { label: 'Package', score: scores.pkg, color: LEG_COLS.package, sublabel: pkgSublabel },
     { label: 'School',  score: scores.sch, color: LEG_COLS.school },
     { label: 'Place',   score: scores.plc, color: LEG_COLS.place,
       sublabel: prefsSetCount > 0 ? `${prefsSetCount} prefs set` : 'set preferences →' },
@@ -165,7 +201,7 @@ export default function MyMove() {
             {results.map(city => (
               <div
                 key={city}
-                onClick={() => { setExplored(city); setSearch('') }}
+                onClick={() => handleCityChange(city)}
                 style={{ padding: '10px 14px', cursor: 'pointer', fontSize: 14, borderBottom: '1px solid var(--border)' }}
                 onMouseEnter={e => e.currentTarget.style.background = '#f5f4f1'}
                 onMouseLeave={e => e.currentTarget.style.background = 'white'}
@@ -183,7 +219,7 @@ export default function MyMove() {
       {focusCity ? (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', alignItems: 'start' }}>
 
-          {/* Left: Stool + quick stats */}
+          {/* Left: Stool + school selector + quick stats */}
           <div>
             <div style={{ background: 'white', border: '1px solid var(--border)', borderRadius: 'var(--rl)', padding: '1.5rem', marginBottom: '1rem' }}>
               <div style={{ fontFamily: 'var(--serif)', fontSize: '1.1rem', marginBottom: '.25rem' }}>{focusCity}</div>
@@ -201,6 +237,57 @@ export default function MyMove() {
                 ))}
               </div>
             </div>
+
+            {/* School selector */}
+            {citySchools.length > 0 && (
+              <div style={{ background: 'white', border: '1px solid var(--border)', borderRadius: 'var(--rl)', padding: '1.25rem', marginBottom: '1rem' }}>
+                <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--ink-4)', marginBottom: '.25rem' }}>
+                  Schools in {focusCity}
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--ink-3)', marginBottom: '1rem' }}>
+                  Select a school to see its reported salary in the Package leg.
+                  {selectedSchool && (
+                    <button
+                      onClick={() => setSelectedSchool(null)}
+                      style={{ marginLeft: 8, fontSize: 11, color: 'var(--ink-4)', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', padding: 0 }}>
+                      Clear
+                    </button>
+                  )}
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '.4rem' }}>
+                  {citySchools.map(school => {
+                    const active = selectedSchool === school.name
+                    return (
+                      <button
+                        key={school.name}
+                        onClick={() => setSelectedSchool(active ? null : school.name)}
+                        style={{
+                          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                          padding: '8px 12px', borderRadius: 8, cursor: 'pointer', textAlign: 'left',
+                          border: active ? '1.5px solid #1D9E75' : '1.5px solid var(--border)',
+                          background: active ? '#E1F5EE' : 'white',
+                          transition: 'all .15s',
+                        }}
+                        onMouseEnter={e => { if (!active) e.currentTarget.style.borderColor = 'var(--border-2)' }}
+                        onMouseLeave={e => { if (!active) e.currentTarget.style.borderColor = 'var(--border)' }}
+                      >
+                        <span style={{ fontSize: 12.5, color: active ? '#1D9E75' : 'var(--ink-2)', fontWeight: active ? 600 : 400, flex: 1, paddingRight: 8, lineHeight: 1.3 }}>
+                          {school.name}
+                        </span>
+                        <div style={{ flexShrink: 0, textAlign: 'right' }}>
+                          <div style={{ fontSize: 12.5, fontWeight: 600, color: active ? '#1D9E75' : 'var(--ink)' }}>
+                            ${school.avg.toLocaleString()}
+                          </div>
+                          <div style={{ fontSize: 10, color: 'var(--ink-4)' }}>
+                            {school.count} {school.count === 1 ? 'report' : 'reports'}
+                          </div>
+                        </div>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
 
             {CTRY_DATA[focusCountry] && (
               <div style={{ background: 'white', border: '1px solid var(--border)', borderRadius: 'var(--rl)', padding: '1.25rem' }}>
@@ -319,7 +406,7 @@ export default function MyMove() {
           </div>
           <div style={{ display: 'flex', gap: '.5rem', justifyContent: 'center', flexWrap: 'wrap', marginTop: '1.5rem' }}>
             {['Dubai', 'Bangkok', 'Tokyo', 'Singapore', 'Tbilisi', 'Riyadh'].map(c => (
-              <button key={c} onClick={() => setExplored(c)}
+              <button key={c} onClick={() => handleCityChange(c)}
                 style={{ padding: '6px 14px', border: '1px solid var(--border-2)', borderRadius: 20, fontSize: 13, background: 'white', cursor: 'pointer', color: 'var(--ink-2)' }}>
                 {c}
               </button>
