@@ -70,9 +70,24 @@ const CATEGORY_CONFIG = {
   }
 }
 
+// ── yrs-aware home panel config ───────────────────────────────────────────────
+
+function homeConfig(yrs) {
+  if (yrs === '15+ years') return {
+    label: 'Your cultural roots',
+    note: 'After 15+ years abroad, your home country may no longer feel like your active frame of reference. What follows describes the culture that shaped you — your real baseline is the international circuit itself.'
+  }
+  if (yrs === '8–15 years') return {
+    label: 'Where you started',
+    note: 'With 8–15 years abroad, your home culture is a useful starting point but your frame has shifted. These patterns shaped your instincts — they may not match how you see the world now.'
+  }
+  if (yrs === '4–7 years') return { label: 'Your original culture', note: null }
+  return { label: 'Your home country', note: null }
+}
+
 // ── Journey panel (one of three stages) ─────────────────────────────────────
 
-function JourneyPanel({ label, sublabel, country, hof, color, bg, getSummary }) {
+function JourneyPanel({ label, sublabel, country, hof, color, bg, getSummary, note }) {
   if (!country || !hof) {
     return (
       <div style={{ flex: 1, minWidth: 200, border: `1px solid ${color}40`, borderTop: `3px solid ${color}`, borderRadius: '0 0 8px 8px', padding: '1rem', background: 'white' }}>
@@ -86,6 +101,9 @@ function JourneyPanel({ label, sublabel, country, hof, color, bg, getSummary }) 
     <div style={{ flex: 1, minWidth: 200, border: `1px solid ${color}40`, borderTop: `3px solid ${color}`, borderRadius: '0 0 8px 8px', padding: '1rem', background: bg }}>
       <div style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.07em', color, marginBottom: 4 }}>{label}</div>
       <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--ink)', marginBottom: '.6rem' }}>{country}</div>
+      {note && (
+        <div style={{ fontSize: 11.5, color, background: `${color}15`, borderRadius: 5, padding: '5px 8px', marginBottom: '.625rem', lineHeight: 1.5, fontStyle: 'italic' }}>{note}</div>
+      )}
       <div style={{ fontSize: 13, color: 'var(--ink-2)', lineHeight: 1.65 }}>{text}</div>
     </div>
   )
@@ -128,6 +146,7 @@ function CategorySection({ config, behaviors, profile }) {
   const hHome = HOF[profile.home]
   const hCur  = HOF[profile.cc]
   const hDest = HOF[profile.dc]
+  const hc    = homeConfig(profile.yrs)
 
   return (
     <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden', marginBottom: '.75rem', background: 'white' }}>
@@ -158,13 +177,14 @@ function CategorySection({ config, behaviors, profile }) {
             </div>
             <div style={{ display: 'flex', gap: '.75rem', flexWrap: 'wrap' }}>
               <JourneyPanel
-                label="Your home country"
+                label={hc.label}
                 sublabel="home country"
                 country={profile.home}
                 hof={hHome}
                 color="#888780"
                 bg="white"
                 getSummary={config.getSummary}
+                note={hc.note}
               />
               <JourneyPanel
                 label="Where you are now"

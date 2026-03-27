@@ -6,7 +6,7 @@ const STORAGE_KEY = 'stool_profile_v1'
 const TAB_KEY = 'stool_active_tab_v1'
 
 const DEFAULT_PROFILE = {
-  name: '', home: '', yrs: '', curr: '', subj: '',
+  name: '', home: '', yrs: '', curr: '',
   cc: '', city: '', sal: 0, hous: '', flt: '', tax: '',
   dc: '', dcity: '',
   sch: 5, plc: 5, pkg: 5,
