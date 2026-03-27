@@ -427,7 +427,7 @@ export default function Onboarding() {
 
   const advance = () => {
     if (step === 0) { setStep(1); return }
-    if (step < 5) { setStep(step + 1); return }
+    if (step < 6) { setStep(step + 1); return }
   }
 
   const handleSkipSave = () => {
