@@ -45,22 +45,53 @@ function shortPreview(text, countryToStrip) {
   return s.slice(0, 85).replace(/\s+\S*$/, '').replace(/[,.]$/, '') + '…'
 }
 
+// Render one country panel in the expanded view
+function CountryPanel({ country, text, score, di, color, label, sublabel, bg }) {
+  return (
+    <div style={{ borderTop: `3px solid ${color}`, borderRadius: '0 0 var(--r) var(--r)', border: '1px solid var(--border)', borderTopWidth: 3, padding: '1rem', background: bg || 'white' }}>
+      <div style={{ marginBottom: 6 }}>
+        <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.07em', color, lineHeight: 1 }}>{label}</div>
+        <div style={{ fontSize: 11, color: 'var(--ink-4)', marginTop: 2, fontWeight: 500 }}>{sublabel} · <strong style={{ color: 'var(--ink-3)' }}>{country}</strong></div>
+      </div>
+      <div style={{ fontSize: 13, color: 'var(--ink-2)', lineHeight: 1.72 }}>{text}</div>
+      {score != null && (
+        <div style={{ marginTop: '.75rem', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ flex: 1, height: 4, background: 'var(--border)', borderRadius: 3, overflow: 'hidden' }}>
+            <div style={{ width: `${score}%`, height: '100%', background: color, borderRadius: 3 }} />
+          </div>
+          <span style={{ fontSize: 10, fontWeight: 600, color, flexShrink: 0 }}>
+            {DLBLS[di]} {score}
+          </span>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function FAQItem({ f, profile }) {
   const [open, setOpen] = useState(false)
   const hCur  = HOF[profile.cc]
   const hDest = HOF[profile.dc]
   const hHome = HOF[profile.home]
-  const cc = profile.cc
-  const dc = profile.dc
+  const cc   = profile.cc
+  const dc   = profile.dc
+  const home = profile.home
 
   const di = DABBR.indexOf(f.dest_key)
+  const homeScore = hHome && di >= 0 ? hHome[di] : null
   const curScore  = hCur  && di >= 0 ? hCur[di]  : null
   const destScore = hDest && di >= 0 ? hDest[di] : null
 
-  const curText  = hCur  && f.current_context ? f.current_context(cc,  hCur)  : null
+  const homeText = hHome && f.current_context && home ? f.current_context(home, hHome) : null
+  const curText  = hCur  && f.current_context && cc   ? f.current_context(cc,   hCur)  : null
   const destText = destContext(dc, hDest, f)
 
-  const hasBoth = curText && destText && cc && dc
+  // How many panels do we have?
+  const panels = [
+    homeText && home ? { country: home, text: homeText, score: homeScore, color: '#6B6A67', label: 'Where you\'re from', sublabel: 'What you know', bg: '#F7F6F3' } : null,
+    curText  && cc   ? { country: cc,   text: curText,  score: curScore,  color: '#1D9E75', label: 'Where you are now', sublabel: 'What you\'re adjusting to', bg: 'white' } : null,
+    destText && dc   ? { country: dc,   text: destText, score: destScore, color: '#534AB7', label: 'Where you\'re going', sublabel: 'What to expect next', bg: 'white' } : null,
+  ].filter(Boolean)
 
   return (
     <div className={`faq-item${open ? ' open' : ''}`}>
@@ -73,21 +104,15 @@ function FAQItem({ f, profile }) {
             <span className="pill pa" style={{ fontSize: 10 }}>{f.category}</span>
           </div>
 
-          {/* Plain-English country previews — "In India: students likely..." */}
-          {(curText || destText) && (
+          {/* Plain-English country previews */}
+          {panels.length > 0 && (
             <div style={{ marginTop: 7, display: 'flex', flexDirection: 'column', gap: 4 }}>
-              {cc && curText && (
-                <div style={{ fontSize: 12, color: 'var(--ink-3)', lineHeight: 1.5 }}>
-                  <span style={{ fontWeight: 600, color: '#1D6650' }}>In {cc}:</span>{' '}
-                  {shortPreview(curText, cc)}
+              {panels.map(p => (
+                <div key={p.country} style={{ fontSize: 12, color: 'var(--ink-3)', lineHeight: 1.5 }}>
+                  <span style={{ fontWeight: 600, color: p.color }}>In {p.country}:</span>{' '}
+                  {shortPreview(p.text, p.country)}
                 </div>
-              )}
-              {dc && destText && (
-                <div style={{ fontSize: 12, color: 'var(--ink-3)', lineHeight: 1.5 }}>
-                  <span style={{ fontWeight: 600, color: '#3B31A0' }}>In {dc}:</span>{' '}
-                  {shortPreview(destText, dc)}
-                </div>
-              )}
+              ))}
             </div>
           )}
         </div>
@@ -97,48 +122,23 @@ function FAQItem({ f, profile }) {
       {open && (
         <div className="faq-body">
 
-          {/* ── Country contrast panels — the core "Place A vs Place B" section */}
-          {hasBoth ? (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '.75rem', marginBottom: '1.25rem' }}>
-              <div style={{ borderTop: '3px solid #1D9E75', borderRadius: '0 0 var(--r) var(--r)', border: '1px solid var(--border)', borderTopWidth: 3, padding: '1rem', background: 'white' }}>
-                <div style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.07em', color: '#1D9E75', marginBottom: 4 }}>In {cc}</div>
-                <div style={{ fontSize: 13.5, color: 'var(--ink-2)', lineHeight: 1.7 }}>{curText}</div>
-                {curScore != null && (
-                  <div style={{ marginTop: '.75rem', display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <div style={{ flex: 1, height: 5, background: 'var(--border)', borderRadius: 3, overflow: 'hidden' }}>
-                      <div style={{ width: `${curScore}%`, height: '100%', background: '#1D9E75', borderRadius: 3 }} />
-                    </div>
-                    <span style={{ fontSize: 11, fontWeight: 600, color: '#1D9E75', flexShrink: 0 }}>
-                      {DLBLS[di]} {curScore}
-                    </span>
-                  </div>
-                )}
-              </div>
-              <div style={{ borderTop: '3px solid #534AB7', borderRadius: '0 0 var(--r) var(--r)', border: '1px solid var(--border)', borderTopWidth: 3, padding: '1rem', background: 'white' }}>
-                <div style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.07em', color: '#534AB7', marginBottom: 4 }}>In {dc}</div>
-                <div style={{ fontSize: 13.5, color: 'var(--ink-2)', lineHeight: 1.7 }}>{destText}</div>
-                {destScore != null && (
-                  <div style={{ marginTop: '.75rem', display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <div style={{ flex: 1, height: 5, background: 'var(--border)', borderRadius: 3, overflow: 'hidden' }}>
-                      <div style={{ width: `${destScore}%`, height: '100%', background: '#534AB7', borderRadius: 3 }} />
-                    </div>
-                    <span style={{ fontSize: 11, fontWeight: 600, color: '#534AB7', flexShrink: 0 }}>
-                      {DLBLS[di]} {destScore}
-                    </span>
-                  </div>
-                )}
-              </div>
+          {/* ── Three-stage country journey panels */}
+          {panels.length > 0 ? (
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: panels.length === 3 ? '1fr 1fr 1fr' : panels.length === 2 ? '1fr 1fr' : '1fr',
+              gap: '.625rem',
+              marginBottom: '1.25rem'
+            }}>
+              {panels.map(p => (
+                <CountryPanel key={p.country} {...p} di={di} />
+              ))}
             </div>
-          ) : curText ? (
-            /* Only current country set */
-            <div style={{ marginBottom: '1.25rem', padding: '.875rem 1rem', background: '#E1F5EE', borderLeft: '3px solid #1D9E75', borderRadius: '0 var(--r) var(--r) 0', fontSize: 13.5, color: '#1D6650', lineHeight: 1.7 }}>
-              <strong>In {cc}:</strong> {curText}
-            </div>
-          ) : !cc ? (
+          ) : (
             <div style={{ marginBottom: '1rem', fontSize: 13, color: 'var(--ink-4)', fontStyle: 'italic' }}>
-              Add your current country in your profile to see how this applies where you are.
+              Add your home country, current country, and destination in your profile to see the full three-stage comparison.
             </div>
-          ) : null}
+          )}
 
           {/* ── Why + How to respond */}
           <div className="faq-section">
