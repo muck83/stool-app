@@ -6,6 +6,16 @@ const SCHOOL_Q_IDS = ['q2', 'q5', 'q6', 'q8']
 const CULTURAL_Q_IDS = ['q1', 'q4', 'q7']
 const STRUCTURAL_Q_IDS = ['q2', 'q5', 'q6']
 const DIAG_SCORE_MAP = [2, 4, 7, 9]
+const QUESTION_TONES = {
+  q1: { bg: 'var(--blue-bg)', border: 'var(--blue)', text: 'var(--blue-dark)', pill: 'Culture' },
+  q2: { bg: 'var(--amber-bg)', border: 'var(--amber)', text: 'var(--amber-dark)', pill: 'School' },
+  q3: { bg: 'var(--purple-bg)', border: 'var(--purple)', text: 'var(--purple-dark)', pill: 'Place' },
+  q4: { bg: 'var(--blue-bg)', border: 'var(--blue)', text: 'var(--blue-dark)', pill: 'Culture' },
+  q5: { bg: 'var(--amber-bg)', border: 'var(--amber)', text: 'var(--amber-dark)', pill: 'School' },
+  q6: { bg: 'var(--amber-bg)', border: 'var(--amber)', text: 'var(--amber-dark)', pill: 'School' },
+  q7: { bg: 'var(--blue-bg)', border: 'var(--blue)', text: 'var(--blue-dark)', pill: 'Culture' },
+  q8: { bg: 'var(--green-bg)', border: 'var(--green)', text: 'var(--green-dark)', pill: 'Outlook' },
+}
 
 function computeSchoolLegScore(answers) {
   const vals = SCHOOL_Q_IDS.map((id) => answers[id]).filter((v) => v !== undefined)
@@ -245,49 +255,81 @@ export function Diagnostic() {
   const delta = diagScore == null ? 0 : diagScore - currentScore
   const deltaArrow = delta > 1 ? 'up' : delta < -1 ? 'down' : 'across'
   const deltaColor = delta > 1 ? '#1D9E75' : delta < -1 ? '#D85A30' : '#534AB7'
+  const progressPct = Math.max(8, (answeredCount / 8) * 100)
 
   return (
     <div className="tp active">
-      <div style={{ fontFamily: 'var(--serif)', fontSize: '1.5rem', marginBottom: '.35rem' }}>Diagnostic</div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '.75rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
-        <div style={{ fontSize: 13, color: 'var(--ink-3)', maxWidth: 640, lineHeight: 1.6 }}>
-          This diagnostic helps you tell the difference between structural problems and cultural friction. Eight honest questions, about two minutes.
+      <div style={{ background: 'white', border: '1px solid var(--border)', borderRadius: 'var(--rl)', padding: '1.15rem 1.2rem', marginBottom: '1rem', boxShadow: '0 2px 18px rgba(0,0,0,.04)' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '.75rem', flexWrap: 'wrap', marginBottom: '.8rem' }}>
+          <div>
+            <div style={{ fontFamily: 'var(--serif)', fontSize: '1.5rem', marginBottom: '.25rem' }}>Diagnostic</div>
+            <div style={{ fontSize: 13, color: 'var(--ink-3)', maxWidth: 700, lineHeight: 1.6 }}>
+              This diagnostic helps you tell the difference between structural problems and cultural friction. Eight honest questions, about two minutes.
+            </div>
+          </div>
+          <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--teal-dark)', background: 'var(--teal-light)', border: '1px solid rgba(29,158,117,.22)', borderRadius: 999, padding: '5px 10px', whiteSpace: 'nowrap' }}>
+            {answeredCount}/8 answered
+          </div>
         </div>
-        <div style={{ fontSize: 11, fontWeight: 500, color: 'var(--ink-3)', background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 999, padding: '4px 10px', whiteSpace: 'nowrap' }}>
-          {answeredCount}/8 answered
+        <div style={{ height: 8, background: 'var(--surface-2)', borderRadius: 999, overflow: 'hidden' }}>
+          <div style={{ width: `${progressPct}%`, height: '100%', background: 'linear-gradient(90deg, var(--teal) 0%, var(--blue) 55%, var(--purple) 100%)', borderRadius: 999, transition: 'width .25s ease' }} />
         </div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '.75rem' }}>
         {DIAG_QS.map((q, qi) => (
-          <div key={q.id} style={{ background: 'white', border: '1px solid var(--border)', borderRadius: 'var(--r)', padding: '1rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: '.45rem' }}>
-              <div style={{ fontSize: 10, fontWeight: 500, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.06em' }}>{q.dim}</div>
-              <div style={{ fontSize: 10.5, color: 'var(--ink-4)', whiteSpace: 'nowrap' }}>Q{qi + 1}</div>
+          <div key={q.id} style={{ background: 'white', border: '1px solid var(--border)', borderRadius: 'var(--r)', overflow: 'hidden', boxShadow: '0 1px 12px rgba(0,0,0,.03)' }}>
+            <div style={{ background: QUESTION_TONES[q.id].bg, borderBottom: '1px solid var(--border)', padding: '.75rem .95rem .7rem', borderTop: `3px solid ${QUESTION_TONES[q.id].border}` }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: '.45rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '.45rem', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: 10, fontWeight: 600, color: QUESTION_TONES[q.id].text, textTransform: 'uppercase', letterSpacing: '.08em' }}>
+                    {QUESTION_TONES[q.id].pill}
+                  </span>
+                  <span style={{ fontSize: 10.5, color: 'var(--ink-4)' }}>•</span>
+                  <div style={{ fontSize: 10.5, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.05em' }}>{q.dim}</div>
+                </div>
+                <div style={{ fontSize: 10.5, color: QUESTION_TONES[q.id].text, whiteSpace: 'nowrap', fontWeight: 600 }}>Q{qi + 1}</div>
+              </div>
+              <div style={{ fontSize: 13.4, fontWeight: 500, color: 'var(--ink)', lineHeight: 1.45 }}>{q.text}</div>
             </div>
-            <div style={{ fontSize: 13.25, fontWeight: 500, color: 'var(--ink-2)', marginBottom: '.65rem', lineHeight: 1.45 }}>{q.text}</div>
+            <div style={{ padding: '.85rem .95rem .95rem' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
               {q.opts.map((o, oi) => (
                 <button
                   key={oi}
-                  className={`diag-opt${answers[q.id] === oi ? ' sel' : ''}`}
-                  style={{ fontSize: 12, padding: '.65rem .8rem', marginBottom: 0 }}
+                  style={{
+                    fontSize: 12,
+                    padding: '.7rem .8rem',
+                    marginBottom: 0,
+                    width: '100%',
+                    textAlign: 'left',
+                    borderRadius: 'var(--r)',
+                    border: `1px solid ${answers[q.id] === oi ? QUESTION_TONES[q.id].border : 'var(--border)'}`,
+                    background: answers[q.id] === oi ? QUESTION_TONES[q.id].bg : 'white',
+                    color: answers[q.id] === oi ? QUESTION_TONES[q.id].text : 'var(--ink-2)',
+                    fontWeight: answers[q.id] === oi ? 500 : 400,
+                    lineHeight: 1.45,
+                    cursor: 'pointer',
+                    transition: 'all .18s ease',
+                    boxShadow: answers[q.id] === oi ? `inset 0 0 0 1px ${QUESTION_TONES[q.id].border}22` : 'none',
+                  }}
                   onClick={() => select(q.id, oi)}
                 >
                   {o}
                 </button>
               ))}
             </div>
+            </div>
           </div>
         ))}
       </div>
 
-      <button className="btn btn-primary" style={{ marginTop: '1rem', maxWidth: 240 }} onClick={run}>
+      <button className="btn btn-primary" style={{ marginTop: '1rem', maxWidth: 240, boxShadow: '0 8px 18px rgba(29,158,117,.16)' }} onClick={run}>
         Analyse my responses -&gt;
       </button>
 
       {result && (
-        <div style={{ marginTop: '1.5rem', background: 'white', border: '1px solid var(--border)', borderRadius: 'var(--rl)', padding: '1.5rem' }}>
+        <div style={{ marginTop: '1.5rem', background: 'white', border: '1px solid var(--border)', borderRadius: 'var(--rl)', padding: '1.5rem', boxShadow: '0 2px 20px rgba(0,0,0,.04)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '.75rem', flexWrap: 'wrap', marginBottom: '.5rem' }}>
             <div style={{ fontFamily: 'var(--serif)', fontSize: '1.2rem' }}>Your diagnosis</div>
             {saveState === 'saving' && <div style={{ fontSize: 11.5, color: 'var(--ink-4)' }}>Saving privately for admin review...</div>}
@@ -296,7 +338,7 @@ export function Diagnostic() {
             {saveState === 'error' && <div style={{ fontSize: 11.5, color: '#D85A30' }}>This result could not be saved to the admin dashboard.</div>}
           </div>
 
-          <div style={{ fontSize: 11, fontWeight: 600, color: '#BA7517', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: '.35rem' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '.45rem', fontSize: 11, fontWeight: 600, color: 'var(--amber-dark)', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: '.55rem', background: 'var(--amber-bg)', border: '1px solid rgba(186,117,23,.18)', borderRadius: 999, padding: '5px 10px' }}>
             {result.title}
           </div>
           <div style={{ fontSize: 13.5, color: 'var(--ink-2)', lineHeight: 1.7, marginBottom: '1rem' }}>{result.body}</div>
@@ -309,16 +351,16 @@ export function Diagnostic() {
 
           {diagScore != null && (
             <div style={{ marginTop: '1.25rem', borderTop: '1px solid var(--border)', paddingTop: '1.25rem' }}>
-              <div style={{ fontSize: 11, fontWeight: 600, color: '#BA7517', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: '.5rem' }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--amber-dark)', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: '.5rem' }}>
                 School leg score from this diagnostic
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '.75rem', flexWrap: 'wrap' }}>
                 <div style={{ fontSize: 13, color: 'var(--ink-3)' }}>
-                  Current profile score: <strong style={{ color: '#BA7517', fontSize: '1.2rem', fontWeight: 300 }}>{currentScore}</strong>
+                  Current profile score: <strong style={{ color: 'var(--amber)', fontSize: '1.2rem', fontWeight: 300 }}>{currentScore}</strong>
                 </div>
                 <div style={{ fontSize: 13, color: deltaColor, textTransform: 'uppercase', letterSpacing: '.06em' }}>{deltaArrow}</div>
                 <div style={{ fontSize: 13, color: 'var(--ink-3)' }}>
-                  Diagnostic score: <strong style={{ color: '#BA7517', fontSize: '1.2rem', fontWeight: 300 }}>{diagScore}</strong>
+                  Diagnostic score: <strong style={{ color: 'var(--amber)', fontSize: '1.2rem', fontWeight: 300 }}>{diagScore}</strong>
                 </div>
               </div>
               <div style={{ fontSize: 12, color: 'var(--ink-3)', marginBottom: '.75rem', lineHeight: 1.5 }}>
@@ -335,7 +377,7 @@ export function Diagnostic() {
                     updateProfile({ sch: diagScore })
                     setScoreApplied(true)
                   }}
-                  style={{ fontSize: 12.5, fontWeight: 500, color: 'white', background: '#BA7517', border: 'none', borderRadius: 'var(--r)', padding: '7px 16px', cursor: 'pointer' }}
+                  style={{ fontSize: 12.5, fontWeight: 500, color: 'white', background: 'var(--amber)', border: 'none', borderRadius: 'var(--r)', padding: '7px 16px', cursor: 'pointer', boxShadow: '0 8px 18px rgba(186,117,23,.16)' }}
                 >
                   Update my School score to {diagScore} -&gt;
                 </button>
