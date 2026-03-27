@@ -23,30 +23,26 @@ function destContext(dc, hDest, f) {
   return text
 }
 
-// One-line preview for collapsed state
-function previewLine(cc, hCur, dc, hDest, f) {
-  const di = DABBR.indexOf(f.dest_key)
-  if (di < 0) return null
-  const curScore  = hCur  ? hCur[di]  : null
-  const destScore = hDest ? hDest[di] : null
-  if (curScore == null && destScore == null) return null
-
-  // Build short labels from score ranges
-  const label = (score, dim) => {
-    if (score == null) return null
-    const labels = {
-      IDV: score < 35 ? 'group-oriented' : score < 65 ? 'mixed' : 'individually-oriented',
-      PDI: score < 35 ? 'flat hierarchy' : score < 65 ? 'moderate hierarchy' : 'high hierarchy',
-      MAS: score < 35 ? 'cooperative' : score < 65 ? 'balanced' : 'competitive',
-      UAI: score < 35 ? 'comfortable with ambiguity' : score < 65 ? 'moderate structure' : 'needs certainty',
-      LTO: score < 35 ? 'present-focused' : score < 65 ? 'balanced' : 'future-focused',
-      IND: score < 35 ? 'restrained' : score < 65 ? 'moderate' : 'indulgent',
-    }
-    return labels[dim] || null
+// Extract a plain-English one-liner from full context text
+// Strips "In [country]," / "In more X destinations," prefixes then takes first sentence
+function shortPreview(text, countryToStrip) {
+  if (!text) return ''
+  let s = text
+  // Strip "In [Country], " or "In [Country]'s " — we re-add the country ourselves
+  if (countryToStrip) {
+    s = s.replace(new RegExp(`^In\\s+${countryToStrip}[,']\\s*`, 'i'), '')
+         .replace(new RegExp(`^${countryToStrip}\\s+(is|has|leans|treats|views|tends)\\s+`, 'i'), '')
   }
-  const curLabel  = curScore  != null ? label(curScore,  f.dest_key) : null
-  const destLabel = destScore != null ? label(destScore, f.dest_key) : null
-  return { curLabel, destLabel }
+  // Strip generic destination intros
+  s = s.replace(/^In more\s+[\w-]+-oriented\s+(?:destinations?|contexts?)[,]\s*/i, '')
+       .replace(/^Moving to (?:a|an)\s+[\w-]+\s+destination\s+(?:\w+\s+){0,3}/i, '')
+       .replace(/^Destinations?\s+more\s+comfortable\s+with\s+\w+\s+/i, '')
+  // Take first full sentence if < 100 chars
+  const dotIdx = s.indexOf('. ')
+  if (dotIdx > 0 && dotIdx < 100) return s.slice(0, dotIdx)
+  // Else truncate at word boundary
+  if (s.length <= 85) return s.replace(/[.]$/, '')
+  return s.slice(0, 85).replace(/\s+\S*$/, '').replace(/[,.]$/, '') + '…'
 }
 
 function FAQItem({ f, profile }) {
@@ -63,7 +59,6 @@ function FAQItem({ f, profile }) {
 
   const curText  = hCur  && f.current_context ? f.current_context(cc,  hCur)  : null
   const destText = destContext(dc, hDest, f)
-  const preview  = previewLine(cc, hCur, dc, hDest, f)
 
   const hasBoth = curText && destText && cc && dc
 
@@ -72,21 +67,31 @@ function FAQItem({ f, profile }) {
       <button className="faq-q" onClick={() => setOpen(!open)}>
         <div style={{ flex: 1 }}>
           <div className="faq-q-text">{f.behavior}</div>
-          <div style={{ marginTop: 6, display: 'flex', gap: 5, flexWrap: 'wrap', alignItems: 'center' }}>
+
+          {/* Category pill */}
+          <div style={{ marginTop: 5 }}>
             <span className="pill pa" style={{ fontSize: 10 }}>{f.category}</span>
-            {cc && preview?.curLabel  && (
-              <span style={{ fontSize: 11, background: '#E1F5EE', color: '#1D6650', padding: '2px 9px', borderRadius: 12, fontWeight: 500 }}>
-                {cc}: {preview.curLabel}
-              </span>
-            )}
-            {dc && preview?.destLabel && (
-              <span style={{ fontSize: 11, background: '#EEEAFF', color: '#3B31A0', padding: '2px 9px', borderRadius: 12, fontWeight: 500 }}>
-                {dc}: {preview.destLabel}
-              </span>
-            )}
           </div>
+
+          {/* Plain-English country previews — "In India: students likely..." */}
+          {(curText || destText) && (
+            <div style={{ marginTop: 7, display: 'flex', flexDirection: 'column', gap: 4 }}>
+              {cc && curText && (
+                <div style={{ fontSize: 12, color: 'var(--ink-3)', lineHeight: 1.5 }}>
+                  <span style={{ fontWeight: 600, color: '#1D6650' }}>In {cc}:</span>{' '}
+                  {shortPreview(curText, cc)}
+                </div>
+              )}
+              {dc && destText && (
+                <div style={{ fontSize: 12, color: 'var(--ink-3)', lineHeight: 1.5 }}>
+                  <span style={{ fontWeight: 600, color: '#3B31A0' }}>In {dc}:</span>{' '}
+                  {shortPreview(destText, dc)}
+                </div>
+              )}
+            </div>
+          )}
         </div>
-        <div className="faq-chevron">›</div>
+        <div className="faq-chevron" style={{ alignSelf: 'flex-start', marginTop: 2 }}>›</div>
       </button>
 
       {open && (
