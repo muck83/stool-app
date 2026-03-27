@@ -9,7 +9,7 @@ const EMAIL_KEY      = 'stool_profile_email_v1'
 
 const DEFAULT_PROFILE = {
   name: '', home: '', yrs: '', curr: '',
-  cc: '', city: '', sal: 0, hous: '', flt: '', tax: '',
+  cc: '', city: '', school: '', sal: 0, hous: '', flt: '', tax: '',
   dc: '', dcity: '',
   sch: 5, plc: 5, pkg: 5,
 }
@@ -170,6 +170,4 @@ export function ProfileProvider({ children }) {
 
 export function useProfile() {
   const ctx = useContext(ProfileContext)
-  if (!ctx) throw new Error('useProfile must be used within ProfileProvider')
-  return ctx
-}
+  if (!ctx) throw new Error('useProfile must be us

@@ -3,6 +3,16 @@ import { useState } from 'react'
 import { useProfile } from '../../context/ProfileContext.jsx'
 import { HOF } from '../../data/hofstede.js'
 
+// School-leg score from diagnostic answers (school-relevant questions only)
+const SCHOOL_Q_IDS  = ['q2', 'q5', 'q6', 'q8']
+const DIAG_SCORE_MAP = [2, 4, 7, 9]  // answer index 0=worst → 3=best
+
+function computeSchoolLegScore(answers) {
+  const vals = SCHOOL_Q_IDS.map(id => answers[id]).filter(v => v !== undefined)
+  if (!vals.length) return null
+  return Math.round(vals.reduce((sum, v) => sum + DIAG_SCORE_MAP[v], 0) / vals.length)
+}
+
 const DIAG_QS = [
   { id:'q1', text:"When a student or colleague doesn't respond to your feedback or question the way you expect, how do you feel?", dim:'Group culture / authority', opts:["Confused — it doesn't make logical sense","Frustrated — it feels disrespectful","Mildly annoyed but I'm adapting","Curious — I try to understand the cultural reason"] },
   { id:'q2', text:"In staff meetings, how much do you feel your professional voice is heard by leadership?", dim:'Authority distance', opts:["Almost never — decisions feel top-down","Sometimes — when I've built personal relationships","Usually — the culture is reasonably open","Yes — the leadership is genuinely collaborative"] },
@@ -15,11 +25,12 @@ const DIAG_QS = [
 ]
 
 export function Diagnostic() {
-  const { profile } = useProfile()
+  const { profile, updateProfile } = useProfile()
   const [answers, setAnswers] = useState({})
   const [result, setResult] = useState(null)
+  const [scoreApplied, setScoreApplied] = useState(false)
 
-  const select = (qid, oi) => setAnswers(a => ({ ...a, [qid]: oi }))
+  const select = (qid, oi) => { setAnswers(a => ({ ...a, [qid]: oi })); setScoreApplied(false) }
 
   const run = () => {
     if (Object.keys(answers).length < 5) { alert('Please answer at least 5 questions for a meaningful analysis.'); return }
@@ -85,6 +96,48 @@ export function Diagnostic() {
           <div className="ibox" style={{ marginBottom: '1rem' }}>{result.urgency}</div>
           <div className="csec">Recommended actions</div>
           {result.actions.map((a, i) => <div key={i} className="ibox" style={{ marginBottom: '.5rem' }}>{a}</div>)}
+
+          {/* ── School leg score update ─────────────────────────────── */}
+          {(() => {
+            const diagScore = computeSchoolLegScore(answers)
+            if (!diagScore) return null
+            const current = profile.sch || 5
+            const delta   = diagScore - current
+            const arrow   = delta > 1 ? '↑' : delta < -1 ? '↓' : '→'
+            const col     = delta > 1 ? '#1D9E75' : delta < -1 ? '#D85A30' : '#534AB7'
+            return (
+              <div style={{ marginTop: '1.25rem', borderTop: '1px solid var(--border)', paddingTop: '1.25rem' }}>
+                <div style={{ fontSize: 11, fontWeight: 600, color: '#BA7517', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: '.5rem' }}>
+                  School leg score from this diagnostic
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '.75rem', flexWrap: 'wrap' }}>
+                  <div style={{ fontSize: 13, color: 'var(--ink-3)' }}>
+                    Current profile score: <strong style={{ color: '#BA7517', fontSize: '1.2rem', fontWeight: 300 }}>{current}</strong>
+                  </div>
+                  <div style={{ fontSize: '1.3rem', color: col }}>{arrow}</div>
+                  <div style={{ fontSize: 13, color: 'var(--ink-3)' }}>
+                    Diagnostic score: <strong style={{ color: '#BA7517', fontSize: '1.2rem', fontWeight: 300 }}>{diagScore}</strong>
+                  </div>
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--ink-3)', marginBottom: '.75rem', lineHeight: 1.5 }}>
+                  Based on your answers to the leadership, workload, transparency, and outlook questions.
+                  {Math.abs(delta) > 1 && <span style={{ color: col, fontWeight: 500 }}> {delta > 0 ? ` Your gut-feel score may be underestimating your current school.` : ` Your gut-feel score may be more optimistic than your answers suggest.`}</span>}
+                </div>
+                {!scoreApplied ? (
+                  <button
+                    onClick={() => { updateProfile({ sch: diagScore }); setScoreApplied(true) }}
+                    style={{ fontSize: 12.5, fontWeight: 500, color: 'white', background: '#BA7517', border: 'none', borderRadius: 'var(--r)', padding: '7px 16px', cursor: 'pointer' }}
+                  >
+                    Update my School score to {diagScore} →
+                  </button>
+                ) : (
+                  <div style={{ fontSize: 12.5, color: 'var(--teal-dark)', background: '#E1F5EE', borderRadius: 'var(--r)', padding: '7px 14px', display: 'inline-block', fontWeight: 500 }}>
+                    ✓ School score updated to {diagScore} — reflected in My Move and Overview
+                  </div>
+                )}
+              </div>
+            )
+          })()}
         </div>
       )}
     </div>
