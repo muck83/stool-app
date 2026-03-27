@@ -48,7 +48,8 @@ function Splash({ onNext, onSkip, onLoadFromCloud }) {
 
   return (
     <div style={{ textAlign: 'center', padding: '.5rem 0 1rem' }}>
-      <div className="spl-a" style={{ '--dd': '1620ms', '--sd': '600ms', fontSize: 11, color: 'var(--ink-4)', letterSpacing: '.13em', textTransform: 'uppercase', fontWeight: 500, marginBottom: '1.5rem' }}>
+      <StoolSVG width={90} height={96} />
+      <div className="spl-a" style={{ '--dd': '1620ms', '--sd': '600ms', fontSize: 11, color: 'var(--ink-4)', letterSpacing: '.13em', textTransform: 'uppercase', fontWeight: 500, marginTop: '1rem', marginBottom: '1.5rem' }}>
         school · place · package
       </div>
       <div className="spl-a" style={{ '--dd': '2100ms', '--sd': '600ms', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '.625rem', marginBottom: '1.5rem' }}>
@@ -125,6 +126,60 @@ function Splash({ onNext, onSkip, onLoadFromCloud }) {
   )
 }
 
+// ── Personalised weight engine ────────────────────────────────────────────────
+
+function computePersonalisedWeights(form) {
+  let pkg = 0, plc = 0, sch = 0
+  if (form.priority === 'financial')  pkg += 0.5
+  if (form.priority === 'adventure')  plc += 0.5
+  if (form.priority === 'growth')     sch += 0.5
+  if (form.priority === 'balance')    sch -= 0.25
+  if (form.friction === 'leadership') sch -= 0.5
+  if (form.friction === 'workload')   sch -= 0.25
+  return { pkg, plc, sch }
+}
+
+// ── Personalised match notes ──────────────────────────────────────────────────
+
+function generateMatchNotes(form, preds) {
+  if (!form.dc) return []
+  const dest  = CTRY_DATA[form.dc]
+  const hDest = HOF[form.dc]
+  const notes = []
+
+  if (form.life === 'children' && dest) {
+    notes.push(dest.expat < 60
+      ? { leg: 'place', type: 'warn', text: `Expat family networks in ${form.dc} are limited (expat score: ${dest.expat}). Dependent schooling and childcare need direct investigation before signing.` }
+      : { leg: 'place', type: 'good', text: `${form.dc} has a strong expat community — generally positive for families, though dependent schooling should still be verified school by school.` })
+  }
+  if (form.life === 'partner_career')
+    notes.push({ leg: 'place', type: 'flag', text: `Partner work rights at ${form.dc} are not yet in our data — this is a known gap. Verify visa and employment rules directly before committing.` })
+
+  if (form.priority === 'balance' && hDest)
+    notes.push(hDest[2] > 65
+      ? { leg: 'school', type: 'warn', text: `${form.dc} has a high masculinity score (${hDest[2]}) — competitive, results-driven workplaces are the norm. Workload may exceed expectations.` }
+      : { leg: 'school', type: 'good', text: `Cultural data for ${form.dc} suggests a more balanced work culture (MAS ${hDest[2]}), which aligns with your priority.` })
+
+  if (form.priority === 'financial' && dest && form.savings === '20k+' && dest.medSal < 5500)
+    notes.push({ leg: 'package', type: 'warn', text: `Median teacher salary at ${form.dc} is ~$${dest.medSal.toLocaleString()}/mo. Hitting a $20k+ annual savings target will require careful household planning.` })
+
+  if (form.friction === 'leadership' && hDest)
+    notes.push(hDest[0] > 70
+      ? { leg: 'school', type: 'warn', text: `${form.dc} has high power distance (PDI ${hDest[0]}) — top-down, hierarchical leadership is the cultural norm. Given your history with leadership problems, investigate carefully.` }
+      : { leg: 'school', type: 'good', text: `${form.dc}'s relatively low power distance (PDI ${hDest[0]}) suggests more collaborative leadership cultures — a good signal given what you're protecting against.` })
+
+  if (form.friction === 'workload' && hDest && hDest[2] > 65)
+    notes.push({ leg: 'school', type: 'warn', text: `High masculinity score at ${form.dc} (MAS ${hDest[2]}) suggests demanding work environments are common. Given your workload history, investigate before signing.` })
+
+  if (form.friction === 'isolation' && dest && dest.expat < 55)
+    notes.push({ leg: 'place', type: 'warn', text: `Expat social scene at ${form.dc} is limited (${dest.expat}/100). Given isolation was a past problem, investigate social life before committing.` })
+
+  if (form.exit === 'no' && preds.schPred != null && preds.schPred < 5)
+    notes.push({ leg: 'school', type: 'warn', text: `You've said you can't afford to walk away mid-contract — but our school prediction for ${form.dc} is below 5. Exit terms and notice period policies need careful review.` })
+
+  return notes
+}
+
 // ── Prediction engine (shared with My Move tab) ───────────────────────────────
 
 function computePredictions(form) {
@@ -133,28 +188,39 @@ function computePredictions(form) {
   const hHome = HOF[form.home]
   const yrs   = form.yrs
   const yrsBuffer = yrs === '15+ years' ? 1 : yrs === '8–15 years' ? 0.5 : yrs === '4–7 years' ? 0.25 : 0
+  const adj   = computePersonalisedWeights(form)
 
   let pkgPred = null, plcPred = null, schPred = null
 
   if (dest) {
     const salScore = dest.medSal < 3000 ? 4 : dest.medSal < 4500 ? 5 : dest.medSal < 6000 ? 6 : dest.medSal < 8000 ? 7 : 8
-    pkgPred = Math.min(10, Math.round(
+    const savingsPenalty = (form.savings === '20k+' && dest.medSal < 5000) ? -1
+                         : (form.savings === '10-20k' && dest.medSal < 3500) ? -0.5 : 0
+    pkgPred = Math.min(10, Math.max(1, Math.round(
       salScore
       + (dest.housingRate > 70 ? 1.5 : dest.housingRate > 50 ? 0.8 : 0)
       + (dest.taxFree ? 1.5 : 0)
       + (dest.flightRate > 75 ? 0.5 : 0)
-    ))
-    const idvGap = hHome && hDest ? Math.abs(hHome[1] - hDest[1]) : 0
+      + savingsPenalty + adj.pkg
+    )))
+    const idvGap      = hHome && hDest ? Math.abs(hHome[1] - hDest[1]) : 0
+    const expatPenalty = (form.life === 'children' && dest.expat < 60) ? -1.5
+                       : (form.life === 'partner_career' && dest.expat < 55) ? -0.75 : 0
     plcPred = Math.min(10, Math.max(1, Math.round(
       ((dest.ql / 20) + (dest.safety / 25) + (dest.expat / 25)) / 3 * 10
       + (idvGap > 50 ? -1 : idvGap > 30 ? -0.5 : 0)
+      + expatPenalty + adj.plc
     )))
   }
   if (dest && hDest) {
-    const pdiS = hDest[0] > 80 ? 3 : hDest[0] > 60 ? 4 : hDest[0] > 40 ? 5 : 6
-    const masS = hDest[2] > 80 ? 3 : hDest[2] > 60 ? 4 : hDest[2] > 40 ? 5 : 6
-    const uaiS = hDest[3] > 80 ? 4 : hDest[3] > 60 ? 5 : hDest[3] > 40 ? 5 : 6
-    schPred = Math.min(9, Math.round((pdiS + masS + uaiS) / 3 + yrsBuffer))
+    const pdiS         = hDest[0] > 80 ? 3 : hDest[0] > 60 ? 4 : hDest[0] > 40 ? 5 : 6
+    const masS         = hDest[2] > 80 ? 3 : hDest[2] > 60 ? 4 : hDest[2] > 40 ? 5 : 6
+    const uaiS         = hDest[3] > 80 ? 4 : hDest[3] > 60 ? 5 : hDest[3] > 40 ? 5 : 6
+    const frictionAdj  = (form.friction === 'leadership' && hDest[0] > 70) ? -1
+                       : (form.friction === 'workload'   && hDest[2] > 65) ? -0.5 : 0
+    schPred = Math.min(9, Math.max(1, Math.round(
+      (pdiS + masS + uaiS) / 3 + yrsBuffer + frictionAdj + adj.sch
+    )))
   }
 
   return { pkgPred, plcPred, schPred }
@@ -337,6 +403,7 @@ function MiniSchoolDiagnostic({ onScore, currentScore }) {
 const STEPS = [
   { title: "Where are you from?", sub: "Your home culture is the baseline — understanding what you're adapting from shapes everything else on this platform." },
   { title: "Your current situation", sub: "Where are you right now? This anchors your cultural, financial, and professional baseline." },
+  { title: "A bit more about you", sub: "Five quick questions. These personalise your predictions and power the matching engine." },
   { title: "Considering a move?", sub: "Tell us where you're thinking of going and we'll predict your three-legged stool score at your destination." },
   { title: "How does your current stool feel?", sub: "Rate your current posting honestly — we'll show you what we predict at your destination side by side, in real time." },
   { title: "Save your profile?", sub: "Enter your email and we'll save your profile so you can load it from any device. No password needed - your email is your key." },
@@ -352,6 +419,7 @@ export default function Onboarding() {
     cc: '', city: '', school: '', sal: '', hous: '', flt: '', tax: '',
     dc: '', dcity: '',
     sch: 5, plc: 5, pkg: 5,
+    life: '', savings: '', priority: '', friction: '', exit: '',
   })
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
@@ -390,11 +458,11 @@ export default function Onboarding() {
     }
   }
 
-  const dots = Array.from({ length: 6 }, (_, i) => (
+  const dots = Array.from({ length: 7 }, (_, i) => (
     <div key={i} className={`ob-dot ${i === step ? 'active' : i < step ? 'done' : ''}`} />
   ))
 
-  const preds = step === 4 ? computePredictions(form) : {}
+  const preds = step === 5 ? computePredictions(form) : {}
   const isVeteran = form.yrs === '15+ years' || form.yrs === '8–15 years'
 
   return (
@@ -513,6 +581,116 @@ export default function Onboarding() {
 
             {step === 3 && (
               <>
+                {/* Q1: Life situation */}
+                <div style={{ marginBottom: '1.25rem' }}>
+                  <div style={{ fontSize: 12.5, fontWeight: 500, color: 'var(--ink-2)', marginBottom: '.5rem', lineHeight: 1.45 }}>Who's making this move with you?</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+                    {[
+                      { val: 'single',         label: 'Just me — solo move' },
+                      { val: 'partner',        label: 'Partner, no career constraints' },
+                      { val: 'partner_career', label: 'Partner with career needs' },
+                      { val: 'children',       label: 'We have children' },
+                    ].map(o => (
+                      <button key={o.val} onClick={() => set('life', o.val)} style={{
+                        fontSize: 12.5, textAlign: 'left', padding: '8px 11px', borderRadius: 6, cursor: 'pointer', lineHeight: 1.4,
+                        background: form.life === o.val ? '#EEEDFE' : 'var(--surface-2)',
+                        border: form.life === o.val ? '1.5px solid #534AB7' : '1px solid var(--border)',
+                        color: form.life === o.val ? '#26215C' : 'var(--ink-2)',
+                        fontWeight: form.life === o.val ? 500 : 400,
+                      }}>{o.label}</button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Q2: Savings target */}
+                <div style={{ marginBottom: '1.25rem' }}>
+                  <div style={{ fontSize: 12.5, fontWeight: 500, color: 'var(--ink-2)', marginBottom: '.25rem', lineHeight: 1.45 }}>What's your real savings target per year?</div>
+                  <div style={{ fontSize: 12, color: 'var(--ink-4)', marginBottom: '.5rem' }}>After rent, tax, flights, and life — what do you actually need to put away?</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+                    {[
+                      { val: '<5k',    label: 'Under $5k' },
+                      { val: '5-10k',  label: '$5–10k' },
+                      { val: '10-20k', label: '$10–20k' },
+                      { val: '20k+',   label: '$20k+' },
+                    ].map(o => (
+                      <button key={o.val} onClick={() => set('savings', o.val)} style={{
+                        fontSize: 12.5, textAlign: 'left', padding: '8px 11px', borderRadius: 6, cursor: 'pointer',
+                        background: form.savings === o.val ? '#E1F5EE' : 'var(--surface-2)',
+                        border: form.savings === o.val ? '1.5px solid #1D9E75' : '1px solid var(--border)',
+                        color: form.savings === o.val ? '#085041' : 'var(--ink-2)',
+                        fontWeight: form.savings === o.val ? 500 : 400,
+                      }}>{o.label}</button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Q3: What matters most */}
+                <div style={{ marginBottom: '1.25rem' }}>
+                  <div style={{ fontSize: 12.5, fontWeight: 500, color: 'var(--ink-2)', marginBottom: '.5rem', lineHeight: 1.45 }}>What matters most to you right now?</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+                    {[
+                      { val: 'balance',   label: 'Work-life balance' },
+                      { val: 'growth',    label: 'Career growth' },
+                      { val: 'adventure', label: 'Adventure & lifestyle' },
+                      { val: 'financial', label: 'Financial security' },
+                    ].map(o => (
+                      <button key={o.val} onClick={() => set('priority', o.val)} style={{
+                        fontSize: 12.5, textAlign: 'left', padding: '8px 11px', borderRadius: 6, cursor: 'pointer',
+                        background: form.priority === o.val ? '#EEEDFE' : 'var(--surface-2)',
+                        border: form.priority === o.val ? '1.5px solid #534AB7' : '1px solid var(--border)',
+                        color: form.priority === o.val ? '#26215C' : 'var(--ink-2)',
+                        fontWeight: form.priority === o.val ? 500 : 400,
+                      }}>{o.label}</button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Q4: Biggest risk concern */}
+                <div style={{ marginBottom: '1.25rem' }}>
+                  <div style={{ fontSize: 12.5, fontWeight: 500, color: 'var(--ink-2)', marginBottom: '.25rem', lineHeight: 1.45 }}>What's your biggest risk concern?</div>
+                  <div style={{ fontSize: 12, color: 'var(--ink-4)', marginBottom: '.5rem' }}>What would make this posting a mistake?</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+                    {[
+                      { val: 'leadership', label: 'Bad leadership & culture' },
+                      { val: 'workload',   label: 'Workload & burnout' },
+                      { val: 'isolation',  label: 'Isolation & no social life' },
+                      { val: 'financial',  label: 'Financial reality vs. promise' },
+                    ].map(o => (
+                      <button key={o.val} onClick={() => set('friction', o.val)} style={{
+                        fontSize: 12.5, textAlign: 'left', padding: '8px 11px', borderRadius: 6, cursor: 'pointer', lineHeight: 1.4,
+                        background: form.friction === o.val ? '#FAECE7' : 'var(--surface-2)',
+                        border: form.friction === o.val ? '1.5px solid #D85A30' : '1px solid var(--border)',
+                        color: form.friction === o.val ? '#7A2A20' : 'var(--ink-2)',
+                        fontWeight: form.friction === o.val ? 500 : 400,
+                      }}>{o.label}</button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Q5: Exit flexibility */}
+                <div style={{ marginBottom: '.5rem' }}>
+                  <div style={{ fontSize: 12.5, fontWeight: 500, color: 'var(--ink-2)', marginBottom: '.5rem', lineHeight: 1.45 }}>If this posting turned bad, could you walk away mid-contract?</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 6 }}>
+                    {[
+                      { val: 'easy', label: 'Yes — I could leave if I needed to' },
+                      { val: 'hard', label: 'It would be hard but possible' },
+                      { val: 'no',   label: 'No — I need this posting to work out' },
+                    ].map(o => (
+                      <button key={o.val} onClick={() => set('exit', o.val)} style={{
+                        fontSize: 12.5, textAlign: 'left', padding: '8px 11px', borderRadius: 6, cursor: 'pointer',
+                        background: form.exit === o.val ? '#EEEDFE' : 'var(--surface-2)',
+                        border: form.exit === o.val ? '1.5px solid #534AB7' : '1px solid var(--border)',
+                        color: form.exit === o.val ? '#26215C' : 'var(--ink-2)',
+                        fontWeight: form.exit === o.val ? 500 : 400,
+                      }}>{o.label}</button>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+
+            {step === 4 && (
+              <>
                 <div className="frow">
                   <div className="fg">
                     <label>Destination country</label>
@@ -529,7 +707,7 @@ export default function Onboarding() {
               </>
             )}
 
-            {step === 4 && (
+            {step === 5 && (
               <>
                 {form.dc && (
                   <div style={{ fontSize: 12, background: 'var(--surface-2)', borderRadius: 'var(--r)', padding: '.625rem .875rem', marginBottom: '1rem', color: 'var(--ink-3)', lineHeight: 1.5 }}>
@@ -564,10 +742,32 @@ export default function Onboarding() {
                   pred={preds.pkgPred} dc={form.dc}
                   description="Salary, housing, flights, tax, savings potential"
                 />
+
+                {/* Personalised match notes */}
+                {form.dc && (() => {
+                  const notes = generateMatchNotes(form, preds)
+                  if (!notes || notes.length === 0) return null
+                  const legColor = { school: '#BA7517', place: '#534AB7', package: '#1D9E75' }
+                  return (
+                    <div style={{ marginTop: '.75rem' }}>
+                      <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: '.5rem' }}>Personalised signals for you</div>
+                      {notes.map((n, i) => (
+                        <div key={i} style={{
+                          fontSize: 12, padding: '8px 12px', borderRadius: 6, marginBottom: 6, lineHeight: 1.5,
+                          background: n.type === 'warn' ? '#FAECE7' : n.type === 'good' ? '#E1F5EE' : '#F3F2FC',
+                          color:      n.type === 'warn' ? '#7A2A20' : n.type === 'good' ? '#085041' : legColor[n.leg],
+                          borderLeft: `3px solid ${n.type === 'warn' ? '#D85A30' : n.type === 'good' ? '#1D9E75' : legColor[n.leg]}`,
+                        }}>
+                          <span style={{ fontWeight: 600, marginRight: 4, textTransform: 'capitalize' }}>{n.leg}.</span>{n.text}
+                        </div>
+                      ))}
+                    </div>
+                  )
+                })()}
               </>
             )}
 
-            {step === 5 && (
+            {step === 6 && (
               <>
                 <div style={{ maxWidth: 440 }}>
                   <input
@@ -606,7 +806,7 @@ export default function Onboarding() {
               {step > 1
                 ? <button className="btn btn-ghost" onClick={() => setStep(step - 1)}>{"<-"} Back</button>
                 : <span />}
-              {step < 5 ? (
+              {step < 6 ? (
                 <button className="btn btn-primary" onClick={advance}>
                   Continue{' ->'}
                 </button>
