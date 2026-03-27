@@ -13,14 +13,14 @@ const DIM_PLAIN_GUIDE = {
   'Individualism': {
     title: 'Group vs self',
     intro: 'how much people prioritise the group or the individual',
-    high: 'People are more likely to value independence, personal choice, and speaking for themselves.',
-    low: 'People are more likely to protect harmony, think about the group, and avoid standing out.',
+    high: 'People may protect harmony more, think about the group first, and avoid standing out.',
+    low: 'People may value independence more, speak more directly, and act more individually.',
   },
   'Masculinity': {
     title: 'Competition',
     intro: 'how competitive or collaborative daily life may feel',
     high: 'Results, assertiveness, and visible success may matter more.',
-    low: 'Cooperation, balance, and keeping relationships steady may matter more.',
+    low: 'Cooperation, balance, and steady relationships may matter more.',
   },
   'Uncertainty Avoidance': {
     title: 'Need for structure',
@@ -55,9 +55,9 @@ function gapLevel(gap) {
 }
 
 function gapLabel(gap) {
-  if (gap > 30) return 'Big adjustment'
-  if (gap > 15) return 'Noticeable adjustment'
-  return 'Smaller adjustment'
+  if (gap > 30) return 'Very different'
+  if (gap > 15) return 'Some adjustment'
+  return 'Mostly familiar'
 }
 
 function gapColor(gap) {
@@ -77,42 +77,48 @@ function compareDirection(cur, dest, key) {
 function legMeta(diff) {
   if (diff > 1) {
     return {
-      label: 'Likely stronger',
+      label: 'Stronger on paper',
       toneBg: '#E1F5EE',
       toneText: 'var(--teal-dark)',
-      summary: 'On paper, this destination looks stronger than your current post.',
+      summary: 'The country-level picture looks better than what you rated in your current post.',
     }
   }
   if (diff < -1) {
     return {
-      label: 'Likely tougher',
+      label: 'Needs more checking',
       toneBg: '#FAECE7',
       toneText: 'var(--coral-dark)',
-      summary: 'This looks like a weaker leg than what you have now, so it needs careful checking.',
+      summary: 'This forecast comes in below your current score, so this leg needs closer checking before you sign.',
     }
   }
   return {
-    label: 'Likely similar',
+    label: 'About the same',
     toneBg: '#E6F1FB',
     toneText: 'var(--blue-dark)',
-    summary: 'This looks broadly similar to your current post at country level.',
+    summary: 'This looks broadly similar to what you have now at country level.',
   }
+}
+
+function diffSummary(diff) {
+  if (diff > 1) return `About ${Math.abs(diff)} point${Math.abs(diff) === 1 ? '' : 's'} higher than your current score.`
+  if (diff < -1) return `About ${Math.abs(diff)} point${Math.abs(diff) === 1 ? '' : 's'} lower than your current score.`
+  return 'Roughly in the same range as your current score.'
 }
 
 function schoolReasons(hDest, yrsBuffer, yrsValue) {
   if (!hDest) return []
 
   const reasons = [
-    `Hierarchy score ${hDest[0]} and structure score ${hDest[3]} help estimate how top-down and rule-bound schools may feel.`,
-    `Competition score ${hDest[2]} helps estimate whether the professional culture may feel more pressured or more collaborative.`,
-    'This is a country-level school forecast, not a verdict on one specific school.',
+    `Saudi Arabia scores high on hierarchy (${hDest[0]}) and structure (${hDest[3]}), which usually points to more top-down and rule-bound school systems.`,
+    `Its competition score (${hDest[2]}) helps estimate whether the professional culture may feel more pressured or more collaborative.`,
+    'This forecast is about the general school environment in the country, not one specific campus.',
   ]
 
   if (yrsBuffer > 0) {
     reasons.splice(
       2,
       0,
-      `${yrsValue} abroad adds an adaptation buffer because experienced international teachers often settle into new systems faster.`
+      `Because you have ${yrsValue} abroad, we soften the culture-adjustment penalty slightly for the school forecast.`
     )
   }
 
@@ -123,12 +129,12 @@ function placeReasons(dest, homeGap) {
   if (!dest) return []
 
   const reasons = [
-    `Quality of life ${dest.ql}/100, safety ${dest.safety}/100, and expat fit ${dest.expat}/100 shape this place forecast.`,
-    `A cost-of-living index of ${dest.col} helps us separate a good salary from an actually comfortable life.`,
+    `Quality of life (${dest.ql}/100), safety (${dest.safety}/100), and expat fit (${dest.expat}/100) shape this place forecast.`,
+    `The cost-of-living index (${dest.col}) helps separate a good salary from an actually comfortable day-to-day life.`,
   ]
 
   if (homeGap > 30) {
-    reasons.push('There is also a meaningful culture shift from your home baseline, which can make the first months feel heavier outside school.')
+    reasons.push('Your home-country baseline is quite different here, so settling in outside school may take more active adjustment at first.')
   }
 
   return reasons
@@ -139,7 +145,7 @@ function packageReasons(dest) {
 
   return [
     `Median teacher salary is about ${MONEY.format(dest.medSal)} per month at country level.`,
-    `${dest.housingRate}% of schools are estimated to offer housing and ${dest.flightRate}% to offer flights.`,
+    `Around ${dest.housingRate}% of schools are estimated to offer housing and ${dest.flightRate}% to offer flights.`,
     dest.taxFree ? 'Tax treatment is likely to be favorable compared with many markets.' : 'Tax treatment looks more standard, so net savings need checking.',
   ]
 }
@@ -227,13 +233,24 @@ export default function MyMove() {
         This is a country-level forecast for {dcity ? `${dcity}, ` : ''}{dc}. It combines {SALARY_DB_SEED.length.toLocaleString()} salary records, cost and quality-of-life data, and cross-cultural research so you can see where the move looks strong and where to ask harder questions.
       </div>
 
+      <div className="card" style={{ marginBottom: '1rem', padding: '1rem 1.1rem' }}>
+        <div style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--ink-4)', marginBottom: '.45rem' }}>
+          How to read this page
+        </div>
+        <div style={{ display: 'grid', gap: '.45rem', fontSize: 12.5, color: 'var(--ink-2)', lineHeight: 1.6 }}>
+          <div>Left score: your own rating of your current post.</div>
+          <div>Right score: our country-level forecast for {dc}.</div>
+          <div>The adjustment section below compares {cc || 'your current country'} with {dc} and shows where daily life may feel different if you move.</div>
+        </div>
+      </div>
+
       <div className="ibox info" style={{ marginBottom: yrsBuffer > 0 ? '.75rem' : '1.25rem' }}>
         Use this as a starting point, not a promise. One school, neighborhood, or contract can still differ a lot from the country-level picture.
       </div>
 
       {yrsBuffer > 0 && (
         <div style={{ background: '#EEEDFE', border: '1px solid #534AB733', borderLeft: '3px solid #534AB7', borderRadius: '0 var(--r) var(--r) 0', padding: '.625rem 1rem', fontSize: 12.5, color: '#3C3489', lineHeight: 1.55, marginBottom: '1.25rem' }}>
-          <strong>{profile.yrs} abroad.</strong> Your school forecast is adjusted upward by {yrsBuffer === 1 ? '1 point' : `${yrsBuffer} points`} because teachers with more international experience usually adapt to new systems faster.
+          <strong>{profile.yrs} abroad.</strong> In the school forecast, we give a small experience buffer of {yrsBuffer === 1 ? '1 point' : `${yrsBuffer} points`} because long-term international teachers often handle culture shifts more easily.
         </div>
       )}
 
@@ -248,6 +265,7 @@ export default function MyMove() {
                 <div>
                   <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--ink-2)', marginBottom: '.35rem' }}>{leg.l}</div>
                   <div style={{ fontSize: 12.5, color: 'var(--ink-3)', lineHeight: 1.55 }}>{meta.summary}</div>
+                  <div style={{ fontSize: 12.5, color: 'var(--ink)', lineHeight: 1.5, marginTop: '.35rem', fontWeight: 500 }}>{diffSummary(diff)}</div>
                 </div>
                 <span style={{ background: meta.toneBg, color: meta.toneText, borderRadius: 999, padding: '5px 10px', fontSize: 11, fontWeight: 600, whiteSpace: 'nowrap' }}>
                   {meta.label}
@@ -275,7 +293,7 @@ export default function MyMove() {
                 <div style={{ display: 'grid', gap: '.45rem' }}>
                   {leg.reasons.map((reason) => (
                     <div key={reason} style={{ fontSize: 12.5, color: 'var(--ink-2)', lineHeight: 1.55, paddingLeft: '.85rem', position: 'relative' }}>
-                      <span style={{ position: 'absolute', left: 0, top: 0, color: leg.col }}>•</span>
+                      <span style={{ position: 'absolute', left: 0, top: '.45rem', width: 6, height: 6, borderRadius: 999, background: leg.col }} />
                       {reason}
                     </div>
                   ))}
@@ -288,9 +306,9 @@ export default function MyMove() {
 
       {hCur && hDest && (
         <div className="card">
-          <div className="ct">Where the adjustment may show up first</div>
+          <div className="ct">What may feel different if you move</div>
           <div className="cs">
-            These are the areas of daily work and life that may feel most different when moving from {cc} to {dc}. They are prompts to notice, not assumptions to make about every person you meet.
+            Here, adjustment means difference, not danger. This section compares {cc} with {dc} and highlights where daily work or life may feel less familiar at first.
           </div>
 
           {DLBLS.map((d, i) => {
