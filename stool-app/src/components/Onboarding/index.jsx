@@ -207,6 +207,132 @@ function ComparisonLeg({ label, color, bg, curVal, onChange, pred, dc, descripti
   )
 }
 
+// ── Mini school diagnostic (5 targeted questions → auto-scores the slider) ───
+
+const SCHOOL_DIAG_QS = [
+  { id: 'sd1', text: "In staff meetings, how much do you feel your professional voice is heard by leadership?",
+    opts: ["Almost never — decisions feel top-down", "Sometimes — when I've built relationships", "Usually — the culture is reasonably open", "Yes — leadership is genuinely collaborative"] },
+  { id: 'sd2', text: "How does your workload compare to what you expected before this post?",
+    opts: ["Much heavier — it's unsustainable", "Heavier than expected but manageable", "About what I expected", "Reasonable — the culture supports balance"] },
+  { id: 'sd3', text: "How transparent is your school about decisions that affect your work?",
+    opts: ["Opaque — I often find out last", "Selective — I get information informally", "Mostly transparent", "Very transparent — I'm included in decisions"] },
+  { id: 'sd4', text: "How often do cultural differences create genuine friction in your classroom?",
+    opts: ["Daily — it's exhausting", "Several times a week", "Occasionally — I'm mostly adapted", "Rarely — I've found my footing here"] },
+  { id: 'sd5', text: "When you imagine staying in your current post for another two years, how do you feel?",
+    opts: ["Dread — I need to leave", "Uncertain — things would need to change", "Cautiously okay — I can make it work", "Good — I'm settled and growing here"] },
+]
+
+// Maps answer index (0=worst, 3=best) to a 1–10 school score
+const SCORE_MAP = [2, 4, 7, 9]
+
+function computeSchoolDiagScore(answers) {
+  const vals = Object.values(answers).filter(v => v !== undefined)
+  if (!vals.length) return null
+  return Math.round(vals.reduce((sum, v) => sum + SCORE_MAP[v], 0) / vals.length)
+}
+
+function diagInterpretation(answers) {
+  const structuralQs = ['sd1', 'sd2', 'sd3'] // leadership, workload, transparency
+  const adaptQs      = ['sd4', 'sd5']         // cultural friction, future feeling
+  const structBad = structuralQs.filter(id => answers[id] !== undefined && answers[id] <= 1).length
+  const adaptBad  = adaptQs.filter(id => answers[id] !== undefined && answers[id] <= 1).length
+  if (structBad >= 2) return { label: 'Structural friction', color: '#D85A30', note: 'Leadership and workload are the main signals — these won\'t improve with time.' }
+  if (adaptBad >= 2)  return { label: 'Adaptation friction', color: '#534AB7', note: 'This looks more like cultural adjustment — it typically improves with time.' }
+  return { label: 'Mixed picture', color: '#BA7517', note: 'Multiple factors at play — use the Diagnostic tab for a fuller analysis.' }
+}
+
+function MiniSchoolDiagnostic({ onScore, currentScore }) {
+  const [open,    setOpen]    = useState(false)
+  const [answers, setAnswers] = useState({})
+  const [applied, setApplied] = useState(false)
+
+  const answered = Object.keys(answers).length
+  const liveScore = answered >= 3 ? computeSchoolDiagScore(answers) : null
+  const interp    = answered === 5 ? diagInterpretation(answers) : null
+
+  const apply = () => {
+    const score = computeSchoolDiagScore(answers)
+    if (score != null) { onScore(score); setApplied(true) }
+  }
+
+  const reset = () => { setAnswers({}); setApplied(false) }
+
+  if (!open) {
+    return (
+      <div style={{ marginTop: '-.25rem', marginBottom: '.875rem', textAlign: 'center' }}>
+        <button
+          onClick={() => setOpen(true)}
+          style={{ fontSize: 11.5, color: 'var(--teal-dark)', background: '#E1F5EE', border: '1px solid var(--teal)40', borderRadius: 20, padding: '5px 14px', cursor: 'pointer', fontWeight: 500 }}
+        >
+          Not sure? Answer 5 questions for a real score →
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <div style={{ background: 'white', border: '1px solid #BA751733', borderRadius: 'var(--r)', padding: '1rem 1.125rem', marginTop: '-.25rem', marginBottom: '.875rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '.75rem' }}>
+        <div>
+          <span style={{ fontSize: 12, fontWeight: 600, color: '#BA7517', textTransform: 'uppercase', letterSpacing: '.07em' }}>School diagnostic</span>
+          <span style={{ fontSize: 11, color: 'var(--ink-4)', marginLeft: '.5rem' }}>{answered}/5 answered</span>
+        </div>
+        {liveScore != null && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '.4rem' }}>
+            <span style={{ fontSize: 11, color: 'var(--ink-3)' }}>score so far:</span>
+            <span style={{ fontSize: '1.4rem', fontWeight: 300, color: '#BA7517', lineHeight: 1 }}>{liveScore}</span>
+          </div>
+        )}
+      </div>
+
+      {SCHOOL_DIAG_QS.map((q, qi) => (
+        <div key={q.id} style={{ marginBottom: '.75rem' }}>
+          <div style={{ fontSize: 12.5, fontWeight: 500, color: 'var(--ink-2)', marginBottom: '.4rem', lineHeight: 1.45 }}>
+            <span style={{ color: 'var(--ink-4)', marginRight: '.3rem' }}>{qi + 1}.</span>{q.text}
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 5 }}>
+            {q.opts.map((o, oi) => (
+              <button
+                key={oi}
+                onClick={() => { setAnswers(a => ({ ...a, [q.id]: oi })); setApplied(false) }}
+                style={{
+                  fontSize: 11.5, textAlign: 'left', padding: '6px 10px', borderRadius: 6, cursor: 'pointer', lineHeight: 1.4,
+                  background: answers[q.id] === oi ? '#FAEEDA' : 'var(--surface-2)',
+                  border: answers[q.id] === oi ? '1.5px solid #BA7517' : '1px solid var(--border)',
+                  color: answers[q.id] === oi ? '#633806' : 'var(--ink-2)',
+                  fontWeight: answers[q.id] === oi ? 500 : 400,
+                }}
+              >{o}</button>
+            ))}
+          </div>
+        </div>
+      ))}
+
+      {interp && (
+        <div style={{ fontSize: 12, padding: '8px 12px', borderRadius: 6, background: '#FDF6EC', border: `1px solid ${interp.color}33`, color: interp.color, marginBottom: '.75rem', lineHeight: 1.5 }}>
+          <strong>{interp.label}.</strong> {interp.note}
+        </div>
+      )}
+
+      <div style={{ display: 'flex', gap: '.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+        {answered >= 3 && !applied && (
+          <button onClick={apply} style={{ fontSize: 12.5, fontWeight: 500, color: 'white', background: '#BA7517', border: 'none', borderRadius: 'var(--r)', padding: '7px 14px', cursor: 'pointer' }}>
+            Use this score ({liveScore}) →
+          </button>
+        )}
+        {applied && (
+          <span style={{ fontSize: 12, color: 'var(--teal-dark)', background: '#E1F5EE', borderRadius: 'var(--r)', padding: '6px 12px', fontWeight: 500 }}>
+            ✓ School slider updated to {currentScore}
+          </span>
+        )}
+        <button onClick={() => { reset(); setOpen(false) }} style={{ fontSize: 12, color: 'var(--ink-4)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 0' }}>
+          {applied ? 'Close' : 'Skip diagnostic'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
 // ── Steps config ─────────────────────────────────────────────────────────────
 
 const STEPS = [
@@ -214,11 +340,14 @@ const STEPS = [
   { title: "Your current situation", sub: "Where are you right now? This anchors your cultural, financial, and professional baseline." },
   { title: "Considering a move?", sub: "Tell us where you're thinking of going and we'll predict your three-legged stool score at your destination." },
   { title: "How does your current stool feel?", sub: "Rate your current posting honestly — we'll show you what we predict at your destination side by side, in real time." },
+  { title: "Save your profile?", sub: "Enter your email and we'll save your profile so you can load it from any device. No password needed - your email is your key." },
 ]
 
 export default function Onboarding() {
-  const { launchDashboard, skipOnboarding, loadFromCloud } = useProfile()
+  const { launchDashboard, skipOnboarding, loadFromCloud, saveToCloud } = useProfile()
   const [step, setStep] = useState(0)
+  const [saveEmail, setSaveEmail] = useState('')
+  const [saveState, setSaveState] = useState('idle')
   const [form, setForm] = useState({
     name: '', home: '', yrs: '', curr: '',
     cc: '', city: '', sal: '', hous: '', flt: '', tax: '',
@@ -227,14 +356,42 @@ export default function Onboarding() {
   })
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
+  const finalProfile = { ...form, sal: parseFloat(form.sal) || 0 }
 
   const advance = () => {
     if (step === 0) { setStep(1); return }
-    if (step < 4) { setStep(step + 1); return }
-    launchDashboard({ ...form, sal: parseFloat(form.sal) || 0 })
+    if (step < 5) { setStep(step + 1); return }
   }
 
-  const dots = Array.from({ length: 5 }, (_, i) => (
+  const handleSkipSave = () => {
+    launchDashboard(finalProfile)
+  }
+
+  const handleSaveAndContinue = async () => {
+    if (!saveEmail.trim() || saveState === 'saving') return
+    setSaveState('saving')
+    let launched = false
+    const fallback = setTimeout(() => {
+      launched = true
+      launchDashboard(finalProfile)
+    }, 1500)
+
+    try {
+      const result = await saveToCloud(saveEmail.trim(), finalProfile)
+      if (result?.ok && !launched) {
+          clearTimeout(fallback)
+          launched = true
+          setSaveState('saved')
+          launchDashboard(finalProfile)
+      } else if (!result?.ok) {
+        setSaveState('error')
+      }
+    } catch {
+      setSaveState('error')
+    }
+  }
+
+  const dots = Array.from({ length: 6 }, (_, i) => (
     <div key={i} className={`ob-dot ${i === step ? 'active' : i < step ? 'done' : ''}`} />
   ))
 
@@ -384,34 +541,12 @@ export default function Onboarding() {
                     ? `Your experience adapting internationally reduces the adjustment cost here — that's reflected in the prediction.`
                     : null}
                 />
+                <MiniSchoolDiagnostic
+                  onScore={score => set('sch', score)}
+                  currentScore={form.sch}
+                />
                 <ComparisonLeg
                   label="Place"
                   color="#534AB7" bg="#EEEDFE"
                   curVal={form.plc} onChange={v => set('plc', v)}
                   pred={preds.plcPred} dc={form.dc}
-                  description="City quality, safety, family life, lifestyle, adventure"
-                />
-                <ComparisonLeg
-                  label="Package"
-                  color="#1D9E75" bg="#E1F5EE"
-                  curVal={form.pkg} onChange={v => set('pkg', v)}
-                  pred={preds.pkgPred} dc={form.dc}
-                  description="Salary, housing, flights, tax, savings potential"
-                />
-              </>
-            )}
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1.75rem', gap: 12 }}>
-              {step > 1
-                ? <button className="btn btn-ghost" onClick={() => setStep(step - 1)}>← Back</button>
-                : <span />}
-              <button className="btn btn-primary" onClick={advance}>
-                {step === 4 ? 'Build my dashboard →' : 'Continue →'}
-              </button>
-            </div>
-          </>
-        )}
-      </div>
-    </div>
-  )
-}
