@@ -72,4 +72,57 @@ export const SCHOOL_ALIASES = {
   'BSKL':                                         'British International School of Kuala Lumpur',
   'ISKL':                                         'International School of Kuala Lumpur',
   'SAS':                                          'Singapore American School',
-  'UWCSEA':                                       'UWC South
+  'UWCSEA':                                       'UWC South East Asia',
+  'ASD':                                          'American School of Dubai',
+  'HKIS':                                         'Hong Kong International School',
+  'ISM':                                          'International School Manila',
+  'JIS':                                          'Jakarta Intercultural School',
+  'GEMS Wellington Academy Al Khail':                                       'GEMS Wellington Academy - Al Khail',
+  'GWAK':                                       'GEMS Wellington Academy - Al Khail',
+  'GEMS Wellington International':                                       'GEMS Wellington International School',
+  'GEMS World Academy':                                       'GEMS World Academy - Dubai',
+  'JESS':                                       'Jumeirah English Speaking School',
+  'Uptown School':                                       'Uptown International School',
+  'DESC':                                       'Dubai English Speaking College',
+  'BSAK':                                       'The British School Al Khubairat',
+  'British School Al Khubairat':                                       'The British School Al Khubairat',
+  'ACS Abu Dhabi':                                       'American Community School of Abu Dhabi',
+  'American Community School Abu Dhabi':                                       'American Community School of Abu Dhabi',
+  'ADIS':                                       'Abu Dhabi International School',
+  'Cranleigh':                                       'Cranleigh Abu Dhabi',
+  'Brighton Abu Dhabi':                                       'Brighton College Abu Dhabi',
+  'Doha College Qatar':                                       'Doha College',
+  'Repton Dubai':                                       'Repton School Dubai',
+  'Repton Abu Dhabi':                                       'Repton School Abu Dhabi',
+  'NAS Dubai':                                       'Nord Anglia International School Dubai',
+  'Nord Anglia Dubai':                                       'Nord Anglia International School Dubai',
+  'BIS Abu Dhabi':                                       'The British International School Abu Dhabi',
+  'British International School Abu Dhabi':                                       'The British International School Abu Dhabi',
+  'NAS Abu Dhabi':                                       'Nord Anglia International School Abu Dhabi',
+  'Nord Anglia Abu Dhabi':                                       'Nord Anglia International School Abu Dhabi',
+  'ISC Khalifa City':                                       'The International School of Choueifat - Khalifa City',
+  'ISC Abu Dhabi':                                       'The International School of Choueifat - Khalifa City',
+}
+
+/**
+ * Resolve a submitted school name to its canonical form.
+ * Returns the canonical if found, otherwise returns the original.
+ */
+export function resolveSchoolName(name) {
+  if (!name) return name
+  return SCHOOL_ALIASES[name] ?? name
+}
+
+/**
+ * Soft-normalise for search/comparison only (not for storage).
+ * Strips "The", lowercases, collapses whitespace.
+ */
+export function normaliseForSearch(name) {
+  if (!name) return ''
+  return name
+    .toLowerCase()
+    .replace(/^the\s+/, '')
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
