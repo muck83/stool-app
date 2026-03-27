@@ -1,13 +1,103 @@
 import { useState } from 'react'
 import { useProfile } from '../../context/ProfileContext.jsx'
+import { insertDiagnosticSubmission } from '../../lib/supabase.js'
 
 const SCHOOL_Q_IDS = ['q2', 'q5', 'q6', 'q8']
+const CULTURAL_Q_IDS = ['q1', 'q4', 'q7']
+const STRUCTURAL_Q_IDS = ['q2', 'q5', 'q6']
 const DIAG_SCORE_MAP = [2, 4, 7, 9]
 
 function computeSchoolLegScore(answers) {
   const vals = SCHOOL_Q_IDS.map((id) => answers[id]).filter((v) => v !== undefined)
   if (!vals.length) return null
   return Math.round(vals.reduce((sum, v) => sum + DIAG_SCORE_MAP[v], 0) / vals.length)
+}
+
+function classifyAnswer(a) {
+  if (a <= 1) return 2
+  if (a === 2) return 1
+  return 0
+}
+
+function buildDiagnosticResult(answers) {
+  const answeredIds = Object.keys(answers)
+  const total = answeredIds.length
+  if (total < 5) return null
+
+  const scores = { cultural: 0, structural: 0, place: 0, overall: 0 }
+
+  answeredIds.forEach((id) => {
+    const value = answers[id]
+    if (CULTURAL_Q_IDS.includes(id)) scores.cultural += classifyAnswer(value)
+    if (STRUCTURAL_Q_IDS.includes(id)) scores.structural += classifyAnswer(value)
+    if (id === 'q3') scores.place += classifyAnswer(value)
+    if (id === 'q8') {
+      if (value <= 1) scores.overall += 3
+      else if (value === 2) scores.overall += 2
+      else if (value === 3) scores.overall += 1
+    }
+  })
+
+  const cultR = scores.cultural / total
+  const strucR = scores.structural / total
+  const placeR = scores.place / total
+
+  if (cultR > 1.2 && strucR < 0.8) {
+    return {
+      kind: 'cultural',
+      title: 'Mostly cultural friction',
+      body: "What you're describing sounds more like normal adaptation discomfort than a broken institution.",
+      urgency: 'That is genuinely good news. Cultural friction often peaks around 3-6 months and tends to ease by 12 months.',
+      actions: [
+        'Build real relationships with local colleagues, not only expat circles.',
+        'Learn a little of the local language. The respect signal often matters more than fluency.',
+        'Read about the host culture so daily patterns feel less mysterious.',
+      ],
+      scores,
+    }
+  }
+
+  if (strucR > 1.2 && cultR < 0.8) {
+    return {
+      kind: 'structural',
+      title: 'Mostly school or package friction',
+      body: 'Your answers point more toward leadership, workload, or school systems than toward culture shock.',
+      urgency: 'Cultural adjustment improves with time. Structural problems usually need advocacy, a change in conditions, or a move.',
+      actions: [
+        'Name the core issue clearly: workload, leadership opacity, pay, or something else.',
+        'Ask whether the issue is actually improving or whether you are just getting used to it.',
+        'Use the next move to screen the school leg more carefully, not just the country.',
+      ],
+      scores,
+    }
+  }
+
+  if (placeR > 1.2) {
+    return {
+      kind: 'place',
+      title: 'Mostly place friction',
+      body: 'The biggest strain looks like the city or lifestyle around the job rather than the school itself.',
+      urgency: 'Place discomfort is real. It is also the part of the stool most open to active management.',
+      actions: [
+        'Build a social calendar on purpose instead of waiting for belonging to happen.',
+        'Try local routines and neighborhoods, not only expat defaults.',
+        'Use My Move to see whether another destination may fit your life better.',
+      ],
+      scores,
+    }
+  }
+
+  return {
+    kind: 'mixed',
+    title: 'Mixed picture',
+    body: 'More than one leg is creating friction, which makes it easy to blame the wrong thing.',
+    urgency: 'The biggest risk here is confusing a school problem for a country problem, or vice versa.',
+    actions: [
+      'Rate package, school, and place separately and decide which leg is actually failing.',
+      'Ask whether a better school in the same country would solve a large part of the problem.',
+    ],
+    scores,
+  }
 }
 
 const DIAG_QS = [
@@ -106,100 +196,62 @@ export function Diagnostic() {
   const [answers, setAnswers] = useState({})
   const [result, setResult] = useState(null)
   const [scoreApplied, setScoreApplied] = useState(false)
+  const [saveState, setSaveState] = useState('idle')
+  const [lastSavedSignature, setLastSavedSignature] = useState('')
 
   const answeredCount = Object.keys(answers).length
 
   const select = (qid, oi) => {
     setAnswers((a) => ({ ...a, [qid]: oi }))
     setScoreApplied(false)
+    if (saveState !== 'idle') setSaveState('idle')
   }
 
-  const run = () => {
-    if (answeredCount < 5) {
+  const run = async () => {
+    const analysis = buildDiagnosticResult(answers)
+    if (!analysis) {
       alert('Please answer at least 5 questions for a meaningful analysis.')
       return
     }
 
-    const scores = { cultural: 0, structural: 0, place: 0, overall: 0 }
-    let total = 0
-
-    DIAG_QS.forEach((q) => {
-      const a = answers[q.id]
-      if (a === undefined) return
-      total += 1
-
-      if (['Group culture / authority', 'Group culture / certainty', 'Cultural fit'].some((d) => q.dim.includes(d.split(' ')[0]))) {
-        if (a <= 1) scores.cultural += 2
-        else if (a === 2) scores.cultural += 1
-      }
-
-      if (q.dim.includes('school') || q.dim.includes('School') || q.dim.includes('Workload')) {
-        if (a <= 1) scores.structural += 2
-        else if (a === 2) scores.structural += 1
-      }
-
-      if (q.dim === 'Place') {
-        if (a <= 1) scores.place += 2
-        else if (a === 2) scores.place += 1
-      }
-
-      if (q.dim === 'Overall') {
-        if (a <= 1) scores.overall += 3
-        else if (a === 2) scores.overall += 2
-        else if (a === 3) scores.overall += 1
-      }
-    })
-
-    const cultR = scores.cultural / total
-    const strucR = scores.structural / total
-    const placeR = scores.place / total
-
-    let diag
-    let urgency
-    let actions
-
-    if (cultR > 1.2 && strucR < 0.8) {
-      diag = "Your friction appears primarily <strong>cultural</strong>, not structural. The patterns you're describing align more closely with normal adaptation discomfort than with a broken institution."
-      urgency = 'This is genuinely good news. Cultural friction usually peaks around 3-6 months and tends to ease significantly by 12 months.'
-      actions = [
-        'Focus on building real relationships with local colleagues, not expat networks exclusively.',
-        'Learn 20-30 words in the local language. The signal of respect often matters more than the vocabulary itself.',
-        'Read one book on your host culture\'s history or social structure.',
-      ]
-    } else if (strucR > 1.2 && cultR < 0.8) {
-      diag = 'Your friction appears primarily <strong>structural</strong> - the package, school culture, or leadership quality. Structural problems usually do not improve just because you stay longer.'
-      urgency = 'Cultural adaptation improves with time. Structural problems usually require institutional change, advocacy, or a move.'
-      actions = [
-        'Name the specific structural issue clearly: underpayment, leadership opacity, workload, or something else.',
-        'Evaluate whether any of those problems are actually on a trajectory of improvement.',
-        'If the school is the main problem, prioritise the school leg more carefully in your next move.',
-      ]
-    } else if (placeR > 1.2) {
-      diag = 'Your primary challenge appears to be the <strong>place</strong> - the city, location, or lifestyle rather than the school or package.'
-      urgency = 'Place discomfort is real and should not be minimised. It is also the leg most open to active management.'
-      actions = [
-        'Invest deliberately in local discovery, not just expat venues.',
-        'Build a social calendar on purpose: one new experience per week for 3 months.',
-        'If you have another destination in mind, use My Move to test whether the place leg is likely to improve there.',
-      ]
-    } else {
-      diag = 'Your responses suggest a <strong>mixed picture</strong> - more than one factor is contributing to your dissatisfaction.'
-      urgency = 'The risk with a mixed picture is confusing the cause: blaming culture for school problems, or blaming the city for leadership problems.'
-      actions = [
-        'Use the three-legged stool explicitly: rate each leg 1-10 and decide which one is really failing.',
-        'Separate "this country" from "this school" - would a better school in the same country solve a large part of the problem?',
-      ]
+    setResult(analysis)
+    const schoolScore = computeSchoolLegScore(answers)
+    const signature = JSON.stringify(answers)
+    if (signature === lastSavedSignature) {
+      setSaveState('saved')
+      return
     }
 
-    setResult({ diag, urgency, actions })
+    setSaveState('saving')
+    const saveResult = await insertDiagnosticSubmission({
+      profile,
+      answers,
+      result: analysis,
+      schoolLegScore: schoolScore,
+    })
+
+    if (saveResult?.data) {
+      setLastSavedSignature(signature)
+      setSaveState('saved')
+    } else if (saveResult?.error === 'not-configured') {
+      setSaveState('offline')
+    } else {
+      setSaveState('error')
+    }
   }
+
+  const diagScore = computeSchoolLegScore(answers)
+  const currentScore = profile.sch || 5
+  const delta = diagScore == null ? 0 : diagScore - currentScore
+  const deltaArrow = delta > 1 ? 'up' : delta < -1 ? 'down' : 'across'
+  const deltaColor = delta > 1 ? '#1D9E75' : delta < -1 ? '#D85A30' : '#534AB7'
 
   return (
     <div className="tp active">
       <div style={{ fontFamily: 'var(--serif)', fontSize: '1.5rem', marginBottom: '.35rem' }}>Diagnostic</div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '.75rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
         <div style={{ fontSize: 13, color: 'var(--ink-3)', maxWidth: 640, lineHeight: 1.6 }}>
-          This diagnostic helps you tell the difference between structural problems and cultural friction. Eight honest questions - about two minutes.
+          This diagnostic helps you tell the difference between structural problems and cultural friction. Eight honest questions, about two minutes.
         </div>
         <div style={{ fontSize: 11, fontWeight: 500, color: 'var(--ink-3)', background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 999, padding: '4px 10px', whiteSpace: 'nowrap' }}>
           {answeredCount}/8 answered
@@ -231,68 +283,69 @@ export function Diagnostic() {
       </div>
 
       <button className="btn btn-primary" style={{ marginTop: '1rem', maxWidth: 240 }} onClick={run}>
-        Analyse my responses →
+        Analyse my responses -&gt;
       </button>
 
       {result && (
         <div style={{ marginTop: '1.5rem', background: 'white', border: '1px solid var(--border)', borderRadius: 'var(--rl)', padding: '1.5rem' }}>
-          <div style={{ fontFamily: 'var(--serif)', fontSize: '1.2rem', marginBottom: '.5rem' }}>Your diagnosis</div>
-          <div style={{ fontSize: 13.5, color: 'var(--ink-2)', lineHeight: 1.7, marginBottom: '1rem' }} dangerouslySetInnerHTML={{ __html: result.diag }} />
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '.75rem', flexWrap: 'wrap', marginBottom: '.5rem' }}>
+            <div style={{ fontFamily: 'var(--serif)', fontSize: '1.2rem' }}>Your diagnosis</div>
+            {saveState === 'saving' && <div style={{ fontSize: 11.5, color: 'var(--ink-4)' }}>Saving privately for admin review...</div>}
+            {saveState === 'saved' && <div style={{ fontSize: 11.5, color: '#1D9E75' }}>Saved privately for admin review.</div>}
+            {saveState === 'offline' && <div style={{ fontSize: 11.5, color: 'var(--ink-4)' }}>Supabase is not configured, so this result stays local only.</div>}
+            {saveState === 'error' && <div style={{ fontSize: 11.5, color: '#D85A30' }}>This result could not be saved to the admin dashboard.</div>}
+          </div>
+
+          <div style={{ fontSize: 11, fontWeight: 600, color: '#BA7517', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: '.35rem' }}>
+            {result.title}
+          </div>
+          <div style={{ fontSize: 13.5, color: 'var(--ink-2)', lineHeight: 1.7, marginBottom: '1rem' }}>{result.body}</div>
           <div className="ibox" style={{ marginBottom: '1rem' }}>{result.urgency}</div>
+
           <div className="csec">Recommended actions</div>
           {result.actions.map((a, i) => (
             <div key={i} className="ibox" style={{ marginBottom: '.5rem' }}>{a}</div>
           ))}
 
-          {(() => {
-            const diagScore = computeSchoolLegScore(answers)
-            if (!diagScore) return null
-
-            const current = profile.sch || 5
-            const delta = diagScore - current
-            const arrow = delta > 1 ? '↑' : delta < -1 ? '↓' : '→'
-            const col = delta > 1 ? '#1D9E75' : delta < -1 ? '#D85A30' : '#534AB7'
-
-            return (
-              <div style={{ marginTop: '1.25rem', borderTop: '1px solid var(--border)', paddingTop: '1.25rem' }}>
-                <div style={{ fontSize: 11, fontWeight: 600, color: '#BA7517', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: '.5rem' }}>
-                  School leg score from this diagnostic
+          {diagScore != null && (
+            <div style={{ marginTop: '1.25rem', borderTop: '1px solid var(--border)', paddingTop: '1.25rem' }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: '#BA7517', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: '.5rem' }}>
+                School leg score from this diagnostic
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '.75rem', flexWrap: 'wrap' }}>
+                <div style={{ fontSize: 13, color: 'var(--ink-3)' }}>
+                  Current profile score: <strong style={{ color: '#BA7517', fontSize: '1.2rem', fontWeight: 300 }}>{currentScore}</strong>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '.75rem', flexWrap: 'wrap' }}>
-                  <div style={{ fontSize: 13, color: 'var(--ink-3)' }}>
-                    Current profile score: <strong style={{ color: '#BA7517', fontSize: '1.2rem', fontWeight: 300 }}>{current}</strong>
-                  </div>
-                  <div style={{ fontSize: '1.3rem', color: col }}>{arrow}</div>
-                  <div style={{ fontSize: 13, color: 'var(--ink-3)' }}>
-                    Diagnostic score: <strong style={{ color: '#BA7517', fontSize: '1.2rem', fontWeight: 300 }}>{diagScore}</strong>
-                  </div>
+                <div style={{ fontSize: 13, color: deltaColor, textTransform: 'uppercase', letterSpacing: '.06em' }}>{deltaArrow}</div>
+                <div style={{ fontSize: 13, color: 'var(--ink-3)' }}>
+                  Diagnostic score: <strong style={{ color: '#BA7517', fontSize: '1.2rem', fontWeight: 300 }}>{diagScore}</strong>
                 </div>
-                <div style={{ fontSize: 12, color: 'var(--ink-3)', marginBottom: '.75rem', lineHeight: 1.5 }}>
-                  Based on your answers to the leadership, workload, transparency, and outlook questions.
-                  {Math.abs(delta) > 1 && (
-                    <span style={{ color: col, fontWeight: 500 }}>
-                      {delta > 0 ? ' Your gut-feel score may be underestimating your current school.' : ' Your gut-feel score may be more optimistic than your answers suggest.'}
-                    </span>
-                  )}
-                </div>
-                {!scoreApplied ? (
-                  <button
-                    onClick={() => {
-                      updateProfile({ sch: diagScore })
-                      setScoreApplied(true)
-                    }}
-                    style={{ fontSize: 12.5, fontWeight: 500, color: 'white', background: '#BA7517', border: 'none', borderRadius: 'var(--r)', padding: '7px 16px', cursor: 'pointer' }}
-                  >
-                    Update my School score to {diagScore} →
-                  </button>
-                ) : (
-                  <div style={{ fontSize: 12.5, color: 'var(--teal-dark)', background: '#E1F5EE', borderRadius: 'var(--r)', padding: '7px 14px', display: 'inline-block', fontWeight: 500 }}>
-                    School score updated to {diagScore} - reflected in My Move and Overview
-                  </div>
+              </div>
+              <div style={{ fontSize: 12, color: 'var(--ink-3)', marginBottom: '.75rem', lineHeight: 1.5 }}>
+                Based on your answers to the leadership, workload, transparency, and outlook questions.
+                {Math.abs(delta) > 1 && (
+                  <span style={{ color: deltaColor, fontWeight: 500 }}>
+                    {delta > 0 ? ' Your gut-feel score may be underestimating your current school.' : ' Your gut-feel score may be more optimistic than your answers suggest.'}
+                  </span>
                 )}
               </div>
-            )
-          })()}
+              {!scoreApplied ? (
+                <button
+                  onClick={() => {
+                    updateProfile({ sch: diagScore })
+                    setScoreApplied(true)
+                  }}
+                  style={{ fontSize: 12.5, fontWeight: 500, color: 'white', background: '#BA7517', border: 'none', borderRadius: 'var(--r)', padding: '7px 16px', cursor: 'pointer' }}
+                >
+                  Update my School score to {diagScore} -&gt;
+                </button>
+              ) : (
+                <div style={{ fontSize: 12.5, color: 'var(--teal-dark)', background: '#E1F5EE', borderRadius: 'var(--r)', padding: '7px 14px', display: 'inline-block', fontWeight: 500 }}>
+                  School score updated to {diagScore}. It now flows through My Move and Overview.
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>
