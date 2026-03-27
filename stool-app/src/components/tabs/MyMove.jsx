@@ -1,4 +1,4 @@
-﻿import { useProfile } from '../../context/ProfileContext.jsx'
+import { useProfile } from '../../context/ProfileContext.jsx'
 import { HOF, DLBLS, DCOLS } from '../../data/hofstede.js'
 import { CTRY_DATA } from '../../data/geo.js'
 import { SALARY_DB_SEED } from '../../data/salaryDb.js'
@@ -42,6 +42,12 @@ const DIM_PLAIN_GUIDE = {
   },
 }
 
+const MONEY = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  maximumFractionDigits: 0,
+})
+
 function gapLevel(gap) {
   if (gap > 30) return 'big'
   if (gap > 15) return 'noticeable'
@@ -49,9 +55,9 @@ function gapLevel(gap) {
 }
 
 function gapLabel(gap) {
-  if (gap > 30) return 'Big change'
-  if (gap > 15) return 'Noticeable change'
-  return 'Small change'
+  if (gap > 30) return 'Big adjustment'
+  if (gap > 15) return 'Noticeable adjustment'
+  return 'Smaller adjustment'
 }
 
 function gapColor(gap) {
@@ -68,6 +74,76 @@ function compareDirection(cur, dest, key) {
   return dest > cur ? guide.high : guide.low
 }
 
+function legMeta(diff) {
+  if (diff > 1) {
+    return {
+      label: 'Likely stronger',
+      toneBg: '#E1F5EE',
+      toneText: 'var(--teal-dark)',
+      summary: 'On paper, this destination looks stronger than your current post.',
+    }
+  }
+  if (diff < -1) {
+    return {
+      label: 'Likely tougher',
+      toneBg: '#FAECE7',
+      toneText: 'var(--coral-dark)',
+      summary: 'This looks like a weaker leg than what you have now, so it needs careful checking.',
+    }
+  }
+  return {
+    label: 'Likely similar',
+    toneBg: '#E6F1FB',
+    toneText: 'var(--blue-dark)',
+    summary: 'This looks broadly similar to your current post at country level.',
+  }
+}
+
+function schoolReasons(hDest, yrsBuffer, yrsValue) {
+  if (!hDest) return []
+
+  const reasons = [
+    `Hierarchy score ${hDest[0]} and structure score ${hDest[3]} help estimate how top-down and rule-bound schools may feel.`,
+    `Competition score ${hDest[2]} helps estimate whether the professional culture may feel more pressured or more collaborative.`,
+    'This is a country-level school forecast, not a verdict on one specific school.',
+  ]
+
+  if (yrsBuffer > 0) {
+    reasons.splice(
+      2,
+      0,
+      `${yrsValue} abroad adds an adaptation buffer because experienced international teachers often settle into new systems faster.`
+    )
+  }
+
+  return reasons
+}
+
+function placeReasons(dest, homeGap) {
+  if (!dest) return []
+
+  const reasons = [
+    `Quality of life ${dest.ql}/100, safety ${dest.safety}/100, and expat fit ${dest.expat}/100 shape this place forecast.`,
+    `A cost-of-living index of ${dest.col} helps us separate a good salary from an actually comfortable life.`,
+  ]
+
+  if (homeGap > 30) {
+    reasons.push('There is also a meaningful culture shift from your home baseline, which can make the first months feel heavier outside school.')
+  }
+
+  return reasons
+}
+
+function packageReasons(dest) {
+  if (!dest) return []
+
+  return [
+    `Median teacher salary is about ${MONEY.format(dest.medSal)} per month at country level.`,
+    `${dest.housingRate}% of schools are estimated to offer housing and ${dest.flightRate}% to offer flights.`,
+    dest.taxFree ? 'Tax treatment is likely to be favorable compared with many markets.' : 'Tax treatment looks more standard, so net savings need checking.',
+  ]
+}
+
 export default function MyMove() {
   const { profile, editProfile } = useProfile()
   const { cc, dc, dcity, pkg: curPkg, plc: curPlc, sch: curSch } = profile
@@ -76,7 +152,12 @@ export default function MyMove() {
     return (
       <div className="tp active">
         <div style={{ fontFamily: 'var(--serif)', fontSize: '1.5rem', marginBottom: '.35rem' }}>Forecast my move</div>
-        <div className="ibox info">No destination selected. <span onClick={editProfile} style={{ fontWeight: 500, cursor: 'pointer', textDecoration: 'underline' }}>Add a destination in your profile -&gt;</span></div>
+        <div className="ibox info">
+          No destination selected.{' '}
+          <span onClick={editProfile} style={{ fontWeight: 500, cursor: 'pointer', textDecoration: 'underline' }}>
+            Add a destination in your profile -&gt;
+          </span>
+        </div>
       </div>
     )
   }
@@ -93,9 +174,9 @@ export default function MyMove() {
   }
 
   let plcPred = 5
+  const homeIndividualismGap = hHome && hDest ? Math.abs(hHome[1] - hDest[1]) : 0
   if (dest) {
-    const idvGap = hHome && hDest ? Math.abs(hHome[1] - hDest[1]) : 0
-    plcPred = Math.min(10, Math.max(1, Math.round(((dest.ql / 20) + (dest.safety / 25) + (dest.expat / 25)) / 3 * 10 + (idvGap > 50 ? -1 : idvGap > 30 ? -0.5 : 0))))
+    plcPred = Math.min(10, Math.max(1, Math.round(((dest.ql / 20) + (dest.safety / 25) + (dest.expat / 25)) / 3 * 10 + (homeIndividualismGap > 50 ? -1 : homeIndividualismGap > 30 ? -0.5 : 0))))
   }
 
   const yrsValue = profile.yrs || ''
@@ -116,39 +197,89 @@ export default function MyMove() {
   }
 
   const legs = [
-    { l: 'School', cur: curSch, pred: schPred, col: '#BA7517' },
-    { l: 'Place', cur: curPlc, pred: plcPred, col: '#534AB7' },
-    { l: 'Package', cur: curPkg, pred: pkgPred, col: '#1D9E75' },
+    {
+      l: 'School',
+      cur: curSch,
+      pred: schPred,
+      col: '#BA7517',
+      reasons: schoolReasons(hDest, yrsBuffer, yrsValue),
+    },
+    {
+      l: 'Place',
+      cur: curPlc,
+      pred: plcPred,
+      col: '#534AB7',
+      reasons: placeReasons(dest, homeIndividualismGap),
+    },
+    {
+      l: 'Package',
+      cur: curPkg,
+      pred: pkgPred,
+      col: '#1D9E75',
+      reasons: packageReasons(dest),
+    },
   ]
 
   return (
     <div className="tp active">
       <div style={{ fontFamily: 'var(--serif)', fontSize: '1.5rem', marginBottom: '.35rem' }}>Forecast my move</div>
-      <div style={{ fontSize: 13, color: 'var(--ink-3)', marginBottom: yrsBuffer > 0 ? '.75rem' : '1.5rem', lineHeight: 1.5 }}>
-        Predicted stool at {dcity ? `${dcity}, ` : ''}{dc} - based on {SALARY_DB_SEED.length.toLocaleString()} educator salary records, cultural research data, and quality-of-life indices.
+      <div style={{ fontSize: 13, color: 'var(--ink-3)', marginBottom: '.85rem', lineHeight: 1.6, maxWidth: 760 }}>
+        This is a country-level forecast for {dcity ? `${dcity}, ` : ''}{dc}. It combines {SALARY_DB_SEED.length.toLocaleString()} salary records, cost and quality-of-life data, and cross-cultural research so you can see where the move looks strong and where to ask harder questions.
+      </div>
+
+      <div className="ibox info" style={{ marginBottom: yrsBuffer > 0 ? '.75rem' : '1.25rem' }}>
+        Use this as a starting point, not a promise. One school, neighborhood, or contract can still differ a lot from the country-level picture.
       </div>
 
       {yrsBuffer > 0 && (
         <div style={{ background: '#EEEDFE', border: '1px solid #534AB733', borderLeft: '3px solid #534AB7', borderRadius: '0 var(--r) var(--r) 0', padding: '.625rem 1rem', fontSize: 12.5, color: '#3C3489', lineHeight: 1.55, marginBottom: '1.25rem' }}>
-          <strong>{profile.yrs} abroad.</strong> Your school score is adjusted upward by {yrsBuffer === 1 ? '1 point' : `${yrsBuffer} points`} - experienced international teachers usually adapt to new cultural environments faster.
+          <strong>{profile.yrs} abroad.</strong> Your school forecast is adjusted upward by {yrsBuffer === 1 ? '1 point' : `${yrsBuffer} points`} because teachers with more international experience usually adapt to new systems faster.
         </div>
       )}
 
       <div className="g3" style={{ marginBottom: '1.5rem' }}>
         {legs.map((leg) => {
-          const d = leg.pred - leg.cur
-          const cls = d > 1 ? '#E1F5EE' : d < -1 ? '#FAECE7' : '#E6F1FB'
-          const arrow = d > 1 ? '^' : d < -1 ? 'v' : '='
+          const diff = leg.pred - leg.cur
+          const meta = legMeta(diff)
+
           return (
-            <div key={leg.l} style={{ background: cls, border: `1px solid ${leg.col}33`, borderRadius: 'var(--rl)', padding: '1.5rem' }}>
-              <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--ink-2)', marginBottom: '.5rem' }}>{leg.l}</div>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '.75rem', marginBottom: '.5rem' }}>
-                <span style={{ fontSize: '1.2rem', color: 'var(--ink-3)' }}>Now: <strong>{leg.cur}</strong></span>
-                <span style={{ fontSize: '0.9rem', fontWeight: 600, letterSpacing: '.04em', textTransform: 'uppercase', color: 'var(--ink-3)' }}>{changeLabel}</span>
-                <span style={{ fontSize: '1.75rem', fontWeight: 500, color: leg.col }}>{leg.pred}</span>
+            <div key={leg.l} style={{ background: 'white', border: `1px solid ${leg.col}33`, borderRadius: 'var(--rl)', padding: '1.35rem', display: 'flex', flexDirection: 'column', gap: '.9rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'flex-start' }}>
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--ink-2)', marginBottom: '.35rem' }}>{leg.l}</div>
+                  <div style={{ fontSize: 12.5, color: 'var(--ink-3)', lineHeight: 1.55 }}>{meta.summary}</div>
+                </div>
+                <span style={{ background: meta.toneBg, color: meta.toneText, borderRadius: 999, padding: '5px 10px', fontSize: 11, fontWeight: 600, whiteSpace: 'nowrap' }}>
+                  {meta.label}
+                </span>
               </div>
-              <div style={{ fontSize: 12, lineHeight: 1.55, opacity: .9 }}>
-                {d > 1 ? `Conditions in ${dc} suggest improvement.` : d < -1 ? 'This leg may be weaker - investigate before committing.' : 'Similar conditions predicted.'}
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: '.75rem', alignItems: 'center' }}>
+                <div style={{ background: 'var(--surface-2)', borderRadius: 'var(--r)', padding: '.8rem .9rem' }}>
+                  <div style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--ink-4)', marginBottom: 4 }}>Your current score</div>
+                  <div style={{ fontSize: '1.8rem', fontWeight: 500, lineHeight: 1, color: 'var(--ink)' }}>{leg.cur}</div>
+                </div>
+
+                <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: '.04em' }}>
+                  to
+                </div>
+
+                <div style={{ background: `${leg.col}12`, borderRadius: 'var(--r)', padding: '.8rem .9rem' }}>
+                  <div style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--ink-4)', marginBottom: 4 }}>Forecast at {dc}</div>
+                  <div style={{ fontSize: '1.8rem', fontWeight: 600, lineHeight: 1, color: leg.col }}>{leg.pred}</div>
+                </div>
+              </div>
+
+              <div>
+                <div style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--ink-4)', marginBottom: '.4rem' }}>Why we think this</div>
+                <div style={{ display: 'grid', gap: '.45rem' }}>
+                  {leg.reasons.map((reason) => (
+                    <div key={reason} style={{ fontSize: 12.5, color: 'var(--ink-2)', lineHeight: 1.55, paddingLeft: '.85rem', position: 'relative' }}>
+                      <span style={{ position: 'absolute', left: 0, top: 0, color: leg.col }}>•</span>
+                      {reason}
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           )
@@ -157,9 +288,9 @@ export default function MyMove() {
 
       {hCur && hDest && (
         <div className="card">
-          <div className="ct">What may feel different</div>
+          <div className="ct">Where the adjustment may show up first</div>
           <div className="cs">
-            Moving from {cc} to {dc}. These are the parts of daily work and life most likely to feel different at first.
+            These are the areas of daily work and life that may feel most different when moving from {cc} to {dc}. They are prompts to notice, not assumptions to make about every person you meet.
           </div>
 
           {DLBLS.map((d, i) => {
@@ -197,7 +328,7 @@ export default function MyMove() {
                 </div>
 
                 <div style={{ fontSize: 12.5, color: 'var(--ink-2)', lineHeight: 1.6, marginTop: 8 }}>
-                  {directionText || `This part of life may feel fairly familiar, with less day-to-day adjustment needed.`}
+                  {directionText || 'This part of life may feel fairly familiar, with less day-to-day adjustment needed.'}
                 </div>
               </div>
             )
@@ -207,5 +338,3 @@ export default function MyMove() {
     </div>
   )
 }
-
-
