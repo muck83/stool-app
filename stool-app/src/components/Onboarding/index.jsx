@@ -32,7 +32,20 @@ function StoolSVG({ width = 110, height = 116 }) {
   )
 }
 
-function Splash({ onNext }) {
+function Splash({ onNext, onSkip, onLoadFromCloud }) {
+  const [showReturn, setShowReturn] = useState(false)
+  const [returnEmail, setReturnEmail] = useState('')
+  const [returnState, setReturnState] = useState('idle') // 'idle' | 'loading' | 'error' | 'not-found'
+
+  const handleLoad = async () => {
+    if (!returnEmail.trim()) return
+    setReturnState('loading')
+    const result = await onLoadFromCloud(returnEmail.trim())
+    if (result.ok) return // ProfileContext navigates away automatically
+    setReturnState(result.error === 'not-found' ? 'not-found' : 'error')
+    setTimeout(() => setReturnState('idle'), 4000)
+  }
+
   return (
     <div style={{ textAlign: 'center', padding: '.5rem 0 1rem' }}>
       <StoolSVG />
@@ -59,9 +72,56 @@ function Splash({ onNext }) {
           <strong>The catch:</strong> recruiters lead with the package. Almost every teacher who regrets a move over-weighted the package and underestimated the school. This platform is built to correct that.
         </div>
       </div>
+
+      {/* Returning user panel */}
+      {showReturn && (
+        <div className="spl-au" style={{ '--dd': '0ms', '--sd': '200ms', background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--r)', padding: '1rem', marginBottom: '1rem', textAlign: 'left' }}>
+          <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)', marginBottom: '.5rem' }}>Load your saved profile</div>
+          <div style={{ fontSize: 12, color: 'var(--ink-3)', marginBottom: '.625rem', lineHeight: 1.5 }}>Enter the email you used when you saved your profile.</div>
+          <div style={{ display: 'flex', gap: '.5rem' }}>
+            <input
+              type="email"
+              value={returnEmail}
+              onChange={e => setReturnEmail(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleLoad()}
+              placeholder="your@email.com"
+              style={{ flex: 1, fontSize: 13, padding: '7px 10px', border: '1px solid var(--border)', borderRadius: 'var(--r)', outline: 'none' }}
+              autoFocus
+            />
+            <button
+              onClick={handleLoad}
+              disabled={returnState === 'loading' || !returnEmail.trim()}
+              style={{ fontSize: 13, fontWeight: 500, padding: '7px 14px', background: 'var(--teal)', color: 'white', border: 'none', borderRadius: 'var(--r)', cursor: returnState === 'loading' ? 'wait' : 'pointer', whiteSpace: 'nowrap', opacity: !returnEmail.trim() ? 0.5 : 1 }}
+            >
+              {returnState === 'loading' ? 'Loading…' : 'Load →'}
+            </button>
+          </div>
+          {returnState === 'not-found' && (
+            <div style={{ marginTop: '.5rem', fontSize: 12, color: '#D85A30' }}>No profile found for that email. Try building one now.</div>
+          )}
+          {returnState === 'error' && (
+            <div style={{ marginTop: '.5rem', fontSize: 12, color: '#D85A30' }}>Something went wrong. Check your connection and try again.</div>
+          )}
+          <button onClick={() => setShowReturn(false)} style={{ marginTop: '.625rem', fontSize: 11, color: 'var(--ink-4)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+            ← Cancel
+          </button>
+        </div>
+      )}
+
       <button className="spl-au btn btn-primary" style={{ '--dd': '3200ms', '--sd': '500ms', width: '100%', fontSize: 15, padding: 14 }} onClick={onNext}>
         Build my profile →
       </button>
+
+      <div className="spl-au" style={{ '--dd': '3500ms', '--sd': '500ms', display: 'flex', justifyContent: 'center', gap: '1.5rem', marginTop: '.875rem' }}>
+        {!showReturn && (
+          <button onClick={() => setShowReturn(true)} style={{ fontSize: 12, color: 'var(--teal-dark)', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', textDecorationColor: 'var(--teal)40', padding: 0 }}>
+            Returning? Load my profile
+          </button>
+        )}
+        <button onClick={onSkip} style={{ fontSize: 12, color: 'var(--ink-4)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+          Browse first →
+        </button>
+      </div>
     </div>
   )
 }
@@ -157,7 +217,7 @@ const STEPS = [
 ]
 
 export default function Onboarding() {
-  const { launchDashboard } = useProfile()
+  const { launchDashboard, skipOnboarding, loadFromCloud } = useProfile()
   const [step, setStep] = useState(0)
   const [form, setForm] = useState({
     name: '', home: '', yrs: '', curr: '',
@@ -193,7 +253,7 @@ export default function Onboarding() {
       <div className="ob-card fu">
         <div className="ob-dots">{dots}</div>
 
-        {step === 0 && <Splash onNext={() => setStep(1)} />}
+        {step === 0 && <Splash onNext={() => setStep(1)} onSkip={skipOnboarding} onLoadFromCloud={loadFromCloud} />}
 
         {step > 0 && (
           <>

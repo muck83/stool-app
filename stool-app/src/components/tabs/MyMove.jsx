@@ -41,16 +41,12 @@ export default function MyMove() {
     const idvGap = hHome && hDest ? Math.abs(hHome[1] - hDest[1]) : 0
     plcPred = Math.min(10, Math.max(1, Math.round(((dest.ql / 20) + (dest.safety / 25) + (dest.expat / 25)) / 3 * 10 + (idvGap > 50 ? -1 : idvGap > 30 ? -0.5 : 0))))
   }
-  // yrs abroad acts as an adaptation buffer — experienced international teachers
-  // adjust to new cultural environments faster, reducing the cultural adjustment cost
-  const yrsBuffer = profile.yrs === '15+ years' ? 1 : profile.yrs === '8–15 years' ? 0.5 : profile.yrs === '4–7 years' ? 0.25 : 0
-
   let schPred = 5
   if (dest && hDest) {
     const pdiS = hDest[0] > 80 ? 3 : hDest[0] > 60 ? 4 : hDest[0] > 40 ? 5 : 6
     const masS = hDest[2] > 80 ? 3 : hDest[2] > 60 ? 4 : hDest[2] > 40 ? 5 : 6
     const uaiS = hDest[3] > 80 ? 4 : hDest[3] > 60 ? 5 : hDest[3] > 40 ? 5 : 6
-    schPred = Math.min(9, Math.round((pdiS + masS + uaiS) / 3 + yrsBuffer))
+    schPred = Math.min(9, Math.round((pdiS + masS + uaiS) / 3))
   }
 
   const legs = [
@@ -62,14 +58,9 @@ export default function MyMove() {
   return (
     <div className="tp active">
       <div style={{ fontFamily: 'var(--serif)', fontSize: '1.5rem', marginBottom: '.35rem' }}>Forecast my move</div>
-      <div style={{ fontSize: 13, color: 'var(--ink-3)', marginBottom: yrsBuffer > 0 ? '.75rem' : '1.5rem', lineHeight: 1.5 }}>
+      <div style={{ fontSize: 13, color: 'var(--ink-3)', marginBottom: '1.5rem', lineHeight: 1.5 }}>
         Predicted stool at {dcity ? dcity + ', ' : ''}{dc} — based on {SALARY_DB_SEED.length.toLocaleString()} educator salary records, cultural research data, and quality-of-life indices.
       </div>
-      {yrsBuffer > 0 && (
-        <div style={{ background: '#EEEDFE', border: '1px solid #534AB733', borderLeft: '3px solid #534AB7', borderRadius: '0 var(--r) var(--r) 0', padding: '.625rem 1rem', fontSize: 12.5, color: '#3C3489', lineHeight: 1.55, marginBottom: '1.25rem' }}>
-          <strong>{profile.yrs} abroad.</strong> Your school score is adjusted upward by {yrsBuffer === 1 ? '1 point' : `${yrsBuffer} points`} — experienced international teachers adapt to new cultural environments faster.
-        </div>
-      )}
       <div className="g3" style={{ marginBottom: '1.5rem' }}>
         {legs.map(leg => {
           const d = leg.pred - leg.cur
