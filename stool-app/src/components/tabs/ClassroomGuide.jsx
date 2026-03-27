@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useProfile } from '../../context/ProfileContext.jsx'
 import { FAQ_DATA } from '../../data/faqData.js'
 import { HOF } from '../../data/hofstede.js'
@@ -6,7 +6,7 @@ import { HOF } from '../../data/hofstede.js'
 const CATEGORY_CONFIG = {
   participation: {
     label: 'Participation',
-    icon: '🙋',
+    icon: 'P',
     subtitle: 'Who speaks, who stays silent, and why',
     getSummary: (country, h) => {
       if (!h) return null
@@ -24,7 +24,7 @@ const CATEGORY_CONFIG = {
   },
   communication: {
     label: 'Communication',
-    icon: '💬',
+    icon: 'C',
     subtitle: '"Yes" may not mean yes - and other translation gaps',
     getSummary: (country, h) => {
       if (!h) return null
@@ -42,7 +42,7 @@ const CATEGORY_CONFIG = {
   },
   learning: {
     label: 'Learning styles',
-    icon: '📚',
+    icon: 'L',
     subtitle: 'How students engage with tasks, structure, and uncertainty',
     getSummary: (country, h) => {
       if (!h) return null
@@ -60,7 +60,7 @@ const CATEGORY_CONFIG = {
   },
   parents: {
     label: 'Parent relationships',
-    icon: '👨‍👩‍👧',
+    icon: 'Pa',
     subtitle: 'Why parents engage the way they do',
     getSummary: (country, h) => {
       if (!h) return null
@@ -82,7 +82,7 @@ const CATEGORY_CONFIG = {
   },
   relationships: {
     label: 'Relationships',
-    icon: '🤝',
+    icon: 'R',
     subtitle: 'Teacher-student warmth, trust, and where the lines are',
     getSummary: (country, h) => {
       if (!h) return null
@@ -308,3 +308,6 @@ export default function ClassroomGuide() {
     </div>
   )
 }
+
+
+

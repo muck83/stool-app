@@ -1,4 +1,4 @@
-import { useProfile } from '../../context/ProfileContext.jsx'
+﻿import { useProfile } from '../../context/ProfileContext.jsx'
 import { HOF, DLBLS, DCOLS } from '../../data/hofstede.js'
 import { CTRY_DATA } from '../../data/geo.js'
 import { SALARY_DB_SEED } from '../../data/salaryDb.js'
@@ -138,7 +138,7 @@ export default function MyMove() {
         {legs.map((leg) => {
           const d = leg.pred - leg.cur
           const cls = d > 1 ? '#E1F5EE' : d < -1 ? '#FAECE7' : '#E6F1FB'
-          const arrow = d > 1 ? '↑' : d < -1 ? '↓' : '→'
+          const arrow = d > 1 ? '^' : d < -1 ? 'v' : '='
           return (
             <div key={leg.l} style={{ background: cls, border: `1px solid ${leg.col}33`, borderRadius: 'var(--rl)', padding: '1.5rem' }}>
               <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--ink-2)', marginBottom: '.5rem' }}>{leg.l}</div>
@@ -207,3 +207,4 @@ export default function MyMove() {
     </div>
   )
 }
+
