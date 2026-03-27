@@ -138,6 +138,7 @@ export async function insertSchoolReview({ school, country, answers, hours }) {
   return data
 }
 
+// Fetch reviews for an exact school name
 export async function fetchSchoolReviews(school) {
   if (!supabase) return []
   const { data, error } = await supabase
@@ -145,6 +146,19 @@ export async function fetchSchoolReviews(school) {
     .select('*')
     .ilike('school', school)
   if (error) { console.error('Supabase fetch error:', error); return [] }
+  return data || []
+}
+
+// Search reviews by partial school name — used by MySchool search panel
+export async function searchSchoolReviews(query) {
+  if (!supabase || !query.trim()) return []
+  const { data, error } = await supabase
+    .from('school_reviews')
+    .select('*')
+    .ilike('school', `%${query.trim()}%`)
+    .not('status', 'eq', 'removed')
+    .order('created_at', { ascending: false })
+  if (error) { console.error('Supabase search error:', error); return [] }
   return data || []
 }
 

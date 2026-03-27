@@ -32,50 +32,35 @@ function StoolSVG({ width = 110, height = 116 }) {
 
 function Splash({ onNext }) {
   return (
-    <div style={{ padding: '.25rem 0 1rem' }}>
-
-      {/* Vision statement */}
-      <div className="spl-a" style={{ '--dd': '200ms', '--sd': '500ms', fontSize: 14, color: 'var(--ink-2)', lineHeight: 1.75, marginBottom: '1.25rem' }}>
-        Most teachers discover what's wrong with a posting <em>after</em> they sign.
-        stool uses real salary data, school intelligence, and cultural research to change that — built by a teacher who needed it.
+    <div style={{ textAlign: 'center', padding: '.5rem 0 1rem' }}>
+      <StoolSVG />
+      <div className="spl-a" style={{ '--dd': '1620ms', '--sd': '600ms', fontSize: 11, color: 'var(--ink-4)', letterSpacing: '.13em', textTransform: 'uppercase', fontWeight: 500, marginBottom: '1.5rem' }}>
+        school · place · package
       </div>
 
-      {/* Three legs */}
-      <div className="spl-a" style={{ '--dd': '500ms', '--sd': '500ms', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '.625rem', marginBottom: '1.25rem' }}>
+      <div className="spl-a" style={{ '--dd': '2100ms', '--sd': '600ms', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '.625rem', marginBottom: '1.5rem' }}>
         {[
-          { color: '#BA7517', bg: '#FAEEDA', textColor: '#633806', subColor: '#854F0B', label: 'School', desc: 'Leadership · culture · workload · colleagues' },
-          { color: '#534AB7', bg: '#EEEDFE', textColor: '#26215C', subColor: '#3C3489', label: 'Place', desc: 'City · safety · lifestyle · family' },
-          { color: '#1D9E75', bg: '#E1F5EE', textColor: '#085041', subColor: '#0F6E56', label: 'Package', desc: 'Salary · housing · flights · tax' },
+          { color: '#BA7517', bg: '#FAEEDA', textColor: '#633806', subColor: '#854F0B', label: 'School', desc: 'Leadership · culture · mission · your daily professional life' },
+          { color: '#534AB7', bg: '#EEEDFE', textColor: '#26215C', subColor: '#3C3489', label: 'Place', desc: 'City · safety · family · everything outside school hours' },
+          { color: '#1D9E75', bg: '#E1F5EE', textColor: '#085041', subColor: '#0F6E56', label: 'Package', desc: 'Salary · housing · flights · tax — the financial picture' },
         ].map(leg => (
           <div key={leg.label} style={{ borderTop: `3px solid ${leg.color}`, borderRadius: '0 0 8px 8px', border: `1px solid ${leg.color}33`, borderTopWidth: 3, padding: '.875rem .625rem', background: leg.bg }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: leg.textColor, marginBottom: '.3rem' }}>{leg.label}</div>
+            <div style={{ fontSize: 13, fontWeight: 500, color: leg.textColor, marginBottom: '.3rem' }}>{leg.label}</div>
             <div style={{ fontSize: 11, color: leg.subColor, lineHeight: 1.5 }}>{leg.desc}</div>
           </div>
         ))}
       </div>
 
-      {/* The 2-of-3 rule */}
-      <div className="spl-a" style={{ '--dd': '900ms', '--sd': '500ms', background: 'var(--surface-2)', borderRadius: 'var(--r)', padding: '.875rem 1rem', marginBottom: '.75rem', fontSize: 13, color: 'var(--ink-2)', lineHeight: 1.65 }}>
-        <strong>The 2-of-3 rule:</strong> you need at least 2 legs solid to sustain a posting.
-        Recruiters lead with package. Almost every teacher who regrets a move underestimated school and place. This platform is built to correct that asymmetry.
-      </div>
-
-      {/* Privacy trust block */}
-      <div className="spl-a" style={{ '--dd': '1200ms', '--sd': '500ms', background: 'white', border: '1px solid var(--border)', borderRadius: 'var(--r)', padding: '.875rem 1rem', marginBottom: '1.25rem' }}>
-        <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--ink)', marginBottom: '.5rem' }}>
-          🔒 Your data stays on your device
+      <div className="spl-a" style={{ '--dd': '2700ms', '--sd': '600ms', marginBottom: '1.25rem' }}>
+        <div style={{ background: 'var(--surface-2)', borderRadius: 'var(--r)', padding: '.875rem 1rem', marginBottom: '.625rem', fontSize: 13, color: 'var(--ink-2)', lineHeight: 1.65, textAlign: 'left' }}>
+          <strong>You need at least 2 of 3 to be solid.</strong> One weak leg is survivable. Two weak legs is a posting you should leave. Most teachers discover this <em>after</em> they sign.
         </div>
-        <div style={{ fontSize: 12.5, color: 'var(--ink-3)', lineHeight: 1.7, marginBottom: '.625rem' }}>
-          Your profile is saved locally in your browser — we collect no names, no email addresses, no identifying information. We're not tracking you.
-        </div>
-        <div style={{ display: 'flex', gap: '.5rem', flexWrap: 'wrap' }}>
-          {['Anonymous submissions only', 'No recruiters or school access', 'No ads or sponsored content'].map(t => (
-            <span key={t} style={{ fontSize: 11, background: '#F0F9F6', border: '1px solid #1D9E7533', borderRadius: 20, padding: '3px 10px', color: '#0F6E56' }}>✓ {t}</span>
-          ))}
+        <div style={{ background: '#FAEEDA', borderRadius: 'var(--r)', padding: '.875rem 1rem', fontSize: 13, color: '#633806', lineHeight: 1.65, textAlign: 'left', borderLeft: '3px solid #BA7517' }}>
+          <strong>The catch:</strong> recruiters lead with the package. Almost every teacher who regrets a move over-weighted the package and underestimated the school. This platform is built to correct that.
         </div>
       </div>
 
-      <button className="spl-au btn btn-primary" style={{ '--dd': '1500ms', '--sd': '500ms', width: '100%', fontSize: 15, padding: 14 }} onClick={onNext}>
+      <button className="spl-au btn btn-primary" style={{ '--dd': '3200ms', '--sd': '500ms', width: '100%', fontSize: 15, padding: 14 }} onClick={onNext}>
         Build my profile →
       </button>
     </div>
