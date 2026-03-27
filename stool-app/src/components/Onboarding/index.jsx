@@ -48,8 +48,7 @@ function Splash({ onNext, onSkip, onLoadFromCloud }) {
 
   return (
     <div style={{ textAlign: 'center', padding: '.5rem 0 1rem' }}>
-      <StoolSVG />
-      <div className="spl-a" style={{ '--dd': '1620ms', '--sd': '600ms', fontSize: 11, color: 'var(--ink-4)', letterSpacing: '.13em', textTransform: 'uppercase', fontWeight: 500, marginBottom: '1.5rem' }}>
+      <div className="spl-a" style={{ display: 'none' }}>
         school · place · package
       </div>
       <div className="spl-a" style={{ '--dd': '2100ms', '--sd': '600ms', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '.625rem', marginBottom: '1.5rem' }}>
