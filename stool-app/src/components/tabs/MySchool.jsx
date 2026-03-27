@@ -5,8 +5,13 @@ import { SALARY_DB_SEED } from '../../data/salaryDb.js'
 import SchoolAutocomplete from '../SchoolAutocomplete.jsx'
 import { insertSchoolReview, searchSchoolReviews } from '../../lib/supabase.js'
 
-const DIM_LABELS = { q1: 'Leadership', q2: 'Honesty', q3: 'Workload', q4: 'Autonomy', q5: 'Colleagues', q6: 'Mission', q7: 'Overall' }
-const DIM_KEYS   = ['q1','q2','q3','q4','q5','q6','q7']
+const DIM_LABELS = {
+  q1: 'Leadership', q2: 'Honesty',  q3: 'Workload', q4: 'Autonomy',
+  q5: 'Colleagues', q6: 'Mission',  q7: 'Overall',
+  q8: 'Exit safety', q9: 'Parents', q10: 'Family pkg',
+}
+const DIM_KEYS     = ['q1','q2','q3','q4','q5','q6','q7']
+const DIM_KEYS_ALL = ['q1','q2','q3','q4','q5','q6','q7','q8','q9','q10']
 
 function ProgressBar({ step, total }) {
   return (
@@ -18,8 +23,8 @@ function ProgressBar({ step, total }) {
   )
 }
 
-function ProfileCard({ school, country, answers, hours }) {
-  const scores = DIM_KEYS.map(k => answers[k]?.score).filter(s => s != null)
+function ProfileCard({ school, country, answers, hours, noticePeriod }) {
+  const scores = DIM_KEYS_ALL.map(k => answers[k]?.score).filter(s => s != null)
   const overall = scores.length ? Math.round(scores.reduce((a,b) => a+b, 0) / scores.length * 10) / 10 : null
 
   const diagCounts = {}
@@ -46,14 +51,15 @@ function ProfileCard({ school, country, answers, hours }) {
         <div style={{ fontSize: 11.5, color: 'var(--amber)', marginTop: 2 }}>{country} · {new Date().getFullYear()}</div>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', border: '1px solid var(--border)', borderTop: 'none', overflow: 'hidden' }}>
-        {['q1','q2','q3','q4','q5','q6'].map(k => {
+        {DIM_KEYS_ALL.filter(k => k !== 'q7').map(k => {
           const s = answers[k]?.score
           const c = SR_DIM_COLORS[k]
+          const isNew = ['q8','q9','q10'].includes(k)
           return (
-            <div key={k} style={{ padding: '.75rem 1rem', borderBottom: '1px solid var(--border)', borderRight: '1px solid var(--border)' }}>
-              <div style={{ fontSize: 10, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '.07em', color: 'var(--ink-4)', marginBottom: 3 }}>{DIM_LABELS[k]}</div>
+            <div key={k} style={{ padding: '.75rem 1rem', borderBottom: '1px solid var(--border)', borderRight: '1px solid var(--border)', background: isNew ? 'var(--surface-2)' : 'white' }}>
+              <div style={{ fontSize: 10, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '.07em', color: isNew ? c : 'var(--ink-4)', marginBottom: 3 }}>{DIM_LABELS[k]}</div>
               <div style={{ fontSize: '1.25rem', fontWeight: 300, color: s ? c : '#9b9b96', marginBottom: 3 }}>{s || '—'}</div>
-              <div style={{ height: 4, background: 'var(--surface-2)', borderRadius: 2, overflow: 'hidden' }}>
+              <div style={{ height: 4, background: 'rgba(26,25,23,.08)', borderRadius: 2, overflow: 'hidden' }}>
                 <div style={{ width: `${s ? s * 10 : 0}%`, height: 4, background: c, borderRadius: 2 }} />
               </div>
             </div>
@@ -71,9 +77,18 @@ function ProfileCard({ school, country, answers, hours }) {
           <div style={{ fontSize: 13, color: 'var(--ink-2)', lineHeight: 1.65 }}>{diag.advice}</div>
         </div>
       )}
-      {hours && (
-        <div className="ibox" style={{ marginTop: '.75rem' }}>
-          <strong>{hours} hrs/week</strong> · {parseInt(hours) < 42 ? 'Below the international school average — a real positive.' : parseInt(hours) < 50 ? 'Around the international school average.' : 'Above average — worth naming in any future contract negotiation.'}
+      {(hours || noticePeriod) && (
+        <div style={{ display: 'flex', gap: '.625rem', flexWrap: 'wrap', marginTop: '.75rem' }}>
+          {hours && (
+            <div className="ibox" style={{ flex: 1, minWidth: 160 }}>
+              <strong>{hours} hrs/week</strong> · {parseInt(hours) < 42 ? 'Below average — a real positive.' : parseInt(hours) < 50 ? 'Around the sector average.' : 'Above average — worth naming in any contract negotiation.'}
+            </div>
+          )}
+          {noticePeriod && (
+            <div className="ibox" style={{ flex: 1, minWidth: 160 }}>
+              <strong>{noticePeriod} weeks notice</strong> · {parseInt(noticePeriod) <= 4 ? 'Standard — reasonable exit flexibility.' : parseInt(noticePeriod) <= 8 ? 'Longer than average — factor this into any job search timeline.' : 'Long notice period — significant exit risk if circumstances change.'}
+            </div>
+          )}
         </div>
       )}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '.875rem 1rem', background: 'var(--surface-2)', borderRadius: 'var(--r)', marginTop: '1rem' }}>
@@ -131,11 +146,15 @@ function SchoolSearchPanel() {
       return Object.values(r.answers).map(a => a?.score).filter(s => s != null)
     })
     const avg = allScores.length ? Math.round(allScores.reduce((a,b) => a+b,0) / allScores.length * 10) / 10 : null
-    const dimAvgs = DIM_KEYS.map(k => {
+    const dimAvgs = DIM_KEYS_ALL.map(k => {
       const scores = active.map(r => r.answers?.[k]?.score).filter(s => s != null)
       return { key: k, avg: scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length*10)/10 : null }
     })
-    return { avg, count: active.length, enough: true, dimAvgs }
+    const avgNotice = (() => {
+      const vals = active.map(r => parseInt(r.noticePeriod)).filter(n => !isNaN(n) && n > 0)
+      return vals.length ? Math.round(vals.reduce((a,b)=>a+b,0)/vals.length) : null
+    })()
+    return { avg, count: active.length, enough: true, dimAvgs, avgNotice }
   }
 
   return (
@@ -186,8 +205,9 @@ function SchoolSearchPanel() {
                 {/* Dimension scores */}
                 {stats.enough && stats.dimAvgs && (
                   <div style={{ padding: '.875rem 1.25rem' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '.5rem', marginBottom: '.5rem' }}>
-                      {stats.dimAvgs.slice(0, 6).map(({ key, avg: dimAvg }) => (
+                    {/* Core 6 dimensions */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '.5rem', marginBottom: '.75rem' }}>
+                      {stats.dimAvgs.filter(d => !['q7','q8','q9','q10'].includes(d.key)).map(({ key, avg: dimAvg }) => (
                         <div key={key} style={{ textAlign: 'center' }}>
                           <div style={{ fontSize: 10, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 4 }}>{DIM_LABELS[key]}</div>
                           <div style={{ fontSize: '1.25rem', fontWeight: 300, color: dimAvg ? SR_DIM_COLORS[key] : '#ccc' }}>{dimAvg || '—'}</div>
@@ -197,8 +217,31 @@ function SchoolSearchPanel() {
                         </div>
                       ))}
                     </div>
-                    <div style={{ fontSize: 11, color: 'var(--ink-4)', marginTop: '.5rem' }}>
-                      Based on {stats.count} teacher review{stats.count !== 1 ? 's' : ''} · Ratings are community-generated and independently verified.
+                    {/* Risk signals row */}
+                    {stats.dimAvgs.some(d => ['q8','q9','q10'].includes(d.key) && d.avg != null) && (
+                      <div style={{ borderTop: '1px solid var(--border)', paddingTop: '.625rem', marginBottom: '.5rem' }}>
+                        <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: '.5rem' }}>Risk signals</div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '.5rem' }}>
+                          {stats.dimAvgs.filter(d => ['q8','q9','q10'].includes(d.key)).map(({ key, avg: dimAvg }) => (
+                            <div key={key} style={{ textAlign: 'center', background: 'var(--surface-2)', borderRadius: 6, padding: '.5rem .25rem' }}>
+                              <div style={{ fontSize: 10, color: SR_DIM_COLORS[key], textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 4, fontWeight: 600 }}>{DIM_LABELS[key]}</div>
+                              <div style={{ fontSize: '1.15rem', fontWeight: 300, color: dimAvg ? SR_DIM_COLORS[key] : '#ccc' }}>{dimAvg || '—'}</div>
+                              <div style={{ height: 3, background: 'rgba(26,25,23,.1)', borderRadius: 2, marginTop: 4, overflow: 'hidden' }}>
+                                <div style={{ width: `${dimAvg ? dimAvg * 10 : 0}%`, height: 3, background: SR_DIM_COLORS[key], borderRadius: 2 }} />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        {stats.avgNotice && (
+                          <div style={{ marginTop: '.5rem', fontSize: 11.5, color: 'var(--ink-3)' }}>
+                            Avg notice period: <strong>{stats.avgNotice} weeks</strong>
+                            {stats.avgNotice > 8 ? ' — longer than sector average' : stats.avgNotice <= 4 ? ' — standard' : ''}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    <div style={{ fontSize: 11, color: 'var(--ink-4)', marginTop: '.25rem' }}>
+                      Based on {stats.count} teacher review{stats.count !== 1 ? 's' : ''} · Community-generated · Risk signals from reviews including exit safety, parent culture, and family package questions.
                     </div>
                   </div>
                 )}
@@ -224,11 +267,12 @@ function SchoolSearchPanel() {
 
 export default function MySchool() {
   const { profile } = useProfile()
-  const [step, setStep] = useState(0) // 0=identity, 1-7=questions, 8=result
+  const [step, setStep] = useState(0)
   const [school, setSchool] = useState('')
   const [country, setCountry] = useState(profile.cc || '')
   const [answers, setAnswers] = useState({})
   const [hours, setHours] = useState('')
+  const [noticePeriod, setNoticePeriod] = useState('')
   const [reviews, setReviews] = useState([])
 
   const selectOpt = (key, score, diag) => setAnswers(a => ({ ...a, [key]: { score, diag } }))
@@ -240,7 +284,7 @@ export default function MySchool() {
     } else if (step < SR_QS.length) {
       setStep(step + 1)
     } else {
-      const review = { school, country, answers: { ...answers }, hours }
+      const review = { school, country, answers: { ...answers }, hours, noticePeriod }
       setReviews(r => [...r, review])
       insertSchoolReview(review)
       setStep(SR_QS.length + 1)
@@ -250,7 +294,7 @@ export default function MySchool() {
   const back = () => { if (step > 0) setStep(step - 1) }
 
   const reset = () => {
-    setStep(0); setSchool(''); setCountry(profile.cc || ''); setAnswers({}); setHours('')
+    setStep(0); setSchool(''); setCountry(profile.cc || ''); setAnswers({}); setHours(''); setNoticePeriod('')
   }
 
   const q = step >= 1 && step <= SR_QS.length ? SR_QS[step - 1] : null
@@ -269,7 +313,7 @@ export default function MySchool() {
       <div className="g2" style={{ marginBottom: '1.25rem', alignItems: 'start' }}>
         <div>
           <div className="g3" style={{ marginBottom: '1.25rem' }}>
-            {[['3','reviews needed before a school profile becomes visible'],['10','reviews needed to feed the destination prediction model'],['7','behavioural questions — takes about 4 minutes']].map(([n, desc]) => (
+            {[['3','reviews needed before a school profile becomes visible'],['10','reviews needed to feed the destination prediction model'],['10','questions covering culture, exit safety, parent pressure, and family package']].map(([n, desc]) => (
               <div key={n} style={{ background: 'white', border: '1px solid var(--border)', borderRadius: 'var(--r)', padding: '1rem', textAlign: 'center' }}>
                 <div style={{ fontSize: '1.75rem', fontWeight: 300, color: n === '7' ? 'var(--amber)' : 'var(--ink)', marginBottom: 2 }}>{n}</div>
                 <div style={{ fontSize: 11, color: 'var(--ink-3)', lineHeight: 1.4 }}>{desc}</div>
@@ -300,7 +344,7 @@ export default function MySchool() {
 
         <div className="card" id="school-review-card">
           <div className="ct">School diagnostic</div>
-          <div className="cs">7 behavioural questions. You get a named diagnosis — leadership opacity, workload exploitation, mission drift — with a prognosis and specific advice.</div>
+          <div className="cs">10 questions covering school culture, exit safety, parent pressure, and family package reality. You get a named diagnosis with a prognosis and specific advice.</div>
           <ProgressBar step={step > 0 ? step - 1 : 0} total={SR_QS.length} />
 
           {step === 0 && (
@@ -347,6 +391,15 @@ export default function MySchool() {
                   </div>
                 </div>
               )}
+              {q.extra === 'notice' && (
+                <div style={{ marginBottom: '.875rem', padding: '.875rem 1rem', background: 'var(--surface-2)', borderRadius: 'var(--r)' }}>
+                  <label style={{ fontSize: 11, fontWeight: 500, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.06em', display: 'block', marginBottom: 8 }}>Notice period required — optional but important for future teachers</label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '.75rem' }}>
+                    <input type="number" value={noticePeriod} onChange={e => setNoticePeriod(e.target.value)} min={0} max={52} placeholder="e.g. 8" style={{ width: 100, padding: '10px 13px', border: '1px solid var(--border-2)', borderRadius: 'var(--r)', fontSize: 15, fontWeight: 500 }} />
+                    <span style={{ fontSize: 13, color: 'var(--ink-3)' }}>weeks notice required by contract</span>
+                  </div>
+                </div>
+              )}
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
                 <button className="btn btn-ghost" onClick={back}>← Back</button>
                 <button className="btn btn-amber" style={{ maxWidth: 160 }} onClick={next}>{step === SR_QS.length ? 'See diagnosis →' : 'Next →'}</button>
@@ -356,7 +409,7 @@ export default function MySchool() {
 
           {step === SR_QS.length + 1 && (
             <>
-              <ProfileCard school={school} country={country} answers={answers} hours={hours} />
+              <ProfileCard school={school} country={country} answers={answers} hours={hours} noticePeriod={noticePeriod} />
               <button className="btn btn-ghost" style={{ marginTop: '.875rem', fontSize: 13 }} onClick={reset}>Review another school</button>
             </>
           )}
