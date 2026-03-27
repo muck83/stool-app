@@ -1,11 +1,12 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { SR_QS, SR_DIAGNOSES, SR_DIM_COLORS } from '../../data/srQuestions.js'
 import { useProfile } from '../../context/ProfileContext.jsx'
 import { SALARY_DB_SEED } from '../../data/salaryDb.js'
 import SchoolAutocomplete from '../SchoolAutocomplete.jsx'
-import { insertSchoolReview } from '../../lib/supabase.js'
+import { insertSchoolReview, searchSchoolReviews } from '../../lib/supabase.js'
 
 const DIM_LABELS = { q1: 'Leadership', q2: 'Honesty', q3: 'Workload', q4: 'Autonomy', q5: 'Colleagues', q6: 'Mission', q7: 'Overall' }
+const DIM_KEYS   = ['q1','q2','q3','q4','q5','q6','q7']
 
 function ProgressBar({ step, total }) {
   return (
@@ -18,12 +19,11 @@ function ProgressBar({ step, total }) {
 }
 
 function ProfileCard({ school, country, answers, hours }) {
-  const keys = ['q1','q2','q3','q4','q5','q6','q7']
-  const scores = keys.map(k => answers[k]?.score).filter(s => s != null)
+  const scores = DIM_KEYS.map(k => answers[k]?.score).filter(s => s != null)
   const overall = scores.length ? Math.round(scores.reduce((a,b) => a+b, 0) / scores.length * 10) / 10 : null
 
   const diagCounts = {}
-  keys.forEach(k => {
+  DIM_KEYS.forEach(k => {
     const d = answers[k]?.diag
     if (d && d !== 'none') diagCounts[d] = (diagCounts[d] || 0) + 1
   })
@@ -90,6 +90,138 @@ function ProfileCard({ school, country, answers, hours }) {
   )
 }
 
+// ── School Search / Browse ────────────────────────────────────────────────────
+
+function SchoolSearchPanel() {
+  const [query, setQuery]       = useState('')
+  const [results, setResults]   = useState(null)  // null = not searched, [] = no results
+  const [loading, setLoading]   = useState(false)
+  const debounceRef = useRef(null)
+
+  const scoreColor = (s) => s >= 8 ? '#1D9E75' : s >= 6 ? '#BA7517' : s >= 4 ? '#D85A30' : '#A32D2D'
+  const scoreLabel = (s) => s >= 8 ? 'Strong posting' : s >= 6 ? 'Solid with caveats' : s >= 4 ? 'Significant concerns' : 'Serious warning signs'
+
+  const search = async (q) => {
+    if (!q.trim() || q.trim().length < 2) { setResults(null); return }
+    setLoading(true)
+    const data = await searchSchoolReviews(q.trim())
+    // Group by school name (ilike might return multiple schools)
+    const grouped = data.reduce((acc, r) => {
+      const key = r.school.toLowerCase()
+      if (!acc[key]) acc[key] = { school: r.school, country: r.country, reviews: [] }
+      acc[key].reviews.push(r)
+      return acc
+    }, {})
+    setResults(Object.values(grouped))
+    setLoading(false)
+  }
+
+  const handleChange = (e) => {
+    const val = e.target.value
+    setQuery(val)
+    clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => search(val), 400)
+  }
+
+  const getSchoolStats = (reviews) => {
+    const active = reviews.filter(r => !r.status || r.status === 'active' || r.status === 'verified')
+    if (active.length < 3) return { avg: null, count: active.length, enough: false }
+    const allScores = active.flatMap(r => {
+      if (!r.answers) return []
+      return Object.values(r.answers).map(a => a?.score).filter(s => s != null)
+    })
+    const avg = allScores.length ? Math.round(allScores.reduce((a,b) => a+b,0) / allScores.length * 10) / 10 : null
+    const dimAvgs = DIM_KEYS.map(k => {
+      const scores = active.map(r => r.answers?.[k]?.score).filter(s => s != null)
+      return { key: k, avg: scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length*10)/10 : null }
+    })
+    return { avg, count: active.length, enough: true, dimAvgs }
+  }
+
+  return (
+    <div style={{ marginBottom: '1.5rem' }}>
+      <div style={{ fontFamily: 'var(--serif)', fontSize: '1.1rem', marginBottom: '.35rem', color: 'var(--ink)' }}>Search school ratings</div>
+      <div style={{ fontSize: 12.5, color: 'var(--ink-3)', marginBottom: '.875rem', lineHeight: 1.6 }}>
+        See what teachers have said about a school before you sign. Ratings appear once 3+ teachers have reviewed a school.
+      </div>
+      <div style={{ display: 'flex', gap: 8, marginBottom: '1rem' }}>
+        <input
+          value={query}
+          onChange={handleChange}
+          placeholder="Search by school name, e.g. Bangkok Patana…"
+          style={{ flex: 1, padding: '10px 14px', border: '1px solid var(--border-2)', borderRadius: 'var(--r)', fontSize: 14 }}
+        />
+        {loading && <div style={{ display: 'flex', alignItems: 'center', fontSize: 12, color: 'var(--ink-4)', padding: '0 8px' }}>Searching…</div>}
+      </div>
+
+      {results !== null && results.length === 0 && !loading && (
+        <div style={{ padding: '1rem', background: 'var(--surface-2)', borderRadius: 'var(--r)', fontSize: 13, color: 'var(--ink-3)' }}>
+          No ratings yet for "{query}" — be the first to review this school below.
+        </div>
+      )}
+
+      {results && results.length > 0 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '.75rem' }}>
+          {results.map(({ school, country, reviews }) => {
+            const stats = getSchoolStats(reviews)
+            return (
+              <div key={school} style={{ background: 'white', border: '1px solid var(--border)', borderRadius: 'var(--r)', overflow: 'hidden' }}>
+                {/* School header */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.25rem', borderBottom: stats.enough ? '1px solid var(--border)' : 'none' }}>
+                  <div>
+                    <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--ink)' }}>{school}</div>
+                    <div style={{ fontSize: 11.5, color: 'var(--ink-4)', marginTop: 2 }}>
+                      {country} · {stats.count} review{stats.count !== 1 ? 's' : ''}
+                      {!stats.enough && ` · needs ${3 - stats.count} more to show ratings`}
+                    </div>
+                  </div>
+                  {stats.enough && stats.avg && (
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontSize: '2rem', fontWeight: 300, color: scoreColor(stats.avg), lineHeight: 1 }}>{stats.avg}</div>
+                      <div style={{ fontSize: 11, color: scoreColor(stats.avg), marginTop: 3 }}>{scoreLabel(stats.avg)}</div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Dimension scores */}
+                {stats.enough && stats.dimAvgs && (
+                  <div style={{ padding: '.875rem 1.25rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '.5rem', marginBottom: '.5rem' }}>
+                      {stats.dimAvgs.slice(0, 6).map(({ key, avg: dimAvg }) => (
+                        <div key={key} style={{ textAlign: 'center' }}>
+                          <div style={{ fontSize: 10, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 4 }}>{DIM_LABELS[key]}</div>
+                          <div style={{ fontSize: '1.25rem', fontWeight: 300, color: dimAvg ? SR_DIM_COLORS[key] : '#ccc' }}>{dimAvg || '—'}</div>
+                          <div style={{ height: 3, background: 'var(--surface-2)', borderRadius: 2, marginTop: 4, overflow: 'hidden' }}>
+                            <div style={{ width: `${dimAvg ? dimAvg * 10 : 0}%`, height: 3, background: SR_DIM_COLORS[key], borderRadius: 2 }} />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div style={{ fontSize: 11, color: 'var(--ink-4)', marginTop: '.5rem' }}>
+                      Based on {stats.count} teacher review{stats.count !== 1 ? 's' : ''} · Ratings are community-generated and independently verified.
+                    </div>
+                  </div>
+                )}
+
+                {/* Not enough reviews */}
+                {!stats.enough && (
+                  <div style={{ padding: '.75rem 1.25rem', background: '#FAFAF9', borderTop: '1px solid var(--border)' }}>
+                    <div style={{ fontSize: 12, color: 'var(--ink-4)', fontStyle: 'italic' }}>
+                      Ratings hidden until 3 teachers have reviewed. {3 - stats.count} more review{3 - stats.count !== 1 ? 's' : ''} needed.
+                    </div>
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Main export ───────────────────────────────────────────────────────────────
+
 export default function MySchool() {
   const { profile } = useProfile()
   const [step, setStep] = useState(0) // 0=identity, 1-7=questions, 8=result
@@ -110,7 +242,6 @@ export default function MySchool() {
     } else {
       const review = { school, country, answers: { ...answers }, hours }
       setReviews(r => [...r, review])
-      // Persist to Supabase (fire-and-forget)
       insertSchoolReview(review)
       setStep(SR_QS.length + 1)
     }
@@ -127,12 +258,16 @@ export default function MySchool() {
 
   return (
     <div className="tp active">
+      <div style={{ fontFamily: 'var(--serif)', fontSize: '1.5rem', marginBottom: '.35rem' }}>How was your experience at your school?</div>
+      <div style={{ fontSize: 13, color: 'var(--ink-3)', maxWidth: 480, lineHeight: 1.65, marginBottom: '1.25rem' }}>
+        Seven questions that surface the real picture — leadership, honesty, workload, autonomy, colleagues, mission. You get a named diagnosis and practical advice. Your responses also contribute to an aggregated school profile that helps other teachers make informed decisions.
+      </div>
+
+      {/* School search panel — always visible */}
+      <SchoolSearchPanel />
+
       <div className="g2" style={{ marginBottom: '1.25rem', alignItems: 'start' }}>
         <div>
-          <div style={{ fontFamily: 'var(--serif)', fontSize: '1.5rem', marginBottom: '.35rem' }}>What's actually wrong with your school?</div>
-          <div style={{ fontSize: 13, color: 'var(--ink-3)', maxWidth: 480, lineHeight: 1.65, marginBottom: '1.25rem' }}>
-            Seven behavioural questions that name the real issue — leadership, honesty, workload, autonomy, colleagues, mission. You get a named diagnosis, a prognosis, and practical advice. As a by-product, your responses contribute to an aggregated school profile that helps other teachers make the same decision you're navigating now.
-          </div>
           <div className="g3" style={{ marginBottom: '1.25rem' }}>
             {[['3','reviews needed before a school profile becomes visible'],['10','reviews needed to feed the destination prediction model'],['7','behavioural questions — takes about 4 minutes']].map(([n, desc]) => (
               <div key={n} style={{ background: 'white', border: '1px solid var(--border)', borderRadius: 'var(--r)', padding: '1rem', textAlign: 'center' }}>
