@@ -53,6 +53,8 @@ export const SCHOOL_ALIASES = {
   // Thailand
   'Concordian':                                   'Concordian International School',
   'Regents Int School':                           'Regents International School',
+  'ISB':                                          'International School Bangkok',
+  'NIST':                                         'NIST International School',
   'UWC Thailand International School':            'UWC Thailand',
 
   // China — YCIS network (ambiguous campus → full name; campus variants preserved)
@@ -60,33 +62,14 @@ export const SCHOOL_ALIASES = {
   'YCIS (Yew Chung International School)':        'Yew Chung International School',
   'YCIS Pudong':                                  'Yew Chung International School Pudong',
   'BASIS':                                        'BASIS International School',
+  'WAB':                                          'Western Academy of Beijing',
 
   // Vietnam
   'Vietnam Australia School':                     'Vietnam Australia International School',
   'Pennsylvania International School':            'Pennsylvania American International School',
   'TAS':                                          'The American School (TAS)',
   'American International school':                'American International School',
-}
-
-/**
- * Resolve a submitted school name to its canonical form.
- * Returns the canonical if found, otherwise returns the original.
- */
-export function resolveSchoolName(name) {
-  if (!name) return name
-  return SCHOOL_ALIASES[name] ?? name
-}
-
-/**
- * Soft-normalise for search/comparison only (not for storage).
- * Strips "The", lowercases, collapses whitespace.
- */
-export function normaliseForSearch(name) {
-  if (!name) return ''
-  return name
-    .toLowerCase()
-    .replace(/^the\s+/, '')
-    .replace(/[^a-z0-9\s]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-}
+  'BSKL':                                         'British International School of Kuala Lumpur',
+  'ISKL':                                         'International School of Kuala Lumpur',
+  'SAS':                                          'Singapore American School',
+  'UWCSEA':                                       'UWC South

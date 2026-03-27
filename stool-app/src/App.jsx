@@ -12,6 +12,7 @@ import Diagnostic from './components/tabs/Diagnostic.jsx'
 import Culture from './components/tabs/Culture.jsx'
 import Financial from './components/tabs/Financial.jsx'
 import Research from './components/tabs/Research.jsx'
+import About from './components/tabs/About.jsx'
 import Admin from './components/Admin.jsx'
 
 const TABS = [
@@ -24,6 +25,7 @@ const TABS = [
   { id: 'cultural',    label: 'Culture' },
   { id: 'financial',   label: 'Financial' },
   { id: 'research',    label: 'Research' },
+  { id: 'about',       label: 'About' },
 ]
 
 const TAB_COMPONENTS = {
@@ -36,6 +38,7 @@ const TAB_COMPONENTS = {
   cultural:   Culture,
   financial:  Financial,
   research:   Research,
+  about:      About,
 }
 
 function Dashboard() {
