@@ -6,34 +6,67 @@ import { SALARY_DB_SEED } from '../../data/salaryDb.js'
 import { PLACE_ATTRS, ATTR_CATEGORIES } from '../../data/places.js'
 import StoolViz from '../StoolViz.jsx'
 
-const DIM_DESCRIPTIONS = {
-  'Power Distance':        'How much people accept unequal distribution of power. High = hierarchical workplaces where authority is rarely questioned. Low = flat structures where staff challenge leadership.',
-  'Individualism':         'Whether people act as individuals or as part of a group. High = personal achievement and autonomy valued. Low = group loyalty, consensus, and collective harmony come first.',
-  'Masculinity':           'Preference for competition vs cooperation. High = assertiveness, achievement, and results-orientation dominate. Low = collaboration, work-life balance, and caring for others are prioritised.',
-  'Uncertainty Avoidance': 'Tolerance for ambiguity. High = strong need for rules, structure, and predictability. Low = comfortable with improvisation, flexibility, and not knowing what comes next.',
-  'Long-term Orientation': 'Focus on the future vs the present. High = thrift, perseverance, and investing for the long run. Low = respect for tradition, short-term results, and fulfilling social obligations.',
-  'Indulgence':            'How much people try to control impulses and desires. High = enjoy life, leisure, and having fun. Low = restraint, regulation of gratification, and strict social norms.',
+// Translate a Hofstede score into a practical lived experience for a teacher
+function getDimExperience(dim, score) {
+  if (score == null) return ''
+  const hi = score >= 70
+  const lo = score < 40
+
+  const exp = {
+    'Power Distance': hi
+      ? `Your authority is rarely questioned. Students expect you to have all the answers — saying "I don't know" can genuinely surprise them. Decisions flow from the top down, and parents and students will accept your judgment without much pushback. Formal titles matter.`
+      : lo
+      ? `Students treat you as a facilitator, not an authority. Expect to be challenged openly — sometimes bluntly. First-name terms are common. Students will negotiate grades, question methods, and advocate for themselves without hesitation.`
+      : `A mix: students respect your role but will voice disagreement when they feel strongly. Some hierarchy is expected but it isn't rigid. Formal titles are polite but not always required.`,
+
+    'Individualism': hi
+      ? `Students advocate for themselves and expect individual recognition. Competition between classmates is normal and motivating. Group work can cause frustration if individual contributions aren't tracked. Direct feedback is welcomed and expected.`
+      : lo
+      ? `Group harmony comes before individual achievement. Students may avoid standing out — even with a correct answer. Design tasks so the group succeeds or fails together. Never single out a student publicly for a mistake.`
+      : `A balance of individual and group motivations. Some students will push to stand out; others work best when the group succeeds. Read the room and adapt.`,
+
+    'Masculinity': hi
+      ? `Results and achievement are what students, parents, and the school judge you by. Competition is motivating. Extra hours and visible effort are respected. Work-life balance is a lower priority — don't be surprised by demanding schedules.`
+      : lo
+      ? `Relationships and wellbeing come first. Students value a caring classroom as much as academic results. Competition can feel uncomfortable. Cooperation and empathy matter — and your own work-life balance will likely be better respected here.`
+      : `A blend of achievement focus and genuine care for relationships. Some students are competitive; others collaborative. Both approaches are respected.`,
+
+    'Uncertainty Avoidance': hi
+      ? `Students need clear rubrics, detailed instructions, and predictable routines. Open-ended tasks generate real anxiety. Establish your classroom structure early — students will rely on it. Ambiguity reads as incompetence, not creativity.`
+      : lo
+      ? `Students are comfortable with open-ended tasks and improvisation. Too much structure can feel patronising. Creative freedom is welcomed. Students can handle "figure it out" without panic.`
+      : `Some structure helps but students can manage ambiguity. Clear expectations are polite, not essential. Flexibility is appreciated.`,
+
+    'Long-term Orientation': hi
+      ? `Education is a serious long-term investment — often the primary vehicle for family social mobility. Students are patient and persistent. Parents may prioritise exam results over current wellbeing. The pressure is real and intentional.`
+      : lo
+      ? `Students and families focus on present experience and immediate results. Tradition and loyalty matter. Make the value of your lessons visible now — abstract future benefits don't land. Quick wins motivate.`
+      : `A mix of present enjoyment and future planning. Students respond to both immediate relevance and longer-term goals.`,
+
+    'Indulgence': hi
+      ? `People enjoy life and leisure is genuinely valued. Students expect school to be engaging, even fun. A relaxed, energetic classroom is respected here — not seen as unserious. There's a strong social culture outside school.`
+      : lo
+      ? `Restraint and discipline are cultural norms. Students take school seriously and expect you to as well. A loose, fun-first approach may be seen as lacking rigour. Hard work and self-control are respected values.`
+      : `A moderate balance between enjoyment and discipline. Students appreciate engaging lessons but also respect structure and visible effort.`,
+  }
+
+  return exp[dim] || ''
 }
 
 const LEG_COLS = { package: '#1D9E75', school: '#BA7517', place: '#534AB7' }
 
-// Score a destination's stool legs from geo/hofstede data + personalised place prefs
-// focusCity  — the city name (key for PLACE_ATTRS)
-// focusCountry — the country name (key for CTRY_DATA / HOF)
 function scoreLegs(focusCity, focusCountry, homeCountry, placePrefs) {
   const dest  = CTRY_DATA[focusCountry]
   const hDest = HOF[focusCountry]
   const hHome = HOF[homeCountry]
   if (!dest) return null
 
-  // ── Package leg
   const salScore = dest.medSal < 3000 ? 3 : dest.medSal < 4500 ? 5 : dest.medSal < 6000 ? 6 : dest.medSal < 8000 ? 7.5 : 9
   const pkgBonus = (dest.housingRate > 70 ? 1.2 : dest.housingRate > 50 ? 0.6 : 0)
                  + (dest.taxFree ? 1.2 : 0)
                  + (dest.flightRate > 75 ? 0.4 : 0)
   const pkgScore = Math.min(10, Math.round((salScore + pkgBonus) * 10) / 10)
 
-  // ── School leg (culture/environment proxy from Hofstede)
   let schScore = 5
   if (hDest) {
     const pdiS = hDest[0] > 80 ? 3 : hDest[0] > 60 ? 4 : hDest[0] > 40 ? 5 : 6
@@ -42,14 +75,12 @@ function scoreLegs(focusCity, focusCountry, homeCountry, placePrefs) {
     schScore = Math.min(9, Math.round((pdiS + masS + uaiS) / 3))
   }
 
-  // ── Place leg base (quality-of-life metrics)
   const idvGap = hHome && hDest ? Math.abs(hHome[1] - hDest[1]) : 0
   const plcBase = Math.min(10, Math.max(1,
     ((dest.ql / 20) + (dest.safety / 25) + (dest.expat / 25)) / 3 * 10
     + (idvGap > 50 ? -0.8 : idvGap > 30 ? -0.4 : 0)
   ))
 
-  // ── Apply personalised preference modifiers (keyed by CITY, not country)
   const cityAttrs = PLACE_ATTRS[focusCity] || []
   let prefDelta = 0
   cityAttrs.forEach(attr => {
@@ -69,7 +100,7 @@ function scoreLegs(focusCity, focusCountry, homeCountry, placePrefs) {
 const ALL_CITIES = Object.keys(PLACE_ATTRS)
 
 export default function MyMove() {
-  const { profile, editProfile, updateProfile } = useProfile()
+  const { profile, updateProfile } = useProfile()
   const [hoveredDim, setHoveredDim] = useState(null)
   const [search, setSearch]         = useState('')
   const [explored, setExplored]     = useState(null)
@@ -78,11 +109,10 @@ export default function MyMove() {
 
   const setPref = (attrId, val) => {
     const cur  = placePrefs[attrId] || 0
-    const next = cur === val ? 0 : val   // toggle off if same
+    const next = cur === val ? 0 : val
     updateProfile({ placePrefs: { ...placePrefs, [attrId]: next } })
   }
 
-  // Determine which city / country is in focus
   const focusCity    = explored || profile.dcity || null
   const focusCountry = focusCity
     ? (CITIES[focusCity]?.country || profile.dc || null)
@@ -96,11 +126,10 @@ export default function MyMove() {
     [focusCity, focusCountry, profile.home, JSON.stringify(placePrefs)]
   )
 
-  const cityAttrs   = PLACE_ATTRS[focusCity] || []
-  const hDest       = HOF[focusCountry]
-  const hHome       = HOF[profile.home]
-
-  const prefsSetCount = Object.values(placePrefs).filter(v => v !== 0).length
+  const cityAttrs       = PLACE_ATTRS[focusCity] || []
+  const hDest           = HOF[focusCountry]
+  const hHome           = HOF[profile.home]
+  const prefsSetCount   = Object.values(placePrefs).filter(v => v !== 0).length
 
   const stoolLegs = scores ? [
     { label: 'Package', score: scores.pkg, color: LEG_COLS.package,
@@ -110,15 +139,12 @@ export default function MyMove() {
       sublabel: prefsSetCount > 0 ? `${prefsSetCount} prefs set` : 'set preferences →' },
   ] : []
 
-  // Search results
   const results = search.length > 1
     ? ALL_CITIES.filter(c => c.toLowerCase().includes(search.toLowerCase())).slice(0, 8)
     : []
 
   return (
     <div className="tp active">
-
-      {/* Header */}
       <div style={{ fontFamily: 'var(--serif)', fontSize: '1.5rem', marginBottom: '.25rem' }}>
         Imagine your move
       </div>
@@ -140,7 +166,7 @@ export default function MyMove() {
               <div
                 key={city}
                 onClick={() => { setExplored(city); setSearch('') }}
-                style={{ padding: '10px 14px', cursor: 'pointer', fontSize: 14, borderBottom: '1px solid var(--border)', transition: 'background .1s' }}
+                style={{ padding: '10px 14px', cursor: 'pointer', fontSize: 14, borderBottom: '1px solid var(--border)' }}
                 onMouseEnter={e => e.currentTarget.style.background = '#f5f4f1'}
                 onMouseLeave={e => e.currentTarget.style.background = 'white'}
               >
@@ -160,15 +186,11 @@ export default function MyMove() {
           {/* Left: Stool + quick stats */}
           <div>
             <div style={{ background: 'white', border: '1px solid var(--border)', borderRadius: 'var(--rl)', padding: '1.5rem', marginBottom: '1rem' }}>
-              <div style={{ fontFamily: 'var(--serif)', fontSize: '1.1rem', marginBottom: '.25rem' }}>
-                {focusCity}
-              </div>
+              <div style={{ fontFamily: 'var(--serif)', fontSize: '1.1rem', marginBottom: '.25rem' }}>{focusCity}</div>
               <div style={{ fontSize: 12, color: 'var(--ink-4)', marginBottom: '1.25rem' }}>
                 {focusCountry} · {CTRY_DATA[focusCountry]?.region}
               </div>
-
               <StoolViz legs={stoolLegs} title={focusCity} size={260} />
-
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '.5rem', marginTop: '1rem' }}>
                 {stoolLegs.map(leg => (
                   <div key={leg.label} style={{ textAlign: 'center', padding: '.75rem .5rem', background: leg.color + '12', borderRadius: 8, border: `1px solid ${leg.color}30` }}>
@@ -180,18 +202,17 @@ export default function MyMove() {
               </div>
             </div>
 
-            {/* Quick facts */}
             {CTRY_DATA[focusCountry] && (
               <div style={{ background: 'white', border: '1px solid var(--border)', borderRadius: 'var(--rl)', padding: '1.25rem' }}>
                 <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--ink-4)', marginBottom: '.75rem' }}>At a glance</div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '.4rem .75rem' }}>
                   {[
-                    ['Median salary', `$${CTRY_DATA[focusCountry].medSal?.toLocaleString()}/mo`],
-                    ['Housing',       `${CTRY_DATA[focusCountry].housingRate}% incl.`],
-                    ['Flights',       `${CTRY_DATA[focusCountry].flightRate}% incl.`],
-                    ['Tax-free',      CTRY_DATA[focusCountry].taxFree ? 'Yes ✓' : 'No'],
-                    ['Quality of life',`${CTRY_DATA[focusCountry].ql}/100`],
-                    ['Safety',        `${CTRY_DATA[focusCountry].safety}/100`],
+                    ['Median salary',    `$${CTRY_DATA[focusCountry].medSal?.toLocaleString()}/mo`],
+                    ['Housing',          `${CTRY_DATA[focusCountry].housingRate}% incl.`],
+                    ['Flights',          `${CTRY_DATA[focusCountry].flightRate}% incl.`],
+                    ['Tax-free',         CTRY_DATA[focusCountry].taxFree ? 'Yes ✓' : 'No'],
+                    ['Quality of life',  `${CTRY_DATA[focusCountry].ql}/100`],
+                    ['Safety',           `${CTRY_DATA[focusCountry].safety}/100`],
                   ].map(([k, v]) => (
                     <div key={k} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, padding: '3px 0', borderBottom: '1px solid var(--border)' }}>
                       <span style={{ color: 'var(--ink-4)' }}>{k}</span>
@@ -206,7 +227,6 @@ export default function MyMove() {
           {/* Right: Place preferences + Hofstede */}
           <div>
 
-            {/* Place attributes */}
             {cityAttrs.length > 0 && (
               <div style={{ background: 'white', border: '1px solid var(--border)', borderRadius: 'var(--rl)', padding: '1.25rem', marginBottom: '1rem' }}>
                 <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--ink-4)', marginBottom: '.25rem' }}>
@@ -222,21 +242,15 @@ export default function MyMove() {
                       <div key={attr.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '.5rem' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '.5rem', flex: 1, minWidth: 0 }}>
                           <span style={{ fontSize: 15, flexShrink: 0 }}>{attr.icon}</span>
-                          <span style={{ fontSize: 13, color: pref === 1 ? '#1D9E75' : pref === -1 ? '#D85A30' : 'var(--ink-2)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: pref !== 0 ? 500 : 400 }}>
+                          <span style={{ fontSize: 13, color: pref === 1 ? '#1D9E75' : pref === -1 ? '#D85A30' : 'var(--ink-2)', fontWeight: pref !== 0 ? 500 : 400, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {attr.label}
                           </span>
                         </div>
                         <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
-                          <button
-                            onClick={() => setPref(attr.id, 1)}
-                            title="Love this"
-                            style={{ width: 30, height: 26, borderRadius: 6, border: '1.5px solid', borderColor: pref === 1 ? '#1D9E75' : 'var(--border-2)', background: pref === 1 ? '#E1F5EE' : 'white', cursor: 'pointer', fontSize: 12 }}
-                          >❤️</button>
-                          <button
-                            onClick={() => setPref(attr.id, -1)}
-                            title="Not for me"
-                            style={{ width: 30, height: 26, borderRadius: 6, border: '1.5px solid', borderColor: pref === -1 ? '#D85A30' : 'var(--border-2)', background: pref === -1 ? '#FAECE7' : 'white', cursor: 'pointer', fontSize: 12 }}
-                          >✗</button>
+                          <button onClick={() => setPref(attr.id, 1)} title="Love this"
+                            style={{ width: 30, height: 26, borderRadius: 6, border: '1.5px solid', borderColor: pref === 1 ? '#1D9E75' : 'var(--border-2)', background: pref === 1 ? '#E1F5EE' : 'white', cursor: 'pointer', fontSize: 12 }}>❤️</button>
+                          <button onClick={() => setPref(attr.id, -1)} title="Not for me"
+                            style={{ width: 30, height: 26, borderRadius: 6, border: '1.5px solid', borderColor: pref === -1 ? '#D85A30' : 'var(--border-2)', background: pref === -1 ? '#FAECE7' : 'white', cursor: 'pointer', fontSize: 12 }}>✗</button>
                         </div>
                       </div>
                     )
@@ -245,36 +259,43 @@ export default function MyMove() {
               </div>
             )}
 
-            {/* Cultural dimensions */}
+            {/* Cultural dimensions — with lived-experience tooltips */}
             {hDest && (
               <div style={{ background: 'white', border: '1px solid var(--border)', borderRadius: 'var(--rl)', padding: '1.25rem' }}>
-                <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--ink-4)', marginBottom: '1rem' }}>
-                  Cultural dimensions
+                <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--ink-4)', marginBottom: '.25rem' }}>
+                  Culture in the classroom
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--ink-3)', marginBottom: '1rem' }}>
+                  Hover each dimension to understand what it means day-to-day as a teacher.
                 </div>
                 {DLBLS.map((d, i) => {
                   const val  = hDest[i]
                   const hVal = hHome?.[i]
+                  const experience = getDimExperience(d, val)
                   return (
                     <div
                       key={d}
-                      style={{ marginBottom: '.75rem', position: 'relative', cursor: 'pointer' }}
+                      style={{ marginBottom: '.875rem', position: 'relative', cursor: 'help' }}
                       onMouseEnter={() => setHoveredDim(d)}
                       onMouseLeave={() => setHoveredDim(null)}
                     >
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, marginBottom: 4 }}>
                         <span style={{ fontWeight: 500 }}>{d}</span>
-                        <span style={{ color: DCOLS[i], fontWeight: 600 }}>{val}</span>
+                        <span style={{ color: DCOLS[i], fontWeight: 600 }}>{val}/100</span>
                       </div>
-                      <div style={{ height: 6, background: 'var(--border)', borderRadius: 4, overflow: 'hidden', position: 'relative' }}>
+                      <div style={{ height: 7, background: 'var(--border)', borderRadius: 4, overflow: 'visible', position: 'relative' }}>
                         <div style={{ width: `${val}%`, height: '100%', background: DCOLS[i], borderRadius: 4, transition: 'width .4s' }} />
                         {hVal != null && (
-                          <div style={{ position: 'absolute', top: 0, left: `${hVal}%`, transform: 'translateX(-50%)', width: 2, height: '100%', background: 'var(--ink-2)', opacity: .5 }} />
+                          <div style={{ position: 'absolute', top: -2, left: `${hVal}%`, transform: 'translateX(-50%)', width: 2, height: 11, background: 'var(--ink-2)', opacity: .4, borderRadius: 1 }} />
                         )}
                       </div>
-                      {hoveredDim === d && DIM_DESCRIPTIONS[d] && (
-                        <div style={{ position: 'absolute', left: 0, top: '100%', zIndex: 10, background: 'var(--ink)', color: 'white', fontSize: 12, padding: '10px 13px', borderRadius: 8, marginTop: 6, lineHeight: 1.55, maxWidth: 300, boxShadow: '0 4px 16px rgba(0,0,0,.18)', pointerEvents: 'none' }}>
-                          <strong style={{ color: DCOLS[i], display: 'block', marginBottom: 4 }}>{d}</strong>
-                          {DIM_DESCRIPTIONS[d]}
+                      {hoveredDim === d && experience && (
+                        <div style={{ position: 'absolute', left: 0, right: 0, top: '100%', zIndex: 10, background: 'var(--ink)', color: 'white', fontSize: 12.5, padding: '12px 14px', borderRadius: 8, marginTop: 6, lineHeight: 1.65, boxShadow: '0 6px 20px rgba(0,0,0,.2)', pointerEvents: 'none' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
+                            <strong style={{ color: DCOLS[i] }}>{d}</strong>
+                            <span style={{ color: DCOLS[i], fontWeight: 700, fontSize: 14 }}>{val}</span>
+                          </div>
+                          {experience}
                         </div>
                       )}
                     </div>
@@ -282,7 +303,7 @@ export default function MyMove() {
                 })}
                 {profile.home && (
                   <div style={{ fontSize: 11, color: 'var(--ink-4)', marginTop: '.5rem' }}>
-                    Vertical line = your home country ({profile.home})
+                    Bar line = your home country ({profile.home})
                   </div>
                 )}
               </div>
@@ -290,22 +311,16 @@ export default function MyMove() {
           </div>
         </div>
       ) : (
-        /* No city selected */
         <div style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--ink-3)' }}>
           <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>🪑</div>
-          <div style={{ fontFamily: 'var(--serif)', fontSize: '1.25rem', marginBottom: '.5rem' }}>
-            Where are you thinking?
-          </div>
+          <div style={{ fontFamily: 'var(--serif)', fontSize: '1.25rem', marginBottom: '.5rem' }}>Where are you thinking?</div>
           <div style={{ fontSize: 13, lineHeight: 1.6, maxWidth: 360, margin: '0 auto' }}>
-            Search any city above to see its stool — how the compensation, school culture, and place stack up for you personally.
+            Search any city above to see its stool — how compensation, school culture, and place stack up for you personally.
           </div>
           <div style={{ display: 'flex', gap: '.5rem', justifyContent: 'center', flexWrap: 'wrap', marginTop: '1.5rem' }}>
             {['Dubai', 'Bangkok', 'Tokyo', 'Singapore', 'Tbilisi', 'Riyadh'].map(c => (
-              <button
-                key={c}
-                onClick={() => setExplored(c)}
-                style={{ padding: '6px 14px', border: '1px solid var(--border-2)', borderRadius: 20, fontSize: 13, background: 'white', cursor: 'pointer', color: 'var(--ink-2)' }}
-              >
+              <button key={c} onClick={() => setExplored(c)}
+                style={{ padding: '6px 14px', border: '1px solid var(--border-2)', borderRadius: 20, fontSize: 13, background: 'white', cursor: 'pointer', color: 'var(--ink-2)' }}>
                 {c}
               </button>
             ))}
