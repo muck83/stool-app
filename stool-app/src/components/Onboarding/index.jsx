@@ -748,17 +748,33 @@ export default function Onboarding() {
                   const notes = generateMatchNotes(form, preds)
                   if (!notes || notes.length === 0) return null
                   const legColor = { school: '#BA7517', place: '#534AB7', package: '#1D9E75' }
+                  const legLabel = { school: 'School signal', place: 'Place signal', package: 'Package signal' }
                   return (
-                    <div style={{ marginTop: '.75rem' }}>
+                    <div style={{ marginTop: '.75rem', background: 'white', border: '1px solid var(--border)', borderRadius: 'var(--r)', padding: '1rem 1.125rem' }}>
                       <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: '.5rem' }}>Personalised signals for you</div>
                       {notes.map((n, i) => (
                         <div key={i} style={{
-                          fontSize: 12, padding: '8px 12px', borderRadius: 6, marginBottom: 6, lineHeight: 1.5,
-                          background: n.type === 'warn' ? '#FAECE7' : n.type === 'good' ? '#E1F5EE' : '#F3F2FC',
-                          color:      n.type === 'warn' ? '#7A2A20' : n.type === 'good' ? '#085041' : legColor[n.leg],
-                          borderLeft: `3px solid ${n.type === 'warn' ? '#D85A30' : n.type === 'good' ? '#1D9E75' : legColor[n.leg]}`,
+                          fontSize: 12, padding: '9px 12px', borderRadius: 8, marginBottom: 8, lineHeight: 1.55,
+                          background: n.type === 'warn' ? '#FAECE7' : n.type === 'good' ? '#E1F5EE' : '#FDF6EC',
+                          color: n.type === 'warn' ? '#7A2A20' : n.type === 'good' ? '#085041' : '#633806',
+                          borderLeft: `3px solid ${n.type === 'warn' ? '#D85A30' : n.type === 'good' ? '#1D9E75' : '#BA7517'}`,
                         }}>
-                          <span style={{ fontWeight: 600, marginRight: 4, textTransform: 'capitalize' }}>{n.leg}.</span>{n.text}
+                          <div style={{ marginBottom: 4 }}>
+                            <span style={{
+                              display: 'inline-block',
+                              fontSize: 10,
+                              fontWeight: 600,
+                              letterSpacing: '.06em',
+                              textTransform: 'uppercase',
+                              color: legColor[n.leg],
+                              background: `${legColor[n.leg]}15`,
+                              borderRadius: 999,
+                              padding: '3px 8px',
+                            }}>
+                              {legLabel[n.leg]}
+                            </span>
+                          </div>
+                          <div>{n.text}</div>
                         </div>
                       ))}
                     </div>
