@@ -269,4 +269,15 @@ body {
   background: white; color: var(--ink-2); line-height: 1.45; width: 100%;
   margin-bottom: .5rem;
 }
-.diag-opt.sel { border-color: var(--amber); background: rgba(186,117,23,.1)
+.diag-opt.sel { border-color: var(--amber); background: rgba(186,117,23,.1); font-weight: 500; }
+.sr-prog { display: flex; gap: 4px; margin-bottom: 1.25rem; }
+.tl-step:hover { box-shadow: 0 2px 12px rgba(0,0,0,.08); }
+
+/* ── Animations ── */
+@keyframes splFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes splFadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes rowFlash { 0%, 20% { background: #9FE1CB; } 100% { background: #E1F5EE; } }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.spl-a { opacity: 0; animation: splFade var(--sd, 600ms) ease var(--dd, 0ms) both; }
+.spl-au { opacity: 0; animation: splFadeUp var(--sd, 600ms) ease var(--dd, 0ms) both; }
+.fu { animation: fadeUp .4s ease forwards; }
