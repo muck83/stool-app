@@ -15,6 +15,9 @@ const DIM_KEYS     = ['q1','q2','q3','q4','q5','q6','q7']
 const DIM_KEYS_ALL = ['q1','q2','q3','q4','q5','q6','q7','q8','q9','q10']
 
 // ── 6th-sense thesis engine ────────────────────────────────────────────────────
+// Deterministic narrative generator. Every sentence maps to a real data threshold.
+// Not AI. Not speculation. A trusted colleague who has read the reviews.
+
 const DIM_NAMES = {
   q1: 'leadership transparency', q2: 'recruitment honesty', q3: 'workload',
   q4: 'professional autonomy', q5: 'staff culture', q6: 'mission alignment',
@@ -26,6 +29,7 @@ function generateThesis(stats, profile, schoolCountry) {
   if (dimAvgs) dimAvgs.forEach(({ key, avg: a }) => { sig[key] = a })
   const lines = []
 
+  // ── Opening verdict ───────────────────────────────────────────────────────
   if (avg >= 8) {
     lines.push(`Across ${count} teacher reviews, this school scores consistently strong. The pattern points to institutional integrity — leadership that explains itself, honest recruitment, workload that matches what was promised. Schools that score like this are the minority in this sector. The signal is worth taking seriously.`)
   } else if (avg >= 6.5) {
@@ -38,6 +42,7 @@ function generateThesis(stats, profile, schoolCountry) {
     lines.push(`Teachers are honest here: ${avg}/10 across ${count} reviews. The concerns are consistent enough across dimensions to suggest something structural, not situational.`)
   }
 
+  // ── Strongest/weakest core signal ────────────────────────────────────────
   const coreDims = ['q1','q2','q3','q4','q5','q6'].filter(k => sig[k] != null)
   if (coreDims.length >= 3) {
     const sorted = [...coreDims].sort((a,b) => sig[a] - sig[b])
@@ -52,6 +57,7 @@ function generateThesis(stats, profile, schoolCountry) {
     }
   }
 
+  // ── Risk signals (q8 / q9 / q10) ─────────────────────────────────────────
   const riskParts = []
   if (sig.q8 != null && sig.q8 < 5) riskParts.push(`exit safety (${sig.q8}/10) — departures had consequences at this school`)
   if (sig.q9 != null && sig.q9 < 5) riskParts.push(`parent pressure (${sig.q9}/10) — professional standards were regularly overridden`)
@@ -62,6 +68,7 @@ function generateThesis(stats, profile, schoolCountry) {
     lines.push(`The risk signals — exit safety and parent culture — are positive here. Teachers report departures were handled professionally and parent expectations didn't override classroom standards. These are things most people don't check until it's too late.`)
   }
 
+  // ── Hofstede cultural gap ─────────────────────────────────────────────────
   const destHof = HOF[schoolCountry]
   const homeHof = HOF[profile.home] || HOF[profile.cc]
   if (destHof && homeHof) {
@@ -72,15 +79,18 @@ function generateThesis(stats, profile, schoolCountry) {
     }
   }
 
+  // ── Years-abroad context ──────────────────────────────────────────────────
   const isEarlyCareer = profile.yrs === 'Just starting' || profile.yrs === '1–3 years'
   if (isEarlyCareer && avg < 5.5) {
     lines.push(`One thing worth naming for where you are in your career: schools with structural concerns are harder to navigate without the pattern recognition that comes from previous postings. What an experienced international teacher can manage — and protect themselves from — can land differently when you're still learning the terrain.`)
   }
 
+  // ── Notice period ─────────────────────────────────────────────────────────
   if (avgNotice != null && avgNotice > 8) {
     lines.push(`One practical signal: the average notice period here is ${avgNotice} weeks — longer than the sector norm. If circumstances change mid-contract, leaving requires planning that most teachers don't do in advance.`)
   }
 
+  // ── Closing ───────────────────────────────────────────────────────────────
   if (avg >= 7) {
     lines.push(`The honest read: the data is mostly saying yes here. Go in knowing the caveats the community has flagged, and you'll be going in informed.`)
   } else if (avg >= 5) {
@@ -228,7 +238,7 @@ function ProfileCard({ school, country, answers, hours, noticePeriod }) {
 function SchoolSearchPanel() {
   const { profile } = useProfile()
   const [query, setQuery]       = useState('')
-  const [results, setResults]   = useState(null)
+  const [results, setResults]   = useState(null)  // null = not searched, [] = no results
   const [loading, setLoading]   = useState(false)
   const debounceRef = useRef(null)
 
@@ -239,6 +249,7 @@ function SchoolSearchPanel() {
     if (!q.trim() || q.trim().length < 2) { setResults(null); return }
     setLoading(true)
     const data = await searchSchoolReviews(q.trim())
+    // Group by school name (ilike might return multiple schools)
     const grouped = data.reduce((acc, r) => {
       const key = r.school.toLowerCase()
       if (!acc[key]) acc[key] = { school: r.school, country: r.country, reviews: [] }
@@ -276,15 +287,19 @@ function SchoolSearchPanel() {
   }
 
   return (
-    <div>
-      <div style={{ display: 'flex', gap: 8, marginBottom: '.75rem' }}>
+    <div style={{ marginBottom: '1.5rem' }}>
+      <div style={{ fontFamily: 'var(--serif)', fontSize: '1.1rem', marginBottom: '.35rem', color: 'var(--ink)' }}>Search school ratings</div>
+      <div style={{ fontSize: 12.5, color: 'var(--ink-3)', marginBottom: '.875rem', lineHeight: 1.6 }}>
+        See what teachers have said about a school before you sign. Ratings appear once 3+ teachers have reviewed a school.
+      </div>
+      <div style={{ display: 'flex', gap: 8, marginBottom: '1rem' }}>
         <input
           value={query}
           onChange={handleChange}
-          placeholder="Search by school name, e.g. Bangkok Patana..."
+          placeholder="Search by school name, e.g. Bangkok Patana…"
           style={{ flex: 1, padding: '10px 14px', border: '1px solid var(--border-2)', borderRadius: 'var(--r)', fontSize: 14 }}
         />
-        {loading && <div style={{ display: 'flex', alignItems: 'center', fontSize: 12, color: 'var(--ink-4)', padding: '0 8px' }}>Searching...</div>}
+        {loading && <div style={{ display: 'flex', alignItems: 'center', fontSize: 12, color: 'var(--ink-4)', padding: '0 8px' }}>Searching…</div>}
       </div>
 
       {results !== null && results.length === 0 && !loading && (
@@ -299,6 +314,7 @@ function SchoolSearchPanel() {
             const stats = getSchoolStats(reviews)
             return (
               <div key={school} style={{ background: 'white', border: '1px solid var(--border)', borderRadius: 'var(--r)', overflow: 'hidden' }}>
+                {/* School header */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.25rem', borderBottom: stats.enough ? '1px solid var(--border)' : 'none' }}>
                   <div>
                     <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--ink)' }}>{school}</div>
@@ -315,12 +331,15 @@ function SchoolSearchPanel() {
                   )}
                 </div>
 
+                {/* Intelligence thesis — appears when 3+ reviews exist */}
                 {stats.enough && (
                   <SchoolThesis stats={stats} profile={profile} schoolCountry={country} />
                 )}
 
+                {/* Dimension scores */}
                 {stats.enough && stats.dimAvgs && (
                   <div style={{ padding: '.875rem 1.25rem' }}>
+                    {/* Core 6 dimensions */}
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '.5rem', marginBottom: '.75rem' }}>
                       {stats.dimAvgs.filter(d => !['q7','q8','q9','q10'].includes(d.key)).map(({ key, avg: dimAvg }) => (
                         <div key={key} style={{ textAlign: 'center' }}>
@@ -332,6 +351,7 @@ function SchoolSearchPanel() {
                         </div>
                       ))}
                     </div>
+                    {/* Risk signals row */}
                     {stats.dimAvgs.some(d => ['q8','q9','q10'].includes(d.key) && d.avg != null) && (
                       <div style={{ borderTop: '1px solid var(--border)', paddingTop: '.625rem', marginBottom: '.5rem' }}>
                         <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: '.5rem' }}>Risk signals</div>
@@ -360,6 +380,7 @@ function SchoolSearchPanel() {
                   </div>
                 )}
 
+                {/* Not enough reviews */}
                 {!stats.enough && (
                   <div style={{ padding: '.75rem 1.25rem', background: '#FAFAF9', borderTop: '1px solid var(--border)' }}>
                     <div style={{ fontSize: 12, color: 'var(--ink-4)', fontStyle: 'italic' }}>
@@ -380,27 +401,15 @@ function SchoolSearchPanel() {
 
 export default function MySchool() {
   const { profile } = useProfile()
-  const [mode, setMode] = useState('home') // home | review | search
   const [step, setStep] = useState(0)
-  const [school, setSchool] = useState(profile.school || '')
+  const [school, setSchool] = useState('')
   const [country, setCountry] = useState(profile.cc || '')
   const [answers, setAnswers] = useState({})
   const [hours, setHours] = useState('')
   const [noticePeriod, setNoticePeriod] = useState('')
   const [reviews, setReviews] = useState([])
 
-  const hasSchool = !!(profile.school && profile.cc)
-
   const selectOpt = (key, score, diag) => setAnswers(a => ({ ...a, [key]: { score, diag } }))
-
-  const startReview = (prefill) => {
-    if (prefill) {
-      setSchool(profile.school || '')
-      setCountry(profile.cc || '')
-    }
-    setStep(0)
-    setMode('review')
-  }
 
   const next = () => {
     if (step === 0) {
@@ -419,272 +428,127 @@ export default function MySchool() {
   const back = () => { if (step > 0) setStep(step - 1) }
 
   const reset = () => {
-    setStep(0)
-    setSchool(profile.school || '')
-    setCountry(profile.cc || '')
-    setAnswers({})
-    setHours('')
-    setNoticePeriod('')
-    setMode('home')
+    setStep(0); setSchool(''); setCountry(profile.cc || ''); setAnswers({}); setHours(''); setNoticePeriod('')
   }
 
   const q = step >= 1 && step <= SR_QS.length ? SR_QS[step - 1] : null
   const col = q ? (SR_DIM_COLORS[q.key] || '#BA7517') : '#BA7517'
 
-  // ── HOME MODE ──────────────────────────────────────────────────────────────
-  if (mode === 'home') {
-    return (
-      <div className="tp active">
-        <div style={{ fontFamily: 'var(--serif)', fontSize: '1.5rem', marginBottom: '.35rem' }}>My school</div>
-        <div style={{ fontSize: 13, color: 'var(--ink-3)', maxWidth: 560, lineHeight: 1.6, marginBottom: '1.5rem' }}>
-          Rate your school, search what others have said, and help build the honest picture this sector needs.
-        </div>
+  return (
+    <div className="tp active">
+      <div style={{ fontFamily: 'var(--serif)', fontSize: '1.5rem', marginBottom: '.35rem' }}>How was your experience at your school?</div>
+      <div style={{ fontSize: 13, color: 'var(--ink-3)', maxWidth: 480, lineHeight: 1.65, marginBottom: '1.25rem' }}>
+        Seven questions that surface the real picture — leadership, honesty, workload, autonomy, colleagues, mission. You get a named diagnosis and practical advice. Your responses also contribute to an aggregated school profile that helps other teachers make informed decisions.
+      </div>
 
-        {/* ── Hero CTA: rate your school ─────────────────────────────────── */}
-        {hasSchool && (
-          <div
-            onClick={() => startReview(true)}
-            style={{
-              background: 'linear-gradient(135deg, #FAEEDA 0%, #FFF8EE 100%)',
-              border: '1px solid rgba(186,117,23,.25)',
-              borderRadius: 'var(--rl)',
-              padding: '1.5rem 1.5rem 1.35rem',
-              marginBottom: '1.25rem',
-              cursor: 'pointer',
-              transition: 'box-shadow .2s',
-            }}
-          >
-            <div style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '.08em', color: 'var(--amber)', fontWeight: 600, marginBottom: '.4rem' }}>
-              Rate your school
-            </div>
-            <div style={{ fontFamily: 'var(--serif)', fontSize: '1.15rem', color: 'var(--amber-dark)', marginBottom: '.35rem' }}>
-              {profile.school}
-            </div>
-            <div style={{ fontSize: 12.5, color: 'var(--ink-3)', lineHeight: 1.55, marginBottom: '.75rem' }}>
-              {profile.city ? `${profile.city}, ` : ''}{profile.cc} · You're already here — your experience matters. Ten questions, a personal diagnosis, and your review helps every teacher who considers this school next.
-            </div>
-            <div style={{
-              display: 'inline-block',
-              padding: '.55rem 1.1rem',
-              background: '#BA7517',
-              color: 'white',
-              borderRadius: 'var(--r)',
-              fontSize: 13,
-              fontWeight: 600,
-            }}>
-              Start my review
-            </div>
+      {/* School search panel — always visible */}
+      <SchoolSearchPanel />
+
+      <div className="g2" style={{ marginBottom: '1.25rem', alignItems: 'start' }}>
+        <div>
+          <div className="g3" style={{ marginBottom: '1.25rem' }}>
+            {[['3','reviews needed before a school profile becomes visible'],['10','reviews needed to feed the destination prediction model'],['10','questions covering culture, exit safety, parent pressure, and family package']].map(([n, desc]) => (
+              <div key={n} style={{ background: 'white', border: '1px solid var(--border)', borderRadius: 'var(--r)', padding: '1rem', textAlign: 'center' }}>
+                <div style={{ fontSize: '1.75rem', fontWeight: 300, color: n === '7' ? 'var(--amber)' : 'var(--ink)', marginBottom: 2 }}>{n}</div>
+                <div style={{ fontSize: 11, color: 'var(--ink-3)', lineHeight: 1.4 }}>{desc}</div>
+              </div>
+            ))}
           </div>
-        )}
-
-        {/* ── Your completed reviews ──────────────────────────────────────── */}
-        {reviews.length > 0 && (
-          <div style={{ marginBottom: '1.5rem' }}>
-            <div style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '.08em', color: 'var(--ink-4)', fontWeight: 600, marginBottom: '.65rem' }}>
-              Your reviews
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '.5rem' }}>
+          {reviews.length > 0 && (
+            <div className="card">
+              <div className="ct">Community school profiles</div>
+              <div className="cs">Profiles appear once 3+ teachers have reviewed a school.</div>
               {reviews.map((r, i) => {
                 const scores = Object.values(r.answers).map(a => a?.score).filter(Boolean)
                 const avg = scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length*10)/10 : null
-                const oc = avg >= 8 ? '#1D9E75' : avg >= 6 ? '#BA7517' : avg >= 4 ? '#D85A30' : '#A32D2D'
-                const label = avg >= 8 ? 'Strong' : avg >= 6 ? 'Solid' : avg >= 4 ? 'Concerns' : 'Warning'
+                const oc = avg >= 8 ? '#1D9E75' : avg >= 6 ? '#BA7517' : '#D85A30'
                 return (
-                  <div key={i} style={{
-                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                    padding: '.85rem 1.1rem',
-                    background: 'white', border: '1px solid var(--border)', borderRadius: 'var(--r)',
-                  }}>
+                  <div key={i} style={{ borderTop: '1px solid var(--border)', padding: '.875rem 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
-                      <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--ink)' }}>{r.school}</div>
-                      <div style={{ fontSize: 11.5, color: 'var(--ink-4)', marginTop: 2 }}>{r.country} · Reviewed {new Date().getFullYear()}</div>
+                      <div style={{ fontSize: 13.5, fontWeight: 500 }}>{r.school}</div>
+                      <div style={{ fontSize: 11, color: 'var(--ink-4)' }}>{r.country} · {new Date().getFullYear()}</div>
                     </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: '1.5rem', fontWeight: 300, color: oc, lineHeight: 1 }}>{avg}</div>
-                      <div style={{ fontSize: 10, color: oc, marginTop: 2 }}>{label}</div>
-                    </div>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 300, color: oc }}>{avg || '—'}</div>
                   </div>
                 )
               })}
             </div>
-          </div>
-        )}
-
-        {/* ── Two action cards ────────────────────────────────────────────── */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
-          {/* Search card */}
-          <div
-            onClick={() => setMode('search')}
-            style={{
-              background: 'white',
-              border: '1px solid var(--border)',
-              borderRadius: 'var(--r)',
-              padding: '1.25rem',
-              cursor: 'pointer',
-              transition: 'border-color .2s',
-            }}
-          >
-            <div style={{ fontSize: 22, marginBottom: '.5rem' }}>&#128269;</div>
-            <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--ink)', marginBottom: '.25rem' }}>Search ratings</div>
-            <div style={{ fontSize: 12, color: 'var(--ink-3)', lineHeight: 1.5 }}>
-              See what teachers have said about a school before you sign. Visible once 3+ reviews exist.
-            </div>
-          </div>
-
-          {/* Review another school card */}
-          <div
-            onClick={() => { setSchool(''); setCountry(''); startReview(false) }}
-            style={{
-              background: 'white',
-              border: '1px solid var(--border)',
-              borderRadius: 'var(--r)',
-              padding: '1.25rem',
-              cursor: 'pointer',
-              transition: 'border-color .2s',
-            }}
-          >
-            <div style={{ fontSize: 22, marginBottom: '.5rem' }}>&#9997;&#65039;</div>
-            <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--ink)', marginBottom: '.25rem' }}>Review a different school</div>
-            <div style={{ fontSize: 12, color: 'var(--ink-3)', lineHeight: 1.5 }}>
-              Worked somewhere else? Rate a previous posting and help build the community picture.
-            </div>
-          </div>
-        </div>
-
-        {/* ── How it works ─────────────────────────────────────────────────── */}
-        <div style={{
-          display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '.75rem',
-          padding: '1rem', background: 'var(--surface-2)', borderRadius: 'var(--r)',
-        }}>
-          {[
-            ['10 questions', 'Leadership, honesty, workload, autonomy, colleagues, mission — plus exit safety, parents, and family package.'],
-            ['Personal diagnosis', 'You get a named diagnosis with a prognosis and specific advice for your situation.'],
-            ['Community profiles', 'Once 3+ teachers review a school, an aggregated profile becomes visible to everyone.'],
-          ].map(([title, desc]) => (
-            <div key={title} style={{ textAlign: 'center', padding: '.5rem' }}>
-              <div style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--ink)', marginBottom: '.25rem' }}>{title}</div>
-              <div style={{ fontSize: 11.5, color: 'var(--ink-3)', lineHeight: 1.45 }}>{desc}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-    )
-  }
-
-  // ── SEARCH MODE ────────────────────────────────────────────────────────────
-  if (mode === 'search') {
-    return (
-      <div className="tp active">
-        <button
-          onClick={() => setMode('home')}
-          style={{ background: 'none', border: 'none', color: 'var(--ink-3)', cursor: 'pointer', fontSize: 12, fontWeight: 500, marginBottom: '1rem', padding: 0 }}
-        >
-          &larr; Back to My School
-        </button>
-
-        <div style={{ fontFamily: 'var(--serif)', fontSize: '1.25rem', marginBottom: '.35rem' }}>Search school ratings</div>
-        <div style={{ fontSize: 12.5, color: 'var(--ink-3)', marginBottom: '1rem', lineHeight: 1.6 }}>
-          See what teachers have said about a school before you sign. Ratings appear once 3+ teachers have reviewed.
-        </div>
-
-        <SchoolSearchPanel />
-      </div>
-    )
-  }
-
-  // ── REVIEW MODE ────────────────────────────────────────────────────────────
-  return (
-    <div className="tp active">
-      <button
-        onClick={reset}
-        style={{ background: 'none', border: 'none', color: 'var(--ink-3)', cursor: 'pointer', fontSize: 12, fontWeight: 500, marginBottom: '1rem', padding: 0 }}
-      >
-        &larr; Back to My School
-      </button>
-
-      <div style={{ fontFamily: 'var(--serif)', fontSize: '1.25rem', marginBottom: '.5rem' }}>School diagnostic</div>
-      <div style={{ fontSize: 12.5, color: 'var(--ink-3)', marginBottom: '1rem', lineHeight: 1.6, maxWidth: 520 }}>
-        10 questions covering school culture, exit safety, parent pressure, and family package reality. You get a named diagnosis with a prognosis and specific advice.
-      </div>
-
-      <ProgressBar step={step > 0 ? step - 1 : 0} total={SR_QS.length} />
-
-      {step === 0 && (
-        <div className="card" style={{ padding: '1.25rem' }}>
-          {hasSchool && school === profile.school && (
-            <div style={{
-              background: '#E1F5EE', border: '1px solid rgba(29,158,117,.2)',
-              borderRadius: 'var(--r)', padding: '.65rem .85rem',
-              fontSize: 12.5, color: 'var(--teal-dark)', marginBottom: '1rem',
-              lineHeight: 1.5,
-            }}>
-              We've prefilled your school from your profile. Just hit start.
-            </div>
           )}
-          <div className="fg">
-            <label>Country</label>
-            <input value={country} onChange={e => setCountry(e.target.value)} placeholder="e.g. Thailand" />
-          </div>
-          <div className="fg">
-            <label>School name</label>
-            <SchoolAutocomplete
-              value={school}
-              onChange={v => setSchool(v)}
-              schools={SALARY_DB_SEED}
-              country={country}
-              placeholder="e.g. Bangkok Patana School"
-            />
-          </div>
-          <button className="btn btn-amber" style={{ maxWidth: 200, marginTop: '.5rem' }} onClick={next}>Start review &rarr;</button>
         </div>
-      )}
 
-      {q && step <= SR_QS.length && (
-        <div className="card" style={{ padding: '1.25rem' }}>
-          <div style={{ fontSize: 11, fontWeight: 500, color: col, textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: '.4rem' }}>{q.label} · Question {step} of {SR_QS.length}</div>
-          <div style={{ fontSize: 15, fontWeight: 500, color: 'var(--ink)', lineHeight: 1.4, marginBottom: '.3rem' }}>{q.text}</div>
-          <div style={{ fontSize: 12, color: 'var(--ink-3)', marginBottom: '1.1rem', lineHeight: 1.5 }}>{q.why}</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '.5rem', marginBottom: '1.25rem' }}>
-            {q.opts.map((o, i) => {
-              const sel = answers[q.key]?.score === o.score
-              return (
-                <button key={i} className="diag-opt" style={sel ? { borderColor: col, background: `${col}18`, fontWeight: 500 } : undefined} onClick={() => selectOpt(q.key, o.score, o.diag)}>
-                  {sel ? '✓ ' : ''}{o.t}
-                </button>
-              )
-            })}
-          </div>
-          {q.extra === 'hours' && (
-            <div style={{ marginBottom: '.875rem', padding: '.875rem 1rem', background: 'var(--surface-2)', borderRadius: 'var(--r)' }}>
-              <label style={{ fontSize: 11, fontWeight: 500, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.06em', display: 'block', marginBottom: 8 }}>Actual hours per week — optional but valuable</label>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '.75rem' }}>
-                <input type="number" value={hours} onChange={e => setHours(e.target.value)} min={20} max={90} placeholder="e.g. 52" style={{ width: 100, padding: '10px 13px', border: '1px solid var(--border-2)', borderRadius: 'var(--r)', fontSize: 15, fontWeight: 500 }} />
-                <span style={{ fontSize: 13, color: 'var(--ink-3)' }}>hours / week total</span>
+        <div className="card" id="school-review-card">
+          <div className="ct">School diagnostic</div>
+          <div className="cs">10 questions covering school culture, exit safety, parent pressure, and family package reality. You get a named diagnosis with a prognosis and specific advice.</div>
+          <ProgressBar step={step > 0 ? step - 1 : 0} total={SR_QS.length} />
+
+          {step === 0 && (
+            <>
+              <div className="fg">
+                <label>Country</label>
+                <input value={country} onChange={e => setCountry(e.target.value)} placeholder="e.g. Thailand" />
               </div>
-            </div>
-          )}
-          {q.extra === 'notice' && (
-            <div style={{ marginBottom: '.875rem', padding: '.875rem 1rem', background: 'var(--surface-2)', borderRadius: 'var(--r)' }}>
-              <label style={{ fontSize: 11, fontWeight: 500, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.06em', display: 'block', marginBottom: 8 }}>Notice period required — optional but important for future teachers</label>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '.75rem' }}>
-                <input type="number" value={noticePeriod} onChange={e => setNoticePeriod(e.target.value)} min={0} max={52} placeholder="e.g. 8" style={{ width: 100, padding: '10px 13px', border: '1px solid var(--border-2)', borderRadius: 'var(--r)', fontSize: 15, fontWeight: 500 }} />
-                <span style={{ fontSize: 13, color: 'var(--ink-3)' }}>weeks notice required by contract</span>
+              <div className="fg">
+                <label>School name</label>
+                <SchoolAutocomplete
+                  value={school}
+                  onChange={v => setSchool(v)}
+                  schools={SALARY_DB_SEED}
+                  country={country}
+                  placeholder="e.g. Bangkok Patana School"
+                />
               </div>
-            </div>
+              <button className="btn btn-amber" style={{ maxWidth: 200, marginTop: '.5rem' }} onClick={next}>Start review →</button>
+            </>
           )}
-          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
-            <button className="btn btn-ghost" onClick={back}>&larr; Back</button>
-            <button className="btn btn-amber" style={{ maxWidth: 160 }} onClick={next}>{step === SR_QS.length ? 'See diagnosis →' : 'Next →'}</button>
-          </div>
-        </div>
-      )}
 
-      {step === SR_QS.length + 1 && (
-        <div>
-          <ProfileCard school={school} country={country} answers={answers} hours={hours} noticePeriod={noticePeriod} />
-          <button className="btn btn-ghost" style={{ marginTop: '.875rem', fontSize: 13 }} onClick={reset}>&larr; Back to My School</button>
+          {q && step <= SR_QS.length && (
+            <>
+              <div style={{ fontSize: 11, fontWeight: 500, color: col, textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: '.4rem' }}>{q.label} · Question {step} of {SR_QS.length}</div>
+              <div style={{ fontSize: 15, fontWeight: 500, color: 'var(--ink)', lineHeight: 1.4, marginBottom: '.3rem' }}>{q.text}</div>
+              <div style={{ fontSize: 12, color: 'var(--ink-3)', marginBottom: '1.1rem', lineHeight: 1.5 }}>{q.why}</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '.5rem', marginBottom: '1.25rem' }}>
+                {q.opts.map((o, i) => {
+                  const sel = answers[q.key]?.score === o.score
+                  return (
+                    <button key={i} className="diag-opt" style={sel ? { borderColor: col, background: `${col}18`, fontWeight: 500 } : undefined} onClick={() => selectOpt(q.key, o.score, o.diag)}>
+                      {sel ? '✓ ' : ''}{o.t}
+                    </button>
+                  )
+                })}
+              </div>
+              {q.extra === 'hours' && (
+                <div style={{ marginBottom: '.875rem', padding: '.875rem 1rem', background: 'var(--surface-2)', borderRadius: 'var(--r)' }}>
+                  <label style={{ fontSize: 11, fontWeight: 500, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.06em', display: 'block', marginBottom: 8 }}>Actual hours per week — optional but valuable</label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '.75rem' }}>
+                    <input type="number" value={hours} onChange={e => setHours(e.target.value)} min={20} max={90} placeholder="e.g. 52" style={{ width: 100, padding: '10px 13px', border: '1px solid var(--border-2)', borderRadius: 'var(--r)', fontSize: 15, fontWeight: 500 }} />
+                    <span style={{ fontSize: 13, color: 'var(--ink-3)' }}>hours / week total</span>
+                  </div>
+                </div>
+              )}
+              {q.extra === 'notice' && (
+                <div style={{ marginBottom: '.875rem', padding: '.875rem 1rem', background: 'var(--surface-2)', borderRadius: 'var(--r)' }}>
+                  <label style={{ fontSize: 11, fontWeight: 500, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.06em', display: 'block', marginBottom: 8 }}>Notice period required — optional but important for future teachers</label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '.75rem' }}>
+                    <input type="number" value={noticePeriod} onChange={e => setNoticePeriod(e.target.value)} min={0} max={52} placeholder="e.g. 8" style={{ width: 100, padding: '10px 13px', border: '1px solid var(--border-2)', borderRadius: 'var(--r)', fontSize: 15, fontWeight: 500 }} />
+                    <span style={{ fontSize: 13, color: 'var(--ink-3)' }}>weeks notice required by contract</span>
+                  </div>
+                </div>
+              )}
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
+                <button className="btn btn-ghost" onClick={back}>← Back</button>
+                <button className="btn btn-amber" style={{ maxWidth: 160 }} onClick={next}>{step === SR_QS.length ? 'See diagnosis →' : 'Next →'}</button>
+              </div>
+            </>
+          )}
+
+          {step === SR_QS.length + 1 && (
+            <>
+              <ProfileCard school={school} country={country} answers={answers} hours={hours} noticePeriod={noticePeriod} />
+              <button className="btn btn-ghost" style={{ marginTop: '.875rem', fontSize: 13 }} onClick={reset}>Review another school</button>
+            </>
+          )}
         </div>
-      )}
+      </div>
     </div>
   )
 }
