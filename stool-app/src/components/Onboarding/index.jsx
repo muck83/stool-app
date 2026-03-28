@@ -52,28 +52,57 @@ function Splash({ onNext, onSkip, onLoadFromCloud }) {
       <div className="spl-a" style={{ '--dd': '1620ms', '--sd': '600ms', fontSize: 22, fontWeight: 700, color: 'var(--ink)', letterSpacing: '.04em', marginTop: '.75rem' }}>
         stool
       </div>
-      <div className="spl-a" style={{ '--dd': '1900ms', '--sd': '500ms', fontSize: 12.5, color: 'var(--ink-3)', lineHeight: 1.5, marginTop: '.35rem', marginBottom: '1.5rem' }}>
-        The honest intelligence platform for international educators
+
+      {/* Purpose — answer "what is this?" immediately */}
+      <div className="spl-a" style={{ '--dd': '1900ms', '--sd': '500ms', fontSize: 14, color: 'var(--ink-2)', lineHeight: 1.6, marginTop: '.5rem', marginBottom: '.35rem', maxWidth: 340, marginLeft: 'auto', marginRight: 'auto' }}>
+        Helping international teachers see the honest picture — before they sign.
       </div>
-      <div className="spl-a" style={{ '--dd': '2100ms', '--sd': '600ms', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '.625rem', marginBottom: '1.5rem' }}>
+      <div className="spl-a" style={{ '--dd': '2050ms', '--sd': '400ms', fontSize: 11.5, color: 'var(--ink-4)', lineHeight: 1.5, marginBottom: '1.5rem', maxWidth: 320, marginLeft: 'auto', marginRight: 'auto' }}>
+        Whether you're weighing an offer or wondering if it's time to leave, this tool helps you think it through.
+      </div>
+
+      {/* Three legs */}
+      <div className="spl-a" style={{ '--dd': '2300ms', '--sd': '600ms', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '.625rem', marginBottom: '1rem' }}>
         {[
-          { color: '#BA7517', bg: '#FAEEDA', textColor: '#633806', subColor: '#854F0B', label: 'School', desc: 'Leadership / culture / mission / your daily professional life' },
-          { color: '#534AB7', bg: '#EEEDFE', textColor: '#26215C', subColor: '#3C3489', label: 'Place', desc: 'City / safety / family / everything outside school hours' },
-          { color: '#1D9E75', bg: '#E1F5EE', textColor: '#085041', subColor: '#0F6E56', label: 'Package', desc: 'Salary / housing / flights / tax - the financial picture' },
+          { color: '#BA7517', bg: '#FAEEDA', textColor: '#633806', subColor: '#854F0B', label: 'School', desc: 'Leadership, culture, workload, your daily professional life' },
+          { color: '#534AB7', bg: '#EEEDFE', textColor: '#26215C', subColor: '#3C3489', label: 'Place', desc: 'City, safety, family life, everything outside school hours' },
+          { color: '#1D9E75', bg: '#E1F5EE', textColor: '#085041', subColor: '#0F6E56', label: 'Package', desc: 'Salary, housing, flights, tax — the financial picture' },
         ].map(leg => (
           <div key={leg.label} style={{ borderTop: `3px solid ${leg.color}`, borderRadius: '0 0 8px 8px', border: `1px solid ${leg.color}33`, borderTopWidth: 3, padding: '1rem .75rem', background: leg.bg }}>
-            <div style={{ fontSize: 13, fontWeight: 500, color: leg.textColor, marginBottom: '.3rem' }}>{leg.label}</div>
-            <div style={{ fontSize: 12, color: leg.subColor, lineHeight: 1.5 }}>{leg.desc}</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: leg.textColor, marginBottom: '.3rem' }}>{leg.label}</div>
+            <div style={{ fontSize: 11.5, color: leg.subColor, lineHeight: 1.5 }}>{leg.desc}</div>
           </div>
         ))}
       </div>
-      <div className="spl-a" style={{ '--dd': '2700ms', '--sd': '600ms', marginBottom: '1.25rem' }}>
-        <div style={{ background: 'var(--surface-2)', borderRadius: 'var(--r)', padding: '.875rem 1rem', marginBottom: '.625rem', fontSize: 13, color: 'var(--ink-2)', lineHeight: 1.65, textAlign: 'left' }}>
+
+      {/* The rule + the catch */}
+      <div className="spl-a" style={{ '--dd': '2700ms', '--sd': '600ms', marginBottom: '1rem' }}>
+        <div style={{ fontSize: 13, color: 'var(--ink-2)', lineHeight: 1.65, textAlign: 'left', padding: '0 .125rem', marginBottom: '.75rem' }}>
           <strong>You need at least 2 of 3 to be solid.</strong> One weak leg is survivable. Two weak legs is a posting you should leave. Most teachers discover this <em>after</em> they sign.
         </div>
         <div style={{ background: '#FAEEDA', borderRadius: 'var(--r)', padding: '.875rem 1rem', fontSize: 13, color: '#633806', lineHeight: 1.65, textAlign: 'left', borderLeft: '3px solid #BA7517' }}>
           <strong>The catch:</strong> recruiters lead with the package. Almost every teacher who regrets a move over-weighted the package and underestimated the school. This platform is built to correct that.
         </div>
+      </div>
+
+      {/* What you get */}
+      <div className="spl-a" style={{ '--dd': '3000ms', '--sd': '500ms', background: 'var(--surface-2)', borderRadius: 'var(--r)', padding: '.875rem 1rem', marginBottom: '1.25rem', textAlign: 'left' }}>
+        <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--ink-2)', marginBottom: '.5rem' }}>What's inside</div>
+        {[
+          'A diagnosis of your current posting — school, place, and package scored honestly',
+          'Real salary data from 600+ international educators to benchmark your offer',
+          'A country-level forecast showing how your stool might look at a new school',
+          'Cultural context for your classroom — what may feel different and why',
+        ].map((item, i) => (
+          <div key={i} style={{ fontSize: 12, color: 'var(--ink-3)', lineHeight: 1.55, paddingLeft: '.75rem', borderLeft: '2px solid var(--border)', marginBottom: i < 3 ? '.5rem' : 0 }}>
+            {item}
+          </div>
+        ))}
+      </div>
+
+      {/* Built-by line */}
+      <div className="spl-a" style={{ '--dd': '3200ms', '--sd': '400ms', fontSize: 11, color: 'var(--ink-4)', marginBottom: '1.25rem', lineHeight: 1.5 }}>
+        Built by a teacher, grounded in research, free to use.
       </div>
 
       {/* Returning user panel */}
@@ -111,11 +140,11 @@ function Splash({ onNext, onSkip, onLoadFromCloud }) {
         </div>
       )}
 
-      <button className="spl-au btn btn-primary" style={{ '--dd': '3200ms', '--sd': '500ms', width: '100%', fontSize: 15, padding: 14, marginTop: '.5rem' }} onClick={onNext}>
+      <button className="spl-au btn btn-primary" style={{ '--dd': '3400ms', '--sd': '500ms', width: '100%', fontSize: 15, padding: 14 }} onClick={onNext}>
         Build my profile {'->'}
       </button>
 
-      <div className="spl-au" style={{ '--dd': '3500ms', '--sd': '500ms', display: 'flex', justifyContent: 'center', gap: '1.5rem', marginTop: '.875rem' }}>
+      <div className="spl-au" style={{ '--dd': '3700ms', '--sd': '500ms', display: 'flex', justifyContent: 'center', gap: '1.5rem', marginTop: '.875rem' }}>
         {!showReturn && (
           <button onClick={() => setShowReturn(true)} style={{ fontSize: 12, color: 'var(--teal-dark)', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', textDecorationColor: 'var(--teal)40', padding: 0 }}>
             Returning? Load my profile
