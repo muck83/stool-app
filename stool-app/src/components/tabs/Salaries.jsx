@@ -93,7 +93,14 @@ export default function Salaries() {
         normaliseForSearch(r.school + ' ' + r.city + ' ' + r.country + ' ' + r.role).includes(q)
       )
     }
-    return rows
+    // Sort: most recent first (remote/new entries first, then by year desc)
+    return [...rows].sort((a, b) => {
+      // New submissions and remote entries before seed data
+      const aNew = a._new || a._remote ? 1 : 0
+      const bNew = b._new || b._remote ? 1 : 0
+      if (aNew !== bNew) return bNew - aNew
+      return (b.y || 0) - (a.y || 0)
+    })
   }, [liveDB, region, curr, search])
 
   const medianUSD = useMemo(() => {
@@ -248,7 +255,21 @@ export default function Salaries() {
           <div className="fg"><label>City</label><input value={form.city} onChange={e => setF('city', e.target.value)} placeholder="e.g. Bangkok" /></div>
           <div className="fg">
             <label>School name</label>
-            <SchoolAutocomplete value={form.school} onChange={v => setF('school', v)} schools={liveDB} country={form.country} placeholder="e.g. Bangkok Patana" />
+            <SchoolAutocomplete
+              value={form.school}
+              onChange={v => {
+                setF('school', v)
+                const match = liveDB.find(s => s.school === v && s.country === form.country)
+                  || liveDB.find(s => s.school === v)
+                if (match) {
+                  if (match.city) setF('city', match.city)
+                  if (match.country && !form.country) setF('country', match.country)
+                }
+              }}
+              schools={liveDB}
+              country={form.country}
+              placeholder="e.g. Bangkok Patana"
+            />
           </div>
           <div className="fg"><label>Curriculum</label>
             <select value={form.curr} onChange={e => setF('curr', e.target.value)}>

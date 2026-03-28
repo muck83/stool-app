@@ -4,7 +4,7 @@ import { useProfile } from '../../context/ProfileContext.jsx'
 import { SALARY_DB_SEED } from '../../data/salaryDb.js'
 import { HOF } from '../../data/hofstede.js'
 import SchoolAutocomplete from '../SchoolAutocomplete.jsx'
-import { insertSchoolReview, searchSchoolReviews } from '../../lib/supabase.js'
+import { insertSchoolReview, searchSchoolReviews, fetchRecentReviews } from '../../lib/supabase.js'
 
 const DIM_LABELS = {
   q1: 'Leadership', q2: 'Honesty',  q3: 'Workload', q4: 'Autonomy',
@@ -390,6 +390,21 @@ export default function MySchool() {
   const [reviews, setReviews] = useState([])
   const [reviewSchool, setReviewSchool] = useState('')
   const [reviewCountry, setReviewCountry] = useState('')
+  const [recentSchools, setRecentSchools] = useState([])
+
+  useEffect(() => {
+    fetchRecentReviews(8).then(data => {
+      // Deduplicate by school name
+      const seen = new Set()
+      const unique = data.filter(r => {
+        const key = r.school?.toLowerCase()
+        if (!key || seen.has(key)) return false
+        seen.add(key)
+        return true
+      })
+      setRecentSchools(unique)
+    })
+  }, [])
 
   const hasSchool = !!(profile.school && profile.cc)
 
@@ -547,7 +562,12 @@ export default function MySchool() {
               <label style={{ fontSize: 11, fontWeight: 500, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.06em' }}>School name</label>
               <SchoolAutocomplete
                 value={reviewSchool}
-                onChange={v => setReviewSchool(v)}
+                onChange={v => {
+                  setReviewSchool(v)
+                  const match = SALARY_DB_SEED.find(s => s.school === v && s.country === reviewCountry)
+                    || SALARY_DB_SEED.find(s => s.school === v)
+                  if (match?.country && !reviewCountry) setReviewCountry(match.country)
+                }}
                 schools={SALARY_DB_SEED}
                 country={reviewCountry}
                 placeholder="e.g. Bangkok Patana School"
@@ -567,6 +587,32 @@ export default function MySchool() {
             </button>
           </div>
         </div>
+
+        {/* ── Recently reviewed ────────────────────────────────────────── */}
+        {recentSchools.length > 0 && (
+          <div style={{ marginBottom: '1.5rem' }}>
+            <div style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '.08em', color: 'var(--ink-4)', fontWeight: 600, marginBottom: '.5rem' }}>
+              Recently reviewed by the community
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '.4rem' }}>
+              {recentSchools.map((r, i) => (
+                <span
+                  key={i}
+                  style={{
+                    padding: '.35rem .7rem',
+                    fontSize: 12.5,
+                    background: 'white',
+                    border: '1px solid var(--border)',
+                    borderRadius: 999,
+                    color: 'var(--ink-2)',
+                  }}
+                >
+                  {r.school} <span style={{ color: 'var(--ink-4)', fontSize: 11 }}>· {r.country}</span>
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* ── How it works ─────────────────────────────────────────────────── */}
         <div style={{

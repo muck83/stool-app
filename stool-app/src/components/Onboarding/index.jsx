@@ -425,11 +425,8 @@ export default function Onboarding() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', padding: '3rem 1.5rem 4rem', background: 'var(--surface)' }}>
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '2.5rem' }}>
-        {step > 0 && <StoolSVG width={72} height={76} />}
-        <div style={{ fontFamily: 'var(--serif)', fontSize: '1.75rem', color: 'var(--teal-dark)', letterSpacing: '-.02em', lineHeight: 1, marginBottom: '.35rem', marginTop: step > 0 ? '.6rem' : 0 }}>stool</div>
-        <div style={{ fontSize: 11, color: 'var(--ink-4)', letterSpacing: '.12em', textTransform: 'uppercase', fontWeight: 500, marginBottom: '.35rem' }}>school / place / package</div>
-        <div style={{ fontSize: 12, color: 'var(--ink-3)' }}>The honest intelligence platform for international educators</div>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1.5rem' }}>
+        {step > 0 && <StoolSVG width={56} height={60} />}
       </div>
 
       <div className="ob-card fu">
@@ -478,9 +475,13 @@ export default function Onboarding() {
                       value={form.school}
                       onChange={v => {
                         set('school', v)
-                        // Auto-fill city if a matching school record has one
-                        const match = SALARY_DB_SEED.find(s => s.school === v)
-                        if (match?.city && !form.city) set('city', match.city)
+                        // Prefer match in same country, fall back to any match
+                        const match = SALARY_DB_SEED.find(s => s.school === v && s.country === form.cc)
+                          || SALARY_DB_SEED.find(s => s.school === v)
+                        if (match) {
+                          if (match.city) set('city', match.city)
+                          if (match.country && !form.cc) set('cc', match.country)
+                        }
                       }}
                       schools={SALARY_DB_SEED}
                       country={form.cc}
