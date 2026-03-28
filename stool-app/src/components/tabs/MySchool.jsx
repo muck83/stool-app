@@ -562,11 +562,9 @@ export default function MySchool() {
               <label style={{ fontSize: 11, fontWeight: 500, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.06em' }}>School name</label>
               <SchoolAutocomplete
                 value={reviewSchool}
-                onChange={v => {
-                  setReviewSchool(v)
-                  const match = SALARY_DB_SEED.find(s => s.school === v && s.country === reviewCountry)
-                    || SALARY_DB_SEED.find(s => s.school === v)
-                  if (match?.country && !reviewCountry) setReviewCountry(match.country)
+                onChange={v => setReviewSchool(v)}
+                onSelect={rec => {
+                  if (rec.country && !reviewCountry) setReviewCountry(rec.country)
                 }}
                 schools={SALARY_DB_SEED}
                 country={reviewCountry}
@@ -672,6 +670,9 @@ export default function MySchool() {
             <SchoolAutocomplete
               value={school}
               onChange={v => setSchool(v)}
+              onSelect={rec => {
+                if (rec.country && !country) setCountry(rec.country)
+              }}
               schools={SALARY_DB_SEED}
               country={country}
               placeholder="e.g. Bangkok Patana School"

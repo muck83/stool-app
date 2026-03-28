@@ -257,14 +257,10 @@ export default function Salaries() {
             <label>School name</label>
             <SchoolAutocomplete
               value={form.school}
-              onChange={v => {
-                setF('school', v)
-                const match = liveDB.find(s => s.school === v && s.country === form.country)
-                  || liveDB.find(s => s.school === v)
-                if (match) {
-                  if (match.city) setF('city', match.city)
-                  if (match.country && !form.country) setF('country', match.country)
-                }
+              onChange={v => setF('school', v)}
+              onSelect={rec => {
+                if (rec.city) setF('city', rec.city)
+                if (rec.country && !form.country) setF('country', rec.country)
               }}
               schools={liveDB}
               country={form.country}

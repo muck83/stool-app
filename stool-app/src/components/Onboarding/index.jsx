@@ -473,15 +473,10 @@ export default function Onboarding() {
                     <label>Current school name <span style={{ fontWeight: 400, color: 'var(--ink-4)' }}>(optional)</span></label>
                     <SchoolAutocomplete
                       value={form.school}
-                      onChange={v => {
-                        set('school', v)
-                        // Prefer match in same country, fall back to any match
-                        const match = SALARY_DB_SEED.find(s => s.school === v && s.country === form.cc)
-                          || SALARY_DB_SEED.find(s => s.school === v)
-                        if (match) {
-                          if (match.city) set('city', match.city)
-                          if (match.country && !form.cc) set('cc', match.country)
-                        }
+                      onChange={v => set('school', v)}
+                      onSelect={rec => {
+                        if (rec.city) set('city', rec.city)
+                        if (rec.country && !form.cc) set('cc', rec.country)
                       }}
                       schools={SALARY_DB_SEED}
                       country={form.cc}
