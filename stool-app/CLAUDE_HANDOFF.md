@@ -131,6 +131,69 @@ Rules:
 - hash the root file
 - stage it into the tracked `stool-app/...` path
 
+## How To Work With Codex
+
+Codex may already have made local changes or tracked-tree commits in this repo.
+
+Before changing anything:
+- check the latest local `HEAD`
+- check whether the root working file differs from the tracked file
+- do not assume the file you are reading in `src/...` is the file that will deploy
+
+When collaborating:
+- treat Codex changes as the current source of truth unless the user explicitly asks you to replace them
+- do not revert or overwrite recent Codex edits just because they are unfamiliar
+- if you need to change a file Codex recently touched, first compare:
+  - root file: `src/...`
+  - tracked file: `git show HEAD:stool-app/src/...`
+- if those differ, resolve that mismatch first before making new product edits
+
+When reporting back:
+- say whether you changed only the root working file or also updated the tracked tree
+- say the exact commit hash you created, if any
+- say whether `main` is ahead of `origin/main`
+
+## How To Keep Deployments Current
+
+This repo can look updated locally while GitHub and Vercel still have older code.
+
+To avoid that:
+1. Edit the root working file.
+2. Run the build locally from `C:\Users\markt\Downloads\stool-app`.
+3. Inspect the tracked file with `git show HEAD:stool-app/...`.
+4. Commit the tracked file with plumbing.
+5. Confirm the new local `HEAD` is the commit you expect.
+6. Push `main` to GitHub.
+
+Important:
+- a local build passing does **not** mean the deployable tree is correct
+- a visible root file being correct does **not** mean Vercel will build that file
+- only the tracked `stool-app/...` tree is deployable
+
+Before saying “it is deployed”:
+- confirm the change exists in `git show HEAD:stool-app/...`
+- confirm the commit was pushed to `origin/main`
+- if production still looks old, suspect Vercel caching or an older deployment before suspecting the visible root file
+
+## When Codex And Claude Both Touch The Repo
+
+Use this order of operations:
+1. Inspect current `HEAD`
+2. Inspect tracked file with `git show HEAD:stool-app/...`
+3. Compare to root working file
+4. Make the smallest necessary edit
+5. Build
+6. Commit with plumbing
+7. Push
+
+Do not:
+- use `git add`
+- create a normal commit from the mirrored working tree
+- claim something is fixed without checking the tracked file
+- assume a Vercel failure means the root file is broken
+
+If a deployment seems to have “published an older version,” the most likely cause is tracked-tree drift, not missing product logic.
+
 ## Before Debugging A Deploy Error
 
 Do not assume the visible root file is what deployed.
