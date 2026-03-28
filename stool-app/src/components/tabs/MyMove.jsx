@@ -133,11 +133,11 @@ function diffSummary(diff) {
   return 'Roughly in the same range as your current score.'
 }
 
-function schoolReasons(hDest, yrsBuffer, yrsValue) {
+function schoolReasons(hDest, yrsBuffer, yrsValue, countryName) {
   if (!hDest) return []
 
   const reasons = [
-    `Saudi Arabia scores high on hierarchy (${hDest[0]}) and structure (${hDest[3]}), which usually points to more top-down and rule-bound school systems.`,
+    `${countryName} scores ${hDest[0] > 60 ? 'high' : hDest[0] > 40 ? 'moderate' : 'low'} on hierarchy (${hDest[0]}) and ${hDest[3] > 60 ? 'high' : hDest[3] > 40 ? 'moderate' : 'low'} on structure (${hDest[3]}), which shapes how top-down and rule-bound school systems may feel.`,
     `Its competition score (${hDest[2]}) helps estimate whether the professional culture may feel more pressured or more collaborative.`,
     'This forecast is about the general school environment in the country, not one specific campus.',
   ]
@@ -186,13 +186,16 @@ function computeAllPredictions(profile, weights) {
   return Object.entries(CTRY_DATA).map(([country, dest]) => {
     const hDest = HOF[country]
 
-    // Package prediction
+    // Package prediction — includes savings target feasibility
     const salScore = dest.medSal < 3000 ? 4 : dest.medSal < 4500 ? 5 : dest.medSal < 6000 ? 6 : dest.medSal < 8000 ? 7 : 8
+    const savingsPenalty = (profile.savings === '20k+' && dest.medSal < 5000) ? -1
+                         : (profile.savings === '10-20k' && dest.medSal < 3500) ? -0.5 : 0
     const pkgPred = Math.min(10, Math.max(1, Math.round(
       salScore
       + (dest.housingRate > 70 ? 1.5 : dest.housingRate > 50 ? 0.8 : 0)
       + (dest.taxFree ? 1.5 : 0)
       + (dest.flightRate > 75 ? 0.5 : 0)
+      + savingsPenalty
     )))
 
     // Place prediction
@@ -218,33 +221,49 @@ function computeAllPredictions(profile, weights) {
       )))
     }
 
+    // Priority-based adjustments — nudge the leg the teacher cares most about
+    const priSch = profile.priority === 'growth' ? 0.5 : profile.priority === 'balance' ? -0.25 : 0
+    const priPlc = profile.priority === 'adventure' ? 0.5 : 0
+    const priPkg = profile.priority === 'financial' ? 0.5 : 0
+
+    const adjSch = Math.min(10, Math.max(1, Math.round(schPred + priSch)))
+    const adjPlc = Math.min(10, Math.max(1, Math.round(plcPred + priPlc)))
+    const adjPkg = Math.min(10, Math.max(1, Math.round(pkgPred + priPkg)))
+
+    // Exit constraint flag — warn when school looks risky and teacher can't easily leave
+    const exitWarning = (profile.exit === 'no' && adjSch < 5)
+      ? 'School leg looks weak and you flagged limited exit flexibility — check contract terms carefully.'
+      : ''
+
     // Weighted composite score
     const totalWeight = weights.school + weights.place + weights.package
     const composite = totalWeight > 0
-      ? (schPred * weights.school + plcPred * weights.place + pkgPred * weights.package) / totalWeight
-      : (schPred + plcPred + pkgPred) / 3
+      ? (adjSch * weights.school + adjPlc * weights.place + adjPkg * weights.package) / totalWeight
+      : (adjSch + adjPlc + adjPkg) / 3
 
     // Best feature for the insight line
-    const bestLeg = pkgPred >= plcPred && pkgPred >= schPred ? 'package'
-                  : plcPred >= schPred ? 'place' : 'school'
-    const worstLeg = pkgPred <= plcPred && pkgPred <= schPred ? 'package'
-                   : plcPred <= schPred ? 'place' : 'school'
+    const bestLeg = adjPkg >= adjPlc && adjPkg >= adjSch ? 'package'
+                  : adjPlc >= adjSch ? 'place' : 'school'
+    const worstLeg = adjPkg <= adjPlc && adjPkg <= adjSch ? 'package'
+                   : adjPlc <= adjSch ? 'place' : 'school'
 
-    let insight = ''
-    if (bestLeg === 'package' && pkgPred >= 7) insight = dest.taxFree ? 'Strong package — tax-free market' : `Good salary market (~${MONEY.format(dest.medSal)}/mo)`
-    else if (bestLeg === 'place' && plcPred >= 7) insight = `High quality of life (${dest.ql}/100) and safety (${dest.safety}/100)`
-    else if (bestLeg === 'school' && schPred >= 6) insight = 'Culturally comfortable school environment predicted'
-    else if (worstLeg === 'package' && pkgPred <= 4) insight = 'Weaker package — verify savings potential'
-    else if (worstLeg === 'place' && plcPred <= 4) insight = 'Place leg needs investigation — safety or isolation risk'
-    else if (worstLeg === 'school' && schPred <= 4) insight = 'High cultural adjustment predicted for schools'
-    else insight = `Balanced profile — ${[schPred, plcPred, pkgPred].filter(s => s >= 6).length} of 3 legs solid`
+    let insight = exitWarning || ''
+    if (!insight) {
+      if (bestLeg === 'package' && adjPkg >= 7) insight = dest.taxFree ? 'Strong package — tax-free market' : `Good salary market (~${MONEY.format(dest.medSal)}/mo)`
+      else if (bestLeg === 'place' && adjPlc >= 7) insight = `High quality of life (${dest.ql}/100) and safety (${dest.safety}/100)`
+      else if (bestLeg === 'school' && adjSch >= 6) insight = 'Culturally comfortable school environment predicted'
+      else if (worstLeg === 'package' && adjPkg <= 4) insight = 'Weaker package — verify savings potential'
+      else if (worstLeg === 'place' && adjPlc <= 4) insight = 'Place leg needs investigation — safety or isolation risk'
+      else if (worstLeg === 'school' && adjSch <= 4) insight = 'High cultural adjustment predicted for schools'
+      else insight = `Balanced profile — ${[adjSch, adjPlc, adjPkg].filter(s => s >= 6).length} of 3 legs solid`
+    }
 
     return {
       country,
       region: dest.region,
-      schPred,
-      plcPred,
-      pkgPred,
+      schPred: adjSch,
+      plcPred: adjPlc,
+      pkgPred: adjPkg,
       composite: Math.round(composite * 10) / 10,
       insight,
       dest,
@@ -311,7 +330,7 @@ export default function MyMove() {
         cur: curSch,
         pred: schPred,
         col: '#BA7517',
-        reasons: schoolReasons(hDest, yrsBuffer, yrsValue),
+        reasons: schoolReasons(hDest, yrsBuffer, yrsValue, selectedCountry),
       },
       {
         l: 'Place',
@@ -495,36 +514,101 @@ export default function MyMove() {
               const guide = DIM_PLAIN_GUIDE[d]
               const directionText = compareDirection(hCur[i], hDest[i], d)
               const level = gapLevel(gap)
+              const curPos = hCur[i]
+              const destPos = hDest[i]
 
               return (
-                <div key={d} className="hbar" style={{ marginBottom: '1rem' }}>
-                  <div className="hbh" style={{ alignItems: 'center', gap: 10 }}>
+                <div key={d} style={{ marginBottom: '1.25rem', padding: '1rem 0', borderBottom: '1px solid var(--border)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10, marginBottom: '.5rem' }}>
                     <div>
-                      <div className="hbn" style={{ color: DCOLS[i], fontSize: 13 }}>{guide?.title || d}</div>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: DCOLS[i] }}>{guide?.title || d}</div>
                       <div style={{ fontSize: 12, color: 'var(--ink-4)', marginTop: 2 }}>{guide?.intro}</div>
                     </div>
                     <span
-                      className="hbsc"
                       style={{
                         color: gapColor(gap),
                         background: level === 'big' ? '#FAECE7' : level === 'noticeable' ? '#FAEEDA' : '#E1F5EE',
                         padding: '3px 10px',
                         borderRadius: 999,
                         whiteSpace: 'nowrap',
+                        fontSize: 11,
+                        fontWeight: 600,
                       }}
                     >
                       {gapLabel(gap)}
                     </span>
                   </div>
 
-                  <div className="hbt" style={{ marginTop: 8 }}>
-                    <div
-                      className="hbf"
-                      style={{ width: `${Math.min(gap, 100)}%`, background: gapColor(gap) }}
-                    />
+                  {/* Two-dot comparison track */}
+                  <div style={{ position: 'relative', height: 32, margin: '8px 0' }}>
+                    {/* Track line */}
+                    <div style={{ position: 'absolute', top: 14, left: 0, right: 0, height: 4, background: 'var(--surface-2)', borderRadius: 2 }} />
+                    {/* Span between dots */}
+                    {gap > 5 && (
+                      <div style={{
+                        position: 'absolute',
+                        top: 14,
+                        left: `${Math.min(curPos, destPos)}%`,
+                        width: `${gap}%`,
+                        height: 4,
+                        background: gapColor(gap),
+                        opacity: 0.3,
+                        borderRadius: 2,
+                      }} />
+                    )}
+                    {/* Current country dot */}
+                    <div style={{
+                      position: 'absolute',
+                      left: `${curPos}%`,
+                      top: 6,
+                      transform: 'translateX(-50%)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                    }}>
+                      <div style={{
+                        width: 20,
+                        height: 20,
+                        borderRadius: 999,
+                        background: 'var(--ink-3)',
+                        border: '3px solid white',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.15)',
+                      }} />
+                    </div>
+                    {/* Destination country dot */}
+                    <div style={{
+                      position: 'absolute',
+                      left: `${destPos}%`,
+                      top: 6,
+                      transform: 'translateX(-50%)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                    }}>
+                      <div style={{
+                        width: 20,
+                        height: 20,
+                        borderRadius: 999,
+                        background: DCOLS[i],
+                        border: '3px solid white',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.15)',
+                      }} />
+                    </div>
                   </div>
 
-                  <div style={{ fontSize: 12.5, color: 'var(--ink-2)', lineHeight: 1.6, marginTop: 8 }}>
+                  {/* Legend */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--ink-4)', marginBottom: 6 }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                      <span style={{ width: 8, height: 8, borderRadius: 999, background: 'var(--ink-3)', display: 'inline-block' }} />
+                      {cc || 'Current'}
+                    </span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                      <span style={{ width: 8, height: 8, borderRadius: 999, background: DCOLS[i], display: 'inline-block' }} />
+                      {selectedCountry}
+                    </span>
+                  </div>
+
+                  <div style={{ fontSize: 12.5, color: 'var(--ink-2)', lineHeight: 1.6, marginTop: 4 }}>
                     {directionText || 'This part of life may feel fairly familiar, with less day-to-day adjustment needed.'}
                   </div>
                 </div>

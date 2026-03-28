@@ -371,7 +371,19 @@ export default function Onboarding() {
   const [pkgAnswers, setPkgAnswers] = useState({})
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
-  const finalProfile = { ...form, sal: parseFloat(form.sal) || 0 }
+
+  /* Diagnostic scores — computed live so finalProfile always reflects answers */
+  const schoolScore = computeSchoolDiagScore(schoolAnswers)
+  const placeScore  = computePlaceDiagScore(placeAnswers)
+  const pkgScore    = computePackageDiagScore(pkgAnswers, form)
+
+  const finalProfile = {
+    ...form,
+    sal: parseFloat(form.sal) || 0,
+    sch: schoolScore ?? form.sch,
+    plc: placeScore  ?? form.plc,
+    pkg: pkgScore    ?? form.pkg,
+  }
 
   const advance = () => {
     if (step === 0) { setStep(1); return }
@@ -409,10 +421,6 @@ export default function Onboarding() {
   const dots = Array.from({ length: 5 }, (_, i) => (
     <div key={i} className={`ob-dot ${i === step ? 'active' : i < step ? 'done' : ''}`} />
   ))
-
-  const schoolScore = computeSchoolDiagScore(schoolAnswers)
-  const placeScore = computePlaceDiagScore(placeAnswers)
-  const pkgScore = computePackageDiagScore(pkgAnswers, form)
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', padding: '3rem 1.5rem 4rem', background: 'var(--surface)' }}>
