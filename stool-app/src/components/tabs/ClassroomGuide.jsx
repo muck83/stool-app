@@ -141,9 +141,22 @@ export default function ClassroomGuide() {
   return (
     <div className="tp active">
       <div style={{ fontFamily: 'var(--serif)', fontSize: '1.5rem', marginBottom: '.35rem' }}>Classroom guide</div>
-      <div style={{ fontSize: 13, color: 'var(--ink-3)', marginBottom: '1.25rem', maxWidth: 640, lineHeight: 1.6 }}>
-        Practical advice for the classroom moments that catch international teachers off guard. Everything here is grounded in cultural research and shaped by{currentCountry ? ` what we know about ${currentCountry}` : ' your profile'}.
+      <div style={{ fontSize: 13, color: 'var(--ink-3)', marginBottom: currentCountry ? '.65rem' : '1.25rem', maxWidth: 640, lineHeight: 1.6 }}>
+        Practical advice for the classroom moments that catch international teachers off guard. Everything here is grounded in cultural research{currentCountry ? ` for ${currentCountry}` : ''}.
       </div>
+      {currentCountry && (
+        <div style={{
+          display: 'inline-flex', alignItems: 'center', gap: 8,
+          background: '#E1F5EE', border: '1px solid rgba(29,158,117,.2)',
+          borderRadius: 'var(--r)', padding: '.45rem .85rem',
+          marginBottom: '1.25rem',
+        }}>
+          <span style={{ fontSize: 14 }}>📍</span>
+          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--teal-dark)' }}>
+            Showing insights for {currentCountry}
+          </span>
+        </div>
+      )}
 
       {/* Search bar */}
       <div style={{ marginBottom: '1.25rem' }}>
@@ -227,6 +240,7 @@ export default function ClassroomGuide() {
                     borderTop: '1px solid var(--border)',
                     paddingTop: '.65rem',
                   }}>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--teal-dark)', textTransform: 'uppercase', letterSpacing: '.06em' }}>{currentCountry}: </span>
                     {summary}
                   </div>
                 )}

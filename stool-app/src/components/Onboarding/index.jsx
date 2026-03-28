@@ -1,9 +1,11 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useProfile } from '../../context/ProfileContext.jsx'
 import { COUNTRIES } from '../../data/countries.js'
 import { CURRICULUM_OPTS, HOUSING_OPTS, FLIGHTS_OPTS, TAX_OPTS } from '../../data/options.js'
 import { CTRY_DATA } from '../../data/geo.js'
 import { HOF } from '../../data/hofstede.js'
+import { SALARY_DB_SEED } from '../../data/salaryDb.js'
+import SchoolAutocomplete from '../SchoolAutocomplete.jsx'
 
 const COUNTRY_OPTS = COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)
 
@@ -397,24 +399,23 @@ export default function Onboarding() {
   const handleSaveAndContinue = async () => {
     if (!saveEmail.trim() || saveState === 'saving') return
     setSaveState('saving')
-    let launched = false
-    const fallback = setTimeout(() => {
-      launched = true
-      launchDashboard(finalProfile)
-    }, 1500)
 
     try {
       const result = await saveToCloud(saveEmail.trim(), finalProfile)
-      if (result?.ok && !launched) {
-          clearTimeout(fallback)
-          launched = true
-          setSaveState('saved')
-          launchDashboard(finalProfile)
-      } else if (!result?.ok) {
+      if (result?.ok) {
+        setSaveState('saved')
+        launchDashboard(finalProfile)
+      } else {
+        // Save failed — still launch so the user isn't stuck, but warn
+        console.warn('Cloud save failed, launching with local only:', result?.error)
         setSaveState('error')
+        // Launch anyway after a brief pause so user sees the error
+        setTimeout(() => launchDashboard(finalProfile), 1200)
       }
-    } catch {
+    } catch (e) {
+      console.error('Cloud save exception:', e)
       setSaveState('error')
+      setTimeout(() => launchDashboard(finalProfile), 1200)
     }
   }
 
@@ -473,7 +474,18 @@ export default function Onboarding() {
                 <div className="frow">
                   <div className="fg" style={{ gridColumn: '1 / -1' }}>
                     <label>Current school name <span style={{ fontWeight: 400, color: 'var(--ink-4)' }}>(optional)</span></label>
-                    <input value={form.school} onChange={e => set('school', e.target.value)} placeholder="e.g. Bangkok Patana School" />
+                    <SchoolAutocomplete
+                      value={form.school}
+                      onChange={v => {
+                        set('school', v)
+                        // Auto-fill city if a matching school record has one
+                        const match = SALARY_DB_SEED.find(s => s.school === v)
+                        if (match?.city && !form.city) set('city', match.city)
+                      }}
+                      schools={SALARY_DB_SEED}
+                      country={form.cc}
+                      placeholder="e.g. Bangkok Patana School"
+                    />
                   </div>
                 </div>
                 {form.yrs === '15+ years' && (

@@ -391,67 +391,13 @@ export default function MyMove() {
           This is a country-level forecast for {selectedCountry}. It combines {SALARY_DB_SEED.length.toLocaleString()} salary records, cost and quality-of-life data, and cross-cultural research so you can see where the move looks strong and where to ask harder questions.
         </div>
 
-        <div className="card" style={{ marginBottom: '1rem', padding: '1rem 1.1rem' }}>
-          <div style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--ink-4)', marginBottom: '.45rem' }}>
-            How to read this page
-          </div>
-          <div style={{ display: 'grid', gap: '.45rem', fontSize: 12.5, color: 'var(--ink-2)', lineHeight: 1.6 }}>
-            <div>Left score: your own rating of your current post.</div>
-            <div>Right score: our country-level forecast for {selectedCountry}.</div>
-            <div>The adjustment section below compares {cc || 'your current country'} with {selectedCountry} and shows where daily life may feel different if you move.</div>
-          </div>
-        </div>
-
-        {(baselineFacts.length > 0 || personalFacts.length > 0) && (
-          <div className="card" style={{ marginBottom: '1rem', padding: '1rem 1.1rem' }}>
-            <div style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--ink-4)', marginBottom: '.45rem' }}>
-              What this forecast is using from your profile
-            </div>
-
-            {baselineFacts.length > 0 && (
-              <div style={{ marginBottom: personalFacts.length > 0 ? '.85rem' : 0 }}>
-                <div style={{ fontSize: 11, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: '.4rem' }}>
-                  Baseline
-                </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '.45rem' }}>
-                  {baselineFacts.map((fact) => (
-                    <span key={fact.label} className="pbi" style={{ background: 'var(--surface-2)' }}>
-                      <span className="pbil">{fact.label}:</span>
-                      <span>{fact.value}</span>
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {personalFacts.length > 0 && (
-              <div>
-                <div style={{ fontSize: 11, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: '.4rem' }}>
-                  Personal filters
-                </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '.45rem' }}>
-                  {personalFacts.map((fact) => (
-                    <span key={fact.label} className="pbi" style={{ background: 'var(--surface-2)' }}>
-                      <span className="pbil">{fact.label}:</span>
-                      <span>{fact.value}</span>
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        <div className="ibox info" style={{ marginBottom: yrsBuffer > 0 ? '.75rem' : '1.25rem' }}>
-          Use this as a starting point, not a promise. One school, neighborhood, or contract can still differ a lot from the country-level picture.
-        </div>
-
         {yrsBuffer > 0 && (
-          <div style={{ background: '#EEEDFE', border: '1px solid #534AB733', borderLeft: '3px solid #534AB7', borderRadius: '0 var(--r) var(--r) 0', padding: '.625rem 1rem', fontSize: 12.5, color: '#3C3489', lineHeight: 1.55, marginBottom: '1.25rem' }}>
-            <strong>{profile.yrs} abroad.</strong> In the school forecast, we give a small experience buffer of {yrsBuffer === 1 ? '1 point' : `${yrsBuffer} points`} because long-term international teachers often handle culture shifts more easily.
+          <div style={{ background: '#EEEDFE', border: '1px solid #534AB733', borderLeft: '3px solid #534AB7', borderRadius: '0 var(--r) var(--r) 0', padding: '.625rem 1rem', fontSize: 12.5, color: '#3C3489', lineHeight: 1.55, marginBottom: '1rem' }}>
+            <strong>{profile.yrs} abroad.</strong> Experience buffer of {yrsBuffer === 1 ? '1 point' : `${yrsBuffer} points`} applied to the school forecast.
           </div>
         )}
 
+        {/* ── Score cards first ─────────────────────────────────────────── */}
         <div className="g3" style={{ marginBottom: '1.5rem' }}>
           {legs.map((leg) => {
             const diff = leg.pred - leg.cur
@@ -501,6 +447,26 @@ export default function MyMove() {
             )
           })}
         </div>
+
+        <div className="ibox info" style={{ marginBottom: '1rem' }}>
+          Use this as a starting point, not a promise. One school, neighborhood, or contract can still differ a lot from the country-level picture.
+        </div>
+
+        {(baselineFacts.length > 0 || personalFacts.length > 0) && (
+          <details style={{ marginBottom: '1rem', background: 'var(--surface-2)', borderRadius: 'var(--r)', padding: '.75rem 1rem' }}>
+            <summary style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--ink-4)', cursor: 'pointer', fontWeight: 500 }}>
+              What this forecast is using from your profile
+            </summary>
+            <div style={{ marginTop: '.65rem', display: 'flex', flexWrap: 'wrap', gap: '.4rem' }}>
+              {[...baselineFacts, ...personalFacts].map((fact) => (
+                <span key={fact.label} className="pbi" style={{ background: 'white' }}>
+                  <span className="pbil">{fact.label}:</span>
+                  <span>{fact.value}</span>
+                </span>
+              ))}
+            </div>
+          </details>
+        )}
 
         {hCur && hDest && (
           <div className="card">

@@ -388,6 +388,8 @@ export default function MySchool() {
   const [hours, setHours] = useState('')
   const [noticePeriod, setNoticePeriod] = useState('')
   const [reviews, setReviews] = useState([])
+  const [reviewSchool, setReviewSchool] = useState('')
+  const [reviewCountry, setReviewCountry] = useState('')
 
   const hasSchool = !!(profile.school && profile.cc)
 
@@ -510,44 +512,59 @@ export default function MySchool() {
           </div>
         )}
 
-        {/* ── Two action cards ────────────────────────────────────────────── */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
-          {/* Search card */}
-          <div
-            onClick={() => setMode('search')}
-            style={{
-              background: 'white',
-              border: '1px solid var(--border)',
-              borderRadius: 'var(--r)',
-              padding: '1.25rem',
-              cursor: 'pointer',
-              transition: 'border-color .2s',
-            }}
-          >
-            <div style={{ fontSize: 22, marginBottom: '.5rem' }}>&#128269;</div>
-            <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--ink)', marginBottom: '.25rem' }}>Search ratings</div>
-            <div style={{ fontSize: 12, color: 'var(--ink-3)', lineHeight: 1.5 }}>
-              See what teachers have said about a school before you sign. Visible once 3+ reviews exist.
+        {/* ── Search & Review side by side ─────────────────────────────── */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem', alignItems: 'start' }}>
+          {/* Left: Search ratings — inline */}
+          <div style={{
+            background: 'white',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--r)',
+            padding: '1.25rem',
+          }}>
+            <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--ink)', marginBottom: '.2rem' }}>Search ratings</div>
+            <div style={{ fontSize: 12, color: 'var(--ink-3)', lineHeight: 1.5, marginBottom: '.75rem' }}>
+              See what teachers have said before you sign. Visible once 3+ reviews exist.
             </div>
+            <SchoolSearchPanel />
           </div>
 
-          {/* Review another school card */}
-          <div
-            onClick={() => { setSchool(''); setCountry(''); startReview(false) }}
-            style={{
-              background: 'white',
-              border: '1px solid var(--border)',
-              borderRadius: 'var(--r)',
-              padding: '1.25rem',
-              cursor: 'pointer',
-              transition: 'border-color .2s',
-            }}
-          >
-            <div style={{ fontSize: 22, marginBottom: '.5rem' }}>&#9997;&#65039;</div>
-            <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--ink)', marginBottom: '.25rem' }}>Review a different school</div>
-            <div style={{ fontSize: 12, color: 'var(--ink-3)', lineHeight: 1.5 }}>
+          {/* Right: Review a different school */}
+          <div style={{
+            background: 'white',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--r)',
+            padding: '1.25rem',
+          }}>
+            <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--ink)', marginBottom: '.2rem' }}>Review a school</div>
+            <div style={{ fontSize: 12, color: 'var(--ink-3)', lineHeight: 1.5, marginBottom: '.75rem' }}>
               Worked somewhere else? Rate a previous posting and help build the community picture.
             </div>
+            <div className="fg" style={{ marginBottom: '.5rem' }}>
+              <label style={{ fontSize: 11, fontWeight: 500, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.06em' }}>Country</label>
+              <input value={reviewCountry} onChange={e => setReviewCountry(e.target.value)} placeholder="e.g. Thailand" style={{ width: '100%', padding: '8px 12px', border: '1px solid var(--border-2)', borderRadius: 'var(--r)', fontSize: 13 }} />
+            </div>
+            <div className="fg" style={{ marginBottom: '.75rem' }}>
+              <label style={{ fontSize: 11, fontWeight: 500, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.06em' }}>School name</label>
+              <SchoolAutocomplete
+                value={reviewSchool}
+                onChange={v => setReviewSchool(v)}
+                schools={SALARY_DB_SEED}
+                country={reviewCountry}
+                placeholder="e.g. Bangkok Patana School"
+              />
+            </div>
+            <button
+              className="btn btn-amber"
+              style={{ fontSize: 13, padding: '.5rem 1rem' }}
+              onClick={() => {
+                if (!reviewSchool.trim()) return
+                setSchool(reviewSchool)
+                setCountry(reviewCountry)
+                startReview(false)
+              }}
+            >
+              Start review &rarr;
+            </button>
           </div>
         </div>
 
@@ -567,27 +584,6 @@ export default function MySchool() {
             </div>
           ))}
         </div>
-      </div>
-    )
-  }
-
-  // ── SEARCH MODE ────────────────────────────────────────────────────────────
-  if (mode === 'search') {
-    return (
-      <div className="tp active">
-        <button
-          onClick={() => setMode('home')}
-          style={{ background: 'none', border: 'none', color: 'var(--ink-3)', cursor: 'pointer', fontSize: 12, fontWeight: 500, marginBottom: '1rem', padding: 0 }}
-        >
-          &larr; Back to My School
-        </button>
-
-        <div style={{ fontFamily: 'var(--serif)', fontSize: '1.25rem', marginBottom: '.35rem' }}>Search school ratings</div>
-        <div style={{ fontSize: 12.5, color: 'var(--ink-3)', marginBottom: '1rem', lineHeight: 1.6 }}>
-          See what teachers have said about a school before you sign. Ratings appear once 3+ teachers have reviewed.
-        </div>
-
-        <SchoolSearchPanel />
       </div>
     )
   }
