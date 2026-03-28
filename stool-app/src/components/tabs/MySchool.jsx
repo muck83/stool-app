@@ -4,7 +4,7 @@ import { useProfile } from '../../context/ProfileContext.jsx'
 import { SALARY_DB_SEED } from '../../data/salaryDb.js'
 import { HOF } from '../../data/hofstede.js'
 import SchoolAutocomplete from '../SchoolAutocomplete.jsx'
-import { insertSchoolReview, searchSchoolReviews, fetchRecentReviews } from '../../lib/supabase.js'
+import { insertSchoolReview, searchSchoolReviews, fetchRatedSchools } from '../../lib/supabase.js'
 
 const DIM_LABELS = {
   q1: 'Leadership', q2: 'Honesty',  q3: 'Workload', q4: 'Autonomy',
@@ -213,14 +213,38 @@ function ProfileCard({ school, country, answers, hours, noticePeriod }) {
         <div style={{ fontSize: '2rem', fontWeight: 300, color: oc }}>{overall || '—'}</div>
         <div style={{ flex: 1, marginLeft: '.875rem' }}>
           <div style={{ fontSize: 13, fontWeight: 500, color: oc }}>{overallLabel}</div>
-          <div style={{ fontSize: 12, color: 'var(--ink-3)', marginTop: 2 }}>Composite across {scores.length} of 6 dimensions</div>
+          <div style={{ fontSize: 12, color: 'var(--ink-3)', marginTop: 2 }}>Composite across {scores.length} dimensions</div>
         </div>
       </div>
       <div className="ibox" style={{ marginTop: '.75rem', fontSize: 12 }}>
-        Your responses have been recorded. This school will appear in community profiles once 3+ teachers have contributed.
+        Your responses have been recorded. This school now appears in community-rated schools — more reviews make the profile stronger.
       </div>
     </div>
   )
+}
+
+// ── Shared helpers ───────────────────────────────────────────────────────────
+
+const scoreColor = (s) => s >= 8 ? '#1D9E75' : s >= 6 ? '#BA7517' : s >= 4 ? '#D85A30' : '#A32D2D'
+const scoreLabel = (s) => s >= 8 ? 'Strong posting' : s >= 6 ? 'Solid with caveats' : s >= 4 ? 'Significant concerns' : 'Serious warning signs'
+
+function getSchoolStats(reviews) {
+  const active = reviews.filter(r => !r.status || r.status === 'active' || r.status === 'verified')
+  if (active.length === 0) return { avg: null, count: 0, enough: false, early: false }
+  const allScores = active.flatMap(r => {
+    if (!r.answers) return []
+    return Object.values(r.answers).map(a => a?.score).filter(s => s != null)
+  })
+  const avg = allScores.length ? Math.round(allScores.reduce((a,b) => a+b,0) / allScores.length * 10) / 10 : null
+  const dimAvgs = DIM_KEYS_ALL.map(k => {
+    const scores = active.map(r => r.answers?.[k]?.score).filter(s => s != null)
+    return { key: k, avg: scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length*10)/10 : null }
+  })
+  const avgNotice = (() => {
+    const vals = active.map(r => parseInt(r.noticePeriod)).filter(n => !isNaN(n) && n > 0)
+    return vals.length ? Math.round(vals.reduce((a,b)=>a+b,0)/vals.length) : null
+  })()
+  return { avg, count: active.length, enough: true, early: active.length < 3, dimAvgs, avgNotice }
 }
 
 // ── School Search / Browse ────────────────────────────────────────────────────
@@ -231,9 +255,6 @@ function SchoolSearchPanel() {
   const [results, setResults]   = useState(null)
   const [loading, setLoading]   = useState(false)
   const debounceRef = useRef(null)
-
-  const scoreColor = (s) => s >= 8 ? '#1D9E75' : s >= 6 ? '#BA7517' : s >= 4 ? '#D85A30' : '#A32D2D'
-  const scoreLabel = (s) => s >= 8 ? 'Strong posting' : s >= 6 ? 'Solid with caveats' : s >= 4 ? 'Significant concerns' : 'Serious warning signs'
 
   const search = async (q) => {
     if (!q.trim() || q.trim().length < 2) { setResults(null); return }
@@ -254,25 +275,6 @@ function SchoolSearchPanel() {
     setQuery(val)
     clearTimeout(debounceRef.current)
     debounceRef.current = setTimeout(() => search(val), 400)
-  }
-
-  const getSchoolStats = (reviews) => {
-    const active = reviews.filter(r => !r.status || r.status === 'active' || r.status === 'verified')
-    if (active.length < 3) return { avg: null, count: active.length, enough: false }
-    const allScores = active.flatMap(r => {
-      if (!r.answers) return []
-      return Object.values(r.answers).map(a => a?.score).filter(s => s != null)
-    })
-    const avg = allScores.length ? Math.round(allScores.reduce((a,b) => a+b,0) / allScores.length * 10) / 10 : null
-    const dimAvgs = DIM_KEYS_ALL.map(k => {
-      const scores = active.map(r => r.answers?.[k]?.score).filter(s => s != null)
-      return { key: k, avg: scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length*10)/10 : null }
-    })
-    const avgNotice = (() => {
-      const vals = active.map(r => parseInt(r.noticePeriod)).filter(n => !isNaN(n) && n > 0)
-      return vals.length ? Math.round(vals.reduce((a,b)=>a+b,0)/vals.length) : null
-    })()
-    return { avg, count: active.length, enough: true, dimAvgs, avgNotice }
   }
 
   return (
@@ -304,7 +306,6 @@ function SchoolSearchPanel() {
                     <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--ink)' }}>{school}</div>
                     <div style={{ fontSize: 11.5, color: 'var(--ink-4)', marginTop: 2 }}>
                       {country} · {stats.count} review{stats.count !== 1 ? 's' : ''}
-                      {!stats.enough && ` · needs ${3 - stats.count} more to show ratings`}
                     </div>
                   </div>
                   {stats.enough && stats.avg && (
@@ -315,12 +316,17 @@ function SchoolSearchPanel() {
                   )}
                 </div>
 
-                {stats.enough && (
+                {stats.enough && !stats.early && (
                   <SchoolThesis stats={stats} profile={profile} schoolCountry={country} />
                 )}
 
                 {stats.enough && stats.dimAvgs && (
                   <div style={{ padding: '.875rem 1.25rem' }}>
+                    {stats.early && (
+                      <div style={{ background: '#FEF9E7', border: '1px solid #EDD89A', borderRadius: 'var(--r)', padding: '.5rem .75rem', marginBottom: '.75rem', fontSize: 11.5, color: '#6B5B1F', lineHeight: 1.5 }}>
+                        <strong>Early data</strong> — based on {stats.count} review{stats.count !== 1 ? 's' : ''}. Scores become more reliable with 3+ reviews. Add yours to strengthen this profile.
+                      </div>
+                    )}
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '.5rem', marginBottom: '.75rem' }}>
                       {stats.dimAvgs.filter(d => !['q7','q8','q9','q10'].includes(d.key)).map(({ key, avg: dimAvg }) => (
                         <div key={key} style={{ textAlign: 'center' }}>
@@ -363,7 +369,7 @@ function SchoolSearchPanel() {
                 {!stats.enough && (
                   <div style={{ padding: '.75rem 1.25rem', background: '#FAFAF9', borderTop: '1px solid var(--border)' }}>
                     <div style={{ fontSize: 12, color: 'var(--ink-4)', fontStyle: 'italic' }}>
-                      Ratings hidden until 3 teachers have reviewed. {3 - stats.count} more review{3 - stats.count !== 1 ? 's' : ''} needed.
+                      No reviews yet — be the first to rate this school.
                     </div>
                   </div>
                 )}
@@ -390,24 +396,25 @@ export default function MySchool() {
   const [reviews, setReviews] = useState([])
   const [reviewSchool, setReviewSchool] = useState('')
   const [reviewCountry, setReviewCountry] = useState('')
-  const [recentSchools, setRecentSchools] = useState([])
+  const [ratedSchools, setRatedSchools] = useState([])
 
   useEffect(() => {
-    fetchRecentReviews(8).then(data => {
-      // Deduplicate by school name
-      const seen = new Set()
-      const unique = data.filter(r => {
+    // Fetch full review data for rated school cards
+    fetchRatedSchools(50).then(data => {
+      const grouped = {}
+      data.forEach(r => {
         const key = r.school?.toLowerCase()
-        if (!key || seen.has(key)) return false
-        seen.add(key)
-        return true
+        if (!key) return
+        if (!grouped[key]) grouped[key] = { school: r.school, country: r.country, reviews: [] }
+        grouped[key].reviews.push(r)
       })
-      setRecentSchools(unique)
+      setRatedSchools(Object.values(grouped))
     })
   }, [])
 
   const hasSchool = !!(profile.school && profile.cc)
-  const hasReviewedOwn = reviews.some(r => r.school === profile.school)
+  const hasReviewedOwn = reviews.some(r => r.school === profile.school) ||
+    ratedSchools.some(r => r.school?.toLowerCase() === profile.school?.toLowerCase())
 
   const selectOpt = (key, score, diag) => setAnswers(a => ({ ...a, [key]: { score, diag } }))
 
@@ -451,6 +458,8 @@ export default function MySchool() {
       if (!school.trim()) return
       setStep(1)
     } else if (step < SR_QS.length) {
+      const currentQ = SR_QS[step - 1]
+      if (currentQ && !answers[currentQ.key]) return // require an answer
       setStep(step + 1)
     } else {
       const review = { school, country, answers: { ...answers }, hours, noticePeriod }
@@ -573,7 +582,7 @@ export default function MySchool() {
           }}>
             <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--ink)', marginBottom: '.2rem' }}>Search ratings</div>
             <div style={{ fontSize: 12, color: 'var(--ink-3)', lineHeight: 1.5, marginBottom: '.75rem' }}>
-              See what teachers have said before you sign. Visible once 3+ reviews exist.
+              See what teachers have said before you sign. Every review builds the picture.
             </div>
             <SchoolSearchPanel />
           </div>
@@ -621,28 +630,46 @@ export default function MySchool() {
           </div>
         </div>
 
-        {/* ── Recently reviewed ────────────────────────────────────────── */}
-        {recentSchools.length > 0 && (
+        {/* ── Rated schools ────────────────────────────────────────────── */}
+        {ratedSchools.length > 0 && (
           <div style={{ marginBottom: '1.5rem' }}>
-            <div style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '.08em', color: 'var(--ink-4)', fontWeight: 600, marginBottom: '.5rem' }}>
-              Recently reviewed by the community
+            <div style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '.08em', color: 'var(--ink-4)', fontWeight: 600, marginBottom: '.65rem' }}>
+              Community-rated schools
             </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '.4rem' }}>
-              {recentSchools.map((r, i) => (
-                <span
-                  key={i}
-                  style={{
-                    padding: '.35rem .7rem',
-                    fontSize: 12.5,
-                    background: 'white',
-                    border: '1px solid var(--border)',
-                    borderRadius: 999,
-                    color: 'var(--ink-2)',
-                  }}
-                >
-                  {r.school} <span style={{ color: 'var(--ink-4)', fontSize: 11 }}>· {r.country}</span>
-                </span>
-              ))}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '.5rem' }}>
+              {ratedSchools.map(({ school, country, reviews: revs }) => {
+                const stats = getSchoolStats(revs)
+                if (!stats.enough) return null
+                return (
+                  <div key={school} style={{
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    background: 'white', border: '1px solid var(--border)', borderRadius: 'var(--r)',
+                    padding: '.875rem 1.1rem', cursor: 'default',
+                  }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--ink)' }}>{school}</div>
+                      <div style={{ fontSize: 11.5, color: 'var(--ink-4)', marginTop: 2 }}>
+                        {country} · {stats.count} review{stats.count !== 1 ? 's' : ''}
+                        {stats.early && ' · early data'}
+                      </div>
+                      {stats.dimAvgs && (
+                        <div style={{ display: 'flex', gap: '.75rem', marginTop: '.45rem' }}>
+                          {stats.dimAvgs.filter(d => !['q7','q8','q9','q10'].includes(d.key)).map(({ key, avg: dimAvg }) => (
+                            <div key={key} style={{ textAlign: 'center' }}>
+                              <div style={{ fontSize: 9, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.04em' }}>{DIM_LABELS[key]}</div>
+                              <div style={{ fontSize: 14, fontWeight: 400, color: dimAvg ? SR_DIM_COLORS[key] : '#ccc', marginTop: 1 }}>{dimAvg || '—'}</div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <div style={{ textAlign: 'right', marginLeft: '1rem' }}>
+                      <div style={{ fontSize: '1.75rem', fontWeight: 300, color: scoreColor(stats.avg), lineHeight: 1 }}>{stats.avg}</div>
+                      <div style={{ fontSize: 10, color: scoreColor(stats.avg), marginTop: 3 }}>{scoreLabel(stats.avg)}</div>
+                    </div>
+                  </div>
+                )
+              })}
             </div>
           </div>
         )}
@@ -655,7 +682,7 @@ export default function MySchool() {
           {[
             ['10 questions', 'Leadership, honesty, workload, autonomy, colleagues, mission — plus exit safety, parents, and family package.'],
             ['Personal diagnosis', 'You get a named diagnosis with a prognosis and specific advice for your situation.'],
-            ['Community profiles', 'Once 3+ teachers review a school, an aggregated profile becomes visible to everyone.'],
+            ['Community profiles', 'Every review builds a school profile visible to the community. More reviews mean stronger, more reliable ratings.'],
           ].map(([title, desc]) => (
             <div key={title} style={{ textAlign: 'center', padding: '.5rem' }}>
               <div style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--ink)', marginBottom: '.25rem' }}>{title}</div>

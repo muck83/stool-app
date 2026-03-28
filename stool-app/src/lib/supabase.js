@@ -182,6 +182,19 @@ export async function fetchRecentReviews(limit = 10) {
   } catch { return [] }
 }
 
+export async function fetchRatedSchools(limit = 50) {
+  if (!supabase) return []
+  try {
+    const { data, error } = await supabase
+      .from('school_reviews')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(limit)
+    if (error) { console.error('Rated schools fetch error:', error); return [] }
+    return (data || []).filter(r => r.status !== 'removed')
+  } catch { return [] }
+}
+
 export async function insertDiagnosticSubmission({ profile, answers, result, schoolLegScore }) {
   if (!supabase) return { error: 'not-configured' }
 
