@@ -291,7 +291,7 @@ const PLACE_DIAG_QS = [
 // -- Package Diagnostic Questions -----------------------------------------------
 
 const PKG_DIAG_QS = [
-  { id: 'pk1', text: "What's your monthly salary in USD equivalent?",
+  { id: 'pk1', text: "What's your monthly take-home salary in USD? (after tax)",
     type: 'number', placeholder: 'e.g. 4500', field: 'sal' },
   { id: 'pk2', text: "What's your housing situation?",
     type: 'select', field: 'hous', options: HOUSING_OPTS },
@@ -603,7 +603,7 @@ export default function Onboarding() {
 
                   {/* pk1: Number input */}
                   <div style={{ marginBottom: '.75rem' }}>
-                    <div style={{ fontSize: 12.5, fontWeight: 500, color: 'var(--ink-2)', marginBottom: '.4rem' }}>1. What's your monthly salary in USD equivalent?</div>
+                    <div style={{ fontSize: 12.5, fontWeight: 500, color: 'var(--ink-2)', marginBottom: '.4rem' }}>1. What's your monthly take-home salary in USD? (after tax)</div>
                     <input
                       type="number"
                       value={form.sal}

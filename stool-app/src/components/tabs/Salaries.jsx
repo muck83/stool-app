@@ -276,8 +276,8 @@ export default function Salaries() {
           <div className="fg"><label>Your role / subject</label><input value={form.role} onChange={e => setF('role', e.target.value)} placeholder="e.g. IB DP Mathematics" /></div>
           <div className="fg">
             <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              Monthly salary (USD)
-              <span style={{ fontSize: 10, background: '#FEF3C7', color: '#92400E', padding: '1px 6px', borderRadius: 8, fontWeight: 500 }}>monthly only</span>
+              Monthly take-home salary (USD)
+              <span style={{ fontSize: 10, background: '#FEF3C7', color: '#92400E', padding: '1px 6px', borderRadius: 8, fontWeight: 500 }}>after tax</span>
             </label>
             <input type="number" value={form.sal} onChange={e => setF('sal', e.target.value)} placeholder="e.g. 4500" min={0} />
             {warning && !warnAck && (
