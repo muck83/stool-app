@@ -407,6 +407,7 @@ export default function MySchool() {
   }, [])
 
   const hasSchool = !!(profile.school && profile.cc)
+  const hasReviewedOwn = reviews.some(r => r.school === profile.school)
 
   const selectOpt = (key, score, diag) => setAnswers(a => ({ ...a, [key]: { score, diag } }))
 
@@ -484,7 +485,7 @@ export default function MySchool() {
         </div>
 
         {/* ── Hero CTA: rate your school ─────────────────────────────────── */}
-        {hasSchool && (
+        {hasSchool && !hasReviewedOwn && (
           <div
             onClick={() => startReview(true)}
             style={{
