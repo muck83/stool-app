@@ -49,8 +49,11 @@ function Splash({ onNext, onSkip, onLoadFromCloud }) {
   return (
     <div style={{ textAlign: 'center', padding: '.5rem 0 1rem' }}>
       <StoolSVG width={90} height={96} />
-      <div className="spl-a" style={{ '--dd': '1620ms', '--sd': '600ms', fontSize: 11, color: 'var(--ink-4)', letterSpacing: '.13em', textTransform: 'uppercase', fontWeight: 500, marginTop: '1rem', marginBottom: '1.5rem' }}>
-        school / place / package
+      <div className="spl-a" style={{ '--dd': '1620ms', '--sd': '600ms', fontSize: 22, fontWeight: 700, color: 'var(--ink)', letterSpacing: '.04em', marginTop: '.75rem' }}>
+        stool
+      </div>
+      <div className="spl-a" style={{ '--dd': '1900ms', '--sd': '500ms', fontSize: 12.5, color: 'var(--ink-3)', lineHeight: 1.5, marginTop: '.35rem', marginBottom: '1.5rem' }}>
+        The honest intelligence platform for international educators
       </div>
       <div className="spl-a" style={{ '--dd': '2100ms', '--sd': '600ms', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '.625rem', marginBottom: '1.5rem' }}>
         {[
@@ -58,9 +61,9 @@ function Splash({ onNext, onSkip, onLoadFromCloud }) {
           { color: '#534AB7', bg: '#EEEDFE', textColor: '#26215C', subColor: '#3C3489', label: 'Place', desc: 'City / safety / family / everything outside school hours' },
           { color: '#1D9E75', bg: '#E1F5EE', textColor: '#085041', subColor: '#0F6E56', label: 'Package', desc: 'Salary / housing / flights / tax - the financial picture' },
         ].map(leg => (
-          <div key={leg.label} style={{ borderTop: `3px solid ${leg.color}`, borderRadius: '0 0 8px 8px', border: `1px solid ${leg.color}33`, borderTopWidth: 3, padding: '.875rem .625rem', background: leg.bg }}>
+          <div key={leg.label} style={{ borderTop: `3px solid ${leg.color}`, borderRadius: '0 0 8px 8px', border: `1px solid ${leg.color}33`, borderTopWidth: 3, padding: '1rem .75rem', background: leg.bg }}>
             <div style={{ fontSize: 13, fontWeight: 500, color: leg.textColor, marginBottom: '.3rem' }}>{leg.label}</div>
-            <div style={{ fontSize: 11, color: leg.subColor, lineHeight: 1.5 }}>{leg.desc}</div>
+            <div style={{ fontSize: 12, color: leg.subColor, lineHeight: 1.5 }}>{leg.desc}</div>
           </div>
         ))}
       </div>
@@ -108,7 +111,7 @@ function Splash({ onNext, onSkip, onLoadFromCloud }) {
         </div>
       )}
 
-      <button className="spl-au btn btn-primary" style={{ '--dd': '3200ms', '--sd': '500ms', width: '100%', fontSize: 15, padding: 14 }} onClick={onNext}>
+      <button className="spl-au btn btn-primary" style={{ '--dd': '3200ms', '--sd': '500ms', width: '100%', fontSize: 15, padding: 14, marginTop: '.5rem' }} onClick={onNext}>
         Build my profile {'->'}
       </button>
 
