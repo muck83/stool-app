@@ -21,7 +21,7 @@ const TABS = [
   { id: 'data',        label: 'Salaries' },
   { id: 'prediction',  label: 'My Move' },
   { id: 'faq',         label: 'Classroom Guide' },
-  { id: 'diagnostic',  label: 'Check-up' },
+  { id: 'diagnostic',  label: 'Diagnostic' },
   { id: 'cultural',    label: 'Culture' },
   { id: 'financial',   label: 'Financial' },
   { id: 'research',    label: 'Research' },

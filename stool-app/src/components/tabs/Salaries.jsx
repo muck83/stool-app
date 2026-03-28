@@ -6,7 +6,6 @@ import SchoolAutocomplete from '../SchoolAutocomplete.jsx'
 import { useProfile } from '../../context/ProfileContext.jsx'
 import {
   CURRICULUM_OPTS, HOUSING_OPTS, FLIGHTS_OPTS, TAX_OPTS,
-  HOUSING_QUALITY_OPTS, ALLOWANCE_COVERAGE_OPTS,
   normaliseHousing, normaliseFlights, normaliseTax, normaliseCurriculum,
 } from '../../data/options.js'
 import { fetchSalarySubmissions, insertSalarySubmission, supabase, supabaseStatus } from '../../lib/supabase.js'
@@ -41,13 +40,11 @@ export default function Salaries() {
   const [form, setForm] = useState(() => ({
     country: profile.cc   || '',
     city:    profile.city || '',
-    school:  profile.school || '',
+    school:  '',
     curr:    normaliseCurriculum(profile.curr) || '',
     role:    '',
     sal:     profile.sal  || '',
     hous:    normaliseHousing(profile.hous)   || '',
-    housQuality: '',
-    allowCoverage: '',
     flt:     normaliseFlights(profile.flt)    || '',
     tax:     normaliseTax(profile.tax)        || '',
     extras:  '',
@@ -93,14 +90,7 @@ export default function Salaries() {
         normaliseForSearch(r.school + ' ' + r.city + ' ' + r.country + ' ' + r.role).includes(q)
       )
     }
-    // Sort: most recent first (remote/new entries first, then by year desc)
-    return [...rows].sort((a, b) => {
-      // New submissions and remote entries before seed data
-      const aNew = a._new || a._remote ? 1 : 0
-      const bNew = b._new || b._remote ? 1 : 0
-      if (aNew !== bNew) return bNew - aNew
-      return (b.y || 0) - (a.y || 0)
-    })
+    return rows
   }, [liveDB, region, curr, search])
 
   const medianUSD = useMemo(() => {
@@ -129,10 +119,7 @@ export default function Salaries() {
       school: resolveSchoolName(school.trim()),
       curr: form.curr || 'Other', role: form.role || 'Teacher',
       usd: Math.round(parseFloat(sal)),
-      housing: form.hous || 'Not stated',
-      housingQuality: form.housQuality || '',
-      allowanceCoverage: form.allowCoverage || '',
-      flights: form.flt || 'Not stated',
+      housing: form.hous || 'Not stated', flights: form.flt || 'Not stated',
       tax: form.tax || 'Not stated', _new: true, _id: id,
     }
     // Update local state immediately so it feels instant
@@ -141,13 +128,11 @@ export default function Salaries() {
     setForm({
       country: profile.cc   || '',
       city:    profile.city || '',
-      school:  profile.school || '',
+      school:  '',
       curr:    normaliseCurriculum(profile.curr) || '',
       role:    '',
       sal:     '',
       hous:    normaliseHousing(profile.hous) || '',
-      housQuality: '',
-      allowCoverage: '',
       flt:     normaliseFlights(profile.flt)  || '',
       tax:     normaliseTax(profile.tax)      || '',
       extras:  '',
@@ -227,15 +212,7 @@ export default function Salaries() {
                     <td><span className={`pill ${currClass(r.curr)}`}>{r.curr}</span></td>
                     <td>{r.role}</td>
                     <td style={{ color: 'var(--teal-dark)', fontWeight: 500 }}>${r.usd.toLocaleString()}</td>
-                    <td>
-                      {r.housing}
-                      {r.housingQuality && <span style={{ display: 'block', fontSize: 10, color: r.housingQuality === 'poor' || r.housingQuality === 'shared' ? 'var(--coral)' : 'var(--ink-4)' }}>
-                        {r.housingQuality === 'great' ? 'Good quality' : r.housingQuality === 'ok' ? 'Basic/adequate' : r.housingQuality === 'shared' ? 'Shared' : r.housingQuality === 'poor' ? 'Poor' : ''}
-                      </span>}
-                      {r.allowanceCoverage && <span style={{ display: 'block', fontSize: 10, color: r.allowanceCoverage === '25' ? 'var(--coral)' : 'var(--ink-4)' }}>
-                        Covers ~{r.allowanceCoverage}% of rent
-                      </span>}
-                    </td><td>{r.flights}</td><td>{r.tax}</td>
+                    <td>{r.housing}</td><td>{r.flights}</td><td>{r.tax}</td>
                   </tr>
                 ))}
               </tbody>
@@ -255,17 +232,7 @@ export default function Salaries() {
           <div className="fg"><label>City</label><input value={form.city} onChange={e => setF('city', e.target.value)} placeholder="e.g. Bangkok" /></div>
           <div className="fg">
             <label>School name</label>
-            <SchoolAutocomplete
-              value={form.school}
-              onChange={v => setF('school', v)}
-              onSelect={rec => {
-                if (rec.city) setF('city', rec.city)
-                if (rec.country && !form.country) setF('country', rec.country)
-              }}
-              schools={liveDB}
-              country={form.country}
-              placeholder="e.g. Bangkok Patana"
-            />
+            <SchoolAutocomplete value={form.school} onChange={v => setF('school', v)} schools={liveDB} country={form.country} placeholder="e.g. Bangkok Patana" />
           </div>
           <div className="fg"><label>Curriculum</label>
             <select value={form.curr} onChange={e => setF('curr', e.target.value)}>
@@ -291,35 +258,11 @@ export default function Salaries() {
             {warning && warnAck && <div style={{ fontSize: 11, color: 'var(--teal-dark)', marginTop: 4 }}>✓ Confirmed</div>}
           </div>
           <div className="fg"><label>Housing</label>
-            <select value={form.hous} onChange={e => { setF('hous', e.target.value); setF('housQuality', ''); setF('allowCoverage', '') }}>
+            <select value={form.hous} onChange={e => setF('hous', e.target.value)}>
               <option value="">Select</option>
               {HOUSING_OPTS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
             </select>
           </div>
-          {form.hous === 'Provided' && (
-            <div className="fg">
-              <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                Housing quality
-                <span style={{ fontSize: 10, background: '#E1F5EE', color: 'var(--teal-dark)', padding: '1px 6px', borderRadius: 8, fontWeight: 500 }}>this really matters</span>
-              </label>
-              <select value={form.housQuality} onChange={e => setF('housQuality', e.target.value)}>
-                <option value="">What was it actually like?</option>
-                {HOUSING_QUALITY_OPTS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-              </select>
-            </div>
-          )}
-          {form.hous === 'Allowance' && (
-            <div className="fg">
-              <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                Allowance vs actual rent
-                <span style={{ fontSize: 10, background: '#E1F5EE', color: 'var(--teal-dark)', padding: '1px 6px', borderRadius: 8, fontWeight: 500 }}>this really matters</span>
-              </label>
-              <select value={form.allowCoverage} onChange={e => setF('allowCoverage', e.target.value)}>
-                <option value="">How much of rent did it cover?</option>
-                {ALLOWANCE_COVERAGE_OPTS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-              </select>
-            </div>
-          )}
           <div className="fg"><label>Flights allowance</label>
             <select value={form.flt} onChange={e => setF('flt', e.target.value)}>
               <option value="">Select</option>

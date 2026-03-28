@@ -6,13 +6,12 @@ import { normaliseForSearch } from '../data/schoolAliases.js'
  *
  * Props:
  *  value          – controlled value
- *  onChange       – called with the chosen/typed string (fires on every keystroke AND selection)
- *  onSelect       – called with the full record { school, city, country } when user picks from dropdown
+ *  onChange       – called with the chosen/typed string
  *  schools        – array of { school, country, city } canonical records from the DB
  *  country        – currently selected country (used to rank results)
  *  placeholder
  */
-export default function SchoolAutocomplete({ value, onChange, onSelect, schools, country, placeholder }) {
+export default function SchoolAutocomplete({ value, onChange, schools, country, placeholder }) {
   const [open, setOpen] = useState(false)
   const [highlighted, setHighlighted] = useState(0)
   const inputRef = useRef(null)
@@ -45,9 +44,8 @@ export default function SchoolAutocomplete({ value, onChange, onSelect, schools,
   // Reset highlight when suggestions change
   useEffect(() => { setHighlighted(0) }, [suggestions.length])
 
-  const select = (record) => {
-    onChange(record.school)
-    if (onSelect) onSelect(record)
+  const select = (school) => {
+    onChange(school)
     setOpen(false)
     inputRef.current?.blur()
   }
@@ -62,7 +60,7 @@ export default function SchoolAutocomplete({ value, onChange, onSelect, schools,
       setHighlighted(h => Math.max(h - 1, 0))
     } else if (e.key === 'Enter' && suggestions[highlighted]) {
       e.preventDefault()
-      select(suggestions[highlighted])
+      select(suggestions[highlighted].school)
     } else if (e.key === 'Escape') {
       setOpen(false)
     }
@@ -85,14 +83,7 @@ export default function SchoolAutocomplete({ value, onChange, onSelect, schools,
         value={value}
         onChange={e => { onChange(e.target.value); setOpen(true) }}
         onFocus={() => setOpen(true)}
-        onBlur={() => {
-          setTimeout(() => setOpen(false), 150)
-          // When user finishes typing, check if value matches a known school and auto-fill
-          if (onSelect && value && value.length >= 3) {
-            const exact = candidates.find(s => s.school.toLowerCase() === value.toLowerCase())
-            if (exact) onSelect(exact)
-          }
-        }}
+        onBlur={() => setTimeout(() => setOpen(false), 150)}
         onKeyDown={handleKey}
         placeholder={placeholder}
         autoComplete="off"
@@ -116,7 +107,7 @@ export default function SchoolAutocomplete({ value, onChange, onSelect, schools,
           {suggestions.map((s, i) => (
             <div
               key={s.school + i}
-              onMouseDown={() => select(s)}
+              onMouseDown={() => select(s.school)}
               onMouseEnter={() => setHighlighted(i)}
               style={{
                 padding: '8px 12px',

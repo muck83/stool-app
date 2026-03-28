@@ -262,9 +262,9 @@ export function Diagnostic() {
       <div style={{ background: 'white', border: '1px solid var(--border)', borderRadius: 'var(--rl)', padding: '1.15rem 1.2rem', marginBottom: '1rem', boxShadow: '0 2px 18px rgba(0,0,0,.04)' }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '.75rem', flexWrap: 'wrap', marginBottom: '.8rem' }}>
           <div>
-            <div style={{ fontFamily: 'var(--serif)', fontSize: '1.5rem', marginBottom: '.25rem' }}>Stool check-up</div>
+            <div style={{ fontFamily: 'var(--serif)', fontSize: '1.5rem', marginBottom: '.25rem' }}>Diagnostic</div>
             <div style={{ fontSize: 13, color: 'var(--ink-3)', maxWidth: 700, lineHeight: 1.6 }}>
-              Which leg of your stool is wobbling? Eight honest questions to separate school problems from place problems from cultural friction. Two minutes.
+              This diagnostic helps you tell the difference between structural problems and cultural friction. Eight honest questions, about two minutes.
             </div>
           </div>
           <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--teal-dark)', background: 'var(--teal-light)', border: '1px solid rgba(29,158,117,.22)', borderRadius: 999, padding: '5px 10px', whiteSpace: 'nowrap' }}>
@@ -325,7 +325,7 @@ export function Diagnostic() {
       </div>
 
       <button className="btn btn-primary" style={{ marginTop: '1rem', maxWidth: 240, boxShadow: '0 8px 18px rgba(29,158,117,.16)' }} onClick={run}>
-        Which leg is it? →
+        Analyse my responses -&gt;
       </button>
 
       {result && (

@@ -1,11 +1,9 @@
-import { useState, useMemo } from 'react'
+﻿import { useState } from 'react'
 import { useProfile } from '../../context/ProfileContext.jsx'
 import { COUNTRIES } from '../../data/countries.js'
 import { CURRICULUM_OPTS, HOUSING_OPTS, FLIGHTS_OPTS, TAX_OPTS } from '../../data/options.js'
 import { CTRY_DATA } from '../../data/geo.js'
 import { HOF } from '../../data/hofstede.js'
-import { SALARY_DB_SEED } from '../../data/salaryDb.js'
-import SchoolAutocomplete from '../SchoolAutocomplete.jsx'
 
 const COUNTRY_OPTS = COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)
 
@@ -54,57 +52,28 @@ function Splash({ onNext, onSkip, onLoadFromCloud }) {
       <div className="spl-a" style={{ '--dd': '1620ms', '--sd': '600ms', fontSize: 22, fontWeight: 700, color: 'var(--ink)', letterSpacing: '.04em', marginTop: '.75rem' }}>
         stool
       </div>
-
-      {/* Purpose — answer "what is this?" immediately */}
-      <div className="spl-a" style={{ '--dd': '1900ms', '--sd': '500ms', fontSize: 14, color: 'var(--ink-2)', lineHeight: 1.6, marginTop: '.5rem', marginBottom: '.35rem', maxWidth: 340, marginLeft: 'auto', marginRight: 'auto' }}>
-        Helping international teachers see the honest picture — before they sign.
+      <div className="spl-a" style={{ '--dd': '1900ms', '--sd': '500ms', fontSize: 12.5, color: 'var(--ink-3)', lineHeight: 1.5, marginTop: '.35rem', marginBottom: '1.5rem' }}>
+        The honest intelligence platform for international educators
       </div>
-      <div className="spl-a" style={{ '--dd': '2050ms', '--sd': '400ms', fontSize: 11.5, color: 'var(--ink-4)', lineHeight: 1.5, marginBottom: '1.5rem', maxWidth: 320, marginLeft: 'auto', marginRight: 'auto' }}>
-        Whether you're weighing an offer or wondering if it's time to leave, this tool helps you think it through.
-      </div>
-
-      {/* Three legs */}
-      <div className="spl-a" style={{ '--dd': '2300ms', '--sd': '600ms', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '.625rem', marginBottom: '1rem' }}>
+      <div className="spl-a" style={{ '--dd': '2100ms', '--sd': '600ms', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '.625rem', marginBottom: '1.5rem' }}>
         {[
-          { color: '#BA7517', bg: '#FAEEDA', textColor: '#633806', subColor: '#854F0B', label: 'School', desc: 'Leadership, culture, workload, your daily professional life' },
-          { color: '#534AB7', bg: '#EEEDFE', textColor: '#26215C', subColor: '#3C3489', label: 'Place', desc: 'City, safety, family life, everything outside school hours' },
-          { color: '#1D9E75', bg: '#E1F5EE', textColor: '#085041', subColor: '#0F6E56', label: 'Package', desc: 'Salary, housing, flights, tax — the financial picture' },
+          { color: '#BA7517', bg: '#FAEEDA', textColor: '#633806', subColor: '#854F0B', label: 'School', desc: 'Leadership / culture / mission / your daily professional life' },
+          { color: '#534AB7', bg: '#EEEDFE', textColor: '#26215C', subColor: '#3C3489', label: 'Place', desc: 'City / safety / family / everything outside school hours' },
+          { color: '#1D9E75', bg: '#E1F5EE', textColor: '#085041', subColor: '#0F6E56', label: 'Package', desc: 'Salary / housing / flights / tax - the financial picture' },
         ].map(leg => (
           <div key={leg.label} style={{ borderTop: `3px solid ${leg.color}`, borderRadius: '0 0 8px 8px', border: `1px solid ${leg.color}33`, borderTopWidth: 3, padding: '1rem .75rem', background: leg.bg }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: leg.textColor, marginBottom: '.3rem' }}>{leg.label}</div>
-            <div style={{ fontSize: 11.5, color: leg.subColor, lineHeight: 1.5 }}>{leg.desc}</div>
+            <div style={{ fontSize: 13, fontWeight: 500, color: leg.textColor, marginBottom: '.3rem' }}>{leg.label}</div>
+            <div style={{ fontSize: 12, color: leg.subColor, lineHeight: 1.5 }}>{leg.desc}</div>
           </div>
         ))}
       </div>
-
-      {/* The rule + the catch */}
-      <div className="spl-a" style={{ '--dd': '2700ms', '--sd': '600ms', marginBottom: '1rem' }}>
-        <div style={{ fontSize: 13, color: 'var(--ink-2)', lineHeight: 1.65, textAlign: 'left', padding: '0 .125rem', marginBottom: '.75rem' }}>
+      <div className="spl-a" style={{ '--dd': '2700ms', '--sd': '600ms', marginBottom: '1.25rem' }}>
+        <div style={{ background: 'var(--surface-2)', borderRadius: 'var(--r)', padding: '.875rem 1rem', marginBottom: '.625rem', fontSize: 13, color: 'var(--ink-2)', lineHeight: 1.65, textAlign: 'left' }}>
           <strong>You need at least 2 of 3 to be solid.</strong> One weak leg is survivable. Two weak legs is a posting you should leave. Most teachers discover this <em>after</em> they sign.
         </div>
         <div style={{ background: '#FAEEDA', borderRadius: 'var(--r)', padding: '.875rem 1rem', fontSize: 13, color: '#633806', lineHeight: 1.65, textAlign: 'left', borderLeft: '3px solid #BA7517' }}>
           <strong>The catch:</strong> recruiters lead with the package. Almost every teacher who regrets a move over-weighted the package and underestimated the school. This platform is built to correct that.
         </div>
-      </div>
-
-      {/* What you get */}
-      <div className="spl-a" style={{ '--dd': '3000ms', '--sd': '500ms', background: 'var(--surface-2)', borderRadius: 'var(--r)', padding: '.875rem 1rem', marginBottom: '1.25rem', textAlign: 'left' }}>
-        <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--ink-2)', marginBottom: '.5rem' }}>What's inside</div>
-        {[
-          'A diagnosis of your current posting — school, place, and package scored honestly',
-          'Real salary data from 600+ international educators to benchmark your offer',
-          'A country-level forecast showing how your stool might look at a new school',
-          'Cultural context for your classroom — what may feel different and why',
-        ].map((item, i) => (
-          <div key={i} style={{ fontSize: 12, color: 'var(--ink-3)', lineHeight: 1.55, paddingLeft: '.75rem', borderLeft: '2px solid var(--border)', marginBottom: i < 3 ? '.5rem' : 0 }}>
-            {item}
-          </div>
-        ))}
-      </div>
-
-      {/* Built-by line */}
-      <div className="spl-a" style={{ '--dd': '3200ms', '--sd': '400ms', fontSize: 11, color: 'var(--ink-4)', marginBottom: '1.25rem', lineHeight: 1.5 }}>
-        Built by a teacher, grounded in research, free to use.
       </div>
 
       {/* Returning user panel */}
@@ -142,11 +111,11 @@ function Splash({ onNext, onSkip, onLoadFromCloud }) {
         </div>
       )}
 
-      <button className="spl-au btn btn-primary" style={{ '--dd': '3400ms', '--sd': '500ms', width: '100%', fontSize: 15, padding: 14 }} onClick={onNext}>
+      <button className="spl-au btn btn-primary" style={{ '--dd': '3200ms', '--sd': '500ms', width: '100%', fontSize: 15, padding: 14, marginTop: '.5rem' }} onClick={onNext}>
         Build my profile {'->'}
       </button>
 
-      <div className="spl-au" style={{ '--dd': '3700ms', '--sd': '500ms', display: 'flex', justifyContent: 'center', gap: '1.5rem', marginTop: '.875rem' }}>
+      <div className="spl-au" style={{ '--dd': '3500ms', '--sd': '500ms', display: 'flex', justifyContent: 'center', gap: '1.5rem', marginTop: '.875rem' }}>
         {!showReturn && (
           <button onClick={() => setShowReturn(true)} style={{ fontSize: 12, color: 'var(--teal-dark)', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', textDecorationColor: 'var(--teal)40', padding: 0 }}>
             Returning? Load my profile
@@ -260,7 +229,53 @@ function computePredictions(form) {
   return { pkgPred, plcPred, schPred }
 }
 
-// -- School Diagnostic Questions -----------------------------------------------
+// -- Comparison leg: slider (current) + predicted score side by side -----------
+
+function ComparisonLeg({ label, color, bg, curVal, onChange, pred, dc, description, predNote }) {
+  const hasPred = pred != null && dc
+  const delta   = hasPred ? pred - curVal : null
+  const arrow   = delta == null ? null : delta > 1 ? '^' : delta < -1 ? 'v' : '='
+  const arrowCol = delta == null ? 'var(--ink-4)' : delta > 1 ? '#1D9E75' : delta < -1 ? '#D85A30' : '#534AB7'
+
+  return (
+    <div style={{ border: `1px solid ${color}33`, borderTop: `3px solid ${color}`, borderRadius: '0 0 10px 10px', padding: '1rem 1.25rem', background: bg, marginBottom: '.75rem' }}>
+      <div style={{ fontSize: 11, fontWeight: 600, color, textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: '.625rem' }}>{label}</div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        {/* Slider - current posting */}
+        <div style={{ flex: 1 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>
+            <span style={{ fontSize: 11, color: 'var(--ink-3)' }}>Your current rating</span>
+            <span style={{ fontSize: '1.4rem', fontWeight: 300, color }}>{curVal}</span>
+          </div>
+          <input type="range" min={1} max={10} step={1} value={curVal}
+            onChange={e => onChange(Number(e.target.value))}
+            style={{ width: '100%', accentColor: color }} />
+          <div style={{ fontSize: 11, color: 'var(--ink-4)', marginTop: 3, lineHeight: 1.4 }}>{description}</div>
+        </div>
+
+        {/* Arrow + predicted score */}
+        {hasPred && (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0, width: 72 }}>
+            <div style={{ fontSize: 26, color: arrowCol, lineHeight: 1 }}>{arrow}</div>
+            <div style={{ fontSize: '1.75rem', fontWeight: 300, color, lineHeight: 1.1 }}>{pred}</div>
+            <div style={{ fontSize: 10, color: 'var(--ink-4)', textAlign: 'center', marginTop: 2 }}>predicted<br />at {dc}</div>
+          </div>
+        )}
+      </div>
+
+      {/* Gap callout */}
+      {hasPred && delta != null && Math.abs(delta) > 1 && (
+        <div style={{ marginTop: '.625rem', fontSize: 12, color: delta > 0 ? '#085041' : '#7A2A20', background: delta > 0 ? '#E1F5EE' : '#FAECE7', borderRadius: 6, padding: '5px 10px', lineHeight: 1.45 }}>
+          {predNote || (delta > 0
+            ? `Conditions at ${dc} suggest an improvement here.`
+            : `This leg may be weaker at ${dc} - investigate before committing.`)}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// -- Mini school diagnostic (5 targeted questions - auto-scores the slider) ---
 
 const SCHOOL_DIAG_QS = [
   { id: 'sd1', text: "In staff meetings, how much do you feel your professional voice is heard by leadership?",
@@ -275,35 +290,7 @@ const SCHOOL_DIAG_QS = [
     opts: ["Dread - I need to leave", "Uncertain - things would need to change", "Cautiously okay - I can make it work", "Good - I'm settled and growing here"] },
 ]
 
-// -- Place Diagnostic Questions ------------------------------------------------
-
-const PLACE_DIAG_QS = [
-  { id: 'pd1', text: "How safe do you feel in your daily life outside school?",
-    opts: ["Unsafe — I restrict my movements regularly", "Cautious — there are areas and times I avoid", "Mostly safe — occasional concerns but manageable", "Very safe — I move freely without worry"] },
-  { id: 'pd2', text: "How easy is it to build a social life and find community here?",
-    opts: ["Very hard — I feel isolated most of the time", "Difficult — I have a small circle but it took effort", "Manageable — there's an expat scene and some local connections", "Easy — I have a strong social network here"] },
-  { id: 'pd3', text: "How well does this city work for your life outside school?",
-    opts: ["Poorly — daily logistics are a constant frustration", "It's okay — some things work, others are hard", "Well — I've figured out how to live comfortably", "Great — I genuinely enjoy living here"] },
-  { id: 'pd4', text: "If you have a partner or family, how is this place working for them?",
-    opts: ["Badly — it's a source of real tension", "It's a struggle but we manage", "They're mostly settled", "N/A or they're happy here"] },
-]
-
-// -- Package Diagnostic Questions -----------------------------------------------
-
-const PKG_DIAG_QS = [
-  { id: 'pk1', text: "What's your monthly salary in USD equivalent?",
-    type: 'number', placeholder: 'e.g. 4500', field: 'sal' },
-  { id: 'pk2', text: "What's your housing situation?",
-    type: 'select', field: 'hous', options: HOUSING_OPTS },
-  { id: 'pk3', text: "Are flights home provided?",
-    type: 'select', field: 'flt', options: FLIGHTS_OPTS },
-  { id: 'pk4', text: "What's the tax situation?",
-    type: 'select', field: 'tax', options: TAX_OPTS },
-  { id: 'pk5', text: "At the end of the year, are you actually saving what you hoped?",
-    opts: ["No — I'm barely breaking even or going backwards", "Less than I hoped — lifestyle costs eat into it", "Close to target — I'm managing it", "Yes — I'm hitting or exceeding my savings goal"] },
-]
-
-// Maps answer index (0=worst, 3=best) to a 1-10 score
+// Maps answer index (0=worst, 3=best) to a 1-10 school score
 const SCORE_MAP = [2, 4, 7, 9]
 
 function computeSchoolDiagScore(answers) {
@@ -312,45 +299,117 @@ function computeSchoolDiagScore(answers) {
   return Math.round(vals.reduce((sum, v) => sum + SCORE_MAP[v], 0) / vals.length)
 }
 
-function computePlaceDiagScore(answers) {
-  const vals = Object.values(answers).filter(v => v !== undefined)
-  if (!vals.length) return null
-  // pd4 "N/A" (option index 3) should count as neutral (score 7, not 9)
-  const adjusted = Object.entries(answers).map(([id, v]) => {
-    if (id === 'pd4' && v === 3) return 7 // N/A treated as neutral
-    return SCORE_MAP[v]
-  })
-  return Math.round(adjusted.reduce((s, v) => s + v, 0) / adjusted.length)
-}
-
-function computePackageDiagScore(answers, form) {
-  // pk5 (savings reality) gives the base score
-  const savingsScore = answers.pk5 !== undefined ? [2, 4, 7, 9][answers.pk5] : 5
-  // Boost if housing provided, flights provided, or tax-free
-  let bonus = 0
-  if (form.hous === 'Provided') bonus += 1
-  if (form.flt === 'Yes') bonus += 0.5
-  if (form.tax === 'Tax-free') bonus += 1
-  return Math.min(10, Math.max(1, Math.round(savingsScore + bonus * 0.5)))
-}
-
 function diagInterpretation(answers) {
   const structuralQs = ['sd1', 'sd2', 'sd3'] // leadership, workload, transparency
   const adaptQs      = ['sd4', 'sd5']         // cultural friction, future feeling
   const structBad = structuralQs.filter(id => answers[id] !== undefined && answers[id] <= 1).length
   const adaptBad  = adaptQs.filter(id => answers[id] !== undefined && answers[id] <= 1).length
-  if (structBad >= 2) return { label: 'Structural friction', color: '#D85A30', note: 'Leadership and workload are the main signal - these won\'t improve with time.' }
+  if (structBad >= 2) return { label: 'Structural friction', color: '#D85A30', note: 'Leadership and workload are the main signals - these won\'t improve with time.' }
   if (adaptBad >= 2)  return { label: 'Adaptation friction', color: '#534AB7', note: 'This looks more like cultural adjustment - it typically improves with time.' }
   return { label: 'Mixed picture', color: '#BA7517', note: 'Multiple factors at play - use the Diagnostic tab for a fuller analysis.' }
 }
 
-// -- Steps config for new flow -------------------------------------------------
+function MiniSchoolDiagnostic({ onScore, currentScore }) {
+  const [open,    setOpen]    = useState(false)
+  const [answers, setAnswers] = useState({})
+  const [applied, setApplied] = useState(false)
+
+  const answered = Object.keys(answers).length
+  const liveScore = answered >= 3 ? computeSchoolDiagScore(answers) : null
+  const interp    = answered === 5 ? diagInterpretation(answers) : null
+
+  const apply = () => {
+    const score = computeSchoolDiagScore(answers)
+    if (score != null) { onScore(score); setApplied(true) }
+  }
+
+  const reset = () => { setAnswers({}); setApplied(false) }
+
+  if (!open) {
+    return (
+      <div style={{ marginTop: '-.25rem', marginBottom: '.875rem', textAlign: 'center' }}>
+        <button
+          onClick={() => setOpen(true)}
+          style={{ fontSize: 11.5, color: 'var(--teal-dark)', background: '#E1F5EE', border: '1px solid var(--teal)40', borderRadius: 20, padding: '5px 14px', cursor: 'pointer', fontWeight: 500 }}
+        >
+          Not sure? Answer 5 questions for a real score {'->'}
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <div style={{ background: 'white', border: '1px solid #BA751733', borderRadius: 'var(--r)', padding: '1rem 1.125rem', marginTop: '-.25rem', marginBottom: '.875rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '.75rem' }}>
+        <div>
+          <span style={{ fontSize: 12, fontWeight: 600, color: '#BA7517', textTransform: 'uppercase', letterSpacing: '.07em' }}>School diagnostic</span>
+          <span style={{ fontSize: 11, color: 'var(--ink-4)', marginLeft: '.5rem' }}>{answered}/5 answered</span>
+        </div>
+        {liveScore != null && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '.4rem' }}>
+            <span style={{ fontSize: 11, color: 'var(--ink-3)' }}>score so far:</span>
+            <span style={{ fontSize: '1.4rem', fontWeight: 300, color: '#BA7517', lineHeight: 1 }}>{liveScore}</span>
+          </div>
+        )}
+      </div>
+
+      {SCHOOL_DIAG_QS.map((q, qi) => (
+        <div key={q.id} style={{ marginBottom: '.75rem' }}>
+          <div style={{ fontSize: 12.5, fontWeight: 500, color: 'var(--ink-2)', marginBottom: '.4rem', lineHeight: 1.45 }}>
+            <span style={{ color: 'var(--ink-4)', marginRight: '.3rem' }}>{qi + 1}.</span>{q.text}
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 5 }}>
+            {q.opts.map((o, oi) => (
+              <button
+                key={oi}
+                onClick={() => { setAnswers(a => ({ ...a, [q.id]: oi })); setApplied(false) }}
+                style={{
+                  fontSize: 11.5, textAlign: 'left', padding: '6px 10px', borderRadius: 6, cursor: 'pointer', lineHeight: 1.4,
+                  background: answers[q.id] === oi ? '#FAEEDA' : 'var(--surface-2)',
+                  border: answers[q.id] === oi ? '1.5px solid #BA7517' : '1px solid var(--border)',
+                  color: answers[q.id] === oi ? '#633806' : 'var(--ink-2)',
+                  fontWeight: answers[q.id] === oi ? 500 : 400,
+                }}
+              >{o}</button>
+            ))}
+          </div>
+        </div>
+      ))}
+
+      {interp && (
+        <div style={{ fontSize: 12, padding: '8px 12px', borderRadius: 6, background: '#FDF6EC', border: `1px solid ${interp.color}33`, color: interp.color, marginBottom: '.75rem', lineHeight: 1.5 }}>
+          <strong>{interp.label}.</strong> {interp.note}
+        </div>
+      )}
+
+      <div style={{ display: 'flex', gap: '.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+        {answered >= 3 && !applied && (
+          <button onClick={apply} style={{ fontSize: 12.5, fontWeight: 500, color: 'white', background: '#BA7517', border: 'none', borderRadius: 'var(--r)', padding: '7px 14px', cursor: 'pointer' }}>
+            Use this score ({liveScore}) {'->'}
+          </button>
+        )}
+        {applied && (
+          <span style={{ fontSize: 12, color: 'var(--teal-dark)', background: '#E1F5EE', borderRadius: 'var(--r)', padding: '6px 12px', fontWeight: 500 }}>
+            School slider updated to {currentScore}
+          </span>
+        )}
+        <button onClick={() => { reset(); setOpen(false) }} style={{ fontSize: 12, color: 'var(--ink-4)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 0' }}>
+          {applied ? 'Close' : 'Skip diagnostic'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// -- Steps config -------------------------------------------------------------
 
 const STEPS = [
-  { title: "Where are you?", sub: "Your home culture and current posting — the starting point for everything." },
-  { title: "How does your current stool feel?", sub: "Answer a few honest questions about each leg. We'll calculate your scores." },
-  { title: "What matters to you?", sub: "Five quick questions that personalise your predictions, plus an optional destination." },
-  { title: "Save your profile?", sub: "Enter your email so you can come back. No password, no spam — just your data." },
+  { title: "Where are you from?", sub: "Your home culture is the baseline - understanding what you're adapting from shapes everything else on this platform." },
+  { title: "Your current situation", sub: "Where are you right now? This anchors your cultural, financial, and professional baseline." },
+  { title: "A bit more about you", sub: "Five quick questions. These personalise your predictions and power the matching engine." },
+  { title: "Considering a move?", sub: "Tell us where you're thinking of going and we'll predict your three-legged stool score at your destination." },
+  { title: "How does your current stool feel?", sub: "Rate your current posting honestly - we'll show you what we predict at your destination side by side, in real time." },
+  { title: "Save your profile?", sub: "Enter your email and we'll save your profile so you can load it from any device. No password needed - your email is your key." },
 ]
 
 export default function Onboarding() {
@@ -358,38 +417,20 @@ export default function Onboarding() {
   const [step, setStep] = useState(0)
   const [saveEmail, setSaveEmail] = useState('')
   const [saveState, setSaveState] = useState('idle')
-
   const [form, setForm] = useState({
-    home: '', yrs: '',
-    cc: '', city: '', school: '',
-    sal: '', hous: '', flt: '', tax: '',
+    name: '', home: '', yrs: '', curr: '',
+    cc: '', city: '', school: '', sal: '', hous: '', flt: '', tax: '',
     dc: '', dcity: '',
     sch: 5, plc: 5, pkg: 5,
     life: '', savings: '', priority: '', friction: '', exit: '',
   })
 
-  const [schoolAnswers, setSchoolAnswers] = useState({})
-  const [placeAnswers, setPlaceAnswers] = useState({})
-  const [pkgAnswers, setPkgAnswers] = useState({})
-
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
-
-  /* Diagnostic scores — computed live so finalProfile always reflects answers */
-  const schoolScore = computeSchoolDiagScore(schoolAnswers)
-  const placeScore  = computePlaceDiagScore(placeAnswers)
-  const pkgScore    = computePackageDiagScore(pkgAnswers, form)
-
-  const finalProfile = {
-    ...form,
-    sal: parseFloat(form.sal) || 0,
-    sch: schoolScore ?? form.sch,
-    plc: placeScore  ?? form.plc,
-    pkg: pkgScore    ?? form.pkg,
-  }
+  const finalProfile = { ...form, sal: parseFloat(form.sal) || 0 }
 
   const advance = () => {
     if (step === 0) { setStep(1); return }
-    if (step < 4) { setStep(step + 1); return }
+    if (step < 6) { setStep(step + 1); return }
   }
 
   const handleSkipSave = () => {
@@ -399,34 +440,41 @@ export default function Onboarding() {
   const handleSaveAndContinue = async () => {
     if (!saveEmail.trim() || saveState === 'saving') return
     setSaveState('saving')
+    let launched = false
+    const fallback = setTimeout(() => {
+      launched = true
+      launchDashboard(finalProfile)
+    }, 1500)
 
     try {
       const result = await saveToCloud(saveEmail.trim(), finalProfile)
-      if (result?.ok) {
-        setSaveState('saved')
-        launchDashboard(finalProfile)
-      } else {
-        // Save failed — still launch so the user isn't stuck, but warn
-        console.warn('Cloud save failed, launching with local only:', result?.error)
+      if (result?.ok && !launched) {
+          clearTimeout(fallback)
+          launched = true
+          setSaveState('saved')
+          launchDashboard(finalProfile)
+      } else if (!result?.ok) {
         setSaveState('error')
-        // Launch anyway after a brief pause so user sees the error
-        setTimeout(() => launchDashboard(finalProfile), 1200)
       }
-    } catch (e) {
-      console.error('Cloud save exception:', e)
+    } catch {
       setSaveState('error')
-      setTimeout(() => launchDashboard(finalProfile), 1200)
     }
   }
 
-  const dots = Array.from({ length: 5 }, (_, i) => (
+  const dots = Array.from({ length: 7 }, (_, i) => (
     <div key={i} className={`ob-dot ${i === step ? 'active' : i < step ? 'done' : ''}`} />
   ))
 
+  const preds = step === 5 ? computePredictions(form) : {}
+  const isVeteran = form.yrs === '15+ years' || form.yrs === '8-15 years'
+
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', padding: '3rem 1.5rem 4rem', background: 'var(--surface)' }}>
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1.5rem' }}>
-        {step > 0 && <StoolSVG width={56} height={60} />}
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '2.5rem' }}>
+        {step > 0 && <StoolSVG width={72} height={76} />}
+        <div style={{ fontFamily: 'var(--serif)', fontSize: '1.75rem', color: 'var(--teal-dark)', letterSpacing: '-.02em', lineHeight: 1, marginBottom: '.35rem', marginTop: step > 0 ? '.6rem' : 0 }}>stool</div>
+        <div style={{ fontSize: 11, color: 'var(--ink-4)', letterSpacing: '.12em', textTransform: 'uppercase', fontWeight: 500, marginBottom: '.35rem' }}>school / place / package</div>
+        <div style={{ fontSize: 12, color: 'var(--ink-3)' }}>The honest intelligence platform for international educators</div>
       </div>
 
       <div className="ob-card fu">
@@ -443,11 +491,17 @@ export default function Onboarding() {
               <>
                 <div className="frow">
                   <div className="fg">
+                    <label>First name (optional)</label>
+                    <input value={form.name} onChange={e => set('name', e.target.value)} placeholder="e.g. Mark" />
+                  </div>
+                  <div className="fg">
                     <label>Home country</label>
                     <select value={form.home} onChange={e => set('home', e.target.value)}>
                       <option value="">Select</option>{COUNTRY_OPTS}
                     </select>
                   </div>
+                </div>
+                <div className="frow">
                   <div className="fg">
                     <label>Years teaching internationally</label>
                     <select value={form.yrs} onChange={e => set('yrs', e.target.value)}>
@@ -455,33 +509,12 @@ export default function Onboarding() {
                       {['Just starting','1-3 years','4-7 years','8-15 years','15+ years'].map(o => <option key={o}>{o}</option>)}
                     </select>
                   </div>
-                </div>
-                <div className="frow">
                   <div className="fg">
-                    <label>Current country</label>
-                    <select value={form.cc} onChange={e => set('cc', e.target.value)}>
-                      <option value="">Select</option>{COUNTRY_OPTS}
+                    <label>Primary curriculum</label>
+                    <select value={form.curr} onChange={e => set('curr', e.target.value)}>
+                      <option value="">Select</option>
+                      {CURRICULUM_OPTS.map(o => <option key={o}>{o}</option>)}
                     </select>
-                  </div>
-                  <div className="fg">
-                    <label>Current city</label>
-                    <input value={form.city} onChange={e => set('city', e.target.value)} placeholder="e.g. Bangkok" />
-                  </div>
-                </div>
-                <div className="frow">
-                  <div className="fg" style={{ gridColumn: '1 / -1' }}>
-                    <label>Current school name <span style={{ fontWeight: 400, color: 'var(--ink-4)' }}>(optional)</span></label>
-                    <SchoolAutocomplete
-                      value={form.school}
-                      onChange={v => set('school', v)}
-                      onSelect={rec => {
-                        if (rec.city) set('city', rec.city)
-                        if (rec.country && !form.cc) set('cc', rec.country)
-                      }}
-                      schools={SALARY_DB_SEED}
-                      country={form.cc}
-                      placeholder="e.g. Bangkok Patana School"
-                    />
                   </div>
                 </div>
                 {form.yrs === '15+ years' && (
@@ -499,190 +532,52 @@ export default function Onboarding() {
 
             {step === 2 && (
               <>
-                {/* School Diagnostic */}
-                <div style={{ border: '1px solid #BA751733', borderTop: '3px solid #BA7517', borderRadius: '0 0 10px 10px', padding: '1rem 1.125rem', marginBottom: '.75rem', background: '#FAEEDA' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '.75rem' }}>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: '#BA7517', textTransform: 'uppercase', letterSpacing: '.07em' }}>School</div>
-                    {schoolScore != null && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '.4rem' }}>
-                        <span style={{ fontSize: 11, color: '#854F0B' }}>score:</span>
-                        <span style={{ fontSize: '1.4rem', fontWeight: 300, color: '#BA7517', lineHeight: 1 }}>{schoolScore}</span>
-                        <span style={{ fontSize: 11, color: '#854F0B' }}>/10</span>
-                      </div>
-                    )}
+                <div className="frow">
+                  <div className="fg">
+                    <label>Current country</label>
+                    <select value={form.cc} onChange={e => set('cc', e.target.value)}>
+                      <option value="">Select</option>{COUNTRY_OPTS}
+                    </select>
                   </div>
-                  {SCHOOL_DIAG_QS.map((q, qi) => (
-                    <div key={q.id} style={{ marginBottom: '.75rem' }}>
-                      <div style={{ fontSize: 12.5, fontWeight: 500, color: 'var(--ink-2)', marginBottom: '.4rem', lineHeight: 1.45 }}>
-                        <span style={{ color: 'var(--ink-4)', marginRight: '.3rem' }}>{qi + 1}.</span>{q.text}
-                      </div>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 5 }}>
-                        {q.opts.map((o, oi) => (
-                          <button
-                            key={oi}
-                            onClick={() => { setSchoolAnswers(a => ({ ...a, [q.id]: oi })) }}
-                            style={{
-                              fontSize: 11.5, textAlign: 'left', padding: '6px 10px', borderRadius: 6, cursor: 'pointer', lineHeight: 1.4,
-                              background: schoolAnswers[q.id] === oi ? '#FAEEDA' : 'var(--surface-2)',
-                              border: schoolAnswers[q.id] === oi ? '1.5px solid #BA7517' : '1px solid var(--border)',
-                              color: schoolAnswers[q.id] === oi ? '#633806' : 'var(--ink-2)',
-                              fontWeight: schoolAnswers[q.id] === oi ? 500 : 400,
-                            }}
-                          >{o}</button>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
+                  <div className="fg">
+                    <label>Current city</label>
+                    <input value={form.city} onChange={e => set('city', e.target.value)} placeholder="e.g. Bangkok" />
+                  </div>
                 </div>
-
-                {/* Place Diagnostic */}
-                <div style={{ border: '1px solid #534AB733', borderTop: '3px solid #534AB7', borderRadius: '0 0 10px 10px', padding: '1rem 1.125rem', marginBottom: '.75rem', background: '#EEEDFE' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '.75rem' }}>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: '#534AB7', textTransform: 'uppercase', letterSpacing: '.07em' }}>Place</div>
-                    {placeScore != null && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '.4rem' }}>
-                        <span style={{ fontSize: 11, color: '#3C3489' }}>score:</span>
-                        <span style={{ fontSize: '1.4rem', fontWeight: 300, color: '#534AB7', lineHeight: 1 }}>{placeScore}</span>
-                        <span style={{ fontSize: 11, color: '#3C3489' }}>/10</span>
-                      </div>
-                    )}
+                <div className="frow">
+                  <div className="fg" style={{ gridColumn: '1 / -1' }}>
+                    <label>Current school name <span style={{ fontWeight: 400, color: 'var(--ink-4)' }}>(optional)</span></label>
+                    <input value={form.school} onChange={e => set('school', e.target.value)} placeholder="e.g. Bangkok Patana School" />
                   </div>
-                  {PLACE_DIAG_QS.map((q, qi) => (
-                    <div key={q.id} style={{ marginBottom: '.75rem' }}>
-                      <div style={{ fontSize: 12.5, fontWeight: 500, color: 'var(--ink-2)', marginBottom: '.4rem', lineHeight: 1.45 }}>
-                        <span style={{ color: 'var(--ink-4)', marginRight: '.3rem' }}>{qi + 1}.</span>{q.text}
-                      </div>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 5 }}>
-                        {q.opts.map((o, oi) => (
-                          <button
-                            key={oi}
-                            onClick={() => { setPlaceAnswers(a => ({ ...a, [q.id]: oi })) }}
-                            style={{
-                              fontSize: 11.5, textAlign: 'left', padding: '6px 10px', borderRadius: 6, cursor: 'pointer', lineHeight: 1.4,
-                              background: placeAnswers[q.id] === oi ? '#EEEDFE' : 'var(--surface-2)',
-                              border: placeAnswers[q.id] === oi ? '1.5px solid #534AB7' : '1px solid var(--border)',
-                              color: placeAnswers[q.id] === oi ? '#26215C' : 'var(--ink-2)',
-                              fontWeight: placeAnswers[q.id] === oi ? 500 : 400,
-                            }}
-                          >{o}</button>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
                 </div>
-
-                {/* Package Diagnostic */}
-                <div style={{ border: '1px solid #1D9E7533', borderTop: '3px solid #1D9E75', borderRadius: '0 0 10px 10px', padding: '1rem 1.125rem', marginBottom: '.75rem', background: '#E1F5EE' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '.75rem' }}>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: '#1D9E75', textTransform: 'uppercase', letterSpacing: '.07em' }}>Package</div>
-                    {pkgScore != null && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '.4rem' }}>
-                        <span style={{ fontSize: 11, color: '#0F6E56' }}>score:</span>
-                        <span style={{ fontSize: '1.4rem', fontWeight: 300, color: '#1D9E75', lineHeight: 1 }}>{pkgScore}</span>
-                        <span style={{ fontSize: 11, color: '#0F6E56' }}>/10</span>
-                      </div>
-                    )}
+                <div className="frow">
+                  <div className="fg">
+                    <label>Monthly salary (USD equiv.)</label>
+                    <input type="number" value={form.sal} onChange={e => set('sal', e.target.value)} placeholder="e.g. 4500" min={0} />
                   </div>
-
-                  {/* pk1: Number input */}
-                  <div style={{ marginBottom: '.75rem' }}>
-                    <div style={{ fontSize: 12.5, fontWeight: 500, color: 'var(--ink-2)', marginBottom: '.4rem' }}>1. What's your monthly salary in USD equivalent?</div>
-                    <input
-                      type="number"
-                      value={form.sal}
-                      onChange={e => { set('sal', e.target.value); setPkgAnswers(a => ({ ...a, pk1: parseFloat(e.target.value) })) }}
-                      placeholder="e.g. 4500"
-                      min={0}
-                      style={{ width: '100%', fontSize: 13, padding: '7px 10px', border: '1px solid var(--border)', borderRadius: 'var(--r)', outline: 'none', boxSizing: 'border-box' }}
-                    />
-                  </div>
-
-                  {/* pk2: Housing select */}
-                  <div style={{ marginBottom: '.75rem' }}>
-                    <div style={{ fontSize: 12.5, fontWeight: 500, color: 'var(--ink-2)', marginBottom: '.4rem' }}>2. What's your housing situation?</div>
-                    <select
-                      value={form.hous}
-                      onChange={e => { set('hous', e.target.value); setPkgAnswers(a => ({ ...a, pk2: e.target.value })) }}
-                      style={{ width: '100%', fontSize: 13, padding: '7px 10px', border: '1px solid var(--border)', borderRadius: 'var(--r)', outline: 'none', boxSizing: 'border-box' }}
-                    >
+                  <div className="fg">
+                    <label>Housing</label>
+                    <select value={form.hous} onChange={e => set('hous', e.target.value)}>
                       <option value="">Select</option>
                       {HOUSING_OPTS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                     </select>
                   </div>
-
-                  {/* pk3: Flights select */}
-                  <div style={{ marginBottom: '.75rem' }}>
-                    <div style={{ fontSize: 12.5, fontWeight: 500, color: 'var(--ink-2)', marginBottom: '.4rem' }}>3. Are flights home provided?</div>
-                    <select
-                      value={form.flt}
-                      onChange={e => { set('flt', e.target.value); setPkgAnswers(a => ({ ...a, pk3: e.target.value })) }}
-                      style={{ width: '100%', fontSize: 13, padding: '7px 10px', border: '1px solid var(--border)', borderRadius: 'var(--r)', outline: 'none', boxSizing: 'border-box' }}
-                    >
+                </div>
+                <div className="frow">
+                  <div className="fg">
+                    <label>Flights allowance</label>
+                    <select value={form.flt} onChange={e => set('flt', e.target.value)}>
                       <option value="">Select</option>
                       {FLIGHTS_OPTS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                     </select>
                   </div>
-
-                  {/* pk4: Tax select */}
-                  <div style={{ marginBottom: '.75rem' }}>
-                    <div style={{ fontSize: 12.5, fontWeight: 500, color: 'var(--ink-2)', marginBottom: '.4rem' }}>4. What's the tax situation?</div>
-                    <select
-                      value={form.tax}
-                      onChange={e => { set('tax', e.target.value); setPkgAnswers(a => ({ ...a, pk4: e.target.value })) }}
-                      style={{ width: '100%', fontSize: 13, padding: '7px 10px', border: '1px solid var(--border)', borderRadius: 'var(--r)', outline: 'none', boxSizing: 'border-box' }}
-                    >
+                  <div className="fg">
+                    <label>Tax status</label>
+                    <select value={form.tax} onChange={e => set('tax', e.target.value)}>
                       <option value="">Select</option>
                       {TAX_OPTS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                     </select>
                   </div>
-
-                  {/* pk5: MCQ options */}
-                  <div style={{ marginBottom: '.75rem' }}>
-                    <div style={{ fontSize: 12.5, fontWeight: 500, color: 'var(--ink-2)', marginBottom: '.4rem', lineHeight: 1.45 }}>5. At the end of the year, are you actually saving what you hoped?</div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 5 }}>
-                      {['No — I\'m barely breaking even or going backwards', 'Less than I hoped — lifestyle costs eat into it', 'Close to target — I\'m managing it', 'Yes — I\'m hitting or exceeding my savings goal'].map((o, oi) => (
-                        <button
-                          key={oi}
-                          onClick={() => { setPkgAnswers(a => ({ ...a, pk5: oi })) }}
-                          style={{
-                            fontSize: 11.5, textAlign: 'left', padding: '6px 10px', borderRadius: 6, cursor: 'pointer', lineHeight: 1.4,
-                            background: pkgAnswers.pk5 === oi ? '#E1F5EE' : 'var(--surface-2)',
-                            border: pkgAnswers.pk5 === oi ? '1.5px solid #1D9E75' : '1px solid var(--border)',
-                            color: pkgAnswers.pk5 === oi ? '#085041' : 'var(--ink-2)',
-                            fontWeight: pkgAnswers.pk5 === oi ? 500 : 400,
-                          }}
-                        >{o}</button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Stool Summary */}
-                <div style={{ background: 'var(--surface-2)', borderRadius: 'var(--r)', padding: '1rem', marginTop: '.5rem' }}>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--ink-2)', marginBottom: '.625rem' }}>Your current stool</div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '.5rem', textAlign: 'center' }}>
-                    {[
-                      { label: 'School', score: schoolScore, color: '#BA7517' },
-                      { label: 'Place', score: placeScore, color: '#534AB7' },
-                      { label: 'Package', score: pkgScore, color: '#1D9E75' },
-                    ].map(leg => (
-                      <div key={leg.label}>
-                        <div style={{ fontSize: '1.75rem', fontWeight: 300, color: leg.color, lineHeight: 1 }}>{leg.score ?? '—'}</div>
-                        <div style={{ fontSize: 11, color: leg.color, fontWeight: 500, marginTop: 2 }}>{leg.label}</div>
-                      </div>
-                    ))}
-                  </div>
-                  {schoolScore && placeScore && pkgScore && (() => {
-                    const solid = [schoolScore, placeScore, pkgScore].filter(s => s >= 6).length
-                    return (
-                      <div style={{ fontSize: 12, color: 'var(--ink-3)', marginTop: '.75rem', lineHeight: 1.55, textAlign: 'center' }}>
-                        {solid >= 3 ? 'All three legs are solid — your stool is stable.' :
-                         solid === 2 ? 'Two solid legs — your stool is sustainable, but watch the weak leg.' :
-                         solid === 1 ? 'Only one solid leg — this posting has significant risk.' :
-                         'No solid legs — this is a posting you should seriously reconsider.'}
-                      </div>
-                    )
-                  })()}
                 </div>
               </>
             )}
@@ -776,7 +671,7 @@ export default function Onboarding() {
                 </div>
 
                 {/* Q5: Exit flexibility */}
-                <div style={{ marginBottom: '1.5rem' }}>
+                <div style={{ marginBottom: '.5rem' }}>
                   <div style={{ fontSize: 12.5, fontWeight: 500, color: 'var(--ink-2)', marginBottom: '.5rem', lineHeight: 1.45 }}>If this posting turned bad, could you walk away mid-contract?</div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 6 }}>
                     {[
@@ -794,28 +689,104 @@ export default function Onboarding() {
                     ))}
                   </div>
                 </div>
-
-                {/* Destination section */}
-                <div style={{ paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink-2)', marginBottom: '.25rem', lineHeight: 1.45 }}>Considering a move?</div>
-                  <div style={{ fontSize: 12, color: 'var(--ink-4)', marginBottom: '1rem' }}>Optional — skip this if you're just evaluating where you are now.</div>
-                  <div className="frow">
-                    <div className="fg">
-                      <label>Destination country</label>
-                      <select value={form.dc} onChange={e => set('dc', e.target.value)}>
-                        <option value="">No destination yet</option>{COUNTRY_OPTS}
-                      </select>
-                    </div>
-                    <div className="fg">
-                      <label>Destination city</label>
-                      <input value={form.dcity} onChange={e => set('dcity', e.target.value)} placeholder="e.g. Dubai" />
-                    </div>
-                  </div>
-                </div>
               </>
             )}
 
             {step === 4 && (
+              <>
+                <div className="frow">
+                  <div className="fg">
+                    <label>Destination country</label>
+                    <select value={form.dc} onChange={e => set('dc', e.target.value)}>
+                      <option value="">No destination yet</option>{COUNTRY_OPTS}
+                    </select>
+                  </div>
+                  <div className="fg">
+                    <label>Destination city</label>
+                    <input value={form.dcity} onChange={e => set('dcity', e.target.value)} placeholder="e.g. Dubai" />
+                  </div>
+                </div>
+                <div className="ibox">The <strong>three-legged stool</strong>: school + place + package. You need at least 2 of 3. Our destination prediction uses real salary records, cultural research data, and quality-of-life indices to forecast whether your stool improves at your destination.</div>
+              </>
+            )}
+
+            {step === 5 && (
+              <>
+                {form.dc && (
+                  <div style={{ fontSize: 12, background: 'var(--surface-2)', borderRadius: 'var(--r)', padding: '.625rem .875rem', marginBottom: '1rem', color: 'var(--ink-3)', lineHeight: 1.5 }}>
+                    Right side shows our prediction for <strong>{form.dcity ? `${form.dcity}, ` : ''}{form.dc}</strong>. Drag each slider to rate your <em>current</em> posting - the comparison updates live.
+                  </div>
+                )}
+                <ComparisonLeg
+                  label="School"
+                  color="#BA7517" bg="#FAEEDA"
+                  curVal={form.sch} onChange={v => set('sch', v)}
+                  pred={preds.schPred} dc={form.dc}
+                  description="Leadership, colleague culture, workload, professional development, mission"
+                  predNote={isVeteran && preds.schPred && preds.schPred - form.sch > 0
+                    ? `Your experience adapting internationally reduces the adjustment cost here - that's reflected in the prediction.`
+                    : null}
+                />
+                <MiniSchoolDiagnostic
+                  onScore={score => set('sch', score)}
+                  currentScore={form.sch}
+                />
+                <ComparisonLeg
+                  label="Place"
+                  color="#534AB7" bg="#EEEDFE"
+                  curVal={form.plc} onChange={v => set('plc', v)}
+                  pred={preds.plcPred} dc={form.dc}
+                  description="City quality, safety, family life, lifestyle, adventure"
+                />
+                <ComparisonLeg
+                  label="Package"
+                  color="#1D9E75" bg="#E1F5EE"
+                  curVal={form.pkg} onChange={v => set('pkg', v)}
+                  pred={preds.pkgPred} dc={form.dc}
+                  description="Salary, housing, flights, tax, savings potential"
+                />
+
+                {/* Personalised match notes */}
+                {form.dc && (() => {
+                  const notes = generateMatchNotes(form, preds)
+                  if (!notes || notes.length === 0) return null
+                  const legColor = { school: '#BA7517', place: '#534AB7', package: '#1D9E75' }
+                  const legLabel = { school: 'School signal', place: 'Place signal', package: 'Package signal' }
+                  return (
+                    <div style={{ marginTop: '.75rem', background: 'white', border: '1px solid var(--border)', borderRadius: 'var(--r)', padding: '1rem 1.125rem' }}>
+                      <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: '.5rem' }}>Personalised signals for you</div>
+                      {notes.map((n, i) => (
+                        <div key={i} style={{
+                          fontSize: 12, padding: '9px 12px', borderRadius: 8, marginBottom: 8, lineHeight: 1.55,
+                          background: n.type === 'warn' ? '#FAECE7' : n.type === 'good' ? '#E1F5EE' : '#FDF6EC',
+                          color: n.type === 'warn' ? '#7A2A20' : n.type === 'good' ? '#085041' : '#633806',
+                          borderLeft: `3px solid ${n.type === 'warn' ? '#D85A30' : n.type === 'good' ? '#1D9E75' : '#BA7517'}`,
+                        }}>
+                          <div style={{ marginBottom: 4 }}>
+                            <span style={{
+                              display: 'inline-block',
+                              fontSize: 10,
+                              fontWeight: 600,
+                              letterSpacing: '.06em',
+                              textTransform: 'uppercase',
+                              color: legColor[n.leg],
+                              background: `${legColor[n.leg]}15`,
+                              borderRadius: 999,
+                              padding: '3px 8px',
+                            }}>
+                              {legLabel[n.leg]}
+                            </span>
+                          </div>
+                          <div>{n.text}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )
+                })()}
+              </>
+            )}
+
+            {step === 6 && (
               <>
                 <div style={{ maxWidth: 440 }}>
                   <input
@@ -854,7 +825,7 @@ export default function Onboarding() {
               {step > 1
                 ? <button className="btn btn-ghost" onClick={() => setStep(step - 1)}>{"<-"} Back</button>
                 : <span />}
-              {step < 4 ? (
+              {step < 6 ? (
                 <button className="btn btn-primary" onClick={advance}>
                   Continue{' ->'}
                 </button>
@@ -868,3 +839,5 @@ export default function Onboarding() {
     </div>
   )
 }
+
+
