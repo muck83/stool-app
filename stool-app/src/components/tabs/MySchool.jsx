@@ -379,7 +379,7 @@ function SchoolSearchPanel() {
 // ── Main export ───────────────────────────────────────────────────────────────
 
 export default function MySchool() {
-  const { profile } = useProfile()
+  const { profile, updateProfile } = useProfile()
   const [mode, setMode] = useState('home') // home | review | search
   const [step, setStep] = useState(0)
   const [school, setSchool] = useState(profile.school || '')
@@ -456,6 +456,14 @@ export default function MySchool() {
       const review = { school, country, answers: { ...answers }, hours, noticePeriod }
       setReviews(r => [...r, review])
       insertSchoolReview(review)
+      // Update the profile's school score if reviewing own school
+      if (school === profile.school) {
+        const scores = Object.values(answers).map(a => a?.score).filter(s => s != null)
+        if (scores.length) {
+          const avg = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length * 10) / 10
+          updateProfile({ sch: avg })
+        }
+      }
       setStep(SR_QS.length + 1)
     }
   }
