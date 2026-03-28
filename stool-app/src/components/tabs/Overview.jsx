@@ -202,6 +202,47 @@ export default function Overview() {
           )}
         </div>
       </div>
+
+      {/* Contribution prompts */}
+      {(profile.school || profile.sal > 0) && (
+        <div style={{ marginTop: '1.5rem' }}>
+          <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--ink-2)', marginBottom: '.75rem' }}>Help other teachers</div>
+
+          {profile.school && (
+            <div
+              onClick={() => setActiveTab('schools')}
+              style={{
+                background: '#FAEEDA', border: '1px solid #BA751733', borderRadius: 'var(--r)',
+                padding: '.875rem 1rem', marginBottom: '.5rem', cursor: 'pointer',
+              }}
+            >
+              <div style={{ fontSize: 13, fontWeight: 500, color: '#633806', marginBottom: '.25rem' }}>
+                Rate {profile.school}
+              </div>
+              <div style={{ fontSize: 12, color: '#854F0B', lineHeight: 1.5 }}>
+                Your honest school review helps other teachers considering this school. It takes about 2 minutes and is completely anonymous.
+              </div>
+            </div>
+          )}
+
+          {profile.sal > 0 && (
+            <div
+              onClick={() => setActiveTab('data')}
+              style={{
+                background: '#E1F5EE', border: '1px solid #1D9E7533', borderRadius: 'var(--r)',
+                padding: '.875rem 1rem', marginBottom: '.5rem', cursor: 'pointer',
+              }}
+            >
+              <div style={{ fontSize: 13, fontWeight: 500, color: '#085041', marginBottom: '.25rem' }}>
+                Add your salary to the database
+              </div>
+              <div style={{ fontSize: 12, color: '#0F6E56', lineHeight: 1.5 }}>
+                Your salary data (with school details prefilled from your profile) helps others negotiate fairly. Anonymous and takes 30 seconds.
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }

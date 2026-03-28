@@ -15,6 +15,21 @@ export const HOUSING_OPTS = [
   { value: 'None',      label: 'No housing benefit' },
 ]
 
+// Detailed housing follow-ups — what teachers actually need to know
+export const HOUSING_QUALITY_OPTS = [
+  { value: 'great',    label: 'Good quality — standalone, furnished, decent area' },
+  { value: 'ok',       label: 'Adequate — liveable but basic or shared compound' },
+  { value: 'shared',   label: 'Shared housing — roommate situation' },
+  { value: 'poor',     label: 'Poor quality — would not recommend' },
+]
+
+export const ALLOWANCE_COVERAGE_OPTS = [
+  { value: '100',  label: 'Covers all or nearly all of rent' },
+  { value: '75',   label: 'Covers most of rent (roughly 75%)' },
+  { value: '50',   label: 'Covers about half of rent' },
+  { value: '25',   label: 'Token amount — covers less than a quarter' },
+]
+
 export const FLIGHTS_OPTS = [
   { value: 'Yes', label: 'Yes — covered' },
   { value: 'No',  label: 'No' },

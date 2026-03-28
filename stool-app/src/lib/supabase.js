@@ -152,17 +152,34 @@ export async function fetchSchoolReviews(school) {
 
 export async function searchSchoolReviews(query) {
   if (!supabase || !query.trim()) return []
-  const { data, error } = await supabase
-    .from('school_reviews')
-    .select('*')
-    .ilike('school', `%${query.trim()}%`)
-    .not('status', 'eq', 'removed')
-    .order('created_at', { ascending: false })
-  if (error) {
-    console.error('Supabase search error:', error)
+  try {
+    const { data, error } = await supabase
+      .from('school_reviews')
+      .select('*')
+      .ilike('school', `%${query.trim()}%`)
+      .order('created_at', { ascending: false })
+    if (error) {
+      console.error('Supabase search error:', error)
+      return []
+    }
+    return (data || []).filter(r => r.status !== 'removed')
+  } catch (e) {
+    console.error('Search failed:', e)
     return []
   }
-  return data || []
+}
+
+export async function fetchRecentReviews(limit = 10) {
+  if (!supabase) return []
+  try {
+    const { data, error } = await supabase
+      .from('school_reviews')
+      .select('school, country, created_at')
+      .order('created_at', { ascending: false })
+      .limit(limit)
+    if (error) { console.error('Recent reviews fetch error:', error); return [] }
+    return (data || []).filter(r => r.status !== 'removed')
+  } catch { return [] }
 }
 
 export async function insertDiagnosticSubmission({ profile, answers, result, schoolLegScore }) {
