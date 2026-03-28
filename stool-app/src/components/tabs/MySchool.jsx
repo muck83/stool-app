@@ -410,10 +410,36 @@ export default function MySchool() {
 
   const selectOpt = (key, score, diag) => setAnswers(a => ({ ...a, [key]: { score, diag } }))
 
+  // Map onboarding school diagnostic answers (sd1-sd5) to review questions (q1-q7)
+  // sd1 (leadership voice) → q1 (Leadership), sd2 (workload) → q3 (Workload),
+  // sd3 (transparency) → q2 (Honesty), sd5 (stay 2 yrs) → q7 (Your take)
+  const ONBOARD_TO_REVIEW = { sd1: 'q1', sd2: 'q3', sd3: 'q2', sd5: 'q7' }
+  // Onboarding answer index (0=worst..3=best) → review option index (reversed: 0=best..3=worst)
+  const ONBOARD_IDX_TO_REVIEW_IDX = { 0: 3, 1: 2, 2: 1, 3: 0 }
+
+  const buildPrefillFromDiag = () => {
+    if (!profile.schoolDiag) return {}
+    const prefilled = {}
+    Object.entries(ONBOARD_TO_REVIEW).forEach(([sdKey, qKey]) => {
+      const sdVal = profile.schoolDiag[sdKey]
+      if (sdVal == null) return
+      const reviewIdx = ONBOARD_IDX_TO_REVIEW_IDX[sdVal]
+      if (reviewIdx == null) return
+      const q = SR_QS.find(q => q.key === qKey)
+      if (!q || !q.opts[reviewIdx]) return
+      const opt = q.opts[reviewIdx]
+      prefilled[qKey] = { score: opt.score, diag: opt.diag }
+    })
+    return prefilled
+  }
+
   const startReview = (prefill) => {
     if (prefill) {
       setSchool(profile.school || '')
       setCountry(profile.cc || '')
+      setAnswers(buildPrefillFromDiag())
+    } else {
+      setAnswers({})
     }
     setStep(0)
     setMode('review')
@@ -658,7 +684,7 @@ export default function MySchool() {
               fontSize: 12.5, color: 'var(--teal-dark)', marginBottom: '1rem',
               lineHeight: 1.5,
             }}>
-              We've prefilled your school from your profile. Just hit start.
+              We've prefilled your school from your profile{Object.keys(buildPrefillFromDiag()).length > 0 ? ' and carried over answers from your onboarding diagnostic' : ''}. Just hit start — you can change anything as you go.
             </div>
           )}
           <div className="fg">

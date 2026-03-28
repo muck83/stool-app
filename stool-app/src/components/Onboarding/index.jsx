@@ -382,9 +382,9 @@ export default function Onboarding() {
     }
   })
 
-  const [schoolAnswers, setSchoolAnswers] = useState({})
-  const [placeAnswers, setPlaceAnswers] = useState({})
-  const [pkgAnswers, setPkgAnswers] = useState({})
+  const [schoolAnswers, setSchoolAnswers] = useState(() => (hasExisting && profile.schoolDiag) ? { ...profile.schoolDiag } : {})
+  const [placeAnswers, setPlaceAnswers] = useState(() => (hasExisting && profile.placeDiag) ? { ...profile.placeDiag } : {})
+  const [pkgAnswers, setPkgAnswers] = useState(() => (hasExisting && profile.pkgDiag) ? { ...profile.pkgDiag } : {})
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
@@ -399,6 +399,9 @@ export default function Onboarding() {
     sch: schoolScore ?? form.sch,
     plc: placeScore  ?? form.plc,
     pkg: pkgScore    ?? form.pkg,
+    schoolDiag: Object.keys(schoolAnswers).length > 0 ? { ...schoolAnswers } : undefined,
+    placeDiag:  Object.keys(placeAnswers).length  > 0 ? { ...placeAnswers }  : undefined,
+    pkgDiag:    Object.keys(pkgAnswers).length    > 0 ? { ...pkgAnswers }    : undefined,
   }
 
   const advance = () => {
