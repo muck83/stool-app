@@ -7,6 +7,163 @@ import { COUNTRIES } from '../../data/countries.js'
 // Hofstede indices: 0=PDI, 1=IDV, 2=MAS, 3=UAI, 4=LTO, 5=IVR
 const DIM_INDEX = { PDI: 0, IDV: 1, MAS: 2, UAI: 3, LTO: 4, IVR: 5 }
 
+// ── Culture check quiz questions ──────────────────────────────────────────
+const QUIZ_QUESTIONS = [
+  {
+    q: 'In Japan, students clean their own classrooms every day — there are no janitors.',
+    answer: true,
+    pctCorrect: 42,
+    explanation: 'True. Daily cleaning time is a standard part of the Japanese school day. Students sweep, mop, and tidy as a group — it\'s considered part of character education, not a chore to outsource.',
+    cite: 'Standard practice across Japanese public schools',
+  },
+  {
+    q: 'When a student nods and says "yes" while you explain something, it usually means they understood.',
+    answer: false,
+    pctCorrect: 31,
+    explanation: 'Not in many classrooms. In Korean, Chinese, Japanese, and other East Asian contexts, nodding and saying "yes" typically means "I hear you" or "I respect you" — not "I understand and will do it." The only way to check is to ask them to show you.',
+    cite: 'Cultural communication research; Hall (1976)',
+  },
+  {
+    q: 'Finland — one of the top-ranked education systems globally — doesn\'t begin formal schooling until age 7.',
+    answer: true,
+    pctCorrect: 54,
+    explanation: 'True. Finnish children spend their early years in play-based learning before any formal reading or maths instruction. Despite starting later than almost every other country, Finland consistently ranks near the top for literacy and problem-solving.',
+    cite: 'Finnish National Agency for Education',
+  },
+  {
+    q: 'Students who rely heavily on memorisation tend to score worse on tests of deep, critical thinking.',
+    answer: false,
+    pctCorrect: 27,
+    explanation: 'The research says the opposite. Students from East Asian school systems — where memorisation is common — consistently score among the highest globally on both knowledge recall and higher-order thinking. Memorisation is often a path to deep understanding, not a shortcut around it.',
+    cite: 'Watkins & Biggs (2001); international assessment results',
+  },
+  {
+    q: 'Giving written feedback with no grade produces better learning outcomes than giving a grade alone.',
+    answer: true,
+    pctCorrect: 33,
+    explanation: 'True — and the research gap is significant. Students who receive only written comments (no score) engage more with the feedback and improve more on the next task. When a grade is added, many students stop reading the comments entirely.',
+    cite: 'Black & Wiliam (1998), Inside the Black Box',
+  },
+  {
+    q: 'Waiting just 3 extra seconds after asking a question can more than double the quality of student responses.',
+    answer: true,
+    pctCorrect: 47,
+    explanation: 'True. Most teachers wait less than 1 second before re-asking or answering their own question. Extending this pause to 3–5 seconds significantly increases how many students respond, how long their answers are, and how accurate they are.',
+    cite: 'Rowe (1974)',
+  },
+  {
+    q: 'Students from the same country will generally behave the same way in your classroom.',
+    answer: false,
+    pctCorrect: 38,
+    explanation: 'Not really. The school system a student came from matters far more than their nationality. Two students from Korea — one who attended Korean public school, one who was always in international schools — can have completely different classroom habits and expectations.',
+    cite: 'School culture transfer research; Baskerville (2003)',
+  },
+  {
+    q: 'In Germany, children are typically placed into different types of secondary school based on teacher recommendations around age 10.',
+    answer: true,
+    pctCorrect: 45,
+    explanation: 'True. Germany\'s education system has historically separated students into different school tracks — some leading to university, others to vocational training — based largely on teacher assessments at around age 10. That early decision shapes their whole educational path.',
+    cite: 'OECD Education at a Glance',
+  },
+  {
+    q: 'A student who avoids eye contact with you is probably being disrespectful.',
+    answer: false,
+    pctCorrect: 29,
+    explanation: 'In many cultures, avoiding eye contact with a teacher is a sign of respect, not disrespect. In parts of East Asia, West Africa, and Latin America, sustained eye contact with an authority figure can actually feel confrontational or rude.',
+    cite: 'Cross-cultural communication research',
+  },
+  {
+    q: 'Students who are quiet in class discussions are less engaged with the material than students who speak up.',
+    answer: false,
+    pctCorrect: 36,
+    explanation: 'Not necessarily. Quiet students may be deeply engaged but processing differently — especially those learning in a second language, those from school systems where students don\'t usually speak unless called on, or those managing the social risk of speaking in front of peers.',
+    cite: 'Cummins (1981); participation and second language research',
+  },
+]
+
+function CultureQuiz() {
+  const dailySeed = Math.floor(Date.now() / 86400000) % QUIZ_QUESTIONS.length
+  const [idx, setIdx] = useState(dailySeed)
+  const [chosen, setChosen] = useState(null) // null | true | false
+
+  const q = QUIZ_QUESTIONS[idx]
+  const correct = chosen !== null && chosen === q.answer
+  const next = () => { setIdx(i => (i + 1) % QUIZ_QUESTIONS.length); setChosen(null) }
+
+  return (
+    <div style={{
+      background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%)',
+      borderRadius: 'var(--rl)', padding: '1rem 1.25rem', marginBottom: '1rem',
+    }}>
+      <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.1em', color: '#7EC8B0', marginBottom: '.5rem' }}>
+        Culture check · {idx + 1} of {QUIZ_QUESTIONS.length}
+      </div>
+
+      <div style={{ fontSize: 14, fontWeight: 600, color: '#FFFFFF', lineHeight: 1.5, marginBottom: '.85rem' }}>
+        {q.q}
+      </div>
+
+      {/* Buttons — hidden after answer */}
+      {chosen === null && (
+        <div style={{ display: 'flex', gap: '.5rem' }}>
+          {[{ label: 'True', val: true }, { label: 'False', val: false }].map(({ label, val }) => (
+            <button
+              key={label}
+              onClick={() => setChosen(val)}
+              style={{
+                flex: 1, padding: '.55rem 0', fontSize: 13, fontWeight: 600,
+                background: 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.25)',
+                borderRadius: 'var(--r)', color: 'white', cursor: 'pointer',
+                transition: 'background .15s',
+              }}
+              onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,.2)'}
+              onMouseOut={e => e.currentTarget.style.background = 'rgba(255,255,255,.1)'}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Reveal */}
+      {chosen !== null && (
+        <div>
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: '.4rem',
+            fontSize: 13, fontWeight: 700,
+            color: correct ? '#7EC8B0' : '#F08080',
+            marginBottom: '.5rem',
+          }}>
+            {correct ? '✓ Correct' : `✗ The answer is ${q.answer ? 'True' : 'False'}`}
+            <span style={{
+              fontSize: 11, fontWeight: 600,
+              background: 'rgba(255,255,255,.12)', color: 'rgba(255,255,255,.7)',
+              padding: '2px 9px', borderRadius: 999, marginLeft: 4,
+            }}>
+              {q.pctCorrect}% of people get this right
+            </span>
+          </div>
+          <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,.85)', lineHeight: 1.6, marginBottom: '.35rem' }}>
+            {q.explanation}
+          </div>
+          <div style={{ fontSize: 10.5, color: 'rgba(255,255,255,.4)', fontStyle: 'italic', marginBottom: '.65rem' }}>
+            {q.cite}
+          </div>
+          <button
+            onClick={next}
+            style={{
+              fontSize: 12, fontWeight: 600, color: '#7EC8B0',
+              background: 'transparent', border: 'none', cursor: 'pointer', padding: 0,
+            }}
+          >
+            Next question →
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
 const CATEGORY_CONFIG = {
   participation: {
     label: 'Participation',
@@ -335,12 +492,15 @@ export default function ClassroomGuide() {
         </div>
       </div>
 
-      {/* Research spotlight strip */}
+      {/* Culture check quiz */}
+      <CultureQuiz />
+
+      {/* Research spotlight strip — horizontal scroll */}
       <div style={{ marginBottom: '1rem' }}>
         <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.1em', color: 'var(--ink-4)', marginBottom: '.5rem' }}>
           What the research actually shows
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '.4rem' }}>
+        <div style={{ display: 'flex', gap: '.5rem', overflowX: 'auto', paddingBottom: '.25rem' }}>
           {[
             {
               emoji: '⏱️',
@@ -379,16 +539,14 @@ export default function ClassroomGuide() {
             },
           ].map((r, i) => (
             <div key={i} style={{
-              display: 'flex', gap: '.75rem', alignItems: 'flex-start',
+              flexShrink: 0, width: 260,
               background: r.bg, borderLeft: `3px solid ${r.col}`,
               borderRadius: '0 var(--r) var(--r) 0', padding: '.65rem .85rem',
             }}>
-              <span style={{ fontSize: 18, lineHeight: 1.3, flexShrink: 0 }}>{r.emoji}</span>
-              <div>
-                <div style={{ fontSize: 12.5, fontWeight: 600, color: r.col, lineHeight: 1.45, marginBottom: '.2rem' }}>{r.finding}</div>
-                <div style={{ fontSize: 12, color: 'var(--ink-2)', lineHeight: 1.5, marginBottom: '.25rem' }}>{r.implication}</div>
-                <div style={{ fontSize: 10.5, color: 'var(--ink-4)', fontStyle: 'italic' }}>{r.cite}</div>
-              </div>
+              <div style={{ fontSize: 16, marginBottom: '.3rem' }}>{r.emoji}</div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: r.col, lineHeight: 1.45, marginBottom: '.2rem' }}>{r.finding}</div>
+              <div style={{ fontSize: 11.5, color: 'var(--ink-2)', lineHeight: 1.5, marginBottom: '.25rem' }}>{r.implication}</div>
+              <div style={{ fontSize: 10, color: 'var(--ink-4)', fontStyle: 'italic' }}>{r.cite}</div>
             </div>
           ))}
         </div>
