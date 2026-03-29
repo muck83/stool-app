@@ -11,6 +11,144 @@ import {
 } from '../../data/options.js'
 import { fetchSalarySubmissions, insertSalarySubmission, supabase, supabaseStatus } from '../../lib/supabase.js'
 
+// ── Daily rotating insights computed from live salary data ───────────────
+function buildInsights(db) {
+  const med = arr => {
+    if (!arr.length) return null
+    const s = [...arr].sort((a, b) => a - b)
+    return s[Math.floor(s.length / 2)]
+  }
+  const insights = []
+
+  // IB vs British curriculum
+  const ibM = med(db.filter(r => r.curr === 'IB' && r.usd > 0).map(r => r.usd))
+  const brM = med(db.filter(r => r.curr === 'British' && r.usd > 0).map(r => r.usd))
+  if (ibM && brM && Math.abs(ibM - brM) > 200) {
+    const higher = ibM > brM ? 'IB' : 'British'
+    const lowerC = ibM > brM ? 'British' : 'IB'
+    const pct = Math.round(Math.abs(ibM - brM) / Math.min(ibM, brM) * 100)
+    insights.push({
+      emoji: '📚',
+      headline: `${higher} curriculum teachers earn ${pct}% more than ${lowerC} on our data`,
+      detail: `Median monthly: IB $${ibM.toLocaleString()}, British $${brM.toLocaleString()}. That $${Math.abs(ibM - brM).toLocaleString()}/mo gap adds up to over $${(Math.abs(ibM - brM) * 12).toLocaleString()} a year.`,
+    })
+  }
+
+  // Housing provided vs not
+  const hProvM = med(db.filter(r => r.housing === 'Provided' && r.usd > 0).map(r => r.usd))
+  const hNoneM = med(db.filter(r => r.housing === 'None' && r.usd > 0).map(r => r.usd))
+  if (hProvM && hNoneM && Math.abs(hNoneM - hProvM) > 100) {
+    const diff = hNoneM - hProvM
+    insights.push({
+      emoji: '🏠',
+      headline: `Schools offering free housing pay $${Math.abs(diff).toLocaleString()}/mo less in base salary`,
+      detail: `Median with housing included: $${hProvM.toLocaleString()}/mo. Without: $${hNoneM.toLocaleString()}/mo. Whether the package is worth it depends entirely on local rent.`,
+    })
+  }
+
+  // Top-paying countries (3+ records)
+  const byC = {}
+  db.forEach(r => { if (r.usd > 0 && r.country) { if (!byC[r.country]) byC[r.country] = []; byC[r.country].push(r.usd) } })
+  const cMeds = Object.entries(byC)
+    .filter(([, v]) => v.length >= 3)
+    .map(([c, v]) => ({ c, m: med(v), n: v.length }))
+    .sort((a, b) => b.m - a.m)
+
+  if (cMeds.length >= 2) {
+    const top = cMeds[0], second = cMeds[1]
+    insights.push({
+      emoji: '🌍',
+      headline: `${top.c} has the highest median salary in our database — $${top.m.toLocaleString()}/mo`,
+      detail: `Based on ${top.n} records. The next highest is ${second.c} at $${second.m.toLocaleString()}/mo. Both are take-home (after-tax) figures.`,
+    })
+  }
+
+  // Flights inclusion rate
+  const withFlt = db.filter(r => r.flights === 'Yes').length
+  const pctFlt = Math.round(withFlt / db.length * 100)
+  insights.push({
+    emoji: '✈️',
+    headline: `${pctFlt}% of schools in our database include annual flights`,
+    detail: `${withFlt.toLocaleString()} of ${db.length.toLocaleString()} records. A family return flight can be worth $3,000–6,000 a year — always factor it into package comparisons.`,
+  })
+
+  // Highest single salary on record
+  const maxRec = [...db].filter(r => r.usd > 0 && r.usd < 20000).sort((a, b) => b.usd - a.usd)[0]
+  if (maxRec) {
+    insights.push({
+      emoji: '💰',
+      headline: `The highest monthly salary in our database is $${maxRec.usd.toLocaleString()}`,
+      detail: `Reported at ${maxRec.school} in ${maxRec.country} (${maxRec.curr}, ${maxRec.y}). Outlier packages like this usually combine a senior role with full housing and flights included.`,
+    })
+  }
+
+  // Tax-free percentage
+  const taxFree = db.filter(r => r.tax && (r.tax === '0%' || r.tax === '0' || /school pays|tax.?free|no tax/i.test(r.tax)))
+  const pctTF = Math.round(taxFree.length / db.length * 100)
+  if (pctTF > 5) {
+    insights.push({
+      emoji: '🔖',
+      headline: `${pctTF}% of positions in our database are fully tax-free`,
+      detail: `${taxFree.length} records report zero income tax. On $5,000/mo, moving from a 30% tax country to a tax-free one is worth roughly $1,500/mo — $18,000 a year.`,
+    })
+  }
+
+  // Country spread top-to-bottom
+  if (cMeds.length >= 4) {
+    const top = cMeds[0], bottom = cMeds[cMeds.length - 1]
+    const ratio = (top.m / bottom.m).toFixed(1)
+    insights.push({
+      emoji: '📊',
+      headline: `International school salaries vary ${ratio}× between the highest and lowest-paying countries`,
+      detail: `From $${bottom.m.toLocaleString()}/mo in ${bottom.c} to $${top.m.toLocaleString()}/mo in ${top.c} — both monthly take-home. Destination choice has an enormous career impact.`,
+    })
+  }
+
+  // Senior vs classroom roles
+  const tMed = med(db.filter(r => r.usd > 0 && r.role && /^teacher$/i.test(r.role.trim())).map(r => r.usd))
+  const sMed = med(db.filter(r => r.usd > 0 && r.role && /(head|director|coordinator|principal|deputy)/i.test(r.role)).map(r => r.usd))
+  if (tMed && sMed && sMed > tMed) {
+    const pct = Math.round((sMed - tMed) / tMed * 100)
+    insights.push({
+      emoji: '👔',
+      headline: `Senior roles earn ${pct}% more than classroom teachers in our database`,
+      detail: `Median classroom teacher: $${tMed.toLocaleString()}/mo. Senior/leadership roles: $${sMed.toLocaleString()}/mo. The premium is real, but so is the extra workload.`,
+    })
+  }
+
+  // Year-over-year salary trend
+  const yr = new Date().getFullYear()
+  const recentMed = med(db.filter(r => r.y >= yr - 1 && r.usd > 0).map(r => r.usd))
+  const olderMed  = med(db.filter(r => r.y <= yr - 2 && r.y >= yr - 4 && r.usd > 0).map(r => r.usd))
+  const recentN = db.filter(r => r.y >= yr - 1 && r.usd > 0).length
+  const olderN  = db.filter(r => r.y <= yr - 2 && r.y >= yr - 4 && r.usd > 0).length
+  if (recentMed && olderMed && recentN >= 10 && olderN >= 10) {
+    const pct = Math.round((recentMed - olderMed) / olderMed * 100)
+    const dir = pct >= 0 ? 'up' : 'down'
+    insights.push({
+      emoji: '📈',
+      headline: `Median salaries are ${dir} ${Math.abs(pct)}% compared to 2–3 years ago`,
+      detail: `Recent (${yr - 1}–${yr}): $${recentMed.toLocaleString()}/mo vs $${olderMed.toLocaleString()}/mo in ${yr - 4}–${yr - 2}. Based on ${recentN + olderN} records.`,
+    })
+  }
+
+  // Allowance vs provided housing — which school type is more common?
+  const provN = db.filter(r => r.housing === 'Provided').length
+  const allowN = db.filter(r => r.housing === 'Allowance').length
+  const noneN  = db.filter(r => r.housing === 'None').length
+  const totalHous = provN + allowN + noneN
+  if (totalHous > 20) {
+    const pctNone = Math.round(noneN / totalHous * 100)
+    insights.push({
+      emoji: '🗝️',
+      headline: `${pctNone}% of schools in our database offer no housing benefit at all`,
+      detail: `${provN} provide housing directly, ${allowN} give an allowance, and ${noneN} offer nothing. In high-cost cities, that "nothing" can quietly erase a competitive salary.`,
+    })
+  }
+
+  return insights.filter(Boolean)
+}
+
 function getCountryMedian(db, country) {
   const vals = db
     .filter(r => r.country.toLowerCase() === country.toLowerCase() && r.usd > 0)
@@ -56,6 +194,12 @@ export default function Salaries() {
   const [newIds, setNewIds] = useState(new Set())
   const [warnAck, setWarnAck] = useState(false)
   const [dbLoading, setDbLoading] = useState(!!supabase)
+
+  // Daily insight — seeded by day, cycleable manually
+  const surpriseInsights = useMemo(() => buildInsights(liveDB), [liveDB])
+  const dailyIdx = Math.floor(Date.now() / 86400000) % (surpriseInsights.length || 1)
+  const [insightIdx, setInsightIdx] = useState(dailyIdx)
+  const insight = surpriseInsights[insightIdx % surpriseInsights.length] || null
 
   // Fetch community submissions from Supabase and merge with seed data
   useEffect(() => {
@@ -177,8 +321,59 @@ export default function Salaries() {
         <div className="chip"><div className="chl">Total records</div><div className="chv">{liveDB.length}</div><div className="chs">Crowdsourced, anonymised</div></div>
         <div className="chip"><div className="chl">Countries</div><div className="chv">{new Set(liveDB.map(r => r.country)).size}</div><div className="chs">Represented</div></div>
         <div className="chip"><div className="chl">Median salary</div><div className="chv">${Math.round(medianUSD).toLocaleString()}</div><div className="chs">USD monthly</div></div>
-        <div className="chip"><div className="chl">Stool ratings</div><div className="chv">{liveDB.filter(r => r.pkg != null).length}</div><div className="chs">Schools rated</div></div>
+        <div className="chip"><div className="chl">With full package</div><div className="chv">{Math.round(liveDB.filter(r => r.flights === 'Yes' && r.housing !== 'None').length / liveDB.length * 100)}%</div><div className="chs">Housing + flights included</div></div>
       </div>
+
+      {/* Daily insight card */}
+      {insight && (
+        <div style={{
+          background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%)',
+          borderRadius: 'var(--rl)',
+          padding: '1rem 1.25rem',
+          marginBottom: '1.25rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '1rem',
+        }}>
+          <div style={{ fontSize: 32, lineHeight: 1, flexShrink: 0 }}>{insight.emoji}</div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{
+              fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.1em',
+              color: '#7EC8B0', marginBottom: '.3rem',
+            }}>
+              Did you know · updates daily
+            </div>
+            <div style={{
+              fontSize: 15, fontWeight: 600, color: '#FFFFFF',
+              lineHeight: 1.4, marginBottom: '.3rem',
+            }}>
+              {insight.headline}
+            </div>
+            <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,.65)', lineHeight: 1.55 }}>
+              {insight.detail}
+            </div>
+          </div>
+          <button
+            onClick={() => setInsightIdx(i => (i + 1) % surpriseInsights.length)}
+            title="Next insight"
+            style={{
+              flexShrink: 0,
+              background: 'rgba(255,255,255,.1)',
+              border: '1px solid rgba(255,255,255,.2)',
+              borderRadius: 8,
+              color: 'rgba(255,255,255,.7)',
+              padding: '6px 12px',
+              fontSize: 12,
+              fontWeight: 600,
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+              transition: 'background .15s',
+            }}
+          >
+            next →
+          </button>
+        </div>
+      )}
 
       {/* Table + Contribute side by side */}
       <div className="sal-layout" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) 300px', gap: '1rem', alignItems: 'start' }}>

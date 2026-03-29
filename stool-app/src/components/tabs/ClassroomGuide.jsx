@@ -15,7 +15,7 @@ const CATEGORY_CONFIG = {
     getSummary: (country, h) => {
       if (!h) return null
       const idv = h[1], pdi = h[0]
-      if (idv < 35) return `Students are often careful about speaking in front of the group. Silence usually means they are protecting face and waiting for a safer opening, not that they have nothing to say.`
+      if (idv < 35) return `Students are often careful about speaking in front of the group. Silence is frequently an active face-protection strategy — in Chinese contexts this is Mianzi (social standing), in Korean contexts Kibun (relational harmony). Students are waiting for a safer opening, not that they have nothing to say. Students who came from school systems where teachers speak and students listen will also need time to build the habit of public participation.`
       if (idv < 55) return `Participation is usually mixed. Some students speak easily, while others wait for social cover, a clearer invitation, or a smaller setting.`
       return `Students are generally more comfortable speaking up, sharing opinions, and challenging ideas.${pdi < 45 ? ' They may also question your decisions quite directly.' : ' They still read the room, but personal voice is expected.'}`
     },
@@ -39,7 +39,7 @@ const CATEGORY_CONFIG = {
     getSummary: (country, h) => {
       if (!h) return null
       const uai = h[3], lto = h[4]
-      if (uai > 70) return `Students usually want a clear path, clear criteria, and a correct answer to aim at. Open-ended tasks can feel stressful unless you show them how to begin.`
+      if (uai > 70) return `Students from high-uncertainty-avoidance cultures — especially those from East Asian school systems — often use structured, precise approaches as a deliberate learning strategy, not a limitation. What looks like a preference for memorisation is often memorisation-for-understanding: building mastery through precision before experimenting. Open tasks feel risky because students are genuinely trying to do the work correctly. Give them a clear starting point and they often exceed expectations.`
       if (uai > 45) return `Students usually do best when open tasks come with structure. Rubrics, examples, and a visible path into the task make a big difference.${lto > 60 ? ' They also respond well when you show where the work is leading.' : ''}`
       return `Students are generally more comfortable exploring before everything is fully defined. They may enjoy freedom, but still need help tightening quality and precision.`
     },
@@ -70,6 +70,18 @@ const CATEGORY_CONFIG = {
       return `Students usually want a teacher who is warm, fair, and approachable without trying to act like a friend. Consistency tends to matter more than charm.`
     },
   },
+  feedback: {
+    label: 'Giving feedback',
+    emoji: '✏️',
+    subtitle: 'Why correction lands differently — and how to deliver it well',
+    getSummary: (country, h) => {
+      if (!h) return null
+      const pdi = h[0], idv = h[1]
+      if (pdi > 65 && idv < 40) return `In ${country}, direct negative feedback — especially in public — can cause significant face loss. Students may shut down or disengage after being corrected in front of peers. Written, private, and reframed feedback lands much better here.`
+      if (pdi > 55) return `In ${country}, students tend to receive correction more comfortably when it comes privately or is framed with care. One-on-one or written feedback is usually safer than open group correction.`
+      return `In ${country}, direct feedback is more culturally normal. Students are generally equipped to receive candid assessment, though specificity and tone always matter.`
+    },
+  },
 }
 
 // ── Explore: behavior descriptions mapped to Hofstede thresholds ──────────
@@ -84,6 +96,8 @@ const EXPLORE_BEHAVIORS = [
   { id: 'e8', label: 'Parents prioritize wellbeing over academic results', dim: 'MAS', dir: 'low', threshold: 35, cat: 'parents' },
   { id: 'e9', label: 'Students show respect through formality and distance', dim: 'PDI', dir: 'high', threshold: 65, cat: 'relationships' },
   { id: 'e10', label: 'Students expect warmth and personal connection quickly', dim: 'IVR', dir: 'high', threshold: 55, cat: 'relationships' },
+  { id: 'e11', label: 'Public correction or criticism causes visible withdrawal', dim: 'PDI', dir: 'high', threshold: 65, cat: 'feedback' },
+  { id: 'e12', label: 'Students echo or closely repeat your phrasing rather than paraphrasing', dim: 'IDV', dir: 'low', threshold: 40, cat: 'feedback' },
 ]
 
 function BehaviorCard({ f, viewCountry, viewH }) {
@@ -311,13 +325,13 @@ export default function ClassroomGuide() {
         padding: '.75rem 1rem', marginBottom: '1rem', maxWidth: 640,
       }}>
         <div style={{ fontSize: 12.5, color: '#6B5B1F', lineHeight: 1.6 }}>
-          <strong>What this is and isn't.</strong> These patterns are drawn from{' '}
-          <a href="https://www.hofstede-insights.com" target="_blank" rel="noopener" style={{ color: '#6B5B1F' }}>Hofstede's cultural dimensions research</a>{' '}
-          — national-level data about how societies tend to handle power, uncertainty, and group identity. They describe{' '}
-          <em>tendencies among local students from the host country's education system</em>, not predictions about any individual student.
-          In practice, your classroom may include students from many nationalities, and individual experience —
-          including what students learned to do (or not do) in previous schools — often matters more than national averages.
-          Use this as one lens, not the whole picture.
+          <strong>What this is and isn't.</strong> The single biggest predictor of classroom behavior is often not nationality — it is{' '}
+          <em>the school system a student came from</em>. A student who spent their formative years in a Korean public school brings
+          those habits into your class, regardless of their passport. These patterns use{' '}
+          <a href="https://www.hofstede-insights.com" target="_blank" rel="noopener" style={{ color: '#6B5B1F' }}>Hofstede's cultural dimensions</a>{' '}
+          as a starting point — national-level data about how societies tend to handle power, uncertainty, and group identity — but treat
+          them as background context, not a profile of any individual. Students are shaped by their previous school, their family,
+          their own personality, and their experience in your classroom. Use this to ask better questions, not to make assumptions.
         </div>
       </div>
 
@@ -512,9 +526,11 @@ export default function ClassroomGuide() {
           {/* Footer / source */}
           <div style={{ fontSize: 12, color: 'var(--ink-4)', lineHeight: 1.55, maxWidth: 560, marginTop: '1.25rem' }}>
             <strong>Source:</strong> Cultural dimension scores from Hofstede Insights (6-D model). Classroom interpretations by stool, informed by
-            published research on culture and pedagogy (Markus & Kitayama, Triandis, Schwartz). These are broad tendencies, not
-            predictions about individual students. Student behavior is also shaped by their previous school system, family, and
-            personality. Use this to ask better questions, not to make assumptions.
+            published research including Watkins & Biggs on CHC learners and the Asian Learner Paradox, Marton et al. on
+            memorisation-for-understanding, Meyer's Culture Map (Evaluating dimension), face dynamics research (Mianzi, Kibun, Haji),
+            and Baskerville/McSweeney on the limits of national culture averages. These are broad tendencies, not profiles.
+            The best predictor of classroom behavior is often the school system a student came from, not their nationality.
+            Use this to ask better questions, not to make assumptions.
           </div>
         </>
       )}

@@ -117,8 +117,37 @@ export default function Overview() {
     },
   ]
 
+  // Community stats from salary seed data
+  const totalRecords = SALARY_DB_SEED.length
+  const totalCountries = new Set(SALARY_DB_SEED.map(r => r.country)).size
+  const taxFreeCount = SALARY_DB_SEED.filter(r => r.tax && (r.tax === '0%' || r.tax === '0' || /school pays|tax.?free|no tax/i.test(r.tax))).length
+  const taxFreePct = Math.round(taxFreeCount / totalRecords * 100)
+
   return (
     <div className="tp active">
+
+      {/* Community data strip */}
+      <div style={{
+        display: 'flex', marginBottom: '1.25rem',
+        background: 'white', border: '1px solid var(--border)',
+        borderRadius: 'var(--rl)', overflow: 'hidden',
+      }}>
+        {[
+          { n: totalRecords.toLocaleString(), label: 'salary records', sub: 'from real educators' },
+          { n: totalCountries, label: 'countries', sub: 'in our database' },
+          { n: taxFreePct + '%', label: 'of jobs are tax-free', sub: 'worth $10k+ extra/yr at median' },
+        ].map((s, i) => (
+          <div key={i} style={{
+            flex: 1, padding: '.75rem 1rem', textAlign: 'center',
+            borderRight: i < 2 ? '1px solid var(--border)' : 'none',
+          }}>
+            <div style={{ fontSize: '1.5rem', fontWeight: 300, color: 'var(--teal-dark)', lineHeight: 1 }}>{s.n}</div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--ink)', marginTop: 3 }}>{s.label}</div>
+            <div style={{ fontSize: 10.5, color: 'var(--ink-4)', marginTop: 1, lineHeight: 1.35 }}>{s.sub}</div>
+          </div>
+        ))}
+      </div>
+
       {/* Stool row */}
       <div style={{ display: 'flex', gap: '.875rem', alignItems: 'stretch', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
         {LEG_DEFS.map(leg => (
@@ -132,6 +161,17 @@ export default function Overview() {
 
       {/* Five questions — 2-column tile grid */}
       <div style={{ marginBottom: '1.25rem' }}>
+        <div style={{
+          background: '#0f3460', borderRadius: 'var(--r)',
+          padding: '.7rem 1rem', marginBottom: '.875rem',
+          display: 'flex', alignItems: 'center', gap: '.75rem',
+        }}>
+          <span style={{ fontSize: 18, lineHeight: 1, flexShrink: 0 }}>💡</span>
+          <span style={{ fontSize: 12.5, color: 'rgba(255,255,255,.9)', lineHeight: 1.5 }}>
+            <strong style={{ color: '#7EC8B0' }}>The median salary in Switzerland is {(8873).toLocaleString('en-US', {style:'currency',currency:'USD',maximumFractionDigits:0})}/mo. In Uganda it's $1,800.</strong>
+            {' '}That $7,000/mo gap — plus tax, housing, and flights — makes destination one of the biggest financial decisions an international teacher makes. The questions below help you see yours clearly.
+          </span>
+        </div>
         <div style={{ fontSize: 10, fontWeight: 500, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.1em', marginBottom: '.875rem' }}>The questions worth answering</div>
         <div className="q-tiles" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '.75rem' }}>
           {questions.map((q, i) => (
