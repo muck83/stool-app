@@ -321,7 +321,7 @@ export default function Salaries() {
         <div className="chip"><div className="chl">Total records</div><div className="chv">{liveDB.length}</div><div className="chs">Crowdsourced, anonymised</div></div>
         <div className="chip"><div className="chl">Countries</div><div className="chv">{new Set(liveDB.map(r => r.country)).size}</div><div className="chs">Represented</div></div>
         <div className="chip"><div className="chl">Median salary</div><div className="chv">${Math.round(medianUSD).toLocaleString()}</div><div className="chs">USD monthly</div></div>
-        <div className="chip"><div className="chl">Stool ratings</div><div className="chv">{liveDB.filter(r => r.pkg != null).length}</div><div className="chs">Schools rated</div></div>
+        <div className="chip"><div className="chl">With full package</div><div className="chv">{Math.round(liveDB.filter(r => r.flights === 'Yes' && r.housing !== 'None').length / liveDB.length * 100)}%</div><div className="chs">Housing + flights included</div></div>
       </div>
 
       {/* Daily insight card */}
