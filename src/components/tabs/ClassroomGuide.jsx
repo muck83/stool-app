@@ -184,6 +184,63 @@ const RESEARCH_FACTS = [
     cite: 'OECD TALIS (2024); distributed leadership research (2026)',
     col: '#534AB7', bg: '#EEEDFE',
   },
+  // ── New research facts from 2024-2026 gap analysis ──
+  {
+    emoji: '🧩',
+    headline: 'The same behavior that triggers an ADHD diagnosis in London may be considered completely normal in Tokyo.',
+    detail: 'Diagnostic tools for ADHD and autism are normed on Western, often male, populations. A 2024 cross-cultural study found that autism diagnostic equivalence across cultures is not established — behaviors that prompt a referral in one country may be unremarkable in another. Teachers working with culturally diverse students need to be cautious about attributing behavior to either "their culture" or neurodivergence without considering both.',
+    cite: 'Tafla et al. (2024); Neurodiversity 2.0 framework (2025)',
+    col: '#8B3A3A', bg: '#FEF0F0',
+  },
+  {
+    emoji: '📝',
+    headline: 'Most classroom assessments reward one cultural mode of demonstrating knowledge — and penalise students who think differently.',
+    detail: 'A timed written essay rewards individual, rapid, linear argumentation. A student from a culture that values deliberation, consensus-building, or oral storytelling is being assessed on their cultural fit, not their understanding. A 2025 review found that assessments globally favour Western knowledge systems and English-based communication modes. Offering multiple evidence formats — oral, portfolio, group product — reveals what students actually know.',
+    cite: 'Frontiers in Education (2025); IES REL Pacific (2025)',
+    col: '#BA7517', bg: '#FAEEDA',
+  },
+  {
+    emoji: '💛',
+    headline: 'Social-emotional learning programs assume emotions work the same way everywhere. They don\'t.',
+    detail: 'Most SEL curricula (Zones of Regulation, RULER, Second Step) are built on a Western model: name your feelings, express them verbally, regulate them individually. In many cultures, emotions are relational rather than individual, expressed through action rather than words, and regulated collectively rather than privately. Asking a student to "name how you\'re feeling right now" in front of peers may clash directly with their cultural norms.',
+    cite: 'Where Social-Emotional Learning Meets Culture (2025); APA culturally responsive SEL (2024)',
+    col: '#534AB7', bg: '#EEEDFE',
+  },
+  {
+    emoji: '🔄',
+    headline: 'There\'s a difference between adapting your teaching to a student\'s culture and actually sustaining it.',
+    detail: 'Culturally responsive teaching adapts to students\' backgrounds. Culturally sustaining pedagogy goes further — it asks whether your classroom actively maintains and develops the cultural practices students bring, or just tolerates them. The difference: "I understand why you\'re quiet" versus "I\'ve designed my classroom so your way of participating is one of several legitimate modes." Most schools stop at responsive.',
+    cite: 'Paris (2012); Paris & Alim (2017); Harvard Educational Review CSP dialogue (2024)',
+    col: '#1D9E75', bg: '#E1F5EE',
+  },
+  {
+    emoji: '⚠️',
+    headline: 'Telling an international student "Your English is so good!" can function as a microaggression.',
+    detail: 'It communicates surprise that someone from their background could be articulate — the intent is kind, but the impact reinforces otherness. International schools harbour subtle cultural harms that often go unnamed: assuming English ability from a passport, grouping all Asian students together, or treating non-Western knowledge as exotic rather than rigorous. A 2025 study found that international students of color develop critical racial consciousness through experiencing microaggressions their institutions don\'t acknowledge.',
+    cite: 'Sue et al. (2007); Journal of Higher Education (2025)',
+    col: '#8B3A3A', bg: '#FEF0F0',
+  },
+  {
+    emoji: '✍️',
+    headline: 'Requiring students to write only in Standard English penalises those whose home languages don\'t map neatly onto academic English grammar.',
+    detail: 'Code-meshing — letting students blend their full linguistic repertoire in formal academic writing, not just in casual talk — actually improves both writing quality and identity development. The "standard" itself encodes cultural and colonial hierarchies. When reviewing student writing, distinguish between clarity of argument and conformity to a single dialect.',
+    cite: 'Baker-Bell (2020) Linguistic Justice; Young et al.; Paris & Alim (2017)',
+    col: '#185FA5', bg: '#E6F1FB',
+  },
+  {
+    emoji: '🌐',
+    headline: 'Cultural communication gaps that exist face-to-face amplify online.',
+    detail: 'A direct message that reads as efficient in one culture reads as rude in another. Students from collectivist cultures approach online spaces differently — different norms around anonymity, public disagreement, and authority. Most digital citizenship programs ignore these cultural dimensions entirely. International school students interact online across cultures constantly, often with higher stakes because digital communication lacks tone and context cues.',
+    cite: 'Frontiers in Communication (2024); Delphi study on digital citizenship (2025)',
+    col: '#BA7517', bg: '#FAEEDA',
+  },
+  {
+    emoji: '🪞',
+    headline: 'Two students from the same country with the same Hofstede score can have fundamentally different classroom experiences.',
+    detail: 'A wealthy Korean girl at a London international school and a working-class Korean boy on a scholarship at the same school share a passport — but their experiences are shaped by the intersection of culture with gender, class, family, disability, and individual temperament. Intersectional research shows these factors interact multiplicatively, not additively. Culture is one lens, never the whole picture.',
+    cite: 'Frontiers in Education (2025); Crenshaw (1989); OECD intersectionality working paper (2023)',
+    col: '#534AB7', bg: '#EEEDFE',
+  },
 ]
 
 function ResearchFact() {
@@ -301,6 +358,49 @@ const QUIZ_QUESTIONS = [
     pctCorrect: 44,
     explanation: 'Despite exceptional adaptability and cross-cultural skills, many third-culture kids report never fully feeling "at home" anywhere. They may look confident on the outside but carry a quiet sense of not quite belonging. Schools that name and normalise this experience — rather than assuming globally mobile kids are "fine" — make a real difference.',
     cite: 'Pollock & Van Reken; international school TCK research (2024)',
+  },
+  // ── New quiz questions from gap analysis ──
+  {
+    q: 'ADHD and autism present the same way in every culture.',
+    answer: false,
+    pctCorrect: 28,
+    explanation: 'Diagnostic tools for ADHD and autism are normed on Western populations. The same behavior that triggers a referral in one country may be considered completely normal in another. Cultural expectations of "normal" child behavior — eye contact, stillness, social reciprocity — vary enormously, which means many neurodivergent students from non-Western backgrounds are either misdiagnosed or missed entirely.',
+    cite: 'Tafla et al. (2024); Oxford Neurodiversity Clinic cultural guidelines',
+  },
+  {
+    q: 'A timed written essay is a culturally neutral way to assess student understanding.',
+    answer: false,
+    pctCorrect: 22,
+    explanation: 'Timed essays reward one cultural mode of demonstrating knowledge: individual, rapid, linear argumentation in written English. Students from cultures that value deliberation, oral reasoning, collective problem-solving, or narrative structure are being assessed on cultural fit, not understanding. Offering multiple evidence formats — oral defense, portfolio, group product — gives a more accurate picture of what students know.',
+    cite: 'Frontiers in Education (2025); IES REL Pacific culturally responsive assessment (2025)',
+  },
+  {
+    q: 'Most social-emotional learning programs are designed to work equally well across all cultures.',
+    answer: false,
+    pctCorrect: 35,
+    explanation: 'Most mainstream SEL programs are built on a Western model of emotional literacy: name your feelings, express them verbally, regulate them individually. But in many cultures emotions are relational (not individual), expressed through action (not words), and regulated collectively (not privately). A student who seems "emotionally flat" may simply process emotions in a way the program wasn\'t designed to recognise.',
+    cite: 'Where Social-Emotional Learning Meets Culture (2025); APA (2024)',
+  },
+  {
+    q: 'International school curricula like the IB are culturally neutral because they\'re designed for global use.',
+    answer: false,
+    pctCorrect: 30,
+    explanation: 'All curricula carry cultural assumptions about whose knowledge is legitimate, whose literature is "world literature," and whose scientific traditions count as "real science." The IB, Cambridge, and AP systems were developed within Western epistemological frameworks. Decolonial pedagogy research shows that curriculum content — not just teaching method — shapes whose knowledge students learn to value.',
+    cite: 'Global Policy Journal (2025); NAEYC decolonization research (2024)',
+  },
+  {
+    q: 'Telling an international student "Your English is amazing!" is always a compliment.',
+    answer: false,
+    pctCorrect: 33,
+    explanation: 'While the intent is kind, it communicates surprise that someone from their background could be articulate — reinforcing the assumption that English proficiency is unexpected for people who look or sound a certain way. These small moments (microaggressions) accumulate. Students report that being repeatedly "complimented" on their English makes them feel like permanent outsiders, no matter how long they\'ve been in the school.',
+    cite: 'Sue et al. (2007); Journal of Higher Education (2025)',
+  },
+  {
+    q: 'Two students from the same country with the same cultural background will have similar classroom experiences.',
+    answer: false,
+    pctCorrect: 40,
+    explanation: 'Culture never operates alone. A student\'s classroom experience is shaped by the intersection of culture with gender, class, family wealth, disability, sexuality, and individual temperament. Two students who share a passport and a Hofstede score can have fundamentally different experiences depending on these other factors. This is why cultural data is a starting point, not a complete explanation.',
+    cite: 'Frontiers in Education (2025); Crenshaw (1989) intersectionality',
   },
 ]
 
@@ -462,6 +562,19 @@ const CATEGORY_CONFIG = {
       return `In ${country}, direct feedback is more culturally normal. Students are generally equipped to receive candid assessment, though specificity and tone always matter.`
     },
   },
+  assessment: {
+    label: 'Assessment & evidence',
+    emoji: '📊',
+    subtitle: 'How students demonstrate understanding — and what your tests may miss',
+    getSummary: (country, h) => {
+      if (!h) return null
+      const uai = h[3], idv = h[1], pdi = h[0]
+      if (uai > 65 && idv < 40) return `Students from ${country} often excel in structured, clearly-defined assessment formats — precise answers, thorough preparation, strong recall. They may struggle with open-ended or ambiguous assessment tasks not because they lack understanding, but because the format feels unfamiliar or risky. Consider offering a clear rubric alongside open tasks, or pairing written assessment with oral explanation.`
+      if (idv < 45) return `Students from ${country} may demonstrate understanding more naturally through group discussion, collaborative projects, or oral explanation than through individual timed writing. Assessment formats that only reward solo written work may underrepresent what these students actually know.`
+      if (pdi > 60) return `In ${country}, students may perform differently depending on who is assessing and how. High-stakes formal assessments may trigger anxiety, while lower-stakes formative checks reveal more of what they know. Consider multiple evidence points rather than single high-stakes tests.`
+      return `Students from ${country} are generally comfortable with varied assessment formats. They may still benefit from choice — some students show more through writing, others through speaking or making.`
+    },
+  },
 }
 
 // ── Explore: behavior descriptions mapped to Hofstede thresholds ──────────
@@ -478,6 +591,10 @@ const EXPLORE_BEHAVIORS = [
   { id: 'e10', label: 'Students expect warmth and personal connection quickly', dim: 'IVR', dir: 'high', threshold: 55, cat: 'relationships' },
   { id: 'e11', label: 'Public correction or criticism causes visible withdrawal', dim: 'PDI', dir: 'high', threshold: 65, cat: 'feedback' },
   { id: 'e12', label: 'Students echo or closely repeat your phrasing rather than paraphrasing', dim: 'IDV', dir: 'low', threshold: 40, cat: 'feedback' },
+  { id: 'e13', label: 'Student seems emotionally "flat" or avoids naming feelings in SEL activities', dim: 'IDV', dir: 'low', threshold: 40, cat: 'relationships' },
+  { id: 'e14', label: 'Student struggles with open-ended assessment despite strong content knowledge', dim: 'UAI', dir: 'high', threshold: 60, cat: 'assessment' },
+  { id: 'e15', label: 'Parents seem dissatisfied despite good student outcomes', dim: 'LTO', dir: 'high', threshold: 65, cat: 'parents' },
+  { id: 'e16', label: 'Student behaviour seems neurodivergent but aligns with cultural norms from their home system', dim: 'PDI', dir: 'high', threshold: 55, cat: 'learning' },
 ]
 
 function BehaviorCard({ f, viewCountry, viewH }) {
@@ -732,8 +849,11 @@ export default function ClassroomGuide() {
           <span style={{ display: 'block', marginTop: '.35rem', color: '#6B5B1F', background: '#FFF8E6', borderRadius: 'var(--r)', padding: '.6rem .85rem', border: '1px solid #EDD89A' }}>
             These patterns use <a href="https://www.hofstede-insights.com" target="_blank" rel="noopener" style={{ color: '#6B5B1F' }}>Hofstede's cultural dimensions</a> as
             a starting point — national-level data about how societies handle power, uncertainty, and group identity.
-            But treat them as background context, not a profile of any individual. Students are shaped by their previous school,
-            their family, their own personality, and their experience in your classroom. Use this to ask better questions, not to make assumptions.
+            But treat them as background context, not a profile of any individual.
+            <br /><br />
+            <strong>Known limitations of this data:</strong> Hofstede's original research was conducted at a single company (IBM) in the 1970s–80s. It treats nations as culturally homogeneous — it cannot account for regional differences, diaspora identities, mixed-heritage families, or students who have lived across multiple countries. The model is static: it doesn't capture how cultures change over time, nor how culture intersects with gender, class, disability, or individual temperament. Every student is shaped by multiple identities at once.
+            <br /><br />
+            Use this to ask better questions, not to make assumptions. If you find yourself thinking "this student does X because they're from Y," pause — there's almost always more to the picture.
           </span>
         )}
       </div>
@@ -782,6 +902,20 @@ export default function ClassroomGuide() {
                   {filteredBehaviors.map(f => <BehaviorCard key={f.id} f={f} viewCountry={viewCountry} viewH={hView} />)}
                 </>
               )}
+            </div>
+          )}
+
+          {/* Intersectionality reminder — persistent when country selected */}
+          {viewCountry && !hasFilter && (
+            <div style={{
+              display: 'flex', alignItems: 'flex-start', gap: '.6rem',
+              padding: '.6rem .85rem', marginBottom: '.75rem',
+              background: '#F5F3FF', border: '1px solid #D8D3F0', borderRadius: 'var(--r)',
+            }}>
+              <span style={{ fontSize: 15, flexShrink: 0, lineHeight: 1.3 }}>🪞</span>
+              <div style={{ fontSize: 11.5, color: '#3C3489', lineHeight: 1.55 }}>
+                <strong>Remember:</strong> every student is also shaped by gender, class, family, disability, and individual temperament. Culture is one lens, not the whole picture. Two students from {viewCountry} can have very different classroom experiences.
+              </div>
             </div>
           )}
 
@@ -888,9 +1022,11 @@ export default function ClassroomGuide() {
 
           {/* Footer / source */}
           <div style={{ fontSize: 11, color: 'var(--ink-4)', lineHeight: 1.5, maxWidth: 560, marginTop: '1.25rem' }}>
-            <strong>Sources:</strong> Hofstede Insights 6-D model, Watkins & Biggs (2001) Asian Learner Paradox, Cummins (1981) BICS/CALP,
-            Black & Wiliam (1998), Rowe (1974), Cortazzi & Jin (1996), Hattie (2009), Hammond (2015) Ready for Rigor,
-            OECD TALIS (2024), translanguaging research (Garc&iacute;a & Wei 2014), and Baskerville/McSweeney on limits of national culture averages.
+            <strong>Sources:</strong> Hofstede Insights 6-D model, Watkins & Biggs (2001), Cummins (1981), Black & Wiliam (1998),
+            Rowe (1974), Cortazzi & Jin (1996), Hattie (2009), Hammond (2015), OECD TALIS (2024),
+            García & Wei (2014), Paris & Alim (2017) CSP, Baker-Bell (2020) Linguistic Justice,
+            Sue et al. (2007), Tafla et al. (2024), Crenshaw (1989), Frontiers in Education (2025),
+            and Baskerville/McSweeney on limits of national culture averages.
           </div>
         </div>
 
