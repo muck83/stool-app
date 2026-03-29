@@ -1,6 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useProfile } from '../../context/ProfileContext.jsx'
 import { insertDiagnosticSubmission } from '../../lib/supabase.js'
+
+const DIAG_ANSWERS_KEY = 'stool_diagnostic_answers_v1'
 
 const SCHOOL_Q_IDS = ['q2', 'q5', 'q6', 'q8']
 const CULTURAL_Q_IDS = ['q1', 'q4', 'q7']
@@ -92,8 +94,8 @@ function buildDiagnosticResult(answers) {
         'Build real relationships with local colleagues, not only expat circles. Language matters less than intent.',
       ],
       links: [
-        { label: 'Classroom Guide →', tab: 'classroom' },
-        { label: 'Culture tab →', tab: 'culture' },
+        { label: 'Classroom Guide →', tab: 'faq' },
+        { label: 'Culture tab →', tab: 'cultural' },
       ],
       scores,
     }
@@ -112,8 +114,8 @@ function buildDiagnosticResult(answers) {
         'Check My School to rate this placement honestly before you forget the detail.',
       ],
       links: [
-        { label: 'My Move →', tab: 'move' },
-        { label: 'My School →', tab: 'school' },
+        { label: 'My Move →', tab: 'prediction' },
+        { label: 'My School →', tab: 'schools' },
       ],
       scores,
     }
@@ -131,7 +133,7 @@ function buildDiagnosticResult(answers) {
         'Use My Move to see whether another destination would fit your life better — sometimes the school is fine but the city is wrong.',
       ],
       links: [
-        { label: 'My Move →', tab: 'move' },
+        { label: 'My Move →', tab: 'prediction' },
       ],
       scores,
     }
@@ -149,7 +151,7 @@ function buildDiagnosticResult(answers) {
       'If cultural friction is part of it, the Classroom Guide explains the patterns that catch people off guard most.',
     ],
     links: [
-      { label: 'My Move →', tab: 'move' },
+      { label: 'My Move →', tab: 'prediction' },
       { label: 'Classroom Guide →', tab: 'classroom' },
     ],
     scores,
@@ -248,12 +250,24 @@ const DIAG_QS = [
 ]
 
 export function Diagnostic() {
-  const { profile, updateProfile, setActiveTab } = useProfile()
-  const [answers, setAnswers] = useState({})
+  const { profile, updateProfile, setActiveTab, profileEmail } = useProfile()
+
+  // Restore answers from localStorage on mount
+  const [answers, setAnswers] = useState(() => {
+    try {
+      const saved = localStorage.getItem(DIAG_ANSWERS_KEY)
+      return saved ? JSON.parse(saved) : {}
+    } catch { return {} }
+  })
   const [result, setResult] = useState(null)
   const [scoreApplied, setScoreApplied] = useState(false)
   const [saveState, setSaveState] = useState('idle')
   const [lastSavedSignature, setLastSavedSignature] = useState('')
+
+  // Persist answers to localStorage whenever they change
+  useEffect(() => {
+    try { localStorage.setItem(DIAG_ANSWERS_KEY, JSON.stringify(answers)) } catch {}
+  }, [answers])
 
   const answeredCount = Object.keys(answers).length
 
@@ -261,6 +275,14 @@ export function Diagnostic() {
     setAnswers((a) => ({ ...a, [qid]: oi }))
     setScoreApplied(false)
     if (saveState !== 'idle') setSaveState('idle')
+  }
+
+  const clearAnswers = () => {
+    setAnswers({})
+    setResult(null)
+    setScoreApplied(false)
+    setSaveState('idle')
+    try { localStorage.removeItem(DIAG_ANSWERS_KEY) } catch {}
   }
 
   const run = async () => {
@@ -281,6 +303,7 @@ export function Diagnostic() {
     setSaveState('saving')
     const saveResult = await insertDiagnosticSubmission({
       profile,
+      email: profileEmail,
       answers,
       result: analysis,
       schoolLegScore: schoolScore,
@@ -313,8 +336,18 @@ export function Diagnostic() {
               Which leg of your stool is wobbling? Eight honest questions to separate school problems from place problems from cultural friction. Two minutes.
             </div>
           </div>
-          <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--teal-dark)', background: 'var(--teal-light)', border: '1px solid rgba(29,158,117,.22)', borderRadius: 999, padding: '5px 10px', whiteSpace: 'nowrap' }}>
-            {answeredCount}/8 answered
+          <div style={{ display: 'flex', alignItems: 'center', gap: '.5rem' }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--teal-dark)', background: 'var(--teal-light)', border: '1px solid rgba(29,158,117,.22)', borderRadius: 999, padding: '5px 10px', whiteSpace: 'nowrap' }}>
+              {answeredCount}/8 answered
+            </div>
+            {answeredCount > 0 && (
+              <button
+                onClick={clearAnswers}
+                style={{ fontSize: 11, fontWeight: 500, color: 'var(--ink-4)', background: 'transparent', border: '1px solid var(--border)', borderRadius: 999, padding: '5px 10px', cursor: 'pointer', whiteSpace: 'nowrap' }}
+              >
+                Start over
+              </button>
+            )}
           </div>
         </div>
         <div style={{ height: 8, background: 'var(--surface-2)', borderRadius: 999, overflow: 'hidden' }}>

@@ -7,173 +7,6 @@ import { COUNTRIES } from '../../data/countries.js'
 // Hofstede indices: 0=PDI, 1=IDV, 2=MAS, 3=UAI, 4=LTO, 5=IVR
 const DIM_INDEX = { PDI: 0, IDV: 1, MAS: 2, UAI: 3, LTO: 4, IVR: 5 }
 
-// ── Research facts — rotating daily ──────────────────────────────────────
-const RESEARCH_FACTS = [
-  {
-    emoji: '⏱️',
-    headline: 'Most teachers wait less than one second after asking a question.',
-    detail: 'Extending that pause to just 3–5 seconds more than doubles the number of students who respond — and the answers get longer and more accurate. Students from East Asian school systems often need more processing time, not less knowledge.',
-    cite: 'Rowe (1974)',
-    col: '#534AB7', bg: '#EEEDFE',
-  },
-  {
-    emoji: '🧠',
-    headline: 'Students who memorise and repeat content consistently outperform on tests of deep, critical thinking.',
-    detail: 'Memorisation is often the first stage of real understanding, not a shortcut around it. Students using precise, repetitive methods are building mastery — not avoiding thinking. The research finds no trade-off between memorisation and higher-order skill.',
-    cite: 'Watkins & Biggs (2001)',
-    col: '#1D9E75', bg: '#E1F5EE',
-  },
-  {
-    emoji: '✏️',
-    headline: 'Written feedback with no grade outperforms a grade alone on every learning outcome measured.',
-    detail: 'When students receive a score, most stop reading the written comments entirely. Remove the grade and the feedback suddenly does its job. In cultures where visible failure carries high social cost, this also protects student dignity.',
-    cite: 'Black & Wiliam (1998), Inside the Black Box',
-    col: '#BA7517', bg: '#FAEEDA',
-  },
-  {
-    emoji: '🗣️',
-    headline: 'Students need 5–7 years to develop the language fluency required to debate and reason aloud in a second language.',
-    detail: 'Conversational English can be fluent within two years. Academic language — the kind needed to argue a point, challenge an idea, or explain abstract reasoning out loud — takes much longer. Silence in class discussion is not a sign of what a student knows.',
-    cite: 'Cummins (1981)',
-    col: '#185FA5', bg: '#E6F1FB',
-  },
-  {
-    emoji: '😶',
-    headline: 'One public correction can buy a student\'s silence for the rest of the year.',
-    detail: 'In classrooms where reputation and group standing matter, being corrected in front of peers is not just embarrassing — it is a social cost that students actively work to avoid repeating. The teacher\'s intent rarely changes the student\'s response.',
-    cite: 'Cortazzi & Jin (1996)',
-    col: '#8B3A3A', bg: '#FEF0F0',
-  },
-  {
-    emoji: '🌍',
-    headline: 'The school system a student came from predicts classroom behaviour better than their nationality.',
-    detail: 'A Korean student educated entirely in international schools behaves very differently from a Korean student schooled in the Korean state system — even though both hold the same passport. School culture travels with students; national culture is background context.',
-    cite: 'Baskerville (2003)',
-    col: '#185FA5', bg: '#E6F1FB',
-  },
-  {
-    emoji: '👁️',
-    headline: 'In many cultures, avoiding eye contact with a teacher is a sign of respect — not disrespect.',
-    detail: 'In parts of East Asia, West Africa, and Latin America, sustained eye contact with an authority figure can feel confrontational or rude. A student looking down is not hiding something; they are performing deference in the way their upbringing taught them.',
-    cite: 'Cross-cultural communication research',
-    col: '#534AB7', bg: '#EEEDFE',
-  },
-  {
-    emoji: '📐',
-    headline: 'Students from high-structure school systems are not afraid of open tasks — they are trying to do them correctly.',
-    detail: 'When a student asks "what format do you want?" repeatedly, they are not being rigid. They have been trained that there is a right way to do school work, and they are genuinely trying to find it. A clear starting framework unlocks creativity; ambiguity just creates anxiety.',
-    cite: 'Hofstede (2001); Marton & Säljö (1976)',
-    col: '#BA7517', bg: '#FAEEDA',
-  },
-  {
-    emoji: '🤐',
-    headline: 'Quiet students are not less engaged — they may be processing in a language that is not their first.',
-    detail: 'Real-time verbal participation requires not just knowledge but rapid language access. Students who are highly engaged intellectually may still be forming ideas in their home language and translating. Their silence is the translation happening, not absence of thought.',
-    cite: 'Krashen (1982); Cummins (1981)',
-    col: '#1D9E75', bg: '#E1F5EE',
-  },
-  {
-    emoji: '🏆',
-    headline: 'Finland starts formal schooling at age 7 — and consistently ranks among the highest in the world for literacy and problem-solving.',
-    detail: 'Finnish children spend their early years in play-based learning with no formal reading or maths instruction. Despite starting later than almost every other country, they consistently rank near the top on international assessments. Earlier is not always better.',
-    cite: 'Finnish National Agency for Education; PISA results',
-    col: '#534AB7', bg: '#EEEDFE',
-  },
-  {
-    emoji: '📣',
-    headline: 'In many school systems, asking a teacher a question implies they explained it badly — so students stay silent.',
-    detail: 'This is not passivity. A student who does not understand but says nothing may be protecting the teacher\'s reputation (and their own relationship with the teacher) rather than signalling indifference. Private clarification is far safer than public questioning.',
-    cite: 'Cortazzi & Jin (1996); Hofstede & Bond (1988)',
-    col: '#8B3A3A', bg: '#FEF0F0',
-  },
-  {
-    emoji: '🔁',
-    headline: 'Repeating a question louder or more slowly rarely helps a student who did not understand the first time.',
-    detail: 'Most comprehension gaps in international classrooms are conceptual or linguistic, not acoustic. Re-framing, giving an example, or providing wait time is far more effective than repetition. The louder version just adds social pressure to an already confusing moment.',
-    cite: 'Second language acquisition research',
-    col: '#185FA5', bg: '#E6F1FB',
-  },
-  {
-    emoji: '🎯',
-    headline: 'Group work produces better learning outcomes — but only when roles are clear and individual accountability is built in.',
-    detail: 'In highly collectivist school cultures, group work can default to one person doing everything while others defer. Clear individual deliverables within the group task preserve the collaborative benefits while removing the social dynamic that causes free-riding.',
-    cite: 'Johnson & Johnson (1994); cross-cultural group work research',
-    col: '#1D9E75', bg: '#E1F5EE',
-  },
-  {
-    emoji: '💬',
-    headline: '"Yes" very often means "I hear you" — not "I understand and will do it."',
-    detail: 'In Korean, Japanese, Chinese, and many other languages, the word that translates as "yes" functions as an acknowledgement signal, not a commitment. Teachers who interpret it as agreement often discover later that the student had no idea what was being asked of them.',
-    cite: 'Hall (1976); cross-cultural communication research',
-    col: '#BA7517', bg: '#FAEEDA',
-  },
-  {
-    emoji: '📊',
-    headline: 'The countries that dominate international test rankings also have the highest rates of student test anxiety.',
-    detail: 'High academic performance and high student wellbeing often point in opposite directions across systems. Understanding this trade-off matters when you are asking students from those systems to relax, experiment, or accept failure as part of learning.',
-    cite: 'PISA wellbeing data; Twenge & Campbell (2019)',
-    col: '#534AB7', bg: '#EEEDFE',
-  },
-  {
-    emoji: '🧍',
-    headline: 'Standing at the front and waiting in silence is one of the most effective classroom management tools across cultures.',
-    detail: 'Research consistently shows that calm, silent teacher presence reduces low-level disruption faster than verbal instruction. In high power-distance classrooms — where teacher authority is assumed — this effect is especially pronounced.',
-    cite: 'Lemov (2010), Teach Like a Champion; classroom management meta-analyses',
-    col: '#8B3A3A', bg: '#FEF0F0',
-  },
-  {
-    emoji: '🌱',
-    headline: 'Students who believe their intelligence can grow — rather than being fixed at birth — learn more and recover from failure faster.',
-    detail: 'Growth mindset research has been replicated across dozens of countries and school systems. The effect is consistent regardless of nationality or cultural background, which makes it one of the few universal levers international teachers have.',
-    cite: 'Dweck (2006); Yeager & Walton (2011)',
-    col: '#1D9E75', bg: '#E1F5EE',
-  },
-  {
-    emoji: '🏫',
-    headline: 'In Japan, students clean their own classrooms, serve school lunch, and run morning meetings — with no adult leading.',
-    detail: 'These daily rituals are intentional. Japanese schools treat collective responsibility as a taught skill, not a personality trait. Students who arrive in your classroom already holding these expectations may find a teacher-managed classroom confusing or even infantilising.',
-    cite: 'Japanese Ministry of Education; character education research',
-    col: '#185FA5', bg: '#E6F1FB',
-  },
-  {
-    emoji: '🔔',
-    headline: 'The most effective way to reduce whole-class silence is to reduce the audience — not increase the pressure.',
-    detail: 'Students who will not speak in front of thirty peers will often speak freely in a pair or trio. Reducing the social cost of being wrong is a faster route to participation than asking more directly or calling on individuals without warning.',
-    cite: 'Webb (1989); participation research across school cultures',
-    col: '#BA7517', bg: '#FAEEDA',
-  },
-  {
-    emoji: '🧭',
-    headline: 'The teacher\'s relationship with the student predicts learning outcomes more strongly than any specific teaching method.',
-    detail: 'Across meta-analyses spanning thousands of studies, teacher-student relationship quality is one of the strongest single predictors of academic achievement — stronger than class size, technology, or curriculum. This holds across every country studied.',
-    cite: 'Hattie (2009), Visible Learning',
-    col: '#534AB7', bg: '#EEEDFE',
-  },
-]
-
-function ResearchFact() {
-  const dailySeed = Math.floor(Date.now() / 86400000) % RESEARCH_FACTS.length
-  const [idx, setIdx] = useState(dailySeed)
-  const f = RESEARCH_FACTS[idx]
-  const next = () => setIdx(i => (i + 1) % RESEARCH_FACTS.length)
-
-  return (
-    <div style={{ marginBottom: '1rem', borderLeft: `4px solid ${f.col}`, background: f.bg, borderRadius: '0 var(--r) var(--r) 0', padding: '.85rem 1.05rem' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '.5rem', marginBottom: '.35rem' }}>
-        <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.1em', color: f.col }}>
-          {f.emoji}&nbsp; What the research actually shows · {idx + 1} of {RESEARCH_FACTS.length}
-        </div>
-        <button onClick={next} style={{ fontSize: 11.5, fontWeight: 600, color: f.col, background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, whiteSpace: 'nowrap' }}>
-          Next →
-        </button>
-      </div>
-      <div style={{ fontSize: 13.5, fontWeight: 600, color: f.col, lineHeight: 1.45, marginBottom: '.4rem' }}>{f.headline}</div>
-      <div style={{ fontSize: 12.5, color: 'var(--ink-2)', lineHeight: 1.6, marginBottom: '.3rem' }}>{f.detail}</div>
-      <div style={{ fontSize: 10.5, color: 'var(--ink-4)', fontStyle: 'italic' }}>{f.cite}</div>
-    </div>
-  )
-}
-
 // ── Culture check quiz questions ──────────────────────────────────────────
 const QUIZ_QUESTIONS = [
   {
@@ -260,7 +93,7 @@ function CultureQuiz() {
   return (
     <div style={{
       background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%)',
-      borderRadius: 'var(--rl)', padding: '1rem 1.25rem', height: '100%', boxSizing: 'border-box',
+      borderRadius: 'var(--rl)', padding: '1rem 1.25rem', marginBottom: '1rem',
     }}>
       <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.1em', color: '#7EC8B0', marginBottom: '.5rem' }}>
         Culture check · {idx + 1} of {QUIZ_QUESTIONS.length}
@@ -643,32 +476,81 @@ export default function ClassroomGuide() {
         Practical advice for the classroom moments that catch international teachers off guard.
       </div>
 
-      {/* Caveat box + Culture quiz — side by side */}
-      <div style={{ display: 'flex', gap: '1rem', alignItems: 'stretch', marginBottom: '1rem', flexWrap: 'wrap' }}>
-        <div style={{
-          flex: '1 1 300px',
-          background: '#FFF8E6', border: '1px solid #EDD89A', borderRadius: 'var(--r)',
-          padding: '.75rem 1rem',
-        }}>
-          <div style={{ fontSize: 12.5, color: '#6B5B1F', lineHeight: 1.6 }}>
-            <strong>What this is and isn't.</strong> The single biggest predictor of classroom behavior is often not nationality — it is{' '}
-            <em>the school system a student came from</em>. A student who spent their formative years in a Korean public school brings
-            those habits into your class, regardless of their passport. These patterns use{' '}
-            <a href="https://www.hofstede-insights.com" target="_blank" rel="noopener" style={{ color: '#6B5B1F' }}>Hofstede's cultural dimensions</a>{' '}
-            as a starting point — national-level data about how societies tend to handle power, uncertainty, and group identity — but treat
-            them as background context, not a profile of any individual. Students are shaped by their previous school, their family,
-            their own personality, and their experience in your classroom. Use this to ask better questions, not to make assumptions.
-          </div>
-        </div>
-
-        {/* Culture check quiz */}
-        <div style={{ flex: '1 1 300px' }}>
-          <CultureQuiz />
+      {/* Caveat box */}
+      <div style={{
+        background: '#FFF8E6', border: '1px solid #EDD89A', borderRadius: 'var(--r)',
+        padding: '.75rem 1rem', marginBottom: '1rem', maxWidth: 640,
+      }}>
+        <div style={{ fontSize: 12.5, color: '#6B5B1F', lineHeight: 1.6 }}>
+          <strong>What this is and isn't.</strong> The single biggest predictor of classroom behavior is often not nationality — it is{' '}
+          <em>the school system a student came from</em>. A student who spent their formative years in a Korean public school brings
+          those habits into your class, regardless of their passport. These patterns use{' '}
+          <a href="https://www.hofstede-insights.com" target="_blank" rel="noopener" style={{ color: '#6B5B1F' }}>Hofstede's cultural dimensions</a>{' '}
+          as a starting point — national-level data about how societies tend to handle power, uncertainty, and group identity — but treat
+          them as background context, not a profile of any individual. Students are shaped by their previous school, their family,
+          their own personality, and their experience in your classroom. Use this to ask better questions, not to make assumptions.
         </div>
       </div>
 
-      {/* Research fact of the day — single rotating card */}
-      <ResearchFact />
+      {/* Culture check quiz */}
+      <CultureQuiz />
+
+      {/* Research spotlight strip — horizontal scroll */}
+      <div style={{ marginBottom: '1rem' }}>
+        <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.1em', color: 'var(--ink-4)', marginBottom: '.5rem' }}>
+          What the research actually shows
+        </div>
+        <div style={{ display: 'flex', gap: '.5rem', overflowX: 'auto', paddingBottom: '.25rem' }}>
+          {[
+            {
+              emoji: '⏱️',
+              finding: 'Most teachers wait less than 1 second before re-asking or answering their own question.',
+              implication: 'Many students — especially those trained in East Asian school systems — need 5–7 seconds of quiet thinking time before they can respond. That silence is them forming an answer, not stalling.',
+              cite: 'Rowe (1974) — extending wait time to 3+ seconds increases student response quality by up to 700%',
+              col: '#534AB7', bg: '#EEEDFE',
+            },
+            {
+              emoji: '🧠',
+              finding: 'Students who memorise and repeat content — which can look like shallow learning — consistently outperform on tests that measure deep, critical thinking.',
+              implication: 'Memorisation is often a first step toward real understanding, not a substitute for it. Students using this approach are not avoiding thinking — they are building toward it.',
+              cite: 'Watkins & Biggs (2001); results from the world\'s largest international education tests',
+              col: '#1D9E75', bg: '#E1F5EE',
+            },
+            {
+              emoji: '✏️',
+              finding: 'Written feedback without grades produces better learning outcomes than grades alone.',
+              implication: 'In classrooms where being corrected in front of others carries real social weight, removing the visible score and giving private written comments reduces embarrassment while improving learning — two problems solved at once.',
+              cite: 'Black & Wiliam (1998), Inside the Black Box',
+              col: '#BA7517', bg: '#FAEEDA',
+            },
+            {
+              emoji: '🗣️',
+              finding: 'Students working through a second or third language need 5–7 years to develop the fluency required to debate, argue, and reason aloud in class.',
+              implication: 'A quiet student may be highly intelligent but still building the language skills needed to express complex ideas out loud. Silence in discussion is not a sign of what they know or think.',
+              cite: 'Cummins (1981); Krashen (1982)',
+              col: '#185FA5', bg: '#E6F1FB',
+            },
+            {
+              emoji: '😶',
+              finding: 'In classrooms where teachers are seen as authority figures, students who are corrected in front of their peers are significantly more likely to stop participating for the rest of the lesson.',
+              implication: 'One well-intentioned public correction can buy a student\'s silence for the rest of the year. The intent doesn\'t change the impact.',
+              cite: 'Cortazzi & Jin (1996); Hofstede & Minkov (2010)',
+              col: '#8B3A3A', bg: '#FEF0F0',
+            },
+          ].map((r, i) => (
+            <div key={i} style={{
+              flexShrink: 0, width: 260,
+              background: r.bg, borderLeft: `3px solid ${r.col}`,
+              borderRadius: '0 var(--r) var(--r) 0', padding: '.65rem .85rem',
+            }}>
+              <div style={{ fontSize: 16, marginBottom: '.3rem' }}>{r.emoji}</div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: r.col, lineHeight: 1.45, marginBottom: '.2rem' }}>{r.finding}</div>
+              <div style={{ fontSize: 11.5, color: 'var(--ink-2)', lineHeight: 1.5, marginBottom: '.25rem' }}>{r.implication}</div>
+              <div style={{ fontSize: 10, color: 'var(--ink-4)', fontStyle: 'italic' }}>{r.cite}</div>
+            </div>
+          ))}
+        </div>
+      </div>
 
       {/* Mode toggle */}
       <div style={{ display: 'flex', gap: '.5rem', marginBottom: '1rem' }}>
