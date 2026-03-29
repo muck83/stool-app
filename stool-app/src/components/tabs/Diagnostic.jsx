@@ -29,69 +29,109 @@ function classifyAnswer(a) {
   return 0
 }
 
+// Question labels for specific callouts in results
+const Q_LABELS = {
+  q1: 'how you interpret unexpected student reactions',
+  q2: 'whether your voice is heard by leadership',
+  q3: 'your sense of belonging in your city',
+  q4: 'how you read student silence',
+  q5: 'workload compared to expectations',
+  q6: 'school transparency',
+  q7: 'how often cultural friction hits daily',
+  q8: 'your outlook on staying another two years',
+}
+
 function buildDiagnosticResult(answers) {
   const answeredIds = Object.keys(answers)
   const total = answeredIds.length
   if (total < 5) return null
 
-  const scores = { cultural: 0, structural: 0, place: 0, overall: 0 }
+  // Each dimension's max depends on how many questions were answered
+  const scores = { cultural: 0, structural: 0, place: 0 }
+  const answeredCultural = CULTURAL_Q_IDS.filter(id => answeredIds.includes(id))
+  const answeredStructural = STRUCTURAL_Q_IDS.filter(id => answeredIds.includes(id))
 
   answeredIds.forEach((id) => {
     const value = answers[id]
     if (CULTURAL_Q_IDS.includes(id)) scores.cultural += classifyAnswer(value)
     if (STRUCTURAL_Q_IDS.includes(id)) scores.structural += classifyAnswer(value)
     if (id === 'q3') scores.place += classifyAnswer(value)
-    if (id === 'q8') {
-      if (value <= 1) scores.overall += 3
-      else if (value === 2) scores.overall += 2
-      else if (value === 3) scores.overall += 1
-    }
   })
 
-  const cultR = scores.cultural / total
-  const strucR = scores.structural / total
-  const placeR = scores.place / total
+  // Normalise to 0–1 within each dimension's actual max
+  const cultMax = answeredCultural.length * 2
+  const strucMax = answeredStructural.length * 2
+  const cultN = cultMax > 0 ? scores.cultural / cultMax : 0   // 0 = no friction, 1 = max friction
+  const strucN = strucMax > 0 ? scores.structural / strucMax : 0
+  const placeN = answers.q3 !== undefined ? scores.place / 2 : 0
 
-  if (cultR > 1.2 && strucR < 0.8) {
+  // Find which specific questions scored worst (answer 0 or 1 = friction)
+  const frictionQs = answeredIds
+    .filter(id => id !== 'q8' && answers[id] <= 1)
+    .map(id => Q_LABELS[id])
+    .filter(Boolean)
+
+  // Dominant leg: cultural wins if clearly above structural AND structural not also high
+  const culturalDominant = cultN >= 0.5 && cultN > strucN + 0.2
+  const structuralDominant = strucN >= 0.5 && strucN > cultN + 0.2
+  const placeDominant = placeN >= 0.5 && !culturalDominant && !structuralDominant && strucN < 0.4
+
+  const frictionNote = frictionQs.length > 0
+    ? ` Your answers on ${frictionQs.slice(0, 2).join(' and ')} were the clearest signals.`
+    : ''
+
+  if (culturalDominant) {
     return {
       kind: 'cultural',
       title: 'Mostly cultural friction',
-      body: "What you're describing sounds more like normal adaptation discomfort than a broken institution.",
-      urgency: 'That is genuinely good news. Cultural friction often peaks around 3-6 months and tends to ease by 12 months.',
+      body: `What you're describing sounds more like normal adaptation discomfort than a broken institution.${frictionNote}`,
+      urgency: 'That is genuinely good news. Cultural friction often peaks around 3–6 months and tends to ease by 12 months. School and place are not the main source — the adjustment itself is.',
       actions: [
-        'Build real relationships with local colleagues, not only expat circles.',
-        'Learn a little of the local language. The respect signal often matters more than fluency.',
-        'Read about the host culture so daily patterns feel less mysterious.',
+        'Head to the Classroom Guide — it explains why students behave the way they do and gives you practical responses.',
+        'Check the Culture tab for the specific patterns that are catching you off guard.',
+        'Build real relationships with local colleagues, not only expat circles. Language matters less than intent.',
+      ],
+      links: [
+        { label: 'Classroom Guide →', tab: 'classroom' },
+        { label: 'Culture tab →', tab: 'culture' },
       ],
       scores,
     }
   }
 
-  if (strucR > 1.2 && cultR < 0.8) {
+  if (structuralDominant) {
     return {
       kind: 'structural',
-      title: 'Mostly school or package friction',
-      body: 'Your answers point more toward leadership, workload, or school systems than toward culture shock.',
-      urgency: 'Cultural adjustment improves with time. Structural problems usually need advocacy, a change in conditions, or a move.',
+      title: 'Mostly school friction',
+      body: `Your answers point more toward leadership, workload, or school systems than toward culture shock.${frictionNote}`,
+      urgency: 'Cultural adjustment improves with time. Structural problems usually need advocacy, a change in conditions, or a move. Adapting harder to a poorly run school is not a strategy.',
       actions: [
-        'Name the core issue clearly: workload, leadership opacity, pay, or something else.',
-        'Ask whether the issue is actually improving or whether you are just getting used to it.',
-        'Use the next move to screen the school leg more carefully, not just the country.',
+        'Name the core issue clearly: workload, leadership opacity, pay, or communication. Vague discomfort is harder to act on.',
+        'Ask whether things are actually improving or whether you are just getting used to them.',
+        'Use My Move to screen the school leg more carefully on your next search — not just the country.',
+        'Check My School to rate this placement honestly before you forget the detail.',
+      ],
+      links: [
+        { label: 'My Move →', tab: 'move' },
+        { label: 'My School →', tab: 'school' },
       ],
       scores,
     }
   }
 
-  if (placeR > 1.2) {
+  if (placeDominant) {
     return {
       kind: 'place',
       title: 'Mostly place friction',
-      body: 'The biggest strain looks like the city or lifestyle around the job rather than the school itself.',
-      urgency: 'Place discomfort is real. It is also the part of the stool most open to active management.',
+      body: `The biggest strain looks like the city or lifestyle around the job rather than the school itself.${frictionNote}`,
+      urgency: 'Place discomfort is real. It is also the part of the stool most open to active management — you can change a lot about how you inhabit a place without changing the job.',
       actions: [
-        'Build a social calendar on purpose instead of waiting for belonging to happen.',
-        'Try local routines and neighborhoods, not only expat defaults.',
-        'Use My Move to see whether another destination may fit your life better.',
+        'Build a social calendar on purpose instead of waiting for belonging to happen naturally.',
+        'Try local routines and neighborhoods rather than defaulting to expat spaces.',
+        'Use My Move to see whether another destination would fit your life better — sometimes the school is fine but the city is wrong.',
+      ],
+      links: [
+        { label: 'My Move →', tab: 'move' },
       ],
       scores,
     }
@@ -99,12 +139,18 @@ function buildDiagnosticResult(answers) {
 
   return {
     kind: 'mixed',
-    title: 'Mixed picture',
-    body: 'More than one leg is creating friction, which makes it easy to blame the wrong thing.',
-    urgency: 'The biggest risk here is confusing a school problem for a country problem, or vice versa.',
+    title: 'More than one leg is wobbly',
+    body: `Multiple things are creating friction, which makes it easy to blame the wrong one.${frictionNote}`,
+    urgency: 'The biggest risk with a mixed picture is confusing a school problem for a country problem, or vice versa. Leaving for the right reason matters.',
     actions: [
-      'Rate package, school, and place separately and decide which leg is actually failing.',
-      'Ask whether a better school in the same country would solve a large part of the problem.',
+      'Rate school, place, and cultural fit separately and decide honestly which leg is actually failing.',
+      'Ask: would a better school in the same country solve most of the problem? If yes, the country is not the issue.',
+      'Use My Move to compare destinations side by side — sometimes the clarity comes from seeing the alternative.',
+      'If cultural friction is part of it, the Classroom Guide explains the patterns that catch people off guard most.',
+    ],
+    links: [
+      { label: 'My Move →', tab: 'move' },
+      { label: 'Classroom Guide →', tab: 'classroom' },
     ],
     scores,
   }
@@ -202,7 +248,7 @@ const DIAG_QS = [
 ]
 
 export function Diagnostic() {
-  const { profile, updateProfile } = useProfile()
+  const { profile, updateProfile, setActiveTab } = useProfile()
   const [answers, setAnswers] = useState({})
   const [result, setResult] = useState(null)
   const [scoreApplied, setScoreApplied] = useState(false)
@@ -348,6 +394,25 @@ export function Diagnostic() {
           {result.actions.map((a, i) => (
             <div key={i} className="ibox" style={{ marginBottom: '.5rem' }}>{a}</div>
           ))}
+
+          {result.links && result.links.length > 0 && (
+            <div style={{ display: 'flex', gap: '.5rem', flexWrap: 'wrap', marginTop: '.85rem' }}>
+              {result.links.map(({ label, tab }) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  style={{
+                    fontSize: 12.5, fontWeight: 600,
+                    color: 'var(--teal-dark)', background: '#E1F5EE',
+                    border: '1.5px solid rgba(29,158,117,.3)', borderRadius: 'var(--r)',
+                    padding: '6px 14px', cursor: 'pointer',
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
 
           {diagScore != null && (
             <div style={{ marginTop: '1.25rem', borderTop: '1px solid var(--border)', paddingTop: '1.25rem' }}>
