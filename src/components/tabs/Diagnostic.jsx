@@ -152,7 +152,7 @@ function buildDiagnosticResult(answers) {
     ],
     links: [
       { label: 'My Move →', tab: 'prediction' },
-      { label: 'Classroom Guide →', tab: 'classroom' },
+      { label: 'Classroom Guide →', tab: 'faq' },
     ],
     scores,
   }

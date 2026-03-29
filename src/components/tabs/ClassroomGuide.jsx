@@ -7,6 +7,386 @@ import { COUNTRIES } from '../../data/countries.js'
 // Hofstede indices: 0=PDI, 1=IDV, 2=MAS, 3=UAI, 4=LTO, 5=IVR
 const DIM_INDEX = { PDI: 0, IDV: 1, MAS: 2, UAI: 3, LTO: 4, IVR: 5 }
 
+// ── Research facts — rotating daily ──────────────────────────────────────
+const RESEARCH_FACTS = [
+  {
+    emoji: '⏱️',
+    headline: 'Most teachers wait less than one second after asking a question.',
+    detail: 'Extending that pause to just 3–5 seconds more than doubles the number of students who respond — and the answers get longer and more accurate. Students from East Asian school systems often need more processing time, not less knowledge.',
+    cite: 'Rowe (1974)',
+    col: '#534AB7', bg: '#EEEDFE',
+  },
+  {
+    emoji: '🧠',
+    headline: 'Students who memorise and repeat content consistently outperform on tests of deep, critical thinking.',
+    detail: 'Memorisation is often the first stage of real understanding, not a shortcut around it. Students using precise, repetitive methods are building mastery — not avoiding thinking. The research finds no trade-off between memorisation and higher-order skill.',
+    cite: 'Watkins & Biggs (2001)',
+    col: '#1D9E75', bg: '#E1F5EE',
+  },
+  {
+    emoji: '✏️',
+    headline: 'Written feedback with no grade outperforms a grade alone on every learning outcome measured.',
+    detail: 'When students receive a score, most stop reading the written comments entirely. Remove the grade and the feedback suddenly does its job. In cultures where visible failure carries high social cost, this also protects student dignity.',
+    cite: 'Black & Wiliam (1998), Inside the Black Box',
+    col: '#BA7517', bg: '#FAEEDA',
+  },
+  {
+    emoji: '🗣️',
+    headline: 'Students need 5–7 years to develop the language fluency required to debate and reason aloud in a second language.',
+    detail: 'Conversational English can be fluent within two years. Academic language — the kind needed to argue a point, challenge an idea, or explain abstract reasoning out loud — takes much longer. Silence in class discussion is not a sign of what a student knows.',
+    cite: 'Cummins (1981)',
+    col: '#185FA5', bg: '#E6F1FB',
+  },
+  {
+    emoji: '😶',
+    headline: 'One public correction can buy a student\'s silence for the rest of the year.',
+    detail: 'In classrooms where reputation and group standing matter, being corrected in front of peers is not just embarrassing — it is a social cost that students actively work to avoid repeating. The teacher\'s intent rarely changes the student\'s response.',
+    cite: 'Cortazzi & Jin (1996)',
+    col: '#8B3A3A', bg: '#FEF0F0',
+  },
+  {
+    emoji: '🌍',
+    headline: 'The school system a student came from predicts classroom behaviour better than their nationality.',
+    detail: 'A Korean student educated entirely in international schools behaves very differently from a Korean student schooled in the Korean state system — even though both hold the same passport. School culture travels with students; national culture is background context.',
+    cite: 'Baskerville (2003)',
+    col: '#185FA5', bg: '#E6F1FB',
+  },
+  {
+    emoji: '👁️',
+    headline: 'In many cultures, avoiding eye contact with a teacher is a sign of respect — not disrespect.',
+    detail: 'In parts of East Asia, West Africa, and Latin America, sustained eye contact with an authority figure can feel confrontational or rude. A student looking down is not hiding something; they are performing deference in the way their upbringing taught them.',
+    cite: 'Cross-cultural communication research',
+    col: '#534AB7', bg: '#EEEDFE',
+  },
+  {
+    emoji: '📐',
+    headline: 'Students from high-structure school systems are not afraid of open tasks — they are trying to do them correctly.',
+    detail: 'When a student asks "what format do you want?" repeatedly, they are not being rigid. They have been trained that there is a right way to do school work, and they are genuinely trying to find it. A clear starting framework unlocks creativity; ambiguity just creates anxiety.',
+    cite: 'Hofstede (2001); Marton & Säljö (1976)',
+    col: '#BA7517', bg: '#FAEEDA',
+  },
+  {
+    emoji: '🤐',
+    headline: 'Quiet students are not less engaged — they may be processing in a language that is not their first.',
+    detail: 'Real-time verbal participation requires not just knowledge but rapid language access. Students who are highly engaged intellectually may still be forming ideas in their home language and translating. Their silence is the translation happening, not absence of thought.',
+    cite: 'Krashen (1982); Cummins (1981)',
+    col: '#1D9E75', bg: '#E1F5EE',
+  },
+  {
+    emoji: '🏆',
+    headline: 'Finland starts formal schooling at age 7 — and consistently ranks among the highest in the world for literacy and problem-solving.',
+    detail: 'Finnish children spend their early years in play-based learning with no formal reading or maths instruction. Despite starting later than almost every other country, they consistently rank near the top on international assessments. Earlier is not always better.',
+    cite: 'Finnish National Agency for Education; PISA results',
+    col: '#534AB7', bg: '#EEEDFE',
+  },
+  {
+    emoji: '📣',
+    headline: 'In many school systems, asking a teacher a question implies they explained it badly — so students stay silent.',
+    detail: 'This is not passivity. A student who does not understand but says nothing may be protecting the teacher\'s reputation (and their own relationship with the teacher) rather than signalling indifference. Private clarification is far safer than public questioning.',
+    cite: 'Cortazzi & Jin (1996); Hofstede & Bond (1988)',
+    col: '#8B3A3A', bg: '#FEF0F0',
+  },
+  {
+    emoji: '🔁',
+    headline: 'Repeating a question louder or more slowly rarely helps a student who did not understand the first time.',
+    detail: 'Most comprehension gaps in international classrooms are conceptual or linguistic, not acoustic. Re-framing, giving an example, or providing wait time is far more effective than repetition. The louder version just adds social pressure to an already confusing moment.',
+    cite: 'Second language acquisition research',
+    col: '#185FA5', bg: '#E6F1FB',
+  },
+  {
+    emoji: '🎯',
+    headline: 'Group work produces better learning outcomes — but only when roles are clear and individual accountability is built in.',
+    detail: 'In highly collectivist school cultures, group work can default to one person doing everything while others defer. Clear individual deliverables within the group task preserve the collaborative benefits while removing the social dynamic that causes free-riding.',
+    cite: 'Johnson & Johnson (1994); cross-cultural group work research',
+    col: '#1D9E75', bg: '#E1F5EE',
+  },
+  {
+    emoji: '💬',
+    headline: '"Yes" very often means "I hear you" — not "I understand and will do it."',
+    detail: 'In Korean, Japanese, Chinese, and many other languages, the word that translates as "yes" functions as an acknowledgement signal, not a commitment. Teachers who interpret it as agreement often discover later that the student had no idea what was being asked of them.',
+    cite: 'Hall (1976); cross-cultural communication research',
+    col: '#BA7517', bg: '#FAEEDA',
+  },
+  {
+    emoji: '📊',
+    headline: 'The countries that dominate international test rankings also have the highest rates of student test anxiety.',
+    detail: 'High academic performance and high student wellbeing often point in opposite directions across systems. Understanding this trade-off matters when you are asking students from those systems to relax, experiment, or accept failure as part of learning.',
+    cite: 'PISA wellbeing data; Twenge & Campbell (2019)',
+    col: '#534AB7', bg: '#EEEDFE',
+  },
+  {
+    emoji: '🧍',
+    headline: 'Standing at the front and waiting in silence is one of the most effective classroom management tools across cultures.',
+    detail: 'Research consistently shows that calm, silent teacher presence reduces low-level disruption faster than verbal instruction. In high power-distance classrooms — where teacher authority is assumed — this effect is especially pronounced.',
+    cite: 'Lemov (2010), Teach Like a Champion; classroom management meta-analyses',
+    col: '#8B3A3A', bg: '#FEF0F0',
+  },
+  {
+    emoji: '🌱',
+    headline: 'Students who believe their intelligence can grow — rather than being fixed at birth — learn more and recover from failure faster.',
+    detail: 'Growth mindset research has been replicated across dozens of countries and school systems. The effect is consistent regardless of nationality or cultural background, which makes it one of the few universal levers international teachers have.',
+    cite: 'Dweck (2006); Yeager & Walton (2011)',
+    col: '#1D9E75', bg: '#E1F5EE',
+  },
+  {
+    emoji: '🏫',
+    headline: 'In Japan, students clean their own classrooms, serve school lunch, and run morning meetings — with no adult leading.',
+    detail: 'These daily rituals are intentional. Japanese schools treat collective responsibility as a taught skill, not a personality trait. Students who arrive in your classroom already holding these expectations may find a teacher-managed classroom confusing or even infantilising.',
+    cite: 'Japanese Ministry of Education; character education research',
+    col: '#185FA5', bg: '#E6F1FB',
+  },
+  {
+    emoji: '🔔',
+    headline: 'The most effective way to reduce whole-class silence is to reduce the audience — not increase the pressure.',
+    detail: 'Students who will not speak in front of thirty peers will often speak freely in a pair or trio. Reducing the social cost of being wrong is a faster route to participation than asking more directly or calling on individuals without warning.',
+    cite: 'Webb (1989); participation research across school cultures',
+    col: '#BA7517', bg: '#FAEEDA',
+  },
+  {
+    emoji: '🧭',
+    headline: 'The teacher\'s relationship with the student predicts learning outcomes more strongly than any specific teaching method.',
+    detail: 'Across meta-analyses spanning thousands of studies, teacher-student relationship quality is one of the strongest single predictors of academic achievement — stronger than class size, technology, or curriculum. This holds across every country studied.',
+    cite: 'Hattie (2009), Visible Learning',
+    col: '#534AB7', bg: '#EEEDFE',
+  },
+  {
+    emoji: '🌐',
+    headline: 'Multilingual students don\'t switch between separate language systems — their brain runs one integrated system with features from all their languages.',
+    detail: 'Neuroscience research shows multilingual brains process all known languages simultaneously, not in separate compartments. When a student pauses to find a word, they are navigating one rich system, not failing to access a single language. This is why "translanguaging" — letting students use all their languages as resources — works better than forcing English-only.',
+    cite: 'Garc\u00eda & Wei (2014); Frontiers in Human Neuroscience (2025)',
+    col: '#1D9E75', bg: '#E1F5EE',
+  },
+  {
+    emoji: '🏠',
+    headline: 'Third-culture kids are often socially skilled and globally aware, but many report never quite feeling like they belong anywhere.',
+    detail: 'Students who have grown up across multiple countries develop exceptional adaptability, cross-cultural reading ability, and resilience. But belonging — the feeling of being fully "home" — is often the thing they lack most. Schools that explicitly name and normalise this experience help students feel seen rather than different.',
+    cite: 'TCK research; Nord Anglia (2024); Pollock & Van Reken',
+    col: '#BA7517', bg: '#FAEEDA',
+  },
+  {
+    emoji: '🧠',
+    headline: 'Trauma-informed approaches work best when they are localised — not imported from another culture\'s framework.',
+    detail: 'A 2024 review of 17 international models found that trauma-sensitive schools produce better results when they adapt to local context rather than applying a single Western-origin approach to all students. What "safe" feels like in a classroom varies enormously across cultures.',
+    cite: 'Frontiers in Psychology (2024); ITIPPS framework',
+    col: '#8B3A3A', bg: '#FEF0F0',
+  },
+  {
+    emoji: '🤖',
+    headline: 'AI can help teachers localise content for different cultural contexts — but it carries its own cultural bias.',
+    detail: 'Generative AI tools can translate materials, adapt analogies to local references, and personalise tasks for multilingual learners. But the models themselves encode cultural assumptions (mostly Western, English-language ones). Teachers using AI to differentiate should still check outputs against the cultures they are actually serving.',
+    cite: 'OECD TALIS (2024); AI in inclusive education research (2024–2025)',
+    col: '#185FA5', bg: '#E6F1FB',
+  },
+  {
+    emoji: '📋',
+    headline: 'The 2024 TALIS survey of 280,000 teachers found that teacher multicultural beliefs matter more than national policies for creating inclusive classrooms.',
+    detail: 'Across 50+ education systems, a teacher\'s own openness to cultural diversity was the strongest predictor of whether their classroom felt inclusive. Policy alone does not create belonging — the teacher\'s disposition and reflective practice do.',
+    cite: 'OECD TALIS (2024); distributed leadership research (2026)',
+    col: '#534AB7', bg: '#EEEDFE',
+  },
+]
+
+function ResearchFact() {
+  const dailySeed = Math.floor(Date.now() / 86400000) % RESEARCH_FACTS.length
+  const [idx, setIdx] = useState(dailySeed)
+  const f = RESEARCH_FACTS[idx]
+  const next = () => setIdx(i => (i + 1) % RESEARCH_FACTS.length)
+
+  return (
+    <div style={{ marginBottom: '1rem', borderLeft: `4px solid ${f.col}`, background: f.bg, borderRadius: '0 var(--r) var(--r) 0', padding: '.85rem 1.05rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '.5rem', marginBottom: '.35rem' }}>
+        <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.1em', color: f.col }}>
+          {f.emoji}&nbsp; What the research actually shows · {idx + 1} of {RESEARCH_FACTS.length}
+        </div>
+        <button onClick={next} style={{ fontSize: 11.5, fontWeight: 600, color: f.col, background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, whiteSpace: 'nowrap' }}>
+          Next →
+        </button>
+      </div>
+      <div style={{ fontSize: 13.5, fontWeight: 600, color: f.col, lineHeight: 1.45, marginBottom: '.4rem' }}>{f.headline}</div>
+      <div style={{ fontSize: 12.5, color: 'var(--ink-2)', lineHeight: 1.6, marginBottom: '.3rem' }}>{f.detail}</div>
+      <div style={{ fontSize: 10.5, color: 'var(--ink-4)', fontStyle: 'italic' }}>{f.cite}</div>
+    </div>
+  )
+}
+
+// ── Culture check quiz questions ──────────────────────────────────────────
+const QUIZ_QUESTIONS = [
+  {
+    q: 'In Japan, students clean their own classrooms every day — there are no janitors.',
+    answer: true,
+    pctCorrect: 42,
+    explanation: 'True. Daily cleaning time is a standard part of the Japanese school day. Students sweep, mop, and tidy as a group — it\'s considered part of character education, not a chore to outsource.',
+    cite: 'Standard practice across Japanese public schools',
+  },
+  {
+    q: 'When a student nods and says "yes" while you explain something, it usually means they understood.',
+    answer: false,
+    pctCorrect: 31,
+    explanation: 'Not in many classrooms. In Korean, Chinese, Japanese, and other East Asian contexts, nodding and saying "yes" typically means "I hear you" or "I respect you" — not "I understand and will do it." The only way to check is to ask them to show you.',
+    cite: 'Cultural communication research; Hall (1976)',
+  },
+  {
+    q: 'Finland — one of the top-ranked education systems globally — doesn\'t begin formal schooling until age 7.',
+    answer: true,
+    pctCorrect: 54,
+    explanation: 'True. Finnish children spend their early years in play-based learning before any formal reading or maths instruction. Despite starting later than almost every other country, Finland consistently ranks near the top for literacy and problem-solving.',
+    cite: 'Finnish National Agency for Education',
+  },
+  {
+    q: 'Students who rely heavily on memorisation tend to score worse on tests of deep, critical thinking.',
+    answer: false,
+    pctCorrect: 27,
+    explanation: 'The research says the opposite. Students from East Asian school systems — where memorisation is common — consistently score among the highest globally on both knowledge recall and higher-order thinking. Memorisation is often a path to deep understanding, not a shortcut around it.',
+    cite: 'Watkins & Biggs (2001); international assessment results',
+  },
+  {
+    q: 'Giving written feedback with no grade produces better learning outcomes than giving a grade alone.',
+    answer: true,
+    pctCorrect: 33,
+    explanation: 'True — and the research gap is significant. Students who receive only written comments (no score) engage more with the feedback and improve more on the next task. When a grade is added, many students stop reading the comments entirely.',
+    cite: 'Black & Wiliam (1998), Inside the Black Box',
+  },
+  {
+    q: 'Waiting just 3 extra seconds after asking a question can more than double the quality of student responses.',
+    answer: true,
+    pctCorrect: 47,
+    explanation: 'True. Most teachers wait less than 1 second before re-asking or answering their own question. Extending this pause to 3–5 seconds significantly increases how many students respond, how long their answers are, and how accurate they are.',
+    cite: 'Rowe (1974)',
+  },
+  {
+    q: 'Students from the same country will generally behave the same way in your classroom.',
+    answer: false,
+    pctCorrect: 38,
+    explanation: 'Not really. The school system a student came from matters far more than their nationality. Two students from Korea — one who attended Korean public school, one who was always in international schools — can have completely different classroom habits and expectations.',
+    cite: 'School culture transfer research; Baskerville (2003)',
+  },
+  {
+    q: 'In Germany, children are typically placed into different types of secondary school based on teacher recommendations around age 10.',
+    answer: true,
+    pctCorrect: 45,
+    explanation: 'True. Germany\'s education system has historically separated students into different school tracks — some leading to university, others to vocational training — based largely on teacher assessments at around age 10. That early decision shapes their whole educational path.',
+    cite: 'OECD Education at a Glance',
+  },
+  {
+    q: 'A student who avoids eye contact with you is probably being disrespectful.',
+    answer: false,
+    pctCorrect: 29,
+    explanation: 'In many cultures, avoiding eye contact with a teacher is a sign of respect, not disrespect. In parts of East Asia, West Africa, and Latin America, sustained eye contact with an authority figure can actually feel confrontational or rude.',
+    cite: 'Cross-cultural communication research',
+  },
+  {
+    q: 'Students who are quiet in class discussions are less engaged with the material than students who speak up.',
+    answer: false,
+    pctCorrect: 36,
+    explanation: 'Not necessarily. Quiet students may be deeply engaged but processing differently — especially those learning in a second language, those from school systems where students don\'t usually speak unless called on, or those managing the social risk of speaking in front of peers.',
+    cite: 'Cummins (1981); participation and second language research',
+  },
+  {
+    q: 'Multilingual students process their different languages in separate parts of the brain.',
+    answer: false,
+    pctCorrect: 24,
+    explanation: 'Neuroscience shows multilingual brains run one integrated language system, not separate compartments. All known languages are active simultaneously. This is why allowing students to use their full linguistic repertoire — rather than enforcing English-only — actually supports deeper learning.',
+    cite: 'Frontiers in Human Neuroscience (2025); translanguaging research',
+  },
+  {
+    q: 'A teacher\'s personal openness to cultural diversity is a stronger predictor of classroom inclusion than their school\'s official policies.',
+    answer: true,
+    pctCorrect: 41,
+    explanation: 'True. The 2024 OECD survey of 280,000 teachers across 50+ countries found that a teacher\'s own multicultural beliefs and reflective practice had more impact on whether a classroom felt inclusive than any formal policy framework. Inclusion starts with disposition, not paperwork.',
+    cite: 'OECD TALIS (2024)',
+  },
+  {
+    q: 'Students who have grown up across multiple countries ("third culture kids") generally feel a strong sense of belonging wherever they are.',
+    answer: false,
+    pctCorrect: 44,
+    explanation: 'Despite exceptional adaptability and cross-cultural skills, many third-culture kids report never fully feeling "at home" anywhere. They may look confident on the outside but carry a quiet sense of not quite belonging. Schools that name and normalise this experience — rather than assuming globally mobile kids are "fine" — make a real difference.',
+    cite: 'Pollock & Van Reken; international school TCK research (2024)',
+  },
+]
+
+function CultureQuiz() {
+  const dailySeed = Math.floor(Date.now() / 86400000) % QUIZ_QUESTIONS.length
+  const [idx, setIdx] = useState(dailySeed)
+  const [chosen, setChosen] = useState(null) // null | true | false
+
+  const q = QUIZ_QUESTIONS[idx]
+  const correct = chosen !== null && chosen === q.answer
+  const next = () => { setIdx(i => (i + 1) % QUIZ_QUESTIONS.length); setChosen(null) }
+
+  return (
+    <div style={{
+      background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%)',
+      borderRadius: 'var(--rl)', padding: '1rem 1.25rem', height: '100%', boxSizing: 'border-box',
+    }}>
+      <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.1em', color: '#7EC8B0', marginBottom: '.5rem' }}>
+        Culture check · {idx + 1} of {QUIZ_QUESTIONS.length}
+      </div>
+
+      <div style={{ fontSize: 14, fontWeight: 600, color: '#FFFFFF', lineHeight: 1.5, marginBottom: '.85rem' }}>
+        {q.q}
+      </div>
+
+      {/* Buttons — hidden after answer */}
+      {chosen === null && (
+        <div style={{ display: 'flex', gap: '.5rem' }}>
+          {[{ label: 'True', val: true }, { label: 'False', val: false }].map(({ label, val }) => (
+            <button
+              key={label}
+              onClick={() => setChosen(val)}
+              style={{
+                flex: 1, padding: '.55rem 0', fontSize: 13, fontWeight: 600,
+                background: 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.25)',
+                borderRadius: 'var(--r)', color: 'white', cursor: 'pointer',
+                transition: 'background .15s',
+              }}
+              onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,.2)'}
+              onMouseOut={e => e.currentTarget.style.background = 'rgba(255,255,255,.1)'}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Reveal */}
+      {chosen !== null && (
+        <div>
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: '.4rem',
+            fontSize: 13, fontWeight: 700,
+            color: correct ? '#7EC8B0' : '#F08080',
+            marginBottom: '.5rem',
+          }}>
+            {correct ? '✓ Correct' : `✗ The answer is ${q.answer ? 'True' : 'False'}`}
+            <span style={{
+              fontSize: 11, fontWeight: 600,
+              background: 'rgba(255,255,255,.12)', color: 'rgba(255,255,255,.7)',
+              padding: '2px 9px', borderRadius: 999, marginLeft: 4,
+            }}>
+              {q.pctCorrect}% of people get this right
+            </span>
+          </div>
+          <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,.85)', lineHeight: 1.6, marginBottom: '.35rem' }}>
+            {q.explanation}
+          </div>
+          <div style={{ fontSize: 10.5, color: 'rgba(255,255,255,.4)', fontStyle: 'italic', marginBottom: '.65rem' }}>
+            {q.cite}
+          </div>
+          <button
+            onClick={next}
+            style={{
+              fontSize: 12, fontWeight: 600, color: '#7EC8B0',
+              background: 'transparent', border: 'none', cursor: 'pointer', padding: 0,
+            }}
+          >
+            Next question →
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
 const CATEGORY_CONFIG = {
   participation: {
     label: 'Participation',
@@ -291,7 +671,9 @@ export default function ClassroomGuide() {
   const [filter, setFilter] = useState('')
   const [openCat, setOpenCat] = useState(null)
   const [viewCountry, setViewCountry] = useState(profile.cc || '')
-  const [mode, setMode] = useState('guide') // 'guide' | 'explore'
+  const [showExplore, setShowExplore] = useState(false)
+  const [showCaveat, setShowCaveat] = useState(false)
+  const [showQuiz, setShowQuiz] = useState(false)
 
   const hView = HOF[viewCountry]
   const countryList = useMemo(() => Object.keys(HOF).sort(), [])
@@ -314,88 +696,55 @@ export default function ClassroomGuide() {
 
   return (
     <div className="tp active">
-      <div style={{ fontFamily: 'var(--serif)', fontSize: '1.5rem', marginBottom: '.35rem' }}>Classroom guide</div>
-      <div style={{ fontSize: 13, color: 'var(--ink-3)', marginBottom: '.75rem', maxWidth: 640, lineHeight: 1.6 }}>
-        Practical advice for the classroom moments that catch international teachers off guard.
-      </div>
-
-      {/* Caveat box */}
-      <div style={{
-        background: '#FFF8E6', border: '1px solid #EDD89A', borderRadius: 'var(--r)',
-        padding: '.75rem 1rem', marginBottom: '1rem', maxWidth: 640,
-      }}>
-        <div style={{ fontSize: 12.5, color: '#6B5B1F', lineHeight: 1.6 }}>
-          <strong>What this is and isn't.</strong> The single biggest predictor of classroom behavior is often not nationality — it is{' '}
-          <em>the school system a student came from</em>. A student who spent their formative years in a Korean public school brings
-          those habits into your class, regardless of their passport. These patterns use{' '}
-          <a href="https://www.hofstede-insights.com" target="_blank" rel="noopener" style={{ color: '#6B5B1F' }}>Hofstede's cultural dimensions</a>{' '}
-          as a starting point — national-level data about how societies tend to handle power, uncertainty, and group identity — but treat
-          them as background context, not a profile of any individual. Students are shaped by their previous school, their family,
-          their own personality, and their experience in your classroom. Use this to ask better questions, not to make assumptions.
+      {/* ── Hero: title + country selector in one line ──────────────── */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '.75rem', flexWrap: 'wrap', marginBottom: '.6rem' }}>
+        <div style={{ fontFamily: 'var(--serif)', fontSize: '1.5rem', whiteSpace: 'nowrap' }}>Classroom guide</div>
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: '.4rem',
+          padding: '4px 6px 4px 10px',
+          background: '#E1F5EE', border: '1px solid rgba(29,158,117,.2)',
+          borderRadius: 'var(--r)', flex: '1 1 200px', maxWidth: 340,
+        }}>
+          <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--teal-dark)', whiteSpace: 'nowrap' }}>Showing for</span>
+          <select
+            value={viewCountry}
+            onChange={e => setViewCountry(e.target.value)}
+            style={{
+              flex: 1, padding: '4px 6px', fontSize: 13, fontWeight: 600,
+              border: '1px solid rgba(29,158,117,.3)', borderRadius: 'var(--r)',
+              background: 'white', color: 'var(--teal-dark)',
+              cursor: 'pointer',
+            }}
+          >
+            <option value="">Select a country</option>
+            {countryList.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
         </div>
       </div>
 
-      {/* Mode toggle */}
-      <div style={{ display: 'flex', gap: '.5rem', marginBottom: '1rem' }}>
-        <button
-          onClick={() => setMode('guide')}
-          style={{
-            padding: '.45rem 1rem', fontSize: 13, fontWeight: mode === 'guide' ? 600 : 400,
-            border: mode === 'guide' ? '1.5px solid var(--teal)' : '1px solid var(--border)',
-            borderRadius: 'var(--r)',
-            background: mode === 'guide' ? '#E1F5EE' : 'white',
-            color: mode === 'guide' ? 'var(--teal-dark)' : 'var(--ink-3)',
-            cursor: 'pointer',
-          }}
-        >
-          Country guide
+      {/* Inline caveat — collapsed by default */}
+      <div style={{ fontSize: 12.5, color: 'var(--ink-3)', lineHeight: 1.6, marginBottom: '.75rem', maxWidth: 720 }}>
+        The school system a student came from predicts classroom behaviour better than nationality.{' '}
+        <button onClick={() => setShowCaveat(!showCaveat)} style={{ fontSize: 12, fontWeight: 600, color: 'var(--teal-dark)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, textDecoration: 'underline' }}>
+          {showCaveat ? 'Less' : 'More about this data'}
         </button>
-        <button
-          onClick={() => setMode('explore')}
-          style={{
-            padding: '.45rem 1rem', fontSize: 13, fontWeight: mode === 'explore' ? 600 : 400,
-            border: mode === 'explore' ? '1.5px solid #534AB7' : '1px solid var(--border)',
-            borderRadius: 'var(--r)',
-            background: mode === 'explore' ? '#EEEDFE' : 'white',
-            color: mode === 'explore' ? '#3C3489' : 'var(--ink-3)',
-            cursor: 'pointer',
-          }}
-        >
-          Explore by behavior
-        </button>
+        {showCaveat && (
+          <span style={{ display: 'block', marginTop: '.35rem', color: '#6B5B1F', background: '#FFF8E6', borderRadius: 'var(--r)', padding: '.6rem .85rem', border: '1px solid #EDD89A' }}>
+            These patterns use <a href="https://www.hofstede-insights.com" target="_blank" rel="noopener" style={{ color: '#6B5B1F' }}>Hofstede's cultural dimensions</a> as
+            a starting point — national-level data about how societies handle power, uncertainty, and group identity.
+            But treat them as background context, not a profile of any individual. Students are shaped by their previous school,
+            their family, their own personality, and their experience in your classroom. Use this to ask better questions, not to make assumptions.
+          </span>
+        )}
       </div>
 
-      {/* ── EXPLORE MODE ─────────────────────────────────────────────── */}
-      {mode === 'explore' && <ExplorePanel />}
+      {/* ── Research fact of the day ────────────────────────────────── */}
+      <ResearchFact />
 
-      {/* ── GUIDE MODE ───────────────────────────────────────────────── */}
-      {mode === 'guide' && (
-        <>
-          {/* Country selector */}
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: '.5rem',
-            marginBottom: '1.25rem',
-            padding: '.6rem .85rem',
-            background: '#E1F5EE', border: '1px solid rgba(29,158,117,.2)',
-            borderRadius: 'var(--r)',
-          }}>
-            <span style={{ fontSize: 14 }}>📍</span>
-            <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--teal-dark)', whiteSpace: 'nowrap' }}>Showing for</span>
-            <select
-              value={viewCountry}
-              onChange={e => setViewCountry(e.target.value)}
-              style={{
-                flex: 1, padding: '5px 8px', fontSize: 13, fontWeight: 600,
-                border: '1px solid rgba(29,158,117,.3)', borderRadius: 'var(--r)',
-                background: 'white', color: 'var(--teal-dark)',
-                cursor: 'pointer',
-              }}
-            >
-              <option value="">Select a country</option>
-              {countryList.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
-          </div>
-
+      {/* ── Main content: two-column on wide screens ───────────────── */}
+      <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+        {/* LEFT: Country guide (primary) */}
+        <div style={{ flex: '1 1 440px', minWidth: 0 }}>
           {!viewCountry && (
             <div style={{ padding: '1.25rem', background: 'var(--surface-2)', borderRadius: 'var(--r)', fontSize: 13, color: 'var(--ink-3)', textAlign: 'center', marginBottom: '1rem' }}>
               Select a country above to see classroom insights tailored to that culture.
@@ -404,7 +753,7 @@ export default function ClassroomGuide() {
 
           {/* Search bar */}
           {viewCountry && (
-            <div style={{ marginBottom: '1.25rem' }}>
+            <div style={{ marginBottom: '.85rem' }}>
               <input
                 value={filter}
                 onChange={e => setFilter(e.target.value)}
@@ -412,7 +761,7 @@ export default function ClassroomGuide() {
                 style={{
                   width: '100%', padding: '10px 14px',
                   border: '1px solid var(--border-2)', borderRadius: 'var(--r)',
-                  fontSize: 14,
+                  fontSize: 14, boxSizing: 'border-box',
                 }}
               />
             </div>
@@ -438,7 +787,7 @@ export default function ClassroomGuide() {
 
           {/* Category cards — shown when not searching */}
           {!hasFilter && viewCountry && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '.75rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '.65rem' }}>
               {Object.entries(CATEGORY_CONFIG).map(([catId, config]) => {
                 const behaviors = categorizedBehaviors[catId] || []
                 const summary = hView ? config.getSummary(viewCountry, hView) : null
@@ -452,66 +801,56 @@ export default function ClassroomGuide() {
                     overflow: 'hidden',
                     transition: 'border-color .2s',
                   }}>
-                    {/* Category header — always visible */}
                     <button
                       onClick={() => setOpenCat(isOpen ? null : catId)}
                       style={{
                         width: '100%', display: 'flex', alignItems: 'center', gap: 12,
-                        padding: '1rem 1.25rem', background: 'none', border: 'none',
+                        padding: '.85rem 1.1rem', background: 'none', border: 'none',
                         cursor: 'pointer', textAlign: 'left',
                       }}
                     >
-                      <span style={{ fontSize: 24, lineHeight: 1, flexShrink: 0 }}>{config.emoji}</span>
+                      <span style={{ fontSize: 22, lineHeight: 1, flexShrink: 0 }}>{config.emoji}</span>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                          <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--ink)', fontFamily: 'var(--serif)' }}>{config.label}</div>
-                          <span style={{ fontSize: 11, color: 'var(--ink-4)', background: 'var(--surface-2)', padding: '2px 8px', borderRadius: 10 }}>
+                          <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--ink)', fontFamily: 'var(--serif)' }}>{config.label}</div>
+                          <span style={{ fontSize: 10.5, color: 'var(--ink-4)', background: 'var(--surface-2)', padding: '2px 7px', borderRadius: 10 }}>
                             {behaviors.length}
                           </span>
                         </div>
-                        <div style={{ fontSize: 12, color: 'var(--ink-3)', marginTop: 2 }}>{config.subtitle}</div>
+                        <div style={{ fontSize: 11.5, color: 'var(--ink-3)', marginTop: 1 }}>{config.subtitle}</div>
                       </div>
                       <div style={{
-                        fontSize: 14, color: 'var(--ink-4)',
+                        fontSize: 13, color: 'var(--ink-4)',
                         transform: isOpen ? 'rotate(90deg)' : 'none',
                         transition: 'transform .2s', flexShrink: 0,
                       }}>▶</div>
                     </button>
 
-                    {/* Country summary — visible when collapsed */}
                     {summary && !isOpen && (
                       <div style={{
-                        padding: '0 1.25rem .85rem',
-                        fontSize: 12.5, color: 'var(--ink-3)', lineHeight: 1.55,
+                        padding: '0 1.1rem .75rem',
+                        fontSize: 12, color: 'var(--ink-3)', lineHeight: 1.5,
                         borderTop: '1px solid var(--border)',
-                        paddingTop: '.65rem',
+                        paddingTop: '.55rem',
                       }}>
-                        <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--teal-dark)', textTransform: 'uppercase', letterSpacing: '.06em' }}>{viewCountry}: </span>
+                        <span style={{ fontSize: 10.5, fontWeight: 600, color: 'var(--teal-dark)', textTransform: 'uppercase', letterSpacing: '.06em' }}>{viewCountry}: </span>
                         {summary}
                       </div>
                     )}
 
-                    {/* Expanded: behaviors list */}
                     {isOpen && (
                       <div style={{ borderTop: '1px solid var(--border)' }}>
-                        {/* Summary for selected country */}
                         {summary && (
-                          <div style={{
-                            padding: '.85rem 1.25rem',
-                            background: 'var(--surface-2)',
-                            borderBottom: '1px solid var(--border)',
-                          }}>
-                            <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--teal-dark)', marginBottom: '.3rem' }}>
+                          <div style={{ padding: '.75rem 1.1rem', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)' }}>
+                            <div style={{ fontSize: 10.5, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--teal-dark)', marginBottom: '.2rem' }}>
                               In {viewCountry}
                             </div>
-                            <div style={{ fontSize: 13, color: 'var(--ink-2)', lineHeight: 1.6 }}>{summary}</div>
+                            <div style={{ fontSize: 12.5, color: 'var(--ink-2)', lineHeight: 1.6 }}>{summary}</div>
                           </div>
                         )}
-
-                        {/* Behavior cards */}
-                        <div style={{ padding: '.75rem 1rem' }}>
-                          <div style={{ fontSize: 11, color: 'var(--ink-4)', marginBottom: '.5rem' }}>
-                            {behaviors.length} classroom moment{behaviors.length !== 1 ? 's' : ''} in {viewCountry} — tap one for the why and what to try
+                        <div style={{ padding: '.65rem .9rem' }}>
+                          <div style={{ fontSize: 10.5, color: 'var(--ink-4)', marginBottom: '.4rem' }}>
+                            {behaviors.length} classroom moment{behaviors.length !== 1 ? 's' : ''} — tap for the why and what to try
                           </div>
                           {behaviors.map(f => <BehaviorCard key={f.id} f={f} viewCountry={viewCountry} viewH={hView} />)}
                         </div>
@@ -523,17 +862,43 @@ export default function ClassroomGuide() {
             </div>
           )}
 
-          {/* Footer / source */}
-          <div style={{ fontSize: 12, color: 'var(--ink-4)', lineHeight: 1.55, maxWidth: 560, marginTop: '1.25rem' }}>
-            <strong>Source:</strong> Cultural dimension scores from Hofstede Insights (6-D model). Classroom interpretations by stool, informed by
-            published research including Watkins & Biggs on CHC learners and the Asian Learner Paradox, Marton et al. on
-            memorisation-for-understanding, Meyer's Culture Map (Evaluating dimension), face dynamics research (Mianzi, Kibun, Haji),
-            and Baskerville/McSweeney on the limits of national culture averages. These are broad tendencies, not profiles.
-            The best predictor of classroom behavior is often the school system a student came from, not their nationality.
-            Use this to ask better questions, not to make assumptions.
+          {/* Explore by behavior — collapsible section below guide */}
+          <div style={{ marginTop: '1.25rem' }}>
+            <button
+              onClick={() => setShowExplore(!showExplore)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '.5rem', width: '100%',
+                padding: '.7rem 1rem', fontSize: 13, fontWeight: 500,
+                border: showExplore ? '1.5px solid #534AB7' : '1px solid var(--border)',
+                borderRadius: 'var(--r)',
+                background: showExplore ? '#EEEDFE' : 'white',
+                color: showExplore ? '#3C3489' : 'var(--ink-3)',
+                cursor: 'pointer', textAlign: 'left',
+              }}
+            >
+              <span style={{ fontSize: 14, transform: showExplore ? 'rotate(90deg)' : 'none', transition: 'transform .2s' }}>▶</span>
+              Explore by behavior — find which countries match what you're seeing in class
+            </button>
+            {showExplore && (
+              <div style={{ marginTop: '.5rem', padding: '1rem', background: 'white', border: '1px solid var(--border)', borderRadius: 'var(--r)' }}>
+                <ExplorePanel />
+              </div>
+            )}
           </div>
-        </>
-      )}
+
+          {/* Footer / source */}
+          <div style={{ fontSize: 11, color: 'var(--ink-4)', lineHeight: 1.5, maxWidth: 560, marginTop: '1.25rem' }}>
+            <strong>Sources:</strong> Hofstede Insights 6-D model, Watkins & Biggs (2001) Asian Learner Paradox, Cummins (1981) BICS/CALP,
+            Black & Wiliam (1998), Rowe (1974), Cortazzi & Jin (1996), Hattie (2009), Hammond (2015) Ready for Rigor,
+            OECD TALIS (2024), translanguaging research (Garc&iacute;a & Wei 2014), and Baskerville/McSweeney on limits of national culture averages.
+          </div>
+        </div>
+
+        {/* RIGHT: Quiz sidebar (sticky on scroll) */}
+        <div style={{ flex: '0 0 320px', position: 'sticky', top: '1rem', maxWidth: 340 }}>
+          <CultureQuiz />
+        </div>
+      </div>
     </div>
   )
 }
