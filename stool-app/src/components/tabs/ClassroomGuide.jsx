@@ -335,6 +335,65 @@ export default function ClassroomGuide() {
         </div>
       </div>
 
+      {/* Research spotlight strip */}
+      <div style={{ marginBottom: '1rem' }}>
+        <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.1em', color: 'var(--ink-4)', marginBottom: '.5rem' }}>
+          What the research actually shows
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '.4rem' }}>
+          {[
+            {
+              emoji: '⏱️',
+              finding: 'Most teachers wait less than 1 second before re-asking or answering their own question.',
+              implication: 'Many students — especially those trained in East Asian school systems — need 5–7 seconds of quiet thinking time before they can respond. That silence is them forming an answer, not stalling.',
+              cite: 'Rowe (1974) — extending wait time to 3+ seconds increases student response quality by up to 700%',
+              col: '#534AB7', bg: '#EEEDFE',
+            },
+            {
+              emoji: '🧠',
+              finding: 'Students who memorise and repeat content — which can look like shallow learning — consistently outperform on tests that measure deep, critical thinking.',
+              implication: 'Memorisation is often a first step toward real understanding, not a substitute for it. Students using this approach are not avoiding thinking — they are building toward it.',
+              cite: 'Watkins & Biggs (2001); results from the world\'s largest international education tests',
+              col: '#1D9E75', bg: '#E1F5EE',
+            },
+            {
+              emoji: '✏️',
+              finding: 'Written feedback without grades produces better learning outcomes than grades alone.',
+              implication: 'In classrooms where being corrected in front of others carries real social weight, removing the visible score and giving private written comments reduces embarrassment while improving learning — two problems solved at once.',
+              cite: 'Black & Wiliam (1998), Inside the Black Box',
+              col: '#BA7517', bg: '#FAEEDA',
+            },
+            {
+              emoji: '🗣️',
+              finding: 'Students working through a second or third language need 5–7 years to develop the fluency required to debate, argue, and reason aloud in class.',
+              implication: 'A quiet student may be highly intelligent but still building the language skills needed to express complex ideas out loud. Silence in discussion is not a sign of what they know or think.',
+              cite: 'Cummins (1981); Krashen (1982)',
+              col: '#185FA5', bg: '#E6F1FB',
+            },
+            {
+              emoji: '😶',
+              finding: 'In classrooms where teachers are seen as authority figures, students who are corrected in front of their peers are significantly more likely to stop participating for the rest of the lesson.',
+              implication: 'One well-intentioned public correction can buy a student\'s silence for the rest of the year. The intent doesn\'t change the impact.',
+              cite: 'Cortazzi & Jin (1996); Hofstede & Minkov (2010)',
+              col: '#8B3A3A', bg: '#FEF0F0',
+            },
+          ].map((r, i) => (
+            <div key={i} style={{
+              display: 'flex', gap: '.75rem', alignItems: 'flex-start',
+              background: r.bg, borderLeft: `3px solid ${r.col}`,
+              borderRadius: '0 var(--r) var(--r) 0', padding: '.65rem .85rem',
+            }}>
+              <span style={{ fontSize: 18, lineHeight: 1.3, flexShrink: 0 }}>{r.emoji}</span>
+              <div>
+                <div style={{ fontSize: 12.5, fontWeight: 600, color: r.col, lineHeight: 1.45, marginBottom: '.2rem' }}>{r.finding}</div>
+                <div style={{ fontSize: 12, color: 'var(--ink-2)', lineHeight: 1.5, marginBottom: '.25rem' }}>{r.implication}</div>
+                <div style={{ fontSize: 10.5, color: 'var(--ink-4)', fontStyle: 'italic' }}>{r.cite}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Mode toggle */}
       <div style={{ display: 'flex', gap: '.5rem', marginBottom: '1rem' }}>
         <button
