@@ -17,7 +17,6 @@ import {
 } from '../../lib/pd/progress.js'
 import DimensionCard from '../../components/learn/DimensionCard.jsx'
 import CompletionBar from '../../components/learn/CompletionBar.jsx'
-import HofstedeRadar from '../../components/learn/HofstedeRadar.jsx'
 import SimulationCard from '../../components/learn/SimulationCard.jsx'
 
 /**
@@ -105,12 +104,6 @@ export default function ModulePage() {
   const pct = dimensions.length > 0 ? Math.round((completedCount / dimensions.length) * 100) : 0
   const allDone = completedCount === dimensions.length && dimensions.length > 0
   const started = isInProgress(modMeta.id, dimensions)
-
-  // Parse Hofstede scores
-  const hofstedeScores = mod?.hofstede_data
-    ? [mod.hofstede_data.PDI, mod.hofstede_data.IDV, mod.hofstede_data.MAS,
-       mod.hofstede_data.UAI, mod.hofstede_data.LTO, mod.hofstede_data.IND]
-    : null
 
   // Count research statuses
   const statusCounts = dimensions.reduce((acc, d) => {
@@ -334,73 +327,58 @@ export default function ModulePage() {
               </div>
             )}
 
-            {/* Two-column layout: radar + dimensions */}
-            <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: '1.5rem', alignItems: 'start' }}>
-              {/* Radar */}
-              <div className="card" style={{ position: 'sticky', top: '70px' }}>
-                {hofstedeScores && (
-                  <HofstedeRadar scores={hofstedeScores} country={mod.title} color={modMeta.color} />
-                )}
-              </div>
+            {/* Dimension list + scenarios — full width */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {dimensions.length > 0 && (
+                <div style={{
+                  fontSize: '12px', fontWeight: 600, color: 'var(--ink-4)',
+                  textTransform: 'uppercase', letterSpacing: '.05em',
+                }}>
+                  Reference Library
+                </div>
+              )}
 
-              {/* Dimension list + scenarios */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {/* Reference library header */}
-                {dimensions.length > 0 && (
-                  <div style={{
-                    fontSize: '12px', fontWeight: 600, color: 'var(--ink-4)',
-                    textTransform: 'uppercase', letterSpacing: '.05em',
-                    marginBottom: '0px',
-                  }}>
-                    Reference Library
-                  </div>
-                )}
+              {dimensions.map(dim => (
+                <DimensionCard
+                  key={dim.id}
+                  dimension={dim}
+                  slug={slug}
+                  isCompleted={completionCount(modMeta.id, [dim]) > 0}
+                  moduleColor={modMeta.color}
+                />
+              ))}
 
-                {dimensions.map(dim => (
-                  <DimensionCard
-                    key={dim.id}
-                    dimension={dim}
-                    slug={slug}
-                    isCompleted={completionCount(modMeta.id, [dim]) > 0}
-                    moduleColor={modMeta.color}
-                  />
-                ))}
-
-                {/* Scenarios link */}
-                {scenarioCount > 0 && (
-                  <Link to={`/learn/${slug}/scenarios`} style={{ textDecoration: 'none' }}>
-                    <div className="card" style={{
-                      borderLeft: `3px solid ${modMeta.color}`,
-                      cursor: 'pointer',
-                      transition: 'box-shadow .18s',
-                    }}
-                      onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,.08)' }}
-                      onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none' }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span style={{
-                          width: '28px', height: '28px', borderRadius: '50%',
-                          background: `${modMeta.color}15`, color: modMeta.color,
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          fontSize: '14px', flexShrink: 0,
-                        }}>
-                          ?
-                        </span>
-                        <div>
-                          <h4 style={{
-                            fontFamily: 'var(--serif)', fontSize: '1rem', color: 'var(--ink)', margin: 0,
-                          }}>
-                            Practical scenarios
-                          </h4>
-                          <p style={{ fontSize: '12px', color: 'var(--ink-3)', margin: '2px 0 0 0' }}>
-                            {scenarioCount} scenario{scenarioCount !== 1 ? 's' : ''} — common friction points with diagnosis and response
-                          </p>
-                        </div>
+              {scenarioCount > 0 && (
+                <Link to={`/learn/${slug}/scenarios`} style={{ textDecoration: 'none' }}>
+                  <div className="card" style={{
+                    borderLeft: `3px solid ${modMeta.color}`,
+                    cursor: 'pointer',
+                    transition: 'box-shadow .18s',
+                  }}
+                    onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,.08)' }}
+                    onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none' }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span style={{
+                        width: '28px', height: '28px', borderRadius: '50%',
+                        background: `${modMeta.color}15`, color: modMeta.color,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: '14px', flexShrink: 0,
+                      }}>
+                        ?
+                      </span>
+                      <div>
+                        <h4 style={{ fontFamily: 'var(--serif)', fontSize: '1rem', color: 'var(--ink)', margin: 0 }}>
+                          Practical scenarios
+                        </h4>
+                        <p style={{ fontSize: '12px', color: 'var(--ink-3)', margin: '2px 0 0 0' }}>
+                          {scenarioCount} scenario{scenarioCount !== 1 ? 's' : ''} — common friction points with diagnosis and response
+                        </p>
                       </div>
                     </div>
-                  </Link>
-                )}
-              </div>
+                  </div>
+                </Link>
+              )}
             </div>
           </>
         )}
