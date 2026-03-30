@@ -270,6 +270,7 @@ export default function DimensionPage() {
         {/* ── Knowledge Check (QuizCheckpoint) ──────────────────────────── */}
         {question ? (
           <QuizCheckpoint
+            key={question.id}
             moduleId={modMeta.id}
             question={question}
             color={modMeta.color}
