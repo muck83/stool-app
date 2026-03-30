@@ -1,3 +1,4 @@
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { ProfileProvider, useProfile } from './context/ProfileContext.jsx'
 import Onboarding from './components/Onboarding/index.jsx'
 import Nav from './components/Nav.jsx'
@@ -14,6 +15,12 @@ import Financial from './components/tabs/Financial.jsx'
 import Research from './components/tabs/Research.jsx'
 import About from './components/tabs/About.jsx'
 import Admin from './components/Admin.jsx'
+
+// PD Learn pages
+import LearnHome from './pages/learn/LearnHome.jsx'
+import ModulePage from './pages/learn/ModulePage.jsx'
+import DimensionPage from './pages/learn/DimensionPage.jsx'
+import ScenariosPage from './pages/learn/ScenariosPage.jsx'
 
 const TABS = [
   { id: 'overview',    label: 'Overview' },
@@ -60,11 +67,30 @@ function AppInner() {
   return showOnboarding ? <Onboarding /> : <Dashboard />
 }
 
-export default function App() {
-  if (window.location.pathname === '/admin') return <Admin />
+function StoolApp() {
   return (
     <ProfileProvider>
       <AppInner />
     </ProfileProvider>
+  )
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        {/* PD Learn routes */}
+        <Route path="/learn" element={<LearnHome />} />
+        <Route path="/learn/:slug" element={<ModulePage />} />
+        <Route path="/learn/:slug/scenarios" element={<ScenariosPage />} />
+        <Route path="/learn/:slug/:dimension" element={<DimensionPage />} />
+
+        {/* Admin */}
+        <Route path="/admin" element={<Admin />} />
+
+        {/* Main stool app — catch-all */}
+        <Route path="*" element={<StoolApp />} />
+      </Routes>
+    </BrowserRouter>
   )
 }

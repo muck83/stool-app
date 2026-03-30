@@ -1,0 +1,123 @@
+/**
+ * Supabase queries for the PD layer.
+ * All functions degrade gracefully when supabase is null.
+ */
+
+import { supabase } from '../supabase.js'
+
+/* ─── Read ─── */
+
+export async function fetchModules() {
+  if (!supabase) return []
+  const { data, error } = await supabase
+    .from('pd_modules')
+    .select('*')
+    .eq('status', 'live')
+    .order('created_at')
+  if (error) { console.error('PD fetchModules:', error); return [] }
+  return data || []
+}
+
+export async function fetchDimensions(moduleId) {
+  if (!supabase || !moduleId) return []
+  const { data, error } = await supabase
+    .from('pd_dimensions')
+    .select('*')
+    .eq('module_id', moduleId)
+    .order('dimension_number')
+  if (error) { console.error('PD fetchDimensions:', error); return [] }
+  return data || []
+}
+
+export async function fetchScenarios(moduleId) {
+  if (!supabase || !moduleId) return []
+  const { data, error } = await supabase
+    .from('pd_scenarios')
+    .select('*')
+    .eq('module_id', moduleId)
+    .eq('status', 'live')
+    .order('created_at')
+  if (error) { console.error('PD fetchScenarios:', error); return [] }
+  return data || []
+}
+
+/* ─── Completions ─── */
+
+export async function fetchCompletions(userId, moduleId) {
+  if (!supabase || !userId) return []
+  let query = supabase
+    .from('pd_completions')
+    .select('*')
+    .eq('user_id', userId)
+  if (moduleId) query = query.eq('module_id', moduleId)
+  const { data, error } = await query
+  if (error) { console.error('PD fetchCompletions:', error); return [] }
+  return data || []
+}
+
+export async function markDimensionComplete(userId, moduleId, dimensionId) {
+  if (!supabase || !userId) return null
+  const { data, error } = await supabase
+    .from('pd_completions')
+    .upsert(
+      { user_id: userId, module_id: moduleId, dimension_id: dimensionId },
+      { onConflict: 'user_id,module_id,dimension_id' }
+    )
+    .select()
+    .single()
+  if (error) { console.error('PD markComplete:', error); return null }
+  return data
+}
+
+/* ─── Badges ─── */
+
+export async function fetchBadges(userId) {
+  if (!supabase || !userId) return []
+  const { data, error } = await supabase
+    .from('pd_badges')
+    .select('*')
+    .eq('user_id', userId)
+  if (error) { console.error('PD fetchBadges:', error); return [] }
+  return data || []
+}
+
+export async function awardBadge(userId, moduleId) {
+  if (!supabase || !userId) return null
+  const { data, error } = await supabase
+    .from('pd_badges')
+    .upsert(
+      { user_id: userId, module_id: moduleId },
+      { onConflict: 'user_id,module_id' }
+    )
+    .select()
+    .single()
+  if (error) { console.error('PD awardBadge:', error); return null }
+  return data
+}
+
+/**
+ * Check if user has hit the completion threshold for a module.
+ * If so, award the badge. Returns { complete, percentage, badge }.
+ */
+export async function checkAndUnlockReward(userId, moduleId, threshold = 80) {
+  if (!supabase || !userId) return { complete: false, percentage: 0, badge: null }
+
+  const [completions, dimensions] = await Promise.all([
+    fetchCompletions(userId, moduleId),
+    fetchDimensions(moduleId),
+  ])
+
+  const total = dimensions.length
+  if (total === 0) return { complete: false, percentage: 0, badge: null }
+
+  const done = completions.filter(c => c.module_id === moduleId).length
+  const percentage = Math.round((done / total) * 100)
+  const complete = percentage >= threshold
+
+  let badge = null
+  if (complete) {
+    badge = await awardBadge(userId, moduleId)
+  }
+
+  return { complete, percentage, badge }
+}
