@@ -366,7 +366,7 @@ INSERT INTO public.pd_simulations (
     "finalPrompt": "If you could go back to the first moment, when Mrs. Rao asked how she should know where Ananya actually stands, what would you say now? How would you preserve both clarity and trust without rebuilding rank culture one parent at a time?"
   }
 }'::jsonb,
-  '["School Choice, Brand Value, and Academic Rigor","Parent-Teacher Communication","Informal Networks and School Navigation"]'::jsonb,
+  ARRAY[1, 2, 5],
   20,
   1,
   'live'
