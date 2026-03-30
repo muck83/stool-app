@@ -424,11 +424,7 @@ function SetupNode({ node, simulation, modMeta, onContinue, locked }) {
       <p style={{ fontSize: '14px', color: 'var(--ink-2)', lineHeight: 1.7, margin: '1rem 0' }}>
         {simulation.context}
       </p>
-      {node.content && (
-        <p style={{ fontSize: '14px', color: 'var(--ink-2)', lineHeight: 1.7, margin: '1rem 0' }}>
-          {node.content}
-        </p>
-      )}
+      {node.content && renderContent(node.content)}
 
       {/* Begin button */}
       <div style={{ marginTop: '1.5rem', display: 'flex', gap: '12px' }}>
@@ -457,6 +453,21 @@ function SetupNode({ node, simulation, modMeta, onContinue, locked }) {
   )
 }
 
+// Renders node.content whether it's a plain string or an array of paragraph strings
+function renderContent(content, style = {}) {
+  const base = { fontSize: '14px', color: 'var(--ink-2)', lineHeight: 1.7, margin: '0 0 0.85rem 0' }
+  const s = { ...base, ...style }
+  if (!content) return null
+  if (Array.isArray(content)) {
+    return content.map((para, i) => (
+      <p key={i} style={{ ...s, ...(i === content.length - 1 ? { marginBottom: 0 } : {}) }}>
+        {para}
+      </p>
+    ))
+  }
+  return <p style={{ ...s, marginBottom: 0 }}>{content}</p>
+}
+
 function DilemmaNode({ node, modMeta, onChoice, locked }) {
   const [selected, setSelected] = useState(null)
 
@@ -470,12 +481,30 @@ function DilemmaNode({ node, modMeta, onChoice, locked }) {
 
   return (
     <div className="card" style={{ padding: '2rem' }}>
-      <h2 style={{
-        fontFamily: 'var(--serif)', fontSize: '1rem', color: 'var(--ink)',
-        marginTop: 0, marginBottom: '1.5rem',
-      }}>
-        {node.prompt}
-      </h2>
+      {/* Codex format: content is an array where all items are paragraphs.
+          If there's a separate prompt field, show content as context + prompt as question.
+          If no prompt, render all content items as paragraphs. */}
+      {node.content && (() => {
+        const paras = Array.isArray(node.content) ? node.content : [node.content]
+        const hasPrompt = !!node.prompt
+        const contextParas = hasPrompt ? paras : paras.slice(0, -1)
+        const question = hasPrompt ? node.prompt : paras[paras.length - 1]
+        return (
+          <>
+            {contextParas.length > 0 && (
+              <div style={{ marginBottom: '1.25rem' }}>
+                {renderContent(contextParas)}
+              </div>
+            )}
+            <h2 style={{
+              fontFamily: 'var(--serif)', fontSize: '1.05rem', color: 'var(--ink)',
+              marginTop: 0, marginBottom: '1.5rem',
+            }}>
+              {question}
+            </h2>
+          </>
+        )
+      })()}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
         {node.choices && node.choices.map(choice => (
@@ -507,11 +536,9 @@ function DilemmaNode({ node, modMeta, onChoice, locked }) {
 function ConsequenceNode({ node, modMeta, onContinue, locked }) {
   return (
     <div className="card" style={{ padding: '2rem' }}>
-      <p style={{
-        fontSize: '14px', color: 'var(--ink-2)', lineHeight: 1.7, margin: '0 0 1.5rem 0',
-      }}>
-        {node.content}
-      </p>
+      <div style={{ marginBottom: '1.5rem' }}>
+        {renderContent(node.content)}
+      </div>
 
       <button
         onClick={onContinue}
@@ -538,6 +565,19 @@ function ConsequenceNode({ node, modMeta, onContinue, locked }) {
 }
 
 function PerspectiveNode({ node, modMeta, onContinue, locked }) {
+  // Support both explicit node.character field and Codex-style node.title
+  // e.g. "Perspective 1: Mrs. Park's View" → "Mrs. Park's View"
+  // e.g. "Perspective 2: Mrs. Alharbi's View" → "Mrs. Alharbi's View"
+  const perspectiveLabel = (() => {
+    if (node.character) return `${node.character}'s Perspective`
+    if (node.title) {
+      // Strip leading "Perspective N: " prefix if present
+      const match = node.title.match(/^Perspective \d+:\s*(.+)$/)
+      return match ? match[1] : node.title
+    }
+    return 'Their Perspective'
+  })()
+
   return (
     <div className="card" style={{ padding: '2rem' }}>
       <div style={{ marginBottom: '1rem' }}>
@@ -545,7 +585,7 @@ function PerspectiveNode({ node, modMeta, onContinue, locked }) {
           fontSize: '11px', fontWeight: 600, color: modMeta.color,
           textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: '4px',
         }}>
-          {node.character}'s perspective
+          {perspectiveLabel}
         </div>
         {node.character_role && (
           <div style={{
@@ -557,11 +597,7 @@ function PerspectiveNode({ node, modMeta, onContinue, locked }) {
       </div>
 
       <div className="sim-perspective-block">
-        <p style={{
-          fontSize: '14px', color: 'var(--ink-2)', lineHeight: 1.7, margin: 0,
-        }}>
-          {node.content}
-        </p>
+        {renderContent(node.content)}
       </div>
 
       <button
