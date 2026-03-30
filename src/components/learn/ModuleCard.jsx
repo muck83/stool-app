@@ -10,7 +10,7 @@ const EVIDENCE_LABELS = {
 /**
  * Card for a country module shown on the /learn landing page.
  */
-export default function ModuleCard({ mod, dimensions = [], completedCount = 0 }) {
+export default function ModuleCard({ mod, dimensions = [], completedCount = 0, badgeHeld = false }) {
   const bestStatus = dimensions.reduce((best, d) => {
     const rank = { fully_sourced: 3, partial: 2, community: 1 }
     return (rank[d.research_status] || 0) > (rank[best] || 0) ? d.research_status : best
@@ -42,8 +42,17 @@ export default function ModuleCard({ mod, dimensions = [], completedCount = 0 })
         </div>
         <p className="cs" style={{ marginBottom: '1rem' }}>{mod.tagline}</p>
         <CompletionBar completed={completedCount} total={dimensions.length} color={modColor(mod.id)} />
-        <div style={{ fontSize: '12px', color: 'var(--ink-4)' }}>
-          {dimensions.length} dimensions · {mod.hofstede_data ? '6D cultural profile' : ''}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--ink-4)' }}>
+          <span>{dimensions.length} dimensions{mod.hofstede_data ? ' · 6D cultural profile' : ''}</span>
+          {badgeHeld && (
+            <span style={{
+              padding: '1px 8px', borderRadius: '20px',
+              background: `${modColor(mod.id)}15`, color: modColor(mod.id),
+              fontWeight: 500, fontSize: '11px',
+            }}>
+              🔓 Unlocked
+            </span>
+          )}
         </div>
       </div>
     </Link>
