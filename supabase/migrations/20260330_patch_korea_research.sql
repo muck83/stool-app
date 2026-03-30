@@ -36,8 +36,7 @@ SET content = jsonb_set(
     'journal', 'Journal of Experimental Education',
     'doi', '10.3200/JEXE.76.2.191-217'
   ))
-),
-updated_at = now()
+)
 WHERE module_id = 'korea-001'
   AND dimension_number = 2;
 
@@ -67,14 +66,11 @@ SET
       'journal', 'Journal of Experimental Education',
       'doi', '10.3200/JEXE.76.2.191-217'
     ))
-  ),
-  updated_at = now()
+  )
 WHERE module_id = 'korea-001'
   AND dimension_number = 5;
 
 -- ── 3. Korea D3: remove Takayama (2009) from citations ───────────────────────
--- Takayama's work focuses on Japanese teacher policy reform, not Korean
--- Confucian education. Including it misrepresents sourcing quality.
 UPDATE public.pd_dimensions
 SET
   content = jsonb_set(
@@ -88,8 +84,7 @@ SET
       ),
       '[]'::jsonb
     )
-  ),
-  updated_at = now()
+  )
 WHERE module_id = 'korea-001'
   AND dimension_number = 3;
 

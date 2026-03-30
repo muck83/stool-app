@@ -1,17 +1,22 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { moduleBySlug } from '../../lib/slugMap.js'
-import { fetchModules, fetchDimensions, fetchScenarios } from '../../lib/pd/queries.js'
+import { fetchModules, fetchDimensions, fetchScenarios, fetchSimulations } from '../../lib/pd/queries.js'
 import {
   completionCount,
   completionPercent,
   hasBadge,
   nextIncompleteDimension,
   isInProgress,
+  simCompletionCount,
+  isSimCompleted,
+  checkAndMaybeAwardSimBadge,
+  getSimProgress,
 } from '../../lib/pd/progress.js'
 import DimensionCard from '../../components/learn/DimensionCard.jsx'
 import CompletionBar from '../../components/learn/CompletionBar.jsx'
 import HofstedeRadar from '../../components/learn/HofstedeRadar.jsx'
+import SimulationCard from '../../components/learn/SimulationCard.jsx'
 
 /**
  * /learn/:slug — module overview with Hofstede radar and dimension list.
@@ -23,6 +28,7 @@ export default function ModulePage() {
 
   const [mod, setMod] = useState(null)
   const [dimensions, setDimensions] = useState([])
+  const [simulations, setSimulations] = useState([])
   const [scenarioCount, setScenarioCount] = useState(0)
   const [loading, setLoading] = useState(true)
 
@@ -30,6 +36,7 @@ export default function ModulePage() {
   const [completedCount, setCompletedCount] = useState(0)
   const [nextDim, setNextDim] = useState(null)
   const [badgeHeld, setBadgeHeld] = useState(false)
+  const [simCompletedCount, setSimCompletedCount] = useState(0)
 
   // Sticky progress bar — shown once user scrolls past the header card
   const [stickyVisible, setStickyVisible] = useState(false)
@@ -39,21 +46,24 @@ export default function ModulePage() {
     let cancelled = false
     async function load() {
       if (!modMeta) { setLoading(false); return }
-      const [mods, dims, scenarios] = await Promise.all([
+      const [mods, dims, scenarios, sims] = await Promise.all([
         fetchModules(),
         fetchDimensions(modMeta.id),
         fetchScenarios(modMeta.id),
+        fetchSimulations(modMeta.id),
       ])
       if (cancelled) return
       const found = mods.find(m => m.id === modMeta.id) || null
       setMod(found)
       setDimensions(dims)
+      setSimulations(sims)
       setScenarioCount(scenarios.length)
 
       // Read progress from localStorage
       setCompletedCount(completionCount(modMeta.id, dims))
       setNextDim(nextIncompleteDimension(modMeta.id, dims))
       setBadgeHeld(hasBadge(modMeta.id))
+      setSimCompletedCount(simCompletionCount(modMeta.id, sims))
 
       setLoading(false)
     }
@@ -246,6 +256,31 @@ export default function ModulePage() {
               </div>
             </div>
 
+            {/* Simulations section (primary learning path) */}
+            {simulations.length > 0 && (
+              <div style={{ marginBottom: '2rem' }}>
+                <div style={{
+                  fontSize: '12px', fontWeight: 600, color: 'var(--ink-4)',
+                  textTransform: 'uppercase', letterSpacing: '.05em',
+                  marginBottom: '12px',
+                }}>
+                  Simulations
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {simulations.map(sim => (
+                    <SimulationCard
+                      key={sim.id}
+                      simulation={sim}
+                      moduleSlug={slug}
+                      moduleColor={modMeta.color}
+                      completed={isSimCompleted(sim.id)}
+                      inProgress={getSimProgress(sim.id) !== null && !isSimCompleted(sim.id)}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Two-column layout: radar + dimensions */}
             <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: '1.5rem', alignItems: 'start' }}>
               {/* Radar */}
@@ -255,8 +290,19 @@ export default function ModulePage() {
                 )}
               </div>
 
-              {/* Dimension list */}
+              {/* Dimension list + scenarios */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {/* Reference library header */}
+                {dimensions.length > 0 && (
+                  <div style={{
+                    fontSize: '12px', fontWeight: 600, color: 'var(--ink-4)',
+                    textTransform: 'uppercase', letterSpacing: '.05em',
+                    marginBottom: '0px',
+                  }}>
+                    Reference Library
+                  </div>
+                )}
+
                 {dimensions.map(dim => (
                   <DimensionCard
                     key={dim.id}

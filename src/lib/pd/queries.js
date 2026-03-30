@@ -121,3 +121,47 @@ export async function checkAndUnlockReward(userId, moduleId, threshold = 80) {
 
   return { complete, percentage, badge }
 }
+
+/* ─── Simulations ─── */
+
+export async function fetchSimulations(moduleId) {
+  if (!supabase || !moduleId) return []
+  const { data, error } = await supabase
+    .from('pd_simulations')
+    .select('*')
+    .eq('module_id', moduleId)
+    .eq('status', 'live')
+    .order('sort_order')
+  if (error) { console.error('PD fetchSimulations:', error); return [] }
+  return data || []
+}
+
+export async function fetchSimulation(simId) {
+  if (!supabase || !simId) return null
+  const { data, error } = await supabase
+    .from('pd_simulations')
+    .select('*')
+    .eq('id', simId)
+    .eq('status', 'live')
+    .single()
+  if (error) { console.error('PD fetchSimulation:', error); return null }
+  return data || null
+}
+
+export async function saveSimulationResponse(sessionId, simulationId, nodeId, choiceId, reflectionText) {
+  if (!supabase) return
+  try {
+    await supabase
+      .from('pd_simulation_responses')
+      .insert({
+        session_id: sessionId,
+        simulation_id: simulationId,
+        node_id: nodeId,
+        choice_id: choiceId || null,
+        reflection_text: reflectionText || null,
+      })
+  } catch (e) {
+    // Fire and forget — log silently
+    console.error('PD saveSimulationResponse failed:', e)
+  }
+}

@@ -21,6 +21,7 @@ import LearnHome from './pages/learn/LearnHome.jsx'
 import ModulePage from './pages/learn/ModulePage.jsx'
 import DimensionPage from './pages/learn/DimensionPage.jsx'
 import ScenariosPage from './pages/learn/ScenariosPage.jsx'
+import SimulationPage from './pages/learn/SimulationPage.jsx'
 
 const TABS = [
   { id: 'overview',    label: 'Overview' },
@@ -82,6 +83,7 @@ export default function App() {
         {/* PD Learn routes */}
         <Route path="/learn" element={<LearnHome />} />
         <Route path="/learn/:slug" element={<ModulePage />} />
+        <Route path="/learn/:slug/sim/:simId" element={<SimulationPage />} />
         <Route path="/learn/:slug/scenarios" element={<ScenariosPage />} />
         <Route path="/learn/:slug/:dimension" element={<DimensionPage />} />
 

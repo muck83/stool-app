@@ -11,6 +11,8 @@
 
 const COMPLETED_KEY = 'pd_completed'
 const BADGES_KEY    = 'pd_badges'
+const SIM_PROGRESS_KEY = 'pd_sim_progress'
+const SIM_COMPLETED_KEY = 'pd_sim_completed'
 
 // ─── low-level helpers ───────────────────────────────────────────────────────
 
@@ -140,4 +142,103 @@ export function nextIncompleteDimension(moduleId, allDimensions) {
 export function isInProgress(moduleId, allDimensions) {
   const count = completionCount(moduleId, allDimensions)
   return count > 0 && count < allDimensions.length
+}
+
+// ─── simulation progress ────────────────────────────────────────────────────
+
+/**
+ * Get progress for a specific simulation.
+ * Returns { currentNode: string, choices: {nodeId: choiceId}, reflections: {nodeId: text} }
+ * or null if no progress saved.
+ */
+export function getSimProgress(simId) {
+  try {
+    const raw = localStorage.getItem(SIM_PROGRESS_KEY)
+    if (!raw) return null
+    const obj = JSON.parse(raw)
+    return obj[simId] || null
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Save or update progress for a simulation.
+ * choiceId and reflectionText are optional.
+ */
+export function saveSimProgress(simId, nodeId, choiceId, reflectionText) {
+  try {
+    const raw = localStorage.getItem(SIM_PROGRESS_KEY)
+    const obj = raw ? JSON.parse(raw) : {}
+    if (!obj[simId]) {
+      obj[simId] = { currentNode: nodeId, choices: {}, reflections: {} }
+    }
+    obj[simId].currentNode = nodeId
+    if (choiceId) {
+      obj[simId].choices[nodeId] = choiceId
+    }
+    if (reflectionText) {
+      obj[simId].reflections[nodeId] = reflectionText
+    }
+    localStorage.setItem(SIM_PROGRESS_KEY, JSON.stringify(obj))
+  } catch {
+    // ignore quota errors silently
+  }
+}
+
+/**
+ * Check if a simulation is marked complete.
+ */
+export function isSimCompleted(simId) {
+  try {
+    const raw = localStorage.getItem(SIM_COMPLETED_KEY)
+    const arr = raw ? JSON.parse(raw) : []
+    return arr.includes(simId)
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Mark a simulation as complete.
+ */
+export function markSimComplete(simId) {
+  try {
+    const raw = localStorage.getItem(SIM_COMPLETED_KEY)
+    const arr = raw ? JSON.parse(raw) : []
+    if (!arr.includes(simId)) {
+      arr.push(simId)
+      localStorage.setItem(SIM_COMPLETED_KEY, JSON.stringify(arr))
+    }
+  } catch {
+    // ignore quota errors silently
+  }
+}
+
+/**
+ * Count completed simulations for a module.
+ * allSims is an array of simulation objects with .id field.
+ */
+export function simCompletionCount(moduleId, allSims) {
+  if (!allSims || allSims.length === 0) return 0
+  return allSims.filter(s => isSimCompleted(s.id)).length
+}
+
+/**
+ * Check if all simulations for a module are complete and award badge if so.
+ * Returns { count, total, allDone, badgeAwarded }.
+ */
+export function checkAndMaybeAwardSimBadge(moduleId, allSims) {
+  const count = simCompletionCount(moduleId, allSims)
+  const total = allSims.length
+  const allDone = count === total && total > 0
+  const badgeAlreadyHeld = hasBadge(moduleId)
+
+  let badgeAwarded = false
+  if (allDone && !badgeAlreadyHeld) {
+    awardBadge(moduleId)
+    badgeAwarded = true
+  }
+
+  return { count, total, allDone, badgeAwarded }
 }
