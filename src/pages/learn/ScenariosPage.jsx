@@ -176,7 +176,7 @@ function ScenarioCard({ sc, modMeta }) {
             onMouseEnter={e => { e.currentTarget.style.opacity = '.85' }}
             onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
           >
-            {step === 0 ? 'What's the misread? →' : step === 1 ? 'What's actually happening? →' : 'See response framework →'}
+            {step === 0 ? "What's the misread? →" : step === 1 ? "What's actually happening? →" : "See response framework →"}
           </button>
         ) : (
           <div style={{
