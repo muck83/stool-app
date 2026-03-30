@@ -144,6 +144,147 @@ export function isInProgress(moduleId, allDimensions) {
   return count > 0 && count < allDimensions.length
 }
 
+// ─── quiz / assessment progress ─────────────────────────────────────────────
+
+const QUIZ_KEY         = 'pd_quiz'
+const MODULE_SCORE_KEY = 'pd_module_scores'
+
+/**
+ * Read the full quiz store for one module.
+ * Returns { [questionId]: { selectedOptionId, isCorrect, attempts } }
+ */
+function readModuleQuiz(moduleId) {
+  try {
+    const raw = localStorage.getItem(QUIZ_KEY)
+    const obj = raw ? JSON.parse(raw) : {}
+    return obj[moduleId] || {}
+  } catch { return {} }
+}
+
+function writeModuleQuiz(moduleId, data) {
+  try {
+    const raw = localStorage.getItem(QUIZ_KEY)
+    const obj = raw ? JSON.parse(raw) : {}
+    obj[moduleId] = data
+    localStorage.setItem(QUIZ_KEY, JSON.stringify(obj))
+  } catch {}
+}
+
+/**
+ * Save (or update) a quiz answer.
+ * Best-score logic: if a prior correct answer exists, keep it.
+ */
+export function saveQuizAnswer(moduleId, questionId, selectedOptionId, isCorrect) {
+  const quiz = readModuleQuiz(moduleId)
+  const existing = quiz[questionId]
+  if (existing && existing.isCorrect && !isCorrect) {
+    // Keep the prior correct attempt — only bump attempt count
+    quiz[questionId] = { ...existing, attempts: (existing.attempts || 1) + 1 }
+  } else {
+    quiz[questionId] = {
+      selectedOptionId,
+      isCorrect,
+      attempts: existing ? (existing.attempts || 1) + 1 : 1,
+    }
+  }
+  writeModuleQuiz(moduleId, quiz)
+}
+
+/**
+ * Get a saved answer for one question, or null.
+ * Returns { selectedOptionId, isCorrect, attempts } | null
+ */
+export function getQuizAnswer(moduleId, questionId) {
+  const quiz = readModuleQuiz(moduleId)
+  return quiz[questionId] || null
+}
+
+/**
+ * Compute a 0–1 score for a list of question IDs.
+ * Only answered questions count (unanswered = 0, included in denominator).
+ */
+export function getQuizScore(moduleId, questionIds) {
+  if (!questionIds || questionIds.length === 0) return 0
+  const quiz = readModuleQuiz(moduleId)
+  const correct = questionIds.filter(id => quiz[id]?.isCorrect).length
+  return correct / questionIds.length
+}
+
+/**
+ * True when the final exam is unlocked:
+ * all dimensions complete (which implies all checkpoints were attempted).
+ */
+export function isExamUnlocked(moduleId, allDimensions) {
+  if (!allDimensions || allDimensions.length === 0) return false
+  const done = completedDimensionIds(moduleId)
+  return allDimensions.every(d => done.has(d.id))
+}
+
+/**
+ * True when the final exam has been attempted at least once
+ * (all exam question IDs have an answer).
+ */
+export function isExamAttempted(moduleId, examQuestionIds) {
+  if (!examQuestionIds || examQuestionIds.length === 0) return false
+  const quiz = readModuleQuiz(moduleId)
+  return examQuestionIds.every(id => quiz[id] != null)
+}
+
+/**
+ * Compute the full module score (Phase 1 formula, no calibration):
+ *   module_score = 0.65 × checkpoint_score + 0.35 × final_exam_score
+ */
+export function getModuleScore(moduleId, checkpointQuestionIds, examQuestionIds) {
+  const cs = getQuizScore(moduleId, checkpointQuestionIds)
+  const es = getQuizScore(moduleId, examQuestionIds)
+  return 0.65 * cs + 0.35 * es
+}
+
+/**
+ * Return the earned badge tier (Phase 1, no dimension floors):
+ *   'distinction' | 'mastery' | 'completed' | null
+ * null = module not yet complete.
+ */
+export function getModuleBadgeTier(moduleId, checkpointQuestionIds, examQuestionIds, allDimensions) {
+  // Must be fully complete first
+  if (!isExamUnlocked(moduleId, allDimensions)) return null
+  if (!isExamAttempted(moduleId, examQuestionIds)) return null
+
+  const score = getModuleScore(moduleId, checkpointQuestionIds, examQuestionIds)
+  if (score >= 0.90) return 'distinction'
+  if (score >= 0.80) return 'mastery'
+  return 'completed'
+}
+
+/**
+ * Persist the module badge tier and update the existing pd_badges Set
+ * so hasBadge() continues to work for older UI code.
+ */
+export function saveModuleBadge(moduleId, tier, score) {
+  try {
+    const raw = localStorage.getItem(MODULE_SCORE_KEY)
+    const obj = raw ? JSON.parse(raw) : {}
+    obj[moduleId] = { badge: tier, moduleScore: score, awardedAt: new Date().toISOString() }
+    localStorage.setItem(MODULE_SCORE_KEY, JSON.stringify(obj))
+  } catch {}
+  // Keep the legacy pd_badges Set up to date so hasBadge() works everywhere
+  const set = readSet(BADGES_KEY)
+  set.add(moduleId)
+  writeSet(BADGES_KEY, set)
+}
+
+/**
+ * Read the stored module badge record, or null.
+ * Returns { badge, moduleScore, awardedAt } | null
+ */
+export function getModuleBadgeRecord(moduleId) {
+  try {
+    const raw = localStorage.getItem(MODULE_SCORE_KEY)
+    const obj = raw ? JSON.parse(raw) : {}
+    return obj[moduleId] || null
+  } catch { return null }
+}
+
 // ─── simulation progress ────────────────────────────────────────────────────
 
 /**

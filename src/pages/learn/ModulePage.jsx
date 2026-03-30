@@ -12,6 +12,8 @@ import {
   isSimCompleted,
   checkAndMaybeAwardSimBadge,
   getSimProgress,
+  isExamUnlocked,
+  getModuleBadgeRecord,
 } from '../../lib/pd/progress.js'
 import DimensionCard from '../../components/learn/DimensionCard.jsx'
 import CompletionBar from '../../components/learn/CompletionBar.jsx'
@@ -37,6 +39,8 @@ export default function ModulePage() {
   const [nextDim, setNextDim] = useState(null)
   const [badgeHeld, setBadgeHeld] = useState(false)
   const [simCompletedCount, setSimCompletedCount] = useState(0)
+  const [examUnlocked, setExamUnlocked] = useState(false)
+  const [badgeRecord, setBadgeRecord] = useState(null)
 
   // Sticky progress bar — shown once user scrolls past the header card
   const [stickyVisible, setStickyVisible] = useState(false)
@@ -64,6 +68,8 @@ export default function ModulePage() {
       setNextDim(nextIncompleteDimension(modMeta.id, dims))
       setBadgeHeld(hasBadge(modMeta.id))
       setSimCompletedCount(simCompletionCount(modMeta.id, sims))
+      setExamUnlocked(isExamUnlocked(modMeta.id, dims))
+      setBadgeRecord(getModuleBadgeRecord(modMeta.id))
 
       setLoading(false)
     }
@@ -227,6 +233,53 @@ export default function ModulePage() {
                   </div>
                 </Link>
               ) : null}
+
+              {/* Exam status + badge */}
+              <div style={{
+                marginTop: '1rem', paddingTop: '1rem',
+                borderTop: '1px solid var(--border)',
+                display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap',
+              }}>
+                {badgeRecord ? (
+                  <>
+                    {badgeRecord.badge === 'distinction' && (
+                      <span style={{ fontSize: '12px', fontWeight: 700, color: '#8B5CF6', background: '#f5f3ff', border: '1px solid #d8b4fe', borderRadius: '20px', padding: '4px 12px' }}>
+                        🏅 Distinction — {Math.round((badgeRecord.moduleScore || 0) * 100)}%
+                      </span>
+                    )}
+                    {badgeRecord.badge === 'mastery' && (
+                      <span style={{ fontSize: '12px', fontWeight: 700, color: '#D97706', background: '#fffbeb', border: '1px solid #fcd34d', borderRadius: '20px', padding: '4px 12px' }}>
+                        ⭐ Mastery — {Math.round((badgeRecord.moduleScore || 0) * 100)}%
+                      </span>
+                    )}
+                    {badgeRecord.badge === 'completed' && (
+                      <span style={{ fontSize: '12px', fontWeight: 700, color: '#059669', background: '#f0fdf4', border: '1px solid #6ee7b7', borderRadius: '20px', padding: '4px 12px' }}>
+                        ✓ Completed — {Math.round((badgeRecord.moduleScore || 0) * 100)}%
+                      </span>
+                    )}
+                    <Link to={`/learn/${slug}/exam`} style={{ fontSize: '12px', color: modMeta.color, textDecoration: 'none', fontWeight: 500 }}>
+                      View exam results →
+                    </Link>
+                  </>
+                ) : examUnlocked ? (
+                  <Link to={`/learn/${slug}/exam`} style={{
+                    display: 'inline-flex', alignItems: 'center', gap: '6px',
+                    fontSize: '12px', fontWeight: 600, color: 'white',
+                    background: modMeta.color, padding: '5px 14px',
+                    borderRadius: '20px', textDecoration: 'none',
+                  }}>
+                    📋 Take Module Exam →
+                  </Link>
+                ) : (
+                  <span style={{
+                    fontSize: '12px', color: 'var(--ink-4)',
+                    background: 'var(--surface-2)', border: '1px solid var(--border)',
+                    borderRadius: '20px', padding: '4px 12px',
+                  }}>
+                    🔒 Exam unlocks after all dimensions
+                  </span>
+                )}
+              </div>
 
               {/* Research backbone */}
               {mod.research_backbone && mod.research_backbone.length > 0 && (

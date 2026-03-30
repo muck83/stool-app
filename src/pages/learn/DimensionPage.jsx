@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { moduleBySlug } from '../../lib/slugMap.js'
-import { fetchDimensions } from '../../lib/pd/queries.js'
+import { fetchDimensions, fetchQuizQuestions } from '../../lib/pd/queries.js'
 import {
   isCompleted,
   markComplete,
-  checkAndMaybeAwardBadge,
+  getQuizAnswer,
 } from '../../lib/pd/progress.js'
+import QuizCheckpoint from '../../components/learn/QuizCheckpoint.jsx'
 
 const STATUS_LABELS = {
   fully_sourced: { text: 'Research-backed', bg: 'var(--teal-light)', color: 'var(--teal-dark)' },
@@ -26,33 +27,40 @@ function readingTime(sections = []) {
 
 /**
  * /learn/:slug/:dimension — detail view for a single dimension.
- * Renders content sections from the JSONB `content` field.
- * Supports keyboard navigation (← →) and localStorage completion.
+ * Renders content sections then a QuizCheckpoint.
+ * Answering the checkpoint marks the dimension complete.
  */
 export default function DimensionPage() {
   const { slug, dimension: dimNum } = useParams()
   const navigate = useNavigate()
   const modMeta = moduleBySlug(slug)
 
-  const [dim, setDim] = useState(null)
-  const [allDims, setAllDims] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [done, setDone] = useState(false)
-  const [justCompleted, setJustCompleted] = useState(false)  // triggers celebration flash
-  const [visible, setVisible] = useState(false)              // entrance fade
+  const [dim, setDim]           = useState(null)
+  const [allDims, setAllDims]   = useState([])
+  const [question, setQuestion] = useState(null)   // checkpoint question for this dim
+  const [loading, setLoading]   = useState(true)
+  const [done, setDone]         = useState(false)
+  const [justCompleted, setJustCompleted] = useState(false)
+  const [visible, setVisible]   = useState(false)
 
   useEffect(() => {
     let cancelled = false
     async function load() {
       if (!modMeta) { setLoading(false); return }
-      const dims = await fetchDimensions(modMeta.id)
+      const [dims, qs] = await Promise.all([
+        fetchDimensions(modMeta.id),
+        fetchQuizQuestions(modMeta.id, 'checkpoint'),
+      ])
       if (cancelled) return
       const found = dims.find(d => d.dimension_number === parseInt(dimNum, 10)) || null
       setAllDims(dims)
       setDim(found)
-      if (found) setDone(isCompleted(modMeta.id, found.id))
+      if (found) {
+        setDone(isCompleted(modMeta.id, found.id))
+        const q = qs.find(q => q.dimension_number === found.dimension_number) || null
+        setQuestion(q)
+      }
       setLoading(false)
-      // entrance animation — slight delay so React has painted
       requestAnimationFrame(() => requestAnimationFrame(() => setVisible(true)))
     }
     load()
@@ -67,7 +75,7 @@ export default function DimensionPage() {
       if (currentIdx < allDims.length - 1) {
         navigate(`/learn/${slug}/${allDims[currentIdx + 1].dimension_number}`)
       } else {
-        navigate(`/learn/${slug}/scenarios`)
+        navigate(`/learn/${slug}/exam`)
       }
     }
     if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
@@ -82,18 +90,19 @@ export default function DimensionPage() {
     return () => window.removeEventListener('keydown', handleKey)
   }, [handleKey])
 
-  function handleMarkComplete() {
+  /**
+   * Called by QuizCheckpoint after the teacher selects an answer.
+   * Marks the dimension complete (checkpoint submission = completion).
+   */
+  function handleAnswered({ isCorrect }) {
     if (!dim || done) return
     markComplete(modMeta.id, dim.id)
     setDone(true)
-    const { badgeAwarded } = checkAndMaybeAwardBadge(modMeta.id, allDims)
-    if (badgeAwarded) {
-      // briefly flash the page to signal badge unlock
-      document.body.classList.add('pd-badge-flash')
-      setTimeout(() => document.body.classList.remove('pd-badge-flash'), 800)
-    }
     setJustCompleted(true)
-    setTimeout(() => setJustCompleted(false), 1800)
+    // Badge flash — subtle page background pulse
+    document.body.classList.add('pd-badge-flash')
+    setTimeout(() => document.body.classList.remove('pd-badge-flash'), 800)
+    setTimeout(() => setJustCompleted(false), 2000)
   }
 
   // ── loading / error states ──────────────────────────────────────────────
@@ -128,10 +137,13 @@ export default function DimensionPage() {
   const currentIdx = allDims.findIndex(d => d.id === dim.id)
   const prev = currentIdx > 0 ? allDims[currentIdx - 1] : null
   const next = currentIdx < allDims.length - 1 ? allDims[currentIdx + 1] : null
+  const isLastDimension = currentIdx === allDims.length - 1
+
+  // Determine if quiz has already been answered (for restoring state on revisit)
+  const existingAnswer = question ? getQuizAnswer(modMeta.id, question.id) : null
 
   return (
     <>
-      {/* Badge-flash CSS injected globally once */}
       <style>{`
         @keyframes pd-flash {
           0%   { background: white; }
@@ -255,58 +267,98 @@ export default function DimensionPage() {
           </div>
         )}
 
-        {/* ── Mark complete CTA ─────────────────────────────────────────── */}
-        <div style={{
-          marginTop: '2rem',
-          padding: '1.25rem 1.5rem',
-          background: done ? `${modMeta.color}08` : 'var(--surface-2)',
-          border: `1px solid ${done ? modMeta.color + '30' : 'var(--border)'}`,
-          borderRadius: 'var(--rl)',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px',
-          transition: 'background .4s ease, border-color .4s ease',
-        }}>
-          {done ? (
+        {/* ── Knowledge Check (QuizCheckpoint) ──────────────────────────── */}
+        {question ? (
+          <QuizCheckpoint
+            moduleId={modMeta.id}
+            question={question}
+            color={modMeta.color}
+            onAnswered={handleAnswered}
+          />
+        ) : (
+          /* Fallback: no quiz question in DB — use old "Mark complete" */
+          <div style={{
+            marginTop: '2rem', padding: '1.25rem 1.5rem',
+            background: done ? `${modMeta.color}08` : 'var(--surface-2)',
+            border: `1px solid ${done ? modMeta.color + '30' : 'var(--border)'}`,
+            borderRadius: 'var(--rl)',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px',
+          }}>
+            {done ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{
+                  width: '26px', height: '26px', borderRadius: '50%',
+                  background: modMeta.color, color: 'white',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: '13px',
+                  animation: justCompleted ? 'checkPop .4s ease' : undefined,
+                }}>✓</span>
+                <span style={{ fontSize: '14px', color: modMeta.color, fontWeight: 500 }}>
+                  {justCompleted ? 'Marked as complete!' : 'Completed'}
+                </span>
+              </div>
+            ) : (
+              <span style={{ fontSize: '14px', color: 'var(--ink-3)' }}>
+                Read this dimension? Mark it done to track your progress.
+              </span>
+            )}
+            {!done && (
+              <button
+                onClick={() => {
+                  markComplete(modMeta.id, dim.id)
+                  setDone(true); setJustCompleted(true)
+                  setTimeout(() => setJustCompleted(false), 1800)
+                }}
+                style={{
+                  padding: '8px 18px', background: modMeta.color,
+                  color: 'white', border: 'none', borderRadius: 'var(--r)',
+                  fontSize: '13px', fontWeight: 600, cursor: 'pointer',
+                }}
+              >
+                Mark complete
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* ── Completion + next CTA (shown after checkpoint answered) ──── */}
+        {done && (
+          <div style={{
+            marginTop: '1rem',
+            padding: '1rem 1.5rem',
+            background: `${modMeta.color}08`,
+            border: `1px solid ${modMeta.color}25`,
+            borderRadius: 'var(--rl)',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px',
+          }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <span style={{
-                width: '26px', height: '26px', borderRadius: '50%',
+                width: '24px', height: '24px', borderRadius: '50%',
                 background: modMeta.color, color: 'white',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '13px', flexShrink: 0,
+                fontSize: '12px', flexShrink: 0,
                 animation: justCompleted ? 'checkPop .4s ease' : undefined,
-              }}>
-                ✓
-              </span>
-              <span style={{ fontSize: '14px', color: modMeta.color, fontWeight: 500 }}>
-                {justCompleted ? 'Marked as complete!' : 'Completed'}
+              }}>✓</span>
+              <span style={{ fontSize: '13.5px', color: modMeta.color, fontWeight: 500 }}>
+                {justCompleted ? 'Dimension complete!' : 'Completed'}
               </span>
             </div>
-          ) : (
-            <span style={{ fontSize: '14px', color: 'var(--ink-3)' }}>
-              Read this dimension? Mark it done to track your progress.
-            </span>
-          )}
-          {!done && (
-            <button
-              onClick={handleMarkComplete}
+            <Link
+              to={next
+                ? `/learn/${slug}/${next.dimension_number}`
+                : `/learn/${slug}/exam`
+              }
               style={{
-                padding: '8px 18px',
-                background: modMeta.color,
-                color: 'white',
-                border: 'none',
-                borderRadius: 'var(--r)',
-                fontSize: '13px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                flexShrink: 0,
-                transition: 'opacity .15s',
+                padding: '7px 16px',
+                background: modMeta.color, color: 'white',
+                borderRadius: 'var(--r)', fontSize: '13px', fontWeight: 600,
+                textDecoration: 'none', flexShrink: 0,
               }}
-              onMouseEnter={e => { e.currentTarget.style.opacity = '.85' }}
-              onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
             >
-              Mark complete
-            </button>
-          )}
-        </div>
+              {isLastDimension ? 'Go to Module Exam →' : `Next: D${next?.dimension_number} →`}
+            </Link>
+          </div>
+        )}
 
         {/* ── Keyboard hint ──────────────────────────────────────────────── */}
         <p style={{
@@ -332,9 +384,9 @@ export default function DimensionPage() {
               D{next.dimension_number}: {next.title} →
             </Link>
           ) : (
-            <Link to={`/learn/${slug}/scenarios`}
+            <Link to={`/learn/${slug}/exam`}
               style={{ fontSize: '13px', color: modMeta.color, textDecoration: 'none' }}>
-              Practical scenarios →
+              Module Exam →
             </Link>
           )}
         </div>

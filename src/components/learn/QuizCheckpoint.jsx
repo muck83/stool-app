@@ -1,0 +1,216 @@
+/**
+ * QuizCheckpoint.jsx
+ *
+ * Single-question knowledge-check shown at the end of each dimension.
+ * Clicking an option is the submission — no separate submit button.
+ * Shows per-option feedback immediately after selection.
+ * Stores best attempt to localStorage via progress helpers.
+ */
+
+import { useState } from 'react'
+import { saveQuizAnswer, getQuizAnswer } from '../../lib/pd/progress.js'
+
+export default function QuizCheckpoint({ moduleId, question, color, onAnswered }) {
+  const existing = question ? getQuizAnswer(moduleId, question.id) : null
+
+  const [selectedId, setSelectedId] = useState(existing?.selectedOptionId || null)
+  const [submitted, setSubmitted] = useState(!!existing)
+
+  if (!question) return null
+
+  const options = question.options || []
+  const selectedOption = options.find(o => o.id === selectedId)
+  const isCorrect = selectedOption?.isCorrect || false
+  const correctOption = options.find(o => o.isCorrect)
+
+  function handleSelect(option) {
+    if (submitted) return
+    setSelectedId(option.id)
+    setSubmitted(true)
+    saveQuizAnswer(moduleId, question.id, option.id, option.isCorrect)
+    onAnswered?.({ questionId: question.id, isCorrect: option.isCorrect })
+  }
+
+  function optionStyle(option) {
+    const base = {
+      width: '100%',
+      textAlign: 'left',
+      padding: '10px 14px',
+      borderRadius: '8px',
+      border: '1.5px solid',
+      fontSize: '13.5px',
+      lineHeight: 1.55,
+      cursor: submitted ? 'default' : 'pointer',
+      transition: 'background .15s, border-color .15s',
+      fontFamily: 'inherit',
+      marginBottom: '8px',
+      display: 'block',
+    }
+
+    if (!submitted) {
+      return {
+        ...base,
+        borderColor: 'var(--border)',
+        background: 'white',
+        color: 'var(--ink-2)',
+      }
+    }
+
+    // After submission
+    if (option.id === selectedId) {
+      return {
+        ...base,
+        borderColor: option.isCorrect ? '#22a06b' : '#c9372c',
+        background: option.isCorrect ? '#e3fcef' : '#ffebe6',
+        color: 'var(--ink)',
+        fontWeight: 500,
+      }
+    }
+    if (option.isCorrect && !isCorrect) {
+      // Reveal the correct answer when teacher got it wrong
+      return {
+        ...base,
+        borderColor: '#22a06b',
+        background: '#f3fdf7',
+        color: 'var(--ink-2)',
+      }
+    }
+    return {
+      ...base,
+      borderColor: 'var(--border)',
+      background: 'var(--surface-2)',
+      color: 'var(--ink-4)',
+    }
+  }
+
+  return (
+    <div style={{
+      marginTop: '2rem',
+      padding: '1.5rem',
+      background: submitted
+        ? (isCorrect ? '#f0fdf6' : '#fff8f6')
+        : 'var(--surface-2)',
+      border: `1px solid ${submitted ? (isCorrect ? '#bbf0d6' : '#ffd4cc') : 'var(--border)'}`,
+      borderRadius: 'var(--rl)',
+      transition: 'background .4s ease, border-color .4s ease',
+    }}>
+      {/* Label */}
+      <div style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '6px',
+        fontSize: '11px',
+        fontWeight: 700,
+        textTransform: 'uppercase',
+        letterSpacing: '.07em',
+        color: color,
+        marginBottom: '12px',
+      }}>
+        <span style={{
+          width: '18px', height: '18px', borderRadius: '50%',
+          background: `${color}18`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: '10px',
+        }}>✦</span>
+        Knowledge Check
+      </div>
+
+      {/* Prompt */}
+      <p style={{
+        fontSize: '14.5px',
+        color: 'var(--ink)',
+        lineHeight: 1.65,
+        margin: '0 0 16px 0',
+        fontWeight: 500,
+      }}>
+        {question.prompt}
+      </p>
+
+      {/* Options */}
+      <div>
+        {options.map(option => (
+          <button
+            key={option.id}
+            onClick={() => handleSelect(option)}
+            style={optionStyle(option)}
+            onMouseEnter={e => {
+              if (!submitted) e.currentTarget.style.borderColor = color
+            }}
+            onMouseLeave={e => {
+              if (!submitted) e.currentTarget.style.borderColor = 'var(--border)'
+            }}
+          >
+            <span style={{
+              display: 'inline-block',
+              width: '20px',
+              height: '20px',
+              borderRadius: '50%',
+              border: '1.5px solid currentColor',
+              marginRight: '10px',
+              verticalAlign: 'middle',
+              textAlign: 'center',
+              lineHeight: '17px',
+              fontSize: '10px',
+              fontWeight: 700,
+              flexShrink: 0,
+            }}>
+              {option.id.toUpperCase()}
+            </span>
+            {option.text}
+          </button>
+        ))}
+      </div>
+
+      {/* Feedback */}
+      {submitted && selectedOption && (
+        <div style={{
+          marginTop: '12px',
+          padding: '12px 14px',
+          borderRadius: '8px',
+          background: isCorrect ? '#d3f9e2' : '#ffe8e4',
+          borderLeft: `3px solid ${isCorrect ? '#22a06b' : '#c9372c'}`,
+        }}>
+          <div style={{
+            fontSize: '12px',
+            fontWeight: 700,
+            color: isCorrect ? '#1a7a50' : '#9e2921',
+            marginBottom: '4px',
+          }}>
+            {isCorrect ? '✓ Correct' : '✗ Not quite'}
+          </div>
+          <p style={{ fontSize: '13px', color: 'var(--ink-2)', margin: 0, lineHeight: 1.6 }}>
+            {selectedOption.feedback}
+          </p>
+          {!isCorrect && correctOption && (
+            <p style={{
+              fontSize: '12px', color: 'var(--ink-3)', margin: '8px 0 0 0', lineHeight: 1.5,
+              paddingTop: '8px', borderTop: '1px solid #f5c4bf',
+            }}>
+              <strong>Stronger reading:</strong> {correctOption.feedback}
+            </p>
+          )}
+          {/* Research tags */}
+          {selectedOption.research && selectedOption.research.length > 0 && (
+            <div style={{ marginTop: '8px', display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+              {(isCorrect ? selectedOption.research : (correctOption?.research || selectedOption.research)).map((ref, i) => (
+                <span key={i} style={{
+                  fontSize: '10px', color: 'var(--ink-4)',
+                  background: 'white', borderRadius: '4px',
+                  padding: '2px 7px', border: '1px solid var(--border)',
+                }}>
+                  {ref}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {!submitted && (
+        <p style={{ fontSize: '11px', color: 'var(--ink-4)', margin: '10px 0 0 0' }}>
+          Select the strongest interpretation.
+        </p>
+      )}
+    </div>
+  )
+}
