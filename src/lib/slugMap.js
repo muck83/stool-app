@@ -4,9 +4,10 @@
  */
 
 export const MODULES = [
-  { slug: 'saudi-arabia', id: 'ksa-001', countryCode: 'SA', country: 'Saudi Arabia', color: '#BA7517' },
-  { slug: 'china',        id: 'china-001', countryCode: 'CN', country: 'China',        color: '#D85A30' },
-  { slug: 'south-korea',  id: 'korea-001', countryCode: 'KR', country: 'South Korea',  color: '#534AB7' },
+  { slug: 'saudi-arabia', id: 'ksa-001',   countryCode: 'SA', country: 'Saudi Arabia', color: '#BA7517' },
+  { slug: 'china',        id: 'china-001', countryCode: 'CN', country: 'China',         color: '#D85A30' },
+  { slug: 'south-korea',  id: 'korea-001', countryCode: 'KR', country: 'South Korea',   color: '#534AB7' },
+  { slug: 'india',        id: 'india-001', countryCode: 'IN', country: 'India',          color: '#C56A2D' },
 ]
 
 export const GATED_COUNTRIES = MODULES.map(m => m.country)
