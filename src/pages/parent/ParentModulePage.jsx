@@ -249,6 +249,353 @@ function ReviewScenario({ scenario, lang, index }) {
   )
 }
 
+// ─── MYP Grade Calculator ────────────────────────────────────────────────────
+function MypCalculator({ data, lang }) {
+  const d = data[lang]
+  const [criteria, setCriteria] = useState({ A: 0, B: 0, C: 0, D: 0 })
+
+  const total = Object.values(criteria).reduce((s, v) => s + v, 0)
+  const boundary = data.en.boundaries.find(b => total >= b.min && total <= b.max)
+  const grade = boundary ? boundary.grade : null
+  const descriptor = grade ? data.en.descriptors.find(d => d.grade === grade) : null
+  const descriptorLabel = descriptor ? (lang === 'ko' ? descriptor.ko : descriptor.label) : '—'
+
+  const gradeColor = grade >= 6 ? '#1D9E75' : grade >= 4 ? '#185FA5' : grade >= 2 ? '#BA7517' : '#C0392B'
+
+  const CriterionSlider = ({ label, val, onChange }) => (
+    <div style={{ marginBottom: '1rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink-2)' }}>
+          {lang === 'en' ? `Criterion ${label}` : `준거 ${label}`}
+        </span>
+        <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--teal-dark)', minWidth: 32, textAlign: 'right' }}>{val} / 8</span>
+      </div>
+      <input
+        type="range" min={0} max={8} value={val}
+        onChange={e => onChange(parseInt(e.target.value))}
+        style={{ width: '100%', accentColor: 'var(--teal)', cursor: 'pointer' }}
+      />
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--ink-4)', marginTop: 2 }}>
+        <span>0</span><span>4</span><span>8</span>
+      </div>
+    </div>
+  )
+
+  return (
+    <div style={{ border: '1px solid var(--border)', borderRadius: 'var(--r)', overflow: 'hidden', marginBottom: '1.5rem' }}>
+      <div style={{ padding: '.875rem 1.2rem', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)' }}>
+        <div style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--ink)' }}>
+          {lang === 'en' ? 'MYP Grade Calculator' : 'MYP 등급 계산기'}
+        </div>
+        <div style={{ fontSize: 12, color: 'var(--ink-4)', marginTop: 3 }}>
+          {lang === 'en' ? 'Drag each slider to set the criterion score (0–8)' : '각 슬라이더를 드래그하여 준거 점수(0~8)를 설정하세요'}
+        </div>
+      </div>
+
+      <div style={{ padding: '1.1rem 1.2rem' }}>
+        {['A', 'B', 'C', 'D'].map(l => (
+          <CriterionSlider key={l} label={l} val={criteria[l]}
+            onChange={v => setCriteria(prev => ({ ...prev, [l]: v }))} />
+        ))}
+
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: '1.25rem',
+          padding: '1rem 1.1rem', marginTop: '.5rem',
+          background: `${gradeColor}10`, border: `1px solid ${gradeColor}44`,
+          borderRadius: 'var(--r)',
+        }}>
+          <div style={{ textAlign: 'center', minWidth: 64 }}>
+            <div style={{ fontSize: 11, color: 'var(--ink-4)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 2 }}>
+              {lang === 'en' ? 'Total' : '총점'}
+            </div>
+            <div style={{ fontSize: 22, fontWeight: 700, color: gradeColor }}>{total}<span style={{ fontSize: 13, fontWeight: 400, color: 'var(--ink-4)' }}>/32</span></div>
+          </div>
+          <div style={{ width: 1, height: 40, background: 'var(--border)' }} />
+          <div style={{ textAlign: 'center', minWidth: 56 }}>
+            <div style={{ fontSize: 11, color: 'var(--ink-4)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 2 }}>
+              {lang === 'en' ? 'Grade' : '등급'}
+            </div>
+            <div style={{ fontSize: 28, fontWeight: 800, color: gradeColor, lineHeight: 1 }}>{grade || '—'}</div>
+            <div style={{ fontSize: 10, color: 'var(--ink-4)', marginTop: 2 }}>{lang === 'en' ? 'out of 7' : '7점 만점'}</div>
+          </div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: gradeColor }}>{descriptorLabel}</div>
+            <div style={{ fontSize: 11, color: 'var(--ink-4)', marginTop: 3, lineHeight: 1.5 }}>
+              {lang === 'en'
+                ? `Boundaries: ${boundary ? boundary.min + '–' + boundary.max : '—'} points`
+                : `경계: ${boundary ? boundary.min + '~' + boundary.max : '—'} 점`}
+            </div>
+          </div>
+        </div>
+
+        {/* All grade boundaries reference table */}
+        <div style={{ marginTop: '1.25rem' }}>
+          <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 6 }}>
+            {lang === 'en' ? 'Grade boundary reference' : '등급 경계 참고표'}
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4 }}>
+            {data.en.boundaries.map(b => {
+              const desc = data.en.descriptors.find(d => d.grade === b.grade)
+              const isActive = b.grade === grade
+              const c = b.grade >= 6 ? '#1D9E75' : b.grade >= 4 ? '#185FA5' : b.grade >= 2 ? '#BA7517' : '#C0392B'
+              return (
+                <div key={b.grade} style={{
+                  padding: '6px 4px', borderRadius: 6, textAlign: 'center',
+                  background: isActive ? `${c}20` : 'var(--surface-2)',
+                  border: isActive ? `2px solid ${c}` : '1px solid var(--border)',
+                  transition: 'background .15s, border .15s',
+                }}>
+                  <div style={{ fontSize: 15, fontWeight: 800, color: c }}>{b.grade}</div>
+                  <div style={{ fontSize: 9, color: 'var(--ink-4)', marginTop: 1 }}>{b.min}–{b.max}</div>
+                </div>
+              )
+            })}
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4, marginTop: 3 }}>
+            {data.en.descriptors.map(desc => {
+              const label = lang === 'ko' ? desc.ko : desc.label
+              return (
+                <div key={desc.grade} style={{ fontSize: 8.5, color: 'var(--ink-4)', textAlign: 'center', lineHeight: 1.3 }}>
+                  {label}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Watch out notes */}
+        <div style={{ marginTop: '1.25rem', display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {d.watchOut.map((note, i) => (
+            <div key={i} style={{
+              fontSize: 12, color: 'var(--ink-3)', lineHeight: 1.6,
+              paddingLeft: 10, borderLeft: '2px solid var(--teal)',
+            }}>{note}</div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── DP Grade Calculator ──────────────────────────────────────────────────────
+const DP_SUBJECTS_EN = ['Subject 1 (HL)', 'Subject 2 (HL)', 'Subject 3 (HL)', 'Subject 4 (SL)', 'Subject 5 (SL)', 'Subject 6 (SL)']
+const DP_SUBJECTS_KO = ['과목 1 (HL)', '과목 2 (HL)', '과목 3 (HL)', '과목 4 (SL)', '과목 5 (SL)', '과목 6 (SL)']
+const DP_HL = [true, true, true, false, false, false]
+const EE_TOK_GRADES = ['A', 'B', 'C', 'D', 'E']
+
+function DpCalculator({ data, lang }) {
+  const d = data[lang]
+  const [subjects, setSubjects] = useState([6, 6, 6, 6, 6, 6])
+  const [ee, setEe] = useState('B')
+  const [tok, setTok] = useState('B')
+
+  const matrix = data.en.coreBonus.matrix
+  const coreEntry = matrix.find(m => m.ee === ee && m.tok === tok)
+  const corePoints = coreEntry ? coreEntry.points : 0
+  const subjectTotal = subjects.reduce((s, v) => s + v, 0)
+  const total = subjectTotal + Math.max(0, corePoints)
+
+  // Diploma conditions
+  const hlFail = subjects.slice(0, 3).some(s => s < 3)
+  const slFail = subjects.slice(3, 6).some(s => s < 2)
+  const grade1Count = subjects.filter(s => s === 1).length
+  const tooManyOnes = grade1Count >= 3
+  const eeEFail = ee === 'E' && tok === 'E'
+  const totalFail = total < 24
+  const passes = !hlFail && !slFail && !tooManyOnes && !eeEFail && !totalFail && corePoints !== -1
+
+  const totalColor = passes ? '#1D9E75' : '#C0392B'
+
+  const subjectLabels = lang === 'ko' ? DP_SUBJECTS_KO : DP_SUBJECTS_EN
+
+  return (
+    <div style={{ border: '1px solid var(--border)', borderRadius: 'var(--r)', overflow: 'hidden', marginBottom: '1.5rem' }}>
+      <div style={{ padding: '.875rem 1.2rem', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)' }}>
+        <div style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--ink)' }}>
+          {lang === 'en' ? 'DP Grade Calculator' : 'DP 등급 계산기'}
+        </div>
+        <div style={{ fontSize: 12, color: 'var(--ink-4)', marginTop: 3 }}>
+          {lang === 'en' ? 'Set grades for 6 subjects and the EE/ToK core' : '6개 과목과 소논문/지식이론 핵심 등급을 설정하세요'}
+        </div>
+      </div>
+
+      <div style={{ padding: '1.1rem 1.2rem' }}>
+        {/* Subject grades */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 1.5rem' }}>
+          {subjects.map((val, i) => {
+            const isHL = DP_HL[i]
+            const minPass = isHL ? 3 : 2
+            const failing = val < minPass
+            return (
+              <div key={i} style={{ marginBottom: '.875rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--ink-2)' }}>{subjectLabels[i]}</span>
+                  <span style={{
+                    fontSize: 14, fontWeight: 700,
+                    color: failing ? '#C0392B' : '#1D9E75',
+                    minWidth: 24, textAlign: 'right',
+                  }}>{val}</span>
+                </div>
+                <input
+                  type="range" min={1} max={7} value={val}
+                  onChange={e => {
+                    const next = [...subjects]
+                    next[i] = parseInt(e.target.value)
+                    setSubjects(next)
+                  }}
+                  style={{ width: '100%', accentColor: failing ? '#C0392B' : 'var(--teal)', cursor: 'pointer' }}
+                />
+                {failing && (
+                  <div style={{ fontSize: 10, color: '#C0392B', marginTop: 2 }}>
+                    {lang === 'en' ? `Min ${minPass} required for ${isHL ? 'HL' : 'SL'}` : `${isHL ? 'HL' : 'SL'} 최소 ${minPass}점 필요`}
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+
+        {/* EE + ToK */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 1.5rem', marginTop: '.5rem', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>
+          {[
+            { key: 'ee', val: ee, set: setEe, label: lang === 'en' ? 'Extended Essay (EE)' : '소논문 (EE)' },
+            { key: 'tok', val: tok, set: setTok, label: lang === 'en' ? 'Theory of Knowledge (ToK)' : '지식이론 (ToK)' },
+          ].map(({ key, val, set, label }) => (
+            <div key={key}>
+              <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--ink-2)', marginBottom: 6 }}>{label}</div>
+              <div style={{ display: 'flex', gap: 6 }}>
+                {EE_TOK_GRADES.map(g => (
+                  <button key={g} onClick={() => set(g)} style={{
+                    flex: 1, padding: '5px 0', fontSize: 13, fontWeight: 700,
+                    borderRadius: 6, border: 'none', cursor: 'pointer',
+                    background: val === g ? (g === 'E' ? '#C0392B' : 'var(--teal)') : 'var(--surface-2)',
+                    color: val === g ? 'white' : 'var(--ink-3)',
+                    transition: 'background .12s, color .12s',
+                  }}>{g}</button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Core bonus */}
+        <div style={{
+          marginTop: '1rem', padding: '.75rem 1rem',
+          background: corePoints > 0 ? '#E1F5EE' : corePoints === -1 ? '#FEF3F2' : 'var(--surface-2)',
+          borderRadius: 'var(--r)', border: `1px solid ${corePoints > 0 ? '#1D9E7544' : corePoints === -1 ? '#C0392B44' : 'var(--border)'}`,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        }}>
+          <div style={{ fontSize: 12.5, color: 'var(--ink-2)', fontWeight: 500 }}>
+            {lang === 'en' ? 'EE + ToK bonus' : '소논문 + 지식이론 보너스'}
+          </div>
+          <div style={{ fontSize: 18, fontWeight: 800, color: corePoints > 0 ? '#1D9E75' : corePoints === -1 ? '#C0392B' : 'var(--ink-4)' }}>
+            {corePoints === -1 ? lang === 'en' ? '⚠ Diploma at risk' : '⚠ 졸업장 위험' : `+${corePoints} pts`}
+          </div>
+        </div>
+
+        {/* Total */}
+        <div style={{
+          marginTop: '1rem', padding: '1rem 1.1rem',
+          background: `${totalColor}10`, border: `1px solid ${totalColor}44`,
+          borderRadius: 'var(--r)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem',
+        }}>
+          <div>
+            <div style={{ fontSize: 11, color: 'var(--ink-4)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 3 }}>
+              {lang === 'en' ? 'Total points' : '총 점수'}
+            </div>
+            <div style={{ fontSize: 32, fontWeight: 800, color: totalColor, lineHeight: 1 }}>
+              {total}<span style={{ fontSize: 14, fontWeight: 400, color: 'var(--ink-4)' }}>/45</span>
+            </div>
+          </div>
+          <div style={{
+            padding: '8px 16px', borderRadius: 20, fontWeight: 700, fontSize: 14,
+            background: passes ? '#1D9E75' : '#C0392B', color: 'white',
+          }}>
+            {passes
+              ? (lang === 'en' ? '✓ Diploma awarded' : '✓ 졸업장 수여')
+              : (lang === 'en' ? '✗ Diploma not awarded' : '✗ 졸업장 미수여')}
+          </div>
+        </div>
+
+        {/* Fail conditions */}
+        {!passes && (
+          <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: 5 }}>
+            {totalFail && <div style={{ fontSize: 12, color: '#C0392B', lineHeight: 1.5 }}>• {lang === 'en' ? 'Total below 24 points' : '총점 24점 미만'}</div>}
+            {hlFail && <div style={{ fontSize: 12, color: '#C0392B', lineHeight: 1.5 }}>• {lang === 'en' ? 'One or more HL subjects below grade 3' : 'HL 과목 중 3점 미만 있음'}</div>}
+            {slFail && <div style={{ fontSize: 12, color: '#C0392B', lineHeight: 1.5 }}>• {lang === 'en' ? 'One or more SL subjects below grade 2' : 'SL 과목 중 2점 미만 있음'}</div>}
+            {tooManyOnes && <div style={{ fontSize: 12, color: '#C0392B', lineHeight: 1.5 }}>• {lang === 'en' ? '3 or more grade 1s' : '1점 과목 3개 이상'}</div>}
+            {eeEFail && <div style={{ fontSize: 12, color: '#C0392B', lineHeight: 1.5 }}>• {lang === 'en' ? 'Grade E on both EE and ToK' : '소논문과 지식이론 모두 E 등급'}</div>}
+            {corePoints === -1 && !eeEFail && <div style={{ fontSize: 12, color: '#C0392B', lineHeight: 1.5 }}>• {lang === 'en' ? 'EE/ToK combination fails the diploma condition' : '소논문/지식이론 조합이 졸업장 조건 미충족'}</div>}
+          </div>
+        )}
+
+        {/* University context */}
+        <div style={{ marginTop: '1.25rem', padding: '.875rem 1rem', background: 'var(--surface-2)', borderRadius: 'var(--r)', border: '1px solid var(--border)' }}>
+          <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 6 }}>
+            {lang === 'en' ? 'University context' : '대학교 입시 맥락'}
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--ink-3)', lineHeight: 1.65 }}>
+            {lang === 'en'
+              ? `Top universities typically require 36–40+ points. With ${total} points, your child is ${total >= 40 ? 'in range for the most selective programs' : total >= 36 ? 'competitive for most international universities' : total >= 30 ? 'within range for many universities — with room to improve' : 'in the earlier stages of their IB preparation'}. Note: universities also consider predicted grades, HL subject choices, and personal statements.`
+              : `상위 대학교들은 일반적으로 36~40점 이상을 요구합니다. ${total}점으로, 자녀는 ${total >= 40 ? '가장 까다로운 프로그램에 지원 가능한 수준입니다' : total >= 36 ? '대부분의 국제 대학교에 경쟁력 있는 수준입니다' : total >= 30 ? '많은 대학교에 지원 가능한 범위 내에 있습니다 — 발전 여지가 있습니다' : '아직 IB 준비의 초기 단계에 있습니다'}. 참고: 대학교들은 예상 점수, HL 과목 선택, 자기소개서도 함께 고려합니다.`}
+          </div>
+        </div>
+
+        {/* Watch out notes */}
+        <div style={{ marginTop: '1.25rem', display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {d.watchOut.map((note, i) => (
+            <div key={i} style={{
+              fontSize: 12, color: 'var(--ink-3)', lineHeight: 1.6,
+              paddingLeft: 10, borderLeft: '2px solid var(--teal)',
+            }}>{note}</div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Grading Section ──────────────────────────────────────────────────────────
+function GradingSection({ gradingSystem, lang }) {
+  const [tab, setTab] = useState('myp')
+  const g = gradingSystem[tab]
+
+  return (
+    <div>
+      {/* Tab switcher */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: '1.25rem' }}>
+        {['myp', 'dp'].map(t => (
+          <button key={t} onClick={() => setTab(t)} style={{
+            padding: '6px 20px', fontSize: 13, fontWeight: 600,
+            borderRadius: 20, border: 'none', cursor: 'pointer',
+            background: tab === t ? 'var(--teal)' : 'var(--surface-2)',
+            color: tab === t ? 'white' : 'var(--ink-3)',
+            border: `1px solid ${tab === t ? 'var(--teal)' : 'var(--border)'}`,
+            transition: 'background .15s, color .15s',
+          }}>
+            {t.toUpperCase()}
+          </button>
+        ))}
+      </div>
+
+      <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--ink)', marginBottom: '.75rem' }}>
+        {g[lang].title}
+      </div>
+      <p style={{ fontSize: 13.5, color: 'var(--ink-2)', lineHeight: 1.75, marginBottom: '1rem' }}>
+        {g[lang].intro}
+      </p>
+      <p style={{ fontSize: 13, color: 'var(--ink-3)', lineHeight: 1.7, marginBottom: '1.5rem' }}>
+        {tab === 'myp' ? g[lang].criteriaNote : g[lang].subjectStructure}
+      </p>
+
+      {tab === 'myp'
+        ? <MypCalculator data={gradingSystem.myp} lang={lang} />
+        : <DpCalculator data={gradingSystem.dp} lang={lang} />
+      }
+    </div>
+  )
+}
+
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function ParentModulePage() {
   const { slug } = useParams()
@@ -343,6 +690,21 @@ export default function ParentModulePage() {
       {activity.reviewScenarios.map((s, i) => (
         <ReviewScenario key={s.id} scenario={s} lang={lang} index={i} />
       ))}
+
+      {/* Part 3 — Understanding the grades */}
+      {activity.gradingSystem && (
+        <>
+          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.1em', margin: '2rem 0 1rem' }}>
+            {lang === 'en' ? 'Part 3 — Understanding the grades' : '3부 — 성적 체계 이해하기'}
+          </div>
+          <p style={{ fontSize: 13.5, color: 'var(--ink-3)', lineHeight: 1.65, marginBottom: '1.25rem' }}>
+            {lang === 'en'
+              ? 'IB grades are not percentages, and they are not ranks. Use the calculators below to understand exactly how MYP and DP scores are built — and what they actually mean.'
+              : 'IB 성적은 백분율도 석차도 아닙니다. 아래 계산기를 사용하여 MYP와 DP 점수가 어떻게 구성되는지, 그리고 실제로 무엇을 의미하는지 정확히 이해해 보세요.'}
+          </p>
+          <GradingSection gradingSystem={activity.gradingSystem} lang={lang} />
+        </>
+      )}
 
       {/* Mark complete */}
       {!done && (

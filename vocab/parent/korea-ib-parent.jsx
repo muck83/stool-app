@@ -173,4 +173,104 @@ export const koreaIbParent = {
       },
     },
   ],
+
+  gradingSystem: {
+    myp: {
+      en: {
+        title: 'How MYP Grades Work',
+        intro: 'MYP subjects do not use percentages or class ranks. Every subject uses four criteria, each marked out of 8. Those four scores are added together to give a total out of 32, which is then converted into a final grade from 1 to 7.',
+        criteriaNote: 'The four criteria are labelled A, B, C, and D — and they measure different things depending on the subject. In MYP Mathematics, for example, Criterion A is "Knowing and Understanding" and Criterion D is "Applying Mathematics in Real-Life Contexts." A student can score well on A and struggle on D, and the report will show both.',
+        boundaryNote: 'The conversion from a raw total (out of 32) to a final grade (1–7) is done using grade boundaries. These boundaries are set by each school and can vary slightly, but the standard IB approximation is shown in the calculator below.',
+        descriptors: [
+          { grade: 1, label: 'Minimal achievement',      ko: '최소한의 성취' },
+          { grade: 2, label: 'Very limited achievement', ko: '매우 제한적인 성취' },
+          { grade: 3, label: 'Limited achievement',      ko: '제한적인 성취' },
+          { grade: 4, label: 'Adequate achievement',     ko: '적절한 성취' },
+          { grade: 5, label: 'Substantial achievement',  ko: '상당한 성취' },
+          { grade: 6, label: 'Accomplished achievement', ko: '숙련된 성취' },
+          { grade: 7, label: 'Excellent achievement',    ko: '우수한 성취' },
+        ],
+        // Standard IB MYP grade boundaries for a 4-criteria subject (each out of 8, total out of 32)
+        boundaries: [
+          { grade: 1, min: 0,  max: 5  },
+          { grade: 2, min: 6,  max: 9  },
+          { grade: 3, min: 10, max: 14 },
+          { grade: 4, min: 15, max: 18 },
+          { grade: 5, min: 19, max: 22 },
+          { grade: 6, min: 23, max: 27 },
+          { grade: 7, min: 28, max: 32 },
+        ],
+        watchOut: [
+          'A "4" in MYP is "Adequate achievement" — it is a passing grade, not a near-fail. Korean parents sometimes interpret a 4 as a D grade. It is not.',
+          'Your child can score differently on each criterion in the same subject. A 7/8 on Criterion A and 3/8 on Criterion C in the same subject tells you exactly where to focus — this is diagnostic information, not just a result.',
+          'Grade boundaries vary slightly by school and subject. The calculator uses standard IB approximations. Your school\'s specific boundaries may differ by 1–2 points.',
+        ],
+      },
+      ko: {
+        title: 'MYP 성적 체계 이해하기',
+        intro: 'MYP 과목은 백분율이나 석차를 사용하지 않습니다. 모든 과목은 각 8점 만점의 네 가지 준거로 평가됩니다. 이 네 점수를 합산하면 32점 만점의 총점이 되고, 이것이 최종 1~7점 등급으로 변환됩니다.',
+        criteriaNote: '네 가지 준거는 A, B, C, D로 표시되며 과목에 따라 다른 것을 측정합니다. 예를 들어 MYP 수학에서 준거 A는 "지식과 이해", 준거 D는 "실생활 맥락에서의 수학 적용"입니다. 학생이 A에서는 높은 점수를 받고 D에서는 어려움을 겪을 수 있으며, 성적표에는 두 점수가 모두 표시됩니다.',
+        boundaryNote: '32점 만점의 원점수를 1~7등급으로 변환하는 것은 등급 경계를 사용합니다. 이 경계는 각 학교에서 설정하며 약간씩 다를 수 있지만, 아래 계산기에 표준 IB 근사값이 제시되어 있습니다.',
+        watchOut: [
+          'MYP에서 "4"는 "적절한 성취"입니다. 통과 등급이며 낙제에 가까운 것이 아닙니다. 한국 학부모들은 4를 D 등급으로 해석하는 경우가 있습니다. 그렇지 않습니다.',
+          '자녀는 같은 과목에서 준거별로 다른 점수를 받을 수 있습니다. 준거 A에서 7/8, 준거 C에서 3/8을 받았다면 어디에 집중해야 하는지 정확히 알 수 있습니다. 이는 단순한 결과가 아닌 진단 정보입니다.',
+          '등급 경계는 학교와 과목에 따라 약간 다릅니다. 계산기는 표준 IB 근사값을 사용합니다. 학교의 구체적인 경계는 1~2점 차이가 있을 수 있습니다.',
+        ],
+      },
+    },
+
+    dp: {
+      en: {
+        title: 'How DP Grades Work',
+        intro: 'The IB Diploma is scored out of 45 points. Six subjects contribute up to 42 points (each graded 1–7), and the diploma core — the Extended Essay and Theory of Knowledge — can add up to 3 bonus points. Most competitive universities require 36–40+ points.',
+        subjectStructure: 'Students study six subjects: three at Higher Level (HL) and three at Standard Level (SL). HL subjects involve more content and deeper assessment. Universities often specify minimum grades at HL (e.g., "HL6 in Mathematics").',
+        coreBonus: {
+          title: 'The EE + ToK Bonus Matrix',
+          note: 'The Extended Essay (EE) and Theory of Knowledge (ToK) are each graded A–E. Together they produce 0–3 bonus points using this matrix. A grade of E on either — without a compensating A on the other — means no bonus points. Two E grades means the diploma is not awarded.',
+          matrix: [
+            { ee: 'A', tok: 'A', points: 3 }, { ee: 'A', tok: 'B', points: 3 }, { ee: 'A', tok: 'C', points: 2 }, { ee: 'A', tok: 'D', points: 2 }, { ee: 'A', tok: 'E', points: 0 },
+            { ee: 'B', tok: 'A', points: 3 }, { ee: 'B', tok: 'B', points: 2 }, { ee: 'B', tok: 'C', points: 2 }, { ee: 'B', tok: 'D', points: 1 }, { ee: 'B', tok: 'E', points: 0 },
+            { ee: 'C', tok: 'A', points: 2 }, { ee: 'C', tok: 'B', points: 2 }, { ee: 'C', tok: 'C', points: 1 }, { ee: 'C', tok: 'D', points: 1 }, { ee: 'C', tok: 'E', points: 0 },
+            { ee: 'D', tok: 'A', points: 2 }, { ee: 'D', tok: 'B', points: 1 }, { ee: 'D', tok: 'C', points: 1 }, { ee: 'D', tok: 'D', points: 0 }, { ee: 'D', tok: 'E', points: 0 },
+            { ee: 'E', tok: 'A', points: 0 }, { ee: 'E', tok: 'B', points: 0 }, { ee: 'E', tok: 'C', points: 0 }, { ee: 'E', tok: 'D', points: 0 }, { ee: 'E', tok: 'E', points: -1 },
+          ],
+        },
+        passingRules: [
+          'Minimum 24 points total to be awarded the diploma.',
+          'No subject grade below 2 (SL) or 3 (HL) — a single very low grade can fail the diploma even if the total points are sufficient.',
+          'CAS requirements must be completed and signed off.',
+          'No grade E in both the Extended Essay and Theory of Knowledge.',
+          'No more than three grade 1s across all subjects.',
+        ],
+        watchOut: [
+          'A student with 38 points who fails a condition (e.g., grades a 2 in an HL subject) does not receive the diploma. Points alone are not enough.',
+          'Universities make conditional offers based on predicted grades, typically before final exams. The predicted grade conversation with teachers in Year 12 is critical.',
+          'Internal Assessment (IA) — coursework marked by the teacher — is then moderated by the IB externally. A teacher\'s mark can be adjusted up or down. This is not an error; it is the system.',
+          'The diploma is awarded in May. There is a November session for some students. Universities in different countries accept different session results differently.',
+        ],
+      },
+      ko: {
+        title: 'DP 성적 체계 이해하기',
+        intro: 'IB 졸업장은 45점 만점으로 채점됩니다. 여섯 과목이 최대 42점(각 1~7점)을 기여하고, 졸업장 핵심 요소인 소논문과 지식이론이 최대 3점의 보너스 점수를 추가할 수 있습니다. 대부분의 경쟁력 있는 대학교는 36~40점 이상을 요구합니다.',
+        subjectStructure: '학생들은 세 과목을 상위 수준(HL), 세 과목을 표준 수준(SL)으로 공부합니다. HL 과목은 더 많은 내용과 깊이 있는 평가를 포함합니다. 대학교에서는 종종 HL 최소 등급을 명시합니다(예: "수학 HL6 이상").',
+        coreBonus: {
+          title: '소논문 + 지식이론 보너스 매트릭스',
+          note: '소논문(EE)과 지식이론(ToK)은 각각 A~E로 평가됩니다. 두 점수를 합쳐 이 매트릭스를 통해 0~3점의 보너스 점수가 부여됩니다. 한 과목에서 E 등급을 받으면 보너스 점수가 없습니다. 두 과목 모두 E 등급이면 졸업장이 수여되지 않습니다.',
+        },
+        passingRules: [
+          '졸업장을 받으려면 최소 24점 이상이어야 합니다.',
+          '어떤 과목도 2점(SL) 또는 3점(HL) 미만을 받아서는 안 됩니다. 총점이 충분해도 단 하나의 매우 낮은 점수로 졸업장을 받지 못할 수 있습니다.',
+          'CAS 요건을 완료하고 서명을 받아야 합니다.',
+          '소논문과 지식이론 모두 E 등급을 받아서는 안 됩니다.',
+          '전체 과목에서 1등급이 세 개를 초과해서는 안 됩니다.',
+        ],
+        watchOut: [
+          '38점을 받은 학생이라도 조건을 충족하지 못하면(예: HL 과목에서 2점) 졸업장을 받지 못합니다. 점수만으로는 충분하지 않습니다.',
+          '대학교는 보통 최종 시험 전에 예상 점수를 바탕으로 조건부 입학 허가를 합니다. 11학년에서 교사와 나누는 예상 점수 대화가 매우 중요합니다.',
+          '교사가 채점하는 내부 평가(IA)는 이후 IB에 의해 외부에서 조정됩니다. 교사의 점수가 올라가거나 내려갈 수 있습니다. 이는 오류가 아니라 시스템입니다.',
+          '졸업장은 5월에 수여됩니다. 일부 학생을 위한 11월 시험도 있습니다. 국가별로 시험 세션 결과를 다르게 인정하는 경우가 있습니다.',
+        ],
+      },
+    },
+  },
 }
