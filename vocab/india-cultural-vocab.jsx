@@ -15,6 +15,55 @@ export const indiaCulturalVocab = {
     ],
     question: "Why didn't the emails work? And what made the doorway conversation real in a way they weren't?",
   },
+  contextModifiers: {
+    prompt: "Where are your Indian students from or living?",
+    helpText: "India is enormously diverse, and these concepts reflect broad patterns in urban, aspirational, private-school contexts. Where your families are from \u2014 and where they are now \u2014 shapes which parts of the module land most directly.",
+    options: [
+      {
+        id: 'in-india',
+        label: 'Teaching in India',
+        description: 'You are working at a school inside India',
+        content: [
+          "This module was written for your context. Izzat, jugaad, guru, rishta, and chalega all apply as described. One layer worth holding: regional diversity is enormous and genuinely matters. A Tamil family from Chennai, a Punjabi family from Chandigarh, and a Bengali family from Kolkata will each have distinct cultural expressions, communication styles, and relationship to authority \u2014 even while sharing the broad Hindi concepts in this module. The module gives you a starting framework; individual families will teach you their specific version.",
+          "Caste sits in the background of almost every elite private school in India, rarely discussed openly but often structuring social networks, parent expectations, and community dynamics in ways that are not immediately visible. Families who are of different caste backgrounds may have subtly different relationships to the guru concept, to institutional authority, and to each other within the parent community. This is worth being aware of even if it is rarely foregrounded.",
+          "The economic aspiration driving many Indian private school families is intense and explicitly intergenerational. Education is understood as the primary vehicle for family advancement, and parents are making significant financial sacrifices for school fees. This gives the guru relationship a specific urgency \u2014 the teacher is not just an educator but someone entrusted with the family's social trajectory.",
+        ],
+      },
+      {
+        id: 'gulf-diaspora',
+        label: 'Indian families in the Gulf',
+        description: 'UAE, Saudi Arabia, Qatar, Kuwait, Bahrain, Oman',
+        content: [
+          "The Indian diaspora in the Gulf is one of the largest in the world \u2014 approximately eight to nine million people \u2014 and it is not a uniform population. In international school contexts, you are typically dealing with the professional and aspirational tier: engineers, doctors, accountants, IT professionals, and business owners. But unlike the urban Indian professional in Delhi or Mumbai, many Gulf-based Indian families originally come from smaller cities and towns, often from Kerala, Andhra Pradesh, Tamil Nadu, or UP. Their cultural values tend to be more traditional than Indian metropolitan norms.",
+          "Izzat is particularly heightened in the Gulf Indian community. These families are acutely aware that their child's school performance is visible not just locally but back home in India \u2014 through family WhatsApp groups, community networks, and the status signals that school names carry. Education is also a direct economic statement: the family is in the Gulf to build something, and the school is part of that investment story.",
+          "Many Gulf-based Indian families intend to return to India eventually, or to move to a Western country. The international school is often understood as a stepping stone on one of these two trajectories. This shapes how parents engage with the curriculum \u2014 they are evaluating whether it positions their child well for Indian competitive entrance exams, for British A-levels, or for US college admissions, depending on the family's direction of travel.",
+          "Jugaad is active here. Gulf-based Indian families are often excellent navigators of imperfect institutional systems \u2014 they have had to be. Informal channels, community connections, and direct approaches will be used alongside formal ones. Rishta within the Indian community is a significant resource: who you know within the Indian professional network shapes what you can access.",
+        ],
+      },
+      {
+        id: 'western-diaspora',
+        label: 'Indian diaspora in the West',
+        description: 'UK, US, Canada, Australia, New Zealand',
+        content: [
+          "British Indian, Indian-American, and Indian-Canadian communities are among the most educationally high-achieving diaspora populations in the world. The academic pressure this produces is often invisible to teachers because it operates primarily at home. A student who appears relaxed and socially confident at school may be managing intense family expectations tied to medicine, law, engineering, or finance as the only legitimate career paths. The concept of gongbu in the Korean module has a direct Indian-diaspora equivalent.",
+          "The guru dynamic operates with particular force in these communities. Many Indian-diaspora parents are highly educated professionals \u2014 doctors, engineers, academics \u2014 who deeply respect educational authority and bring high expectations of that authority simultaneously. They may appear very comfortable navigating Western institutional culture while privately evaluating the teacher against demanding standards. Criticism delivered without sufficient authority or expertise will land poorly.",
+          "Generational tension is significant. Second-generation students have often fully internalized Western individualism \u2014 they expect voice, self-determination, and the right to deviate from family plans. Their parents hold Indian collective expectations: family priority, community standing, academic seriousness. The student navigating these two systems simultaneously may appear inconsistent or ambivalent; this is usually the pull between two legitimate but incompatible frameworks.",
+          "Community infrastructure is dense in cities like London, Toronto, and parts of the US. Indian cultural associations, temple communities, and weekend language schools maintain cultural continuity. Rishta within this network is a real social resource. A parent who is well-connected in the Indian community may bring those connections to bear on school interactions in ways that are not always obvious to a teacher without a window into that world.",
+        ],
+      },
+      {
+        id: 'southeast-asia',
+        label: 'Indian diaspora in Southeast Asia',
+        description: 'Singapore, Malaysia, and beyond',
+        content: [
+          "Tamil communities in Singapore and Malaysia have been established for over a century, with roots in South Indian labour migration under British colonial administration. These families are distinct from recent Indian professional arrivals and from the broader Indian diaspora in the West. A Tamil Singaporean family has a Singaporean identity, a Singaporean educational history, and a specific relationship to Tamil language and Hindu practice that does not map neatly onto a mainland Indian frame.",
+          "Singapore's highly competitive educational system has shaped Indian-Singaporean families significantly. Many are accustomed to rigorous academic benchmarking and may bring precise expectations to an international school \u2014 expectations that are as much Singaporean as they are Indian. The guru concept is present, but filtered through Singapore's meritocratic institutional culture, which gives it a more transactional quality than you might find in India itself.",
+          "Indian communities in Malaysia have a more complex position \u2014 historically marginalised under Malaysian affirmative action policies that favour the Malay majority, Indian-Malaysian families often have an acute awareness of their minority status and its implications for their children's futures. Education is understood as the primary tool available to them, which intensifies academic investment and the izzat carried by school performance.",
+          "Across Southeast Asia, recent Indian professional arrivals \u2014 IT workers, consultants, corporate professionals \u2014 form a distinct population from established community families. They are often in the country temporarily, highly internationally mobile, and may have already lived in multiple countries. Their cultural values are recognisably Indian but their institutional fluency is high. They tend to be direct, expectations-clear parents who are comfortable navigating international school systems.",
+        ],
+      },
+    ],
+  },
   facilitatorNote: "India is vastly diverse, and no five terms can represent every family or region. These concepts are widely shared enough across urban, aspirational, private-school contexts to be genuinely useful \u2014 but always hold them loosely and let individual families teach you their own version.",
   cards: [
     {

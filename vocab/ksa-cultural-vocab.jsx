@@ -15,6 +15,43 @@ export const ksaCulturalVocab = {
     ],
     question: "What happened in that first phone call? And why does your colleague find this completely unsurprising?",
   },
+  contextModifiers: {
+    prompt: "What is your context with Saudi and Gulf Arab families?",
+    helpText: "The cultural foundations in this module are consistent across Arab Gulf contexts, but how they show up in school depends significantly on whether the family is at home, living abroad, or from a neighbouring Gulf state.",
+    options: [
+      {
+        id: 'in-saudi',
+        label: 'Teaching in Saudi Arabia',
+        description: 'You are working at a school inside the Kingdom',
+        content: [
+          "This module was written for your context. Saudi Arabia is mid-transformation under Vision 2030, and the pace of social change is uneven \u2014 which means the families in your school are not a uniform group. Some have embraced liberalisation enthusiastically; others are quietly holding traditional values more tightly precisely because the pressure to change feels fast. The school can be a site where these tensions become visible.",
+          "Wasta, izzah, haya, amana, and sabr all operate as described in the cards. What is worth adding: the concept of 'face' in Saudi Arabia is deeply collective. A concern that touches one family can ripple through the extended family and community faster than you might expect. This is not gossip \u2014 it is how networks of trust and obligation function.",
+          "Teachers arriving from Western contexts often underestimate how much the school is watched \u2014 not with hostility, but with careful attention. Families want to know that their amana is in capable, morally serious hands. Consistency, warmth, and clear communication go a long way. Unpredictability or informality can be read as a lack of seriousness rather than as approachability.",
+        ],
+      },
+      {
+        id: 'abroad',
+        label: 'Saudi / Gulf families abroad',
+        description: 'Students studying in Western or international schools outside the Gulf',
+        content: [
+          "Saudi and Gulf Arab families who choose to place their children in schools outside the region are self-selected for openness to international education. They have made a deliberate decision that Western or internationally accredited schooling offers something they want for their child. This does not mean they have set aside their cultural values \u2014 it means they are trying to hold both.",
+          "Izzah is often heightened when living as a minority. The family's reputation is now concentrated within a smaller Gulf expatriate community rather than spread across a large home network. What happens to their child at school can feel more visible and more consequential as a result. Protecting family dignity in a foreign context carries extra weight.",
+          "Haya may manifest differently in Western peer settings. Students often code-switch \u2014 appearing more expressive and socially integrated at school while maintaining modesty norms at home. This is adaptive intelligence, not inauthenticity. A student who seems fully Westernized at school may be navigating a very different set of expectations in the evening.",
+          "Wasta operates differently abroad. The family's primary social network is back home, so the informal influence mechanisms that work in Saudi Arabia are less available to them. They may compensate by being more formal, more persistent through official channels, or more likely to reference connections that are geographically distant. A request that references someone 'back home who knows the school' should be read as the closest available wasta activation.",
+        ],
+      },
+      {
+        id: 'gulf-neighbors',
+        label: 'Non-Saudi Arab Gulf families',
+        description: 'UAE, Qatar, Kuwait, Bahrain, Oman',
+        content: [
+          "The five cultural concepts in this module \u2014 wasta, izzah, haya, amana, sabr \u2014 apply broadly across the Arab Gulf and will be recognisable to Emirati, Qatari, Kuwaiti, Bahraini, and Omani families. The shared foundation of Islamic values, Arabic language, and tribal family structure means the conceptual framework translates. But national identity matters, and assuming all Gulf Arab families are interchangeable is a mistake families will notice.",
+          "UAE families \u2014 especially from Dubai and Abu Dhabi \u2014 are often more internationally experienced than Saudi families. The UAE is a major global hub and Emiratis are accustomed to navigating multinational environments. This can produce a different relationship to translation work: some Emirati parents are highly fluent in the language of international school culture and use it comfortably. The underlying values remain, but the surface presentation may feel more Western-facing.",
+          "Qatari families share the Saudi pattern closely \u2014 tribal family structures, strong Islamic identity, high investment in children's education as a family project. Kuwaiti families tend to be cosmopolitan, well-travelled, and often educated abroad themselves. Bahraini and Omani families each have distinct national characters. The safest approach is to treat these concepts as a starting hypothesis and let individual families teach you their specific expression.",
+        ],
+      },
+    ],
+  },
   facilitatorNote: "These terms come from inside the culture. You don't need to speak Arabic to use them — but recognising them changes how you read everyday school interactions. Each card focuses on a concept that has no clean English equivalent and that regularly shapes parent, student, and colleague behaviour in Saudi school settings.",
   cards: [
     {

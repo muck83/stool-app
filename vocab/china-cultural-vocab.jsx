@@ -15,6 +15,55 @@ export const chinaCulturalVocab = {
     ],
     question: "What did the dumplings mean? And what happened the moment you said the groups were fixed?",
   },
+  contextModifiers: {
+    prompt: "Where are your Chinese students from or living?",
+    helpText: "The five concepts in this module originate in mainland Chinese Confucian tradition \u2014 but they express very differently depending on whether your students are from the mainland, the overseas Chinese diaspora, or from Hong Kong or Taiwan. These are not the same population.",
+    options: [
+      {
+        id: 'mainland',
+        label: 'Mainland China',
+        description: 'Teaching in China, or recent mainland arrivals',
+        content: [
+          "This module was written with mainland Chinese families in mind. Mianzi, guanxi, jiaoyu, suzhi, and k\u00e8q\u00ec all apply as described. One layer worth adding: the one-child policy generation \u2014 students born between roughly 1980 and 2015 \u2014 are often the sole focus of two parents and four grandparents. The investment is intense and the expectations correspondingly high. A single child carries the educational ambitions of an entire extended family.",
+          "Even in international schools, many mainland families keep one eye on the gaokao trajectory or Chinese university pathways. The international school may be valued for English and global exposure while the family simultaneously runs a parallel academic programme at home aligned to Chinese standards. What looks like over-scheduling is often a hedging strategy.",
+          "A subtler dynamic worth knowing: Chinese nationalism has strengthened among younger mainland families since roughly 2015. Some parents are explicitly cautious about Western cultural influence while simultaneously choosing Western-format education for their child. This is not hypocrisy \u2014 it is a genuine tension they are managing. Avoid framing Western educational approaches as inherently superior; it will land badly.",
+        ],
+      },
+      {
+        id: 'southeast-asia-chinese',
+        label: 'Overseas Chinese in Southeast Asia',
+        description: 'Malaysia, Singapore, Indonesia, Thailand, Vietnam, Philippines',
+        content: [
+          "Overseas Chinese communities in Southeast Asia \u2014 known as Huaren (\u534e\u4eba) \u2014 are among the most distinct and often misunderstood populations in international schools. Many families have been in the region for three, four, or five generations, with roots in Fujian, Guangdong, and Hakka communities that emigrated in the 18th and 19th centuries. They are not recent mainland Chinese and should not be treated as such.",
+          "In a significant historical irony, overseas Chinese communities often preserved Confucian values more intact than mainland China itself, which underwent the Cultural Revolution's deliberate dismantling of traditional culture. Mianzi, guanxi, and jiaoyu may operate with more traditional force in a Penang or Kuala Lumpur Chinese family than in a Shanghai one. The concepts in this module may feel especially resonant here.",
+          "These families have also been shaped by their host countries in complex ways. A Chinese-Malaysian family, a Chinese-Indonesian family, and a Chinese-Singaporean family are distinct communities with different relationships to the Chinese mainland, different local languages, and different histories of majority-minority tension. Do not assume shared identity. What they share is the Confucian cultural foundation \u2014 the specific national expression differs significantly.",
+          "One important nuance: some long-established overseas Chinese families feel ambivalent or even resistant to being grouped with mainland Chinese, whose values and political orientation they may see as quite different from their own. A family that has been Singaporean or Malaysian for four generations may not appreciate being characterised through a mainland lens.",
+        ],
+      },
+      {
+        id: 'western-diaspora',
+        label: 'Chinese diaspora in the West',
+        description: 'UK, US, Canada, Australia, New Zealand',
+        content: [
+          "Chinese communities in Western countries are among the most academically high-performing diaspora populations in the world, and the pressure that produces this performance is usually invisible to teachers. A student who appears confident, socially integrated, and Westernised may be managing intense family expectations at home that never surface at school. Academic failure \u2014 or even underperformance relative to family expectations \u2014 carries mianzi consequences that extend to grandparents and extended family back in China.",
+          "The generational dynamic is significant. First-generation parents hold mainland or Hong Kong values; their children are growing up Western. Students often code-switch between home and school \u2014 deferential and academically serious at home, more expressive and individual at school. This is not inconsistency; it is sophisticated cultural navigation. When it breaks down, it usually shows up as the student being visibly caught between two operating systems.",
+          "Guanxi operates within the local Chinese community as much as toward the school. A parent who is well-connected within the Chinese community may be activating those connections in ways that are invisible to a teacher with no Chinese social network. Generosity toward the school \u2014 donations, volunteering, gifts \u2014 may be building guanxi as much as it is expressing goodwill.",
+          "Suzhi aspiration is often expressed through music lessons, academic competitions, coding clubs, and extracurricular breadth. The Saturday Chinese school \u2014 where many diaspora children spend weekend mornings \u2014 is both language maintenance and a community anchor. Do not underestimate its importance to the family's sense of cultural continuity.",
+        ],
+      },
+      {
+        id: 'hk-taiwan',
+        label: 'Hong Kong or Taiwan',
+        description: 'Distinct from mainland China \u2014 culturally and politically',
+        content: [
+          "Hong Kong and Taiwan families share the Confucian cultural foundation of this module, but they have distinct identities that matter deeply to them. Assuming they are the same as mainland Chinese families \u2014 or grouping them together without acknowledgment \u2014 is an error families will notice and remember. Both populations have specific political histories that make this sensitivity more than a point of pride.",
+          "Hong Kong families carry significant recent political context. Since the 2020 National Security Law, many families who chose international schools outside Hong Kong did so deliberately \u2014 they left. This shapes how they think about institutions, authority, and the value of international education. A Hong Kong parent may bring a more rule-of-law, civil-society orientation to school engagement than mainland Chinese parents, and may be more comfortable with open debate and institutional challenge.",
+          "Taiwanese families have a distinctly Taiwanese identity that is separate from PRC Chinese identity. Taiwan is democratic, has Japanese cultural influence, and tends toward more individualistic expression than mainland China. Mianzi still operates, but with less force. Taiwanese parents may be more comfortable with direct communication and open feedback than the k\u00e8q\u00ec model would suggest.",
+          "In practice: if you are unsure whether a family is mainland Chinese, Hong Konger, or Taiwanese, it is always worth asking \u2014 carefully and with genuine curiosity rather than as a categorisation exercise. Most families will appreciate the distinction being acknowledged.",
+        ],
+      },
+    ],
+  },
   facilitatorNote: "These terms come from inside Chinese social and educational culture. They are not stereotypes \u2014 they are lenses. Each one describes a real mechanism that operates in parent-teacher interactions, often invisibly to educators who have not encountered them before.",
   cards: [
     {
