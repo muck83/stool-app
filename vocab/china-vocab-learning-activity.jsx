@@ -40,7 +40,7 @@ export const chinaVocabLearningActivity = {
     },
     {
       citation:
-        'Poole, A., & Bunnell, T. (2024/2025). Host National Teachers' Perceptions of Foreign Educators: Insights into the Changing International School Sector in China.',
+        'Poole, A., & Bunnell, T. (2024/2025). Host National Teachers\' Perceptions of Foreign Educators: Insights into the Changing International School Sector in China.',
       doi: '10.1080/00071005.2024.2393816',
       url: 'https://doi.org/10.1080/00071005.2024.2393816',
       use: 'Changing teacher roles, host-national expertise, and the shrinking automatic status of foreign educators in China\'s internationalised sector.',
