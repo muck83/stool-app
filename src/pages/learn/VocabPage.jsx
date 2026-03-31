@@ -457,6 +457,7 @@ export default function VocabPage() {
   const [finalScore, setFinalScore] = useState(null)
 
   useEffect(() => {
+    window.scrollTo(0, 0)
     if (modMeta) {
       const prog = getVocabProgress(modMeta.id)
       if (prog?.completed) {

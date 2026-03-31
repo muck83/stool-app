@@ -348,6 +348,7 @@ export default function CulturalVocabPage() {
   const [marked, setMarked] = useState(false)
 
   useEffect(() => {
+    window.scrollTo(0, 0)
     if (moduleId) setDone(isCulturalVocabCompleted(moduleId))
   }, [moduleId])
 
