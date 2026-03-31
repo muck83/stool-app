@@ -1,7 +1,9 @@
+import { useState, useEffect } from 'react'
 import { useProfile } from '../../context/ProfileContext.jsx'
 import { HOF, DLBLS, DCOLS } from '../../data/hofstede.js'
 import { CITIES } from '../../data/geo.js'
 import { SALARY_DB_SEED } from '../../data/salaryDb.js'
+import { supabase } from '../../lib/supabase.js'
 
 const LEG_DEFS = [
   { key: 'sch', l: 'School',  c: '#BA7517', bg: '#FAEEDA', desc: 'Leadership, culture, mission' },
@@ -48,6 +50,18 @@ function QuestionCard({ q, c, bg, urgent, badge, badgeCol, sub, action, onClick 
 
 export default function Overview() {
   const { profile, setActiveTab, editProfile } = useProfile()
+  const [liveCount, setLiveCount] = useState(SALARY_DB_SEED.length)
+
+  useEffect(() => {
+    if (!supabase) return
+    supabase
+      .from('salary_submissions')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'active')
+      .then(({ count }) => {
+        if (count && count > 0) setLiveCount(SALARY_DB_SEED.length + count)
+      })
+  }, [])
   const { sch = 5, plc = 5, pkg = 5, sal = 0, cc, home, dc, dcity, hous, flt, tax } = profile
 
   const strong = [sch, plc, pkg].filter(s => s >= 6).length
@@ -80,7 +94,7 @@ export default function Overview() {
         : salGap !== null && salGap < -20 ? `You're earning ${Math.abs(salGap)}% below the median for your region. Is that intentional?`
         : salGap !== null && salGap < 0 ? "You're slightly below the regional median. See the full picture."
         : `You're above the regional median. See how you compare across ${cc || 'your region'}.`,
-      sub: `${SALARY_DB_SEED.length.toLocaleString()} real educator salary records — filterable by country, curriculum, and role. Know what the market pays before your next negotiation.`,
+      sub: `${liveCount.toLocaleString()} real educator salary records — filterable by country, curriculum, and role. Know what the market pays before your next negotiation.`,
       c: '#1D9E75', bg: '#E1F5EE', badgeCol: '#1D9E75',
       badge: sal > 0 && salGap !== null && salGap < -20 ? 'Worth checking' : 'Explore',
       urgent: sal > 0 && salGap !== null && salGap < -20,
@@ -117,11 +131,11 @@ export default function Overview() {
     },
   ]
 
-  // Community stats from salary seed data
-  const totalRecords = SALARY_DB_SEED.length
+  // Community stats — seed data for country/tax calcs, liveCount for display
+  const totalRecords = liveCount
   const totalCountries = new Set(SALARY_DB_SEED.map(r => r.country)).size
   const taxFreeCount = SALARY_DB_SEED.filter(r => r.tax && (r.tax === '0%' || r.tax === '0' || /school pays|tax.?free|no tax/i.test(r.tax))).length
-  const taxFreePct = Math.round(taxFreeCount / totalRecords * 100)
+  const taxFreePct = Math.round(taxFreeCount / SALARY_DB_SEED.length * 100)
 
   return (
     <div className="tp active">
@@ -191,7 +205,7 @@ export default function Overview() {
             <>
               <div className="g2" style={{ marginTop: '.5rem' }}>
                 <div className="chip"><div className="chl">Your salary</div><div className="chv">${sal.toLocaleString()}</div><div className="chs">USD monthly</div></div>
-                <div className="chip"><div className="chl">Regional median</div><div className="chv">${(cd.med || 4307).toLocaleString()}</div><div className="chs">from {SALARY_DB_SEED.length.toLocaleString()} records</div></div>
+                <div className="chip"><div className="chl">Regional median</div><div className="chv">${(cd.med || 4307).toLocaleString()}</div><div className="chs">from {liveCount.toLocaleString()} records</div></div>
               </div>
               <div style={{ marginTop: '.75rem', fontSize: 12.5, color: 'var(--ink-3)', lineHeight: 1.6 }}>
                 You are <strong style={{ color: salGap >= 0 ? 'var(--teal-dark)' : 'var(--coral-dark)' }}>{salGap >= 0 ? '+' : ''}{salGap}%</strong> vs. the regional median.
