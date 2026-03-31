@@ -10,6 +10,61 @@ export const koreaIbParent = {
   country: 'south-korea',
   program: 'IB',
 
+  journeyStages: [
+    {
+      id: 'new',
+      en: {
+        label: 'New to IB',
+        description: 'Your child has just started at an IB school, or you\'re preparing for the move. The five concepts in Part 1 are the most important things to understand in your first term.',
+        highlight: 'Start with Part 1',
+      },
+      ko: {
+        label: 'IB 처음 시작',
+        description: '자녀가 IB 학교에 막 입학했거나 전환을 준비 중입니다. 1부의 다섯 가지 개념이 첫 학기에 가장 중요하게 이해해야 할 것들입니다.',
+        highlight: '1부부터 시작하세요',
+      },
+    },
+    {
+      id: 'settled',
+      en: {
+        label: 'Settling in',
+        description: 'You\'ve been at the school a year or more and have seen a few reports. The grading system still feels unfamiliar. The Part 3 calculators are most useful for you right now.',
+        highlight: 'Jump to Part 3 — the grade calculators',
+      },
+      ko: {
+        label: '적응 중',
+        description: '학교에 다닌 지 1년 이상 되어 성적표를 몇 번 받았습니다. 성적 체계가 아직 낯설게 느껴집니다. 지금은 3부의 성적 계산기가 가장 유용합니다.',
+        highlight: '3부 — 성적 계산기로 바로 이동하세요',
+      },
+    },
+    {
+      id: 'pyp-myp',
+      en: {
+        label: 'PYP → MYP',
+        description: 'Your child is moving from Primary Years to Middle Years, or has just arrived in MYP from a non-IB primary school. Grades appear for the first time — and the system can feel most confusing right now. See Part 4 for PYP-specific guidance.',
+        highlight: 'See Part 4 — PYP concepts — then Part 3 for grade calculators',
+      },
+      ko: {
+        label: 'PYP → MYP 전환',
+        description: '자녀가 PYP(초등)에서 MYP(중등)로 이동 중이거나, 비IB 초등학교에서 MYP로 막 전학했습니다. 처음으로 성적이 등장하는 시기입니다. PYP 관련 안내는 4부를 참고하세요.',
+        highlight: '4부(PYP 개념)를 먼저 보신 후 3부(성적 계산기)를 확인하세요',
+      },
+    },
+    {
+      id: 'myp-dp',
+      en: {
+        label: 'MYP → DP',
+        description: 'Your child is approaching the Diploma Programme. Subject selection, HL/SL choices, and predicted grades are now the decisions that matter. The DP calculator in Part 3 is the most important tool here.',
+        highlight: 'Focus on Part 3 — the DP calculator — and card 3 (Student Agency) and card 5 (CAS)',
+      },
+      ko: {
+        label: 'MYP → DP 전환',
+        description: '자녀가 DP(디플로마 과정)에 다가가고 있습니다. 과목 선택, HL/SL 결정, 예상 점수가 핵심 사안입니다. 3부의 DP 계산기가 지금 가장 중요한 도구입니다.',
+        highlight: '3부(DP 계산기)와 3번 카드(학습자 주도성), 5번 카드(CAS)에 집중하세요',
+      },
+    },
+  ],
+
   meta: {
     en: {
       title: 'Understanding Your Child\'s IB School',
@@ -47,6 +102,7 @@ export const koreaIbParent = {
   cards: [
     {
       id: 'card-001',
+      relevantAt: ['new', 'pyp-myp'],
       ibComponent: 'All programmes',
       en: {
         concept: 'Inquiry-Based Learning',
@@ -73,6 +129,7 @@ export const koreaIbParent = {
     },
     {
       id: 'card-002',
+      relevantAt: ['settled', 'pyp-myp', 'myp-dp'],
       ibComponent: 'MYP & DP assessment',
       en: {
         concept: 'Criterion-Based Assessment',
@@ -99,6 +156,7 @@ export const koreaIbParent = {
     },
     {
       id: 'card-003',
+      relevantAt: ['new', 'myp-dp'],
       ibComponent: 'MYP Personal Project / DP Extended Essay',
       en: {
         concept: 'Student Agency',
@@ -125,6 +183,7 @@ export const koreaIbParent = {
     },
     {
       id: 'card-004',
+      relevantAt: ['new', 'settled', 'pyp-myp'],
       ibComponent: 'Formative assessment (all programmes)',
       en: {
         concept: 'Formative Feedback',
@@ -151,6 +210,7 @@ export const koreaIbParent = {
     },
     {
       id: 'card-005',
+      relevantAt: ['myp-dp'],
       ibComponent: 'DP Core — CAS',
       en: {
         concept: 'CAS — Creativity, Activity, Service',
@@ -210,6 +270,139 @@ export const koreaIbParent = {
         situation: '수업 참관일에 선생님이 질문을 했습니다. 아무도 즉시 대답하지 않았습니다. 선생님이 기다렸습니다. 거의 30초가 지났습니다. 마침내 한 학생이 말했습니다. 선생님은 이렇게 답했습니다: "흥미롭네요. 왜 그렇게 생각하나요?" 학생이 불안해 보였습니다. 수업은 명확한 결론 없이 끝났습니다.',
         withUnderstanding: '선생님이 의도적인 "대기 시간"을 사용하고 있음을 알아봅니다. 연구에 따르면 이는 학생의 사고 질을 크게 향상시킵니다. 후속 질문은 비판이 아닌 소크라테스식 방법입니다. 깔끔한 결론이 없는 것도 의도적입니다. 학생들이 그 질문을 가지고 돌아가길 바라는 것입니다. 학교가 사려 깊은 교육을 하고 있다는 느낌으로 참관을 마칩니다.',
         withoutUnderstanding: '교실이 무질서하고, 선생님이 자신의 질문에 답을 모르는 것 같고, 수업이 결론에 이르지 못한다고 생각합니다. 선생님이 충분한 자격이 있는지 교장 선생님께 이메일을 씁니다.',
+      },
+    },
+  ],
+
+  pypCards: [
+    {
+      id: 'pyp-001',
+      ibComponent: 'PYP — Reporting',
+      en: {
+        concept: 'No Grades in PYP',
+        concern: 'Other schools give percentage scores or letter grades. PYP reports are full of descriptions, learning profiles, and teacher observations — but no numbers. Without a number, it\'s hard to know whether your child is ahead, behind, or on track.',
+        bridge: 'PYP uses narrative reporting because at ages 3–11, a single number oversimplifies what a child can actually do. A narrative report tells you what your child understands, how they approach challenges, and where to focus — it is more diagnostic than a grade, not less. The absence of numbers is a design choice, not an oversight.',
+        goal: 'When your child enters MYP (around age 11), criterion-based grades appear for the first time. The self-awareness built through PYP narrative reporting means they arrive in that graded system knowing how to reflect on their own learning — a huge advantage over students who only ever received a number.',
+        ibConnection: 'PYP uses the IB\'s own reporting framework. Teachers observe and document learning against the PYP curriculum, not against a national grade standard.',
+        whatToAsk: [
+          '"What specific evidence of progress have you seen from my child this term?" — reports use standard language; asking for evidence makes it concrete.',
+          '"What is my child finding genuinely difficult right now?" — PYP teachers observe closely and will know.',
+        ],
+      },
+      ko: {
+        concept: 'PYP에는 성적이 없습니다',
+        concern: '다른 학교들은 백분율 점수나 등급을 줍니다. PYP 성적표는 서술, 학습 프로파일, 교사 관찰로 가득 차 있지만 숫자가 없습니다. 숫자 없이는 자녀가 앞서 있는지, 뒤처져 있는지, 아니면 정상 궤도에 있는지 알기 어렵습니다.',
+        bridge: 'PYP가 서술적 보고를 사용하는 것은 3~11세에 단일 숫자가 아이가 실제로 할 수 있는 것을 지나치게 단순화하기 때문입니다. 서술적 성적표는 자녀가 무엇을 이해하는지, 어려움에 어떻게 접근하는지, 어디에 집중해야 하는지를 알려줍니다. 이는 점수보다 더 진단적인 것이지 덜한 것이 아닙니다. 숫자의 부재는 설계상의 선택이지 실수가 아닙니다.',
+        goal: '자녀가 MYP(약 11세)에 진입하면 처음으로 준거 기반 성적이 등장합니다. PYP 서술적 보고를 통해 쌓인 자기 인식은 자녀가 그 채점 시스템에 자신의 학습을 성찰하는 방법을 알고 들어간다는 것을 의미합니다. 숫자만 받아온 학생들에 비해 큰 강점입니다.',
+        ibConnection: 'PYP는 IB 자체 보고 프레임워크를 사용합니다. 교사는 국가 성적 기준이 아닌 PYP 교육과정에 따라 학습을 관찰하고 기록합니다.',
+        whatToAsk: [
+          '"이번 학기 자녀의 발전에 대한 구체적인 증거를 어떤 것을 보셨나요?" — 성적표는 표준 언어를 사용하므로 증거를 묻는 것이 구체적으로 이해하는 데 도움이 됩니다.',
+          '"자녀가 지금 진정으로 어려움을 겪고 있는 것이 무엇인가요?" — PYP 교사는 면밀히 관찰하므로 알고 있을 것입니다.',
+        ],
+      },
+    },
+    {
+      id: 'pyp-002',
+      ibComponent: 'PYP — Units of Inquiry',
+      en: {
+        concept: 'Units of Inquiry',
+        concern: 'My child\'s school doesn\'t seem to teach separate subjects. They\'re studying "How We Organize Ourselves" this term. I\'m not sure if they\'re getting enough Maths or English.',
+        bridge: 'PYP organizes learning through transdisciplinary Units of Inquiry — themes that connect multiple subject areas around a real-world concept. Maths, language, science, and social studies are all being taught; they\'re woven together rather than delivered as isolated blocks. The skills are present. The packaging is different.',
+        goal: 'Research on transfer of learning shows that knowledge acquired in context — connected to something real and meaningful — transfers to new situations far more effectively than knowledge learned in isolation. PYP builds the connective understanding that makes later, more specialized learning stick.',
+        ibConnection: 'PYP has six transdisciplinary themes that all schools use: Who We Are, Where We Are in Place and Time, How We Express Ourselves, How the World Works, How We Organize Ourselves, and Sharing the Planet.',
+        whatToAsk: [
+          '"Which Maths and language skills is this unit developing?" — teachers can map it precisely against curriculum scope and sequence.',
+          'Ask your child: "What is your class inquiry question right now?" — if they can tell you clearly, the learning is working.',
+        ],
+      },
+      ko: {
+        concept: '탐구 단원',
+        concern: '자녀의 학교는 별도의 과목을 가르치지 않는 것 같습니다. 이번 학기에는 "우리는 어떻게 조직화하는가"를 공부하고 있습니다. 수학이나 영어를 충분히 배우는지 모르겠습니다.',
+        bridge: 'PYP는 실제 개념을 중심으로 여러 교과 영역을 연결하는 탐구 단원을 통해 학습을 조직합니다. 수학, 언어, 과학, 사회는 모두 가르치고 있습니다. 다만 고립된 블록이 아닌 함께 엮여서 전달됩니다. 기술은 있습니다. 포장이 다를 뿐입니다.',
+        goal: '학습 전이에 관한 연구에 따르면 실제적이고 의미 있는 것에 연결되어 맥락 속에서 습득한 지식이 고립된 환경에서 배운 지식보다 새로운 상황에 훨씬 효과적으로 전이됩니다. PYP는 이후의 더 전문화된 학습을 공고히 하는 연결적 이해를 구축합니다.',
+        ibConnection: 'PYP에는 모든 학교가 사용하는 여섯 가지 탐구 주제가 있습니다: 우리는 누구인가, 우리는 시간과 공간에서 어디에 있는가, 우리는 어떻게 표현하는가, 세계는 어떻게 작동하는가, 우리는 어떻게 조직화하는가, 지구 공유하기.',
+        whatToAsk: [
+          '"이 단원은 어떤 수학과 언어 기술을 발전시키나요?" — 교사는 교육과정 범위와 순서에 따라 정확하게 설명할 수 있습니다.',
+          '자녀에게 "지금 수업의 탐구 질문이 뭐야?"라고 물어보세요. 명확하게 대답할 수 있다면 학습이 작동하고 있는 것입니다.',
+        ],
+      },
+    },
+    {
+      id: 'pyp-003',
+      ibComponent: 'PYP Early Years',
+      en: {
+        concept: 'Play-Based Learning',
+        concern: 'My child comes home talking about games and stories. In other schools at this age, children are already reading and writing formally. I\'m worried they are falling behind.',
+        bridge: 'In PYP Early Years (ages 3–6), structured play is the curriculum — not a break from it. Children develop language, mathematical thinking, social reasoning, and inquiry skills through purposeful, teacher-designed play. Both the IB and decades of developmental research agree: formal academic instruction before age 6–7 does not produce better long-term outcomes and often produces worse ones by undermining intrinsic motivation.',
+        goal: 'Children who learn through play in early years develop stronger self-regulation, creativity, and internal motivation than those pushed into formal academics early. These qualities predict success in the more structured MYP and DP years ahead — and are much harder to develop once lost.',
+        ibConnection: 'PYP Early Years is aligned with international research on early childhood development, including work from Finland, New Zealand\'s Te Whāriki, and the Reggio Emilia approach.',
+        whatToAsk: [
+          '"What learning objectives is this play activity building toward?" — in PYP, play always has intentional design behind it.',
+          'If you\'re concerned about readiness: "How is my child progressing in reading and number sense compared to expectations for this age?" — the teacher will have a clear picture.',
+        ],
+      },
+      ko: {
+        concept: '놀이 기반 학습',
+        concern: '자녀가 게임과 이야기에 대해 이야기하며 집에 옵니다. 다른 학교에서는 이 나이에 이미 공식적으로 읽고 쓰고 있습니다. 뒤처질까 봐 걱정됩니다.',
+        bridge: 'PYP 초기 과정(3~6세)에서 구조화된 놀이는 교육과정의 휴식이 아니라 교육과정 그 자체입니다. 아이들은 교사가 설계한 목적 있는 놀이를 통해 언어, 수학적 사고, 사회적 추론, 탐구 기술을 발전시킵니다. IB와 수십 년간의 발달 연구 모두 동의합니다. 6~7세 이전의 공식적 학문 교육은 더 나은 장기적 결과를 만들어내지 않으며, 종종 내재적 동기를 훼손하여 더 나쁜 결과를 낳습니다.',
+        goal: '초기에 놀이를 통해 배운 아이들은 일찍 공식 학습에 투입된 아이들보다 더 강한 자기조절력, 창의성, 내적 동기를 발전시킵니다. 이러한 자질은 앞으로의 더 구조화된 MYP와 DP 과정에서의 성공을 예측하며, 한번 잃으면 회복하기가 훨씬 어렵습니다.',
+        ibConnection: 'PYP 초기 과정은 핀란드, 뉴질랜드의 테 화리키, 레지오 에밀리아 접근법을 포함한 국제 아동 발달 연구와 일치합니다.',
+        whatToAsk: [
+          '"이 놀이 활동은 어떤 학습 목표를 향하고 있나요?" — PYP에서 놀이는 항상 의도적인 설계가 뒤에 있습니다.',
+          '준비도가 걱정된다면: "이 나이 기대치와 비교하여 자녀의 읽기와 수 감각 발전은 어떤가요?" — 교사는 명확한 상황을 파악하고 있을 것입니다.',
+        ],
+      },
+    },
+    {
+      id: 'pyp-004',
+      ibComponent: 'PYP Exhibition (Year 5/6)',
+      en: {
+        concept: 'The PYP Exhibition',
+        concern: 'My child in Year 5 or 6 has been given a large independent project where they choose a global issue to investigate. It seems vague and unstructured. Other children at this age are preparing for exams.',
+        bridge: 'The PYP Exhibition is the culminating assessment of the entire Primary Years Programme — the equivalent of a final exam, but in project form. Students choose a real-world issue, research it independently, collaborate with peers, connect with a mentor, and present findings to the school community. It is assessed against PYP criteria and taken very seriously by the school. The apparent openness is scaffolded structure in disguise.',
+        goal: 'The Exhibition is specifically designed to prepare students for the MYP Personal Project (Year 10) and the DP Extended Essay (Year 12). It is the first moment where everything PYP has built — inquiry skills, self-direction, collaboration, reflection — gets demonstrated publicly.',
+        ibConnection: 'The Exhibition is a mandatory, assessed component of PYP completion. Students must demonstrate all five essential elements of the PYP: knowledge, concepts, skills, attitudes, and action.',
+        whatToAsk: [
+          '"What criteria will the Exhibition be assessed against?" — there is a clear framework; it is not as open as it looks.',
+          'Ask your child: "What action are you planning to take as part of your inquiry?" — PYP Exhibition requires a real-world action component, not just a presentation.',
+        ],
+      },
+      ko: {
+        concept: 'PYP 전시회',
+        concern: '5학년 또는 6학년인 자녀가 탐구할 세계적 이슈를 선택하는 대규모 독립 프로젝트를 받았습니다. 막연하고 구조가 없어 보입니다. 이 나이의 다른 아이들은 시험을 준비하고 있습니다.',
+        bridge: 'PYP 전시회는 전체 초등 과정(PYP)의 최종 평가입니다. 프로젝트 형태의 최종 시험이라고 할 수 있습니다. 학생들은 실제 세계 이슈를 선택하고, 독립적으로 연구하고, 동료와 협력하고, 멘토와 연결하고, 학교 커뮤니티에 결과를 발표합니다. PYP 준거에 따라 평가되며 학교는 매우 진지하게 다룹니다. 겉으로 보이는 개방성은 위장된 구조화된 비계입니다.',
+        goal: '전시회는 MYP 개인 프로젝트(10학년)와 DP 소논문(12학년)을 준비하기 위해 특별히 설계되었습니다. 탐구 기술, 자기주도, 협력, 성찰 등 PYP가 구축한 모든 것이 처음으로 공개적으로 증명되는 순간입니다.',
+        ibConnection: '전시회는 PYP 완료의 필수 평가 요소입니다. 학생들은 PYP의 다섯 가지 핵심 요소인 지식, 개념, 기술, 태도, 행동을 모두 증명해야 합니다.',
+        whatToAsk: [
+          '"전시회는 어떤 준거로 평가되나요?" — 명확한 프레임워크가 있습니다. 겉보기만큼 열려있지 않습니다.',
+          '자녀에게 "탐구의 일부로 어떤 행동을 계획하고 있어?"라고 물어보세요. PYP 전시회는 발표만이 아닌 실제 세계 행동 요소가 필요합니다.',
+        ],
+      },
+    },
+    {
+      id: 'pyp-005',
+      ibComponent: 'PYP → MYP transition',
+      en: {
+        concept: 'The Move to MYP',
+        concern: 'My child is moving from PYP to MYP next year. I\'ve heard things change significantly and I\'m not sure whether my child is prepared for what\'s ahead.',
+        bridge: 'The shift to MYP is real: subjects become separate disciplines, criterion-based grades appear for the first time, homework increases, and the academic pace picks up. The good news is that PYP was designed to build exactly the foundations MYP requires — independent thinking, self-direction, and genuine inquiry skills. Students who have engaged deeply with PYP have those foundations. Students who only passed through it may find the transition harder.',
+        goal: 'Students who arrive in MYP from strong PYP experience tend to adapt to the graded structure faster than those coming from traditional primary schools, because they already know how to learn — not just how to follow instructions. The adjustment period is real, but the foundation is there.',
+        ibConnection: 'The IB designs PYP and MYP as a continuum, not two separate programs. The inquiry approaches, Learner Profile attributes, and approaches to learning skills are explicitly carried forward.',
+        whatToAsk: [
+          'Ask the MYP coordinator: "How will my child be supported in understanding criterion-based assessment in their first MYP year?" — most IB schools have a deliberate transition program.',
+          'In the first MYP term, ask your child: "Do you understand what each criterion in your subjects is asking for?" — if not, that\'s the conversation to have with the subject teacher directly.',
+        ],
+      },
+      ko: {
+        concept: 'MYP로의 전환',
+        concern: '자녀가 내년에 PYP에서 MYP로 이동합니다. 상당히 변화가 있다고 들었는데 자녀가 앞으로의 것을 준비되었는지 모르겠습니다.',
+        bridge: 'MYP로의 전환은 실질적입니다. 과목이 별도 학문으로 나뉘고, 처음으로 준거 기반 성적이 등장하고, 숙제가 늘어나고, 학업 속도가 빨라집니다. 다행스러운 것은 PYP가 MYP에 필요한 바로 그 기초를 쌓도록 설계되었다는 점입니다. 독립적 사고, 자기주도, 진정한 탐구 기술 말입니다. PYP에 깊이 참여한 학생들은 그 기초를 갖추고 있습니다. 단순히 통과만 한 학생들은 전환이 더 어려울 수 있습니다.',
+        goal: 'PYP를 통해 탄탄한 경험을 가진 학생들은 전통적인 초등학교에서 온 학생들보다 MYP의 채점 구조에 더 빠르게 적응하는 경향이 있습니다. 지시를 따르는 방법이 아닌 배우는 방법을 이미 알고 있기 때문입니다. 적응 기간은 실제로 있지만 기초는 갖춰져 있습니다.',
+        ibConnection: 'IB는 PYP와 MYP를 두 개의 별도 프로그램이 아닌 연속체로 설계합니다. 탐구 접근법, 학습자 프로파일 속성, 학습 접근 기술이 명시적으로 이어집니다.',
+        whatToAsk: [
+          'MYP 코디네이터에게 "첫 MYP 학년에서 자녀가 준거 기반 평가를 이해하는 데 어떻게 지원될 건가요?"라고 물어보세요. 대부분의 IB 학교에는 의도적인 전환 프로그램이 있습니다.',
+          '첫 MYP 학기에 자녀에게 "각 과목의 준거가 무엇을 요구하는지 이해하고 있어?"라고 물어보세요. 그렇지 않다면 해당 과목 교사와 직접 대화해야 할 것입니다.',
+        ],
       },
     },
   ],

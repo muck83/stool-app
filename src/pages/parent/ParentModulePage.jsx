@@ -8,6 +8,7 @@ const MODULES = {
 
 const LS_LANG   = slug => `pd_parent_lang_${slug}`
 const LS_DONE   = slug => `pd_parent_done_${slug}`
+const LS_STAGE  = slug => `pd_parent_stage_${slug}`
 
 // ─── Language Toggle ────────────────────────────────────────────────────────
 function LangToggle({ lang, setLang }) {
@@ -79,25 +80,37 @@ function HookSection({ hook, lang }) {
 }
 
 // ─── Concept Card ────────────────────────────────────────────────────────────
-function ConceptCard({ card, lang, index }) {
+function ConceptCard({ card, lang, index, activeStage }) {
   const [open, setOpen] = useState(false)
   const c = card[lang]
   const colors = ['#1D9E75', '#185FA5', '#BA7517', '#534AB7', '#C0392B']
   const col = colors[index % colors.length]
+  const isRelevant = activeStage && card.relevantAt && card.relevantAt.includes(activeStage)
+  const stageCol = activeStage ? STAGE_COLORS[activeStage] : null
 
   return (
     <div style={{
-      border: `1px solid ${col}22`, borderTop: `3px solid ${col}`,
+      border: `1px solid ${isRelevant ? stageCol : col}44`,
+      borderTop: `3px solid ${isRelevant ? stageCol : col}`,
       borderRadius: '0 0 var(--r) var(--r)',
       background: 'var(--surface)',
       marginBottom: '1.25rem', overflow: 'hidden',
+      boxShadow: isRelevant ? `0 0 0 2px ${stageCol}22` : 'none',
+      transition: 'box-shadow .2s',
     }}>
       {/* Header */}
       <div style={{ padding: '1rem 1.2rem .875rem', background: `${col}08` }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem' }}>
-          <div>
-            <div style={{ fontSize: 11, fontWeight: 600, color: col, textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 4 }}>
-              {lang === 'en' ? `Concept ${index + 1}` : `개념 ${index + 1}`}
+          <div style={{ flex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+              <span style={{ fontSize: 11, fontWeight: 600, color: col, textTransform: 'uppercase', letterSpacing: '.07em' }}>
+                {lang === 'en' ? `Concept ${index + 1}` : `개념 ${index + 1}`}
+              </span>
+              {isRelevant && (
+                <span style={{ fontSize: 10, fontWeight: 700, background: stageCol, color: 'white', padding: '1px 7px', borderRadius: 10 }}>
+                  {lang === 'en' ? '★ Relevant now' : '★ 지금 중요'}
+                </span>
+              )}
             </div>
             <div style={{ fontSize: 17, fontWeight: 700, color: 'var(--ink)', lineHeight: 1.3 }}>
               {c.concept}
@@ -256,6 +269,61 @@ function ReviewScenario({ scenario, lang, index }) {
             </div>
           </div>
         )}
+      </div>
+    </div>
+  )
+}
+
+// ─── Journey Timeline ─────────────────────────────────────────────────────────
+const STAGE_COLORS = {
+  new:      '#1D9E75',
+  settled:  '#185FA5',
+  'pyp-myp':'#BA7517',
+  'myp-dp': '#534AB7',
+}
+
+function JourneyTimeline({ stages, activeStage, setActiveStage, lang }) {
+  return (
+    <div style={{ marginBottom: '2rem' }}>
+      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.1em', marginBottom: '.75rem' }}>
+        {lang === 'en' ? 'Where are you in the journey?' : '지금 어느 단계에 계신가요?'}
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
+        {stages.map((stage, i) => {
+          const s = stage[lang]
+          const col = STAGE_COLORS[stage.id]
+          const active = activeStage === stage.id
+          return (
+            <button
+              key={stage.id}
+              onClick={() => setActiveStage(active ? null : stage.id)}
+              style={{
+                textAlign: 'left', padding: '.75rem .875rem',
+                borderRadius: 'var(--r)', cursor: 'pointer',
+                border: active ? `2px solid ${col}` : '1px solid var(--border)',
+                background: active ? `${col}10` : 'var(--surface-2)',
+                transition: 'border .15s, background .15s',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
+                <span style={{
+                  fontSize: 10, fontWeight: 700, color: active ? 'white' : col,
+                  background: active ? col : `${col}20`,
+                  padding: '1px 7px', borderRadius: 10,
+                }}>{i + 1}</span>
+                <span style={{ fontSize: 12.5, fontWeight: 700, color: active ? col : 'var(--ink)' }}>
+                  {s.label}
+                </span>
+              </div>
+              <div style={{ fontSize: 11.5, color: 'var(--ink-4)', lineHeight: 1.5 }}>{s.description}</div>
+              {active && (
+                <div style={{ marginTop: 6, fontSize: 11.5, fontWeight: 600, color: col }}>
+                  → {s.highlight}
+                </div>
+              )}
+            </button>
+          )
+        })}
       </div>
     </div>
   )
@@ -619,6 +687,15 @@ export default function ParentModulePage() {
   const [done, setDone] = useState(() => {
     return localStorage.getItem(LS_DONE(slug)) === 'true'
   })
+  const [activeStage, setActiveStageState] = useState(() => {
+    return localStorage.getItem(LS_STAGE(slug)) || null
+  })
+
+  const setActiveStage = (s) => {
+    setActiveStageState(s)
+    if (s) localStorage.setItem(LS_STAGE(slug), s)
+    else localStorage.removeItem(LS_STAGE(slug))
+  }
 
   useEffect(() => { window.scrollTo(0, 0) }, [])
   useEffect(() => { localStorage.setItem(LS_LANG(slug), lang) }, [lang, slug])
@@ -677,6 +754,16 @@ export default function ParentModulePage() {
         {m.intro}
       </p>
 
+      {/* Journey timeline */}
+      {activity.journeyStages && (
+        <JourneyTimeline
+          stages={activity.journeyStages}
+          activeStage={activeStage}
+          setActiveStage={setActiveStage}
+          lang={lang}
+        />
+      )}
+
       {/* Hook */}
       <HookSection hook={activity.openingHook} lang={lang} />
 
@@ -686,7 +773,7 @@ export default function ParentModulePage() {
       </div>
 
       {activity.cards.map((card, i) => (
-        <ConceptCard key={card.id} card={card} lang={lang} index={i} />
+        <ConceptCard key={card.id} card={card} lang={lang} index={i} activeStage={activeStage} />
       ))}
 
       {/* Part 2 */}
@@ -715,6 +802,32 @@ export default function ParentModulePage() {
               : 'IB 성적은 백분율도 석차도 아닙니다. 아래 계산기를 사용하여 MYP와 DP 점수가 어떻게 구성되는지, 그리고 실제로 무엇을 의미하는지 정확히 이해해 보세요.'}
           </p>
           <GradingSection gradingSystem={activity.gradingSystem} lang={lang} />
+        </>
+      )}
+
+      {/* Part 4 — PYP */}
+      {activity.pypCards && (
+        <>
+          <div style={{
+            fontSize: 11, fontWeight: 700, color: 'var(--ink-4)',
+            textTransform: 'uppercase', letterSpacing: '.1em', margin: '2rem 0 1rem',
+            display: 'flex', alignItems: 'center', gap: 8,
+          }}>
+            <span>{lang === 'en' ? 'Part 4 — If your child is in PYP' : '4부 — 자녀가 PYP에 있다면'}</span>
+            {activeStage === 'pyp-myp' && (
+              <span style={{ fontSize: 10, fontWeight: 700, background: STAGE_COLORS['pyp-myp'], color: 'white', padding: '1px 8px', borderRadius: 10 }}>
+                {lang === 'en' ? '★ Most relevant for your stage' : '★ 현재 단계에 가장 관련'}
+              </span>
+            )}
+          </div>
+          <p style={{ fontSize: 13.5, color: 'var(--ink-3)', lineHeight: 1.65, marginBottom: '1.25rem' }}>
+            {lang === 'en'
+              ? 'PYP (Primary Years Programme, ages 3–11) looks very different from what comes after. These five cards explain what is happening — and what your child is building for later.'
+              : 'PYP(초등 과정, 3~11세)는 이후에 오는 것과 매우 다르게 보입니다. 이 다섯 장의 카드는 무슨 일이 일어나고 있는지, 그리고 자녀가 이후를 위해 무엇을 쌓고 있는지를 설명합니다.'}
+          </p>
+          {activity.pypCards.map((card, i) => (
+            <ConceptCard key={card.id} card={card} lang={lang} index={i} activeStage={activeStage} />
+          ))}
         </>
       )}
 
