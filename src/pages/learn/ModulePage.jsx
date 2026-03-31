@@ -18,6 +18,7 @@ import {
 import DimensionCard from '../../components/learn/DimensionCard.jsx'
 import CompletionBar from '../../components/learn/CompletionBar.jsx'
 import SimulationCard from '../../components/learn/SimulationCard.jsx'
+import { isVocabCompleted } from './VocabPage.jsx'
 
 /**
  * /learn/:slug — module overview with Hofstede radar and dimension list.
@@ -40,6 +41,7 @@ export default function ModulePage() {
   const [simCompletedCount, setSimCompletedCount] = useState(0)
   const [examUnlocked, setExamUnlocked] = useState(false)
   const [badgeRecord, setBadgeRecord] = useState(null)
+  const [vocabDone, setVocabDone] = useState(false)
 
   // Sticky progress bar — shown once user scrolls past the header card
   const [stickyVisible, setStickyVisible] = useState(false)
@@ -69,6 +71,7 @@ export default function ModulePage() {
       setSimCompletedCount(simCompletionCount(modMeta.id, sims))
       setExamUnlocked(isExamUnlocked(modMeta.id, dims))
       setBadgeRecord(getModuleBadgeRecord(modMeta.id))
+      setVocabDone(isVocabCompleted(modMeta.id))
 
       setLoading(false)
     }
@@ -326,6 +329,62 @@ export default function ModulePage() {
                 </div>
               </div>
             )}
+
+            {/* Vocab Lab entry card */}
+            <div style={{ marginBottom: '2rem' }}>
+              <div style={{
+                fontSize: '12px', fontWeight: 600, color: 'var(--ink-4)',
+                textTransform: 'uppercase', letterSpacing: '.05em',
+                marginBottom: '12px',
+              }}>
+                Vocabulary Lab
+              </div>
+              <Link to={`/learn/${slug}/vocab`} style={{ textDecoration: 'none' }}>
+                <div className="card" style={{
+                  borderLeft: `3px solid ${modMeta.color}`,
+                  cursor: 'pointer',
+                  transition: 'box-shadow .18s',
+                  display: 'flex', alignItems: 'center', gap: '14px',
+                }}
+                  onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,.08)' }}
+                  onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none' }}
+                >
+                  <span style={{
+                    width: '36px', height: '36px', borderRadius: '50%',
+                    background: `${modMeta.color}15`, color: modMeta.color,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: '18px', flexShrink: 0,
+                  }}>
+                    📖
+                  </span>
+                  <div style={{ flex: 1 }}>
+                    <h4 style={{ fontFamily: 'var(--serif)', fontSize: '1rem', color: 'var(--ink)', margin: '0 0 2px 0' }}>
+                      Vocabulary Lab
+                    </h4>
+                    <p style={{ fontSize: '12px', color: 'var(--ink-3)', margin: 0 }}>
+                      Key terms, scenario practice, and mastery check · 15 min
+                    </p>
+                  </div>
+                  {vocabDone ? (
+                    <span style={{
+                      fontSize: '11px', fontWeight: 700, color: '#1a7a50',
+                      background: '#f0fdf6', border: '1px solid #bbf0d6',
+                      borderRadius: '20px', padding: '3px 10px', flexShrink: 0,
+                    }}>
+                      ✓ Done
+                    </span>
+                  ) : (
+                    <span style={{
+                      fontSize: '11px', fontWeight: 600, color: modMeta.color,
+                      background: `${modMeta.color}10`, border: `1px solid ${modMeta.color}30`,
+                      borderRadius: '20px', padding: '3px 10px', flexShrink: 0,
+                    }}>
+                      Start →
+                    </span>
+                  )}
+                </div>
+              </Link>
+            </div>
 
             {/* Dimension list + scenarios — full width */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
