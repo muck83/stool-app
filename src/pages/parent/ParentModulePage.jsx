@@ -113,18 +113,17 @@ function ConceptCard({ card, lang, index }) {
           </div>
         </div>
 
-        {/* What you might think */}
+        {/* Concern */}
         <div style={{ marginTop: '1rem' }}>
           <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 6 }}>
-            {lang === 'en' ? 'What you might think' : '이렇게 생각할 수 있습니다'}
+            {lang === 'en' ? 'A common concern' : '자주 하는 걱정'}
           </div>
           <div style={{
             fontSize: 13.5, color: 'var(--ink-2)', lineHeight: 1.7,
-            fontStyle: 'italic', padding: '.75rem 1rem',
-            background: 'var(--surface-2)', borderRadius: 'var(--r)',
-            borderLeft: '3px solid var(--border-strong, #ccc)',
+            padding: '.75rem 1rem', background: 'var(--surface-2)',
+            borderRadius: 'var(--r)', borderLeft: '3px solid var(--border-strong, #ccc)',
           }}>
-            {c.whatYouMightThink}
+            {c.concern}
           </div>
         </div>
       </div>
@@ -140,34 +139,47 @@ function ConceptCard({ card, lang, index }) {
               borderRadius: 20, padding: '6px 18px', cursor: 'pointer',
             }}
           >
-            {lang === 'en' ? 'What it actually means →' : '실제 의미 보기 →'}
+            {lang === 'en' ? 'What the school is doing →' : '학교가 하는 일 보기 →'}
           </button>
         </div>
       ) : (
         <div style={{ padding: '1rem 1.2rem 1.25rem', borderTop: `1px solid ${col}22` }}>
           <div style={{ marginBottom: '1rem' }}>
             <div style={{ fontSize: 11, fontWeight: 600, color: col, textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 6 }}>
-              {lang === 'en' ? 'What it actually means' : '실제 의미'}
+              {lang === 'en' ? 'What the school is doing' : '학교가 하는 일'}
             </div>
             <div style={{ fontSize: 13.5, color: 'var(--ink)', lineHeight: 1.75 }}>
-              {c.whatItActuallyMeans}
+              {c.bridge}
             </div>
           </div>
           <div style={{ marginBottom: '1rem' }}>
             <div style={{ fontSize: 11, fontWeight: 600, color: col, textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 6 }}>
-              {lang === 'en' ? 'Why it matters for your child' : '자녀에게 중요한 이유'}
+              {lang === 'en' ? 'How this connects to your goal' : '목표와의 연결'}
             </div>
             <div style={{ fontSize: 13.5, color: 'var(--ink)', lineHeight: 1.75 }}>
-              {c.whyItMatters}
+              {c.goal}
             </div>
           </div>
           <div style={{
             fontSize: 12, color: 'var(--ink-3)', lineHeight: 1.6,
             padding: '.75rem 1rem', background: `${col}08`,
             borderRadius: 'var(--r)', borderLeft: `3px solid ${col}55`,
+            marginBottom: c.whatToAsk ? '1rem' : 0,
           }}>
             <strong style={{ color: col }}>IB: </strong>{c.ibConnection}
           </div>
+          {c.whatToAsk && (
+            <div style={{ padding: '.875rem 1rem', background: '#FFFBEB', border: '1px solid #F0C060', borderRadius: 'var(--r)' }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: '#92400E', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 8 }}>
+                {lang === 'en' ? 'What to ask at your next meeting' : '다음 면담에서 물어볼 것'}
+              </div>
+              {c.whatToAsk.map((q, i) => (
+                <div key={i} style={{ fontSize: 12.5, color: '#78350F', lineHeight: 1.65, paddingLeft: 10, borderLeft: '2px solid #F0C060', marginBottom: i < c.whatToAsk.length - 1 ? 8 : 0 }}>
+                  {q}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
