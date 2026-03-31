@@ -15,6 +15,60 @@ export const koreaCulturalVocab = {
     ],
     question: "What were the students waiting for before anyone answered? What did the glance mean?",
   },
+  contextModifiers: {
+    prompt: "Where are your Korean students living?",
+    helpText: "Korean cultural values are consistent, but how they show up in school depends on the family's context. Select your setting to see what shifts.",
+    options: [
+      {
+        id: 'southeast-asia',
+        label: 'Southeast Asia',
+        description: 'Vietnam, Indonesia, Thailand, Philippines',
+        flag: '\uD83C\uDF0F',
+        content: [
+          "Korean families in Southeast Asia are often connected to Korean corporate investment in the region \u2014 manufacturing, retail, construction. This means many parents are professionals tied to Korean company hierarchies, which tends to reinforce traditional Korean values around authority and discipline rather than soften them.",
+          "Korea's cultural soft power (K-pop, K-drama, Korean beauty) has made Korean students unusually high-status socially in Southeast Asian peer groups. Your Korean students may be aware of this in ways that shape their confidence and expectations \u2014 and that can occasionally produce a sense of exceptionalism that isn't present in other contexts.",
+          "The host culture's alignment on hierarchy and collectivism means Korean families often find the broader social environment legible. However, this can make Western progressive pedagogy feel particularly jarring by contrast. Parents who are comfortable with the local culture's deference to authority may be especially skeptical of inquiry-based, student-led, or openly democratic classroom approaches \u2014 not because they are unfamiliar, but because they see Korean rigour as demonstrably superior.",
+          "Hagwon-equivalent supplementary education is widely available and heavily used. Expect Korean students to be managing significant out-of-school academic load alongside your programme.",
+        ],
+      },
+      {
+        id: 'middle-east',
+        label: 'Middle East',
+        description: 'Saudi Arabia, UAE, Qatar, Kuwait',
+        flag: '\uD83C\uDF05',
+        content: [
+          "Korean families in the Middle East are typically professionals in engineering, construction, healthcare, or energy \u2014 sectors where Korean companies have had a significant Gulf presence since the 1970s. These families tend to be more conservative and traditional than Korean urban professional families, and their educational expectations are correspondingly high.",
+          "The Korean church is the social centre of Korean community life in the Gulf. Korean evangelical Christianity is a significant force, and it means the Korean community is tight, insular, and often mutually aware. A pastoral issue involving one Korean family may be known to others before you are aware of it yourself. This is not gossip \u2014 it is community care operating the way it does.",
+          "There is partial value alignment between Korean and Arab-Islamic culture \u2014 both are collectivist, family-oriented, and hierarchical. But the divergence around religion is significant. Korean Christian families navigating a Muslim-majority context are managing a layer of identity guardedness that isn't visible in other settings. This can make some families appear more closed or formal than Korean families in East Asian or Western contexts.",
+          "Academic expectations and chemyeon intensity are high. Within the Korean community, children's school performance is visible and carries social weight. A concern raised at school can feel like it has community implications beyond the immediate family.",
+        ],
+      },
+      {
+        id: 'north-america-australia',
+        label: 'North America / Australia',
+        description: 'US, Canada, Australia, New Zealand',
+        flag: '\uD83C\uDF0E',
+        content: [
+          "Korean communities in North America and Australia are among the most established Korean diaspora populations in the world. In cities like Los Angeles, Toronto, and Sydney, Korean cultural infrastructure \u2014 church, supplementary school, social networks \u2014 is dense enough that families can maintain Korean cultural life largely within the Korean community. This means home values are often preserved more intact than you might expect.",
+          "The most important dynamic to understand here is generational tension. Students who are second-generation or who arrived young have typically internalized significant Western individualism \u2014 they expect voice, agency, and the right to express preference. Their parents hold Korean collective expectations: deference, academic seriousness, family priority. The student you see at school and the student who goes home may be navigating genuinely different operating systems. What looks like inconsistency or ambivalence is often this.",
+          "Hagwon culture is intense in Korean-North American communities \u2014 often more so than in Korea itself, because parents feel the cultural pressure of raising Korean children in an individualist environment. Expect significant out-of-school academic load and strong parental investment in measurable performance outcomes.",
+          "Parents may appear very comfortable navigating Western institutional settings \u2014 they speak the language, they know the system. But this fluency can obscure traditional expectations that operate strongly at home. A parent who seems relaxed and Western in a PTM may be applying significant academic and cultural pressure at home that the student never mentions.",
+        ],
+      },
+      {
+        id: 'europe',
+        label: 'Europe',
+        description: 'UK, Germany, France, Netherlands, and beyond',
+        flag: '\uD83C\uDDEA\uD83C\uDDFA',
+        content: [
+          "Korean communities in European cities are typically smaller and less infrastructurally self-sufficient than in North America or Southeast Asia. Without a large Korean church or a Korean school system nearby, families are more socially isolated, and the international school carries more weight as a community anchor than it does elsewhere.",
+          "The cultural distance is significant. Northern European school cultures \u2014 flat hierarchies, egalitarian teacher-student relationships, emphasis on student self-direction and open disagreement \u2014 represent almost an inversion of Korean educational values. A Danish or Dutch classroom, to a Korean student, may feel structureless or even disrespectful. Parents may interpret a teacher's informality or openness to student challenge as a sign that the school lacks rigour.",
+          "Students in European contexts often adapt to local peer culture relatively quickly, which can create visible parent-child tension around identity. The student may be becoming European in ways the parents did not anticipate and are not comfortable with. This can make parents appear more anxious or controlling than Korean parents in more culturally familiar environments.",
+          "Because the Korean community is thin, teachers in European international schools are often working without any Korean cultural support around them. There may be no Korean-speaking colleague, no Korean community organisation to refer to, no institutional memory of how to read Korean parent behaviour. This makes the base cultural vocabulary \u2014 nunchi, chemyeon, kibun, jeong, gongbu \u2014 especially important: you may be the only person in the building who has stopped to think about any of this.",
+        ],
+      },
+    ],
+  },
   facilitatorNote: "The Korea module already uses the word hagwon. These five terms go deeper into the social and relational logic that sits beneath academic pressure \u2014 the invisible operating system that teachers often sense but struggle to name.",
   cards: [
     {

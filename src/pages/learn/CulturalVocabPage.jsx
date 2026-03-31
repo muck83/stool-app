@@ -96,6 +96,97 @@ function HookSection({ hook }) {
 }
 
 // ---------------------------------------------------------------------------
+// ContextSelector — diaspora modifier picker, shown when contextModifiers exists
+// ---------------------------------------------------------------------------
+const CONTEXT_STORAGE_KEY = (moduleId) => `pd_context_${moduleId}`
+
+function ContextSelector({ modifiers, moduleId }) {
+  const [selected, setSelected] = useState(() => {
+    try { return localStorage.getItem(CONTEXT_STORAGE_KEY(moduleId)) || null } catch { return null }
+  })
+
+  function choose(id) {
+    setSelected(id)
+    try { localStorage.setItem(CONTEXT_STORAGE_KEY(moduleId), id) } catch { /* ignore */ }
+  }
+
+  const activeOption = modifiers.options.find((o) => o.id === selected)
+
+  return (
+    <div style={{ marginBottom: 32 }}>
+      {/* Header */}
+      <div style={{
+        background: '#faf5ff', border: '1px solid #ddd6fe',
+        borderRadius: 12, padding: '20px 22px',
+      }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: '#7c3aed', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 6 }}>
+          Your context
+        </div>
+        <p style={{ margin: '0 0 16px 0', fontSize: 14, color: '#4c1d95', lineHeight: 1.6 }}>
+          {modifiers.helpText}
+        </p>
+
+        {/* Option buttons */}
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          {modifiers.options.map((opt) => {
+            const active = selected === opt.id
+            return (
+              <button
+                key={opt.id}
+                onClick={() => choose(opt.id)}
+                style={{
+                  background: active ? '#7c3aed' : '#fff',
+                  color: active ? '#fff' : '#4c1d95',
+                  border: `1.5px solid ${active ? '#7c3aed' : '#c4b5fd'}`,
+                  borderRadius: 8,
+                  padding: '8px 14px',
+                  fontSize: 13,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'flex-start',
+                  gap: 2,
+                  textAlign: 'left',
+                  transition: 'all 0.15s',
+                }}
+              >
+                <span>{opt.label}</span>
+                {opt.description && (
+                  <span style={{ fontSize: 11, fontWeight: 400, opacity: 0.8 }}>
+                    {opt.description}
+                  </span>
+                )}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Active modifier content */}
+      {activeOption && (
+        <div style={{
+          background: '#f5f3ff', border: '1px solid #c4b5fd',
+          borderRadius: 12, padding: '20px 22px', marginTop: 10,
+        }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: '#6d28d9', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 12 }}>
+            Korean families in {activeOption.label}
+          </div>
+          {activeOption.content.map((para, i) => (
+            <p key={i} style={{
+              margin: i < activeOption.content.length - 1 ? '0 0 12px 0' : 0,
+              fontSize: 14, color: '#3b0764', lineHeight: 1.7,
+            }}>
+              {para}
+            </p>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // CardScenario — with / without comparison embedded in card
 // ---------------------------------------------------------------------------
 function CardScenario({ scenario }) {
@@ -479,6 +570,11 @@ export default function CulturalVocabPage() {
       {/* Opening hook */}
       {activity.openingHook && (
         <HookSection hook={activity.openingHook} />
+      )}
+
+      {/* Context selector — only rendered when contextModifiers exists */}
+      {activity.contextModifiers && moduleId && (
+        <ContextSelector modifiers={activity.contextModifiers} moduleId={moduleId} />
       )}
 
       {/* Section label: Terms */}
