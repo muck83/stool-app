@@ -148,6 +148,7 @@ export function isInProgress(moduleId, allDimensions) {
 
 const QUIZ_KEY         = 'pd_quiz'
 const MODULE_SCORE_KEY = 'pd_module_scores'
+const REVISIT_KEY      = 'pd_revisit'
 
 /**
  * Read the full quiz store for one module.
@@ -173,8 +174,9 @@ function writeModuleQuiz(moduleId, data) {
 /**
  * Save (or update) a quiz answer.
  * Best-score logic: if a prior correct answer exists, keep it.
+ * @param {number|null} confidence — 1 (not sure), 2 (somewhat), 3 (very sure). Optional.
  */
-export function saveQuizAnswer(moduleId, questionId, selectedOptionId, isCorrect) {
+export function saveQuizAnswer(moduleId, questionId, selectedOptionId, isCorrect, confidence = null) {
   const quiz = readModuleQuiz(moduleId)
   const existing = quiz[questionId]
   if (existing && existing.isCorrect && !isCorrect) {
@@ -185,9 +187,58 @@ export function saveQuizAnswer(moduleId, questionId, selectedOptionId, isCorrect
       selectedOptionId,
       isCorrect,
       attempts: existing ? (existing.attempts || 1) + 1 : 1,
+      ...(confidence !== null ? { confidence } : {}),
     }
   }
   writeModuleQuiz(moduleId, quiz)
+
+  // Revisit flag: uncertain AND wrong → teacher should review this topic
+  if (!isCorrect && confidence !== null && confidence <= 2) {
+    _setRevisitFlag(moduleId, questionId)
+  }
+}
+
+// ─── revisit flags ───────────────────────────────────────────────────────────
+
+function _readRevisit(moduleId) {
+  try {
+    const raw = localStorage.getItem(REVISIT_KEY)
+    const obj = raw ? JSON.parse(raw) : {}
+    return new Set(obj[moduleId] || [])
+  } catch { return new Set() }
+}
+
+function _writeRevisit(moduleId, set) {
+  try {
+    const raw = localStorage.getItem(REVISIT_KEY)
+    const obj = raw ? JSON.parse(raw) : {}
+    obj[moduleId] = [...set]
+    localStorage.setItem(REVISIT_KEY, JSON.stringify(obj))
+  } catch {}
+}
+
+function _setRevisitFlag(moduleId, questionId) {
+  const set = _readRevisit(moduleId)
+  set.add(questionId)
+  _writeRevisit(moduleId, set)
+}
+
+/**
+ * Get the Set of question IDs flagged for review in a module.
+ * A flag is set when: confidence ≤ 2 AND the answer was wrong.
+ */
+export function getRevisitFlags(moduleId) {
+  return _readRevisit(moduleId)
+}
+
+/**
+ * Clear a single revisit flag (e.g., after teacher revisits the dimension
+ * and answers the checkpoint correctly with high confidence).
+ */
+export function clearRevisitFlag(moduleId, questionId) {
+  const set = _readRevisit(moduleId)
+  set.delete(questionId)
+  _writeRevisit(moduleId, set)
 }
 
 /**
@@ -241,9 +292,13 @@ export function getModuleScore(moduleId, checkpointQuestionIds, examQuestionIds)
 }
 
 /**
- * Return the earned badge tier (Phase 1, no dimension floors):
+ * Return the earned badge tier with Phase 2 dimension floor logic:
  *   'distinction' | 'mastery' | 'completed' | null
  * null = module not yet complete.
+ *
+ * Dimension floors (applied after score thresholds):
+ *   Mastery    — every checkpoint must be eventually correct (isCorrect: true)
+ *   Distinction — every checkpoint correct AND answered on the first attempt
  */
 export function getModuleBadgeTier(moduleId, checkpointQuestionIds, examQuestionIds, allDimensions) {
   // Must be fully complete first
@@ -251,9 +306,31 @@ export function getModuleBadgeTier(moduleId, checkpointQuestionIds, examQuestion
   if (!isExamAttempted(moduleId, examQuestionIds)) return null
 
   const score = getModuleScore(moduleId, checkpointQuestionIds, examQuestionIds)
-  if (score >= 0.90) return 'distinction'
-  if (score >= 0.80) return 'mastery'
-  return 'completed'
+  let tier = 'completed'
+  if (score >= 0.90) tier = 'distinction'
+  else if (score >= 0.80) tier = 'mastery'
+
+  // ── Dimension floor checks ───────────────────────────────────────────────
+  // Every checkpoint question must be answered correctly to earn Mastery+
+  const allCheckpointsCorrect = checkpointQuestionIds.every(qId => {
+    const ans = getQuizAnswer(moduleId, qId)
+    return ans?.isCorrect === true
+  })
+
+  if ((tier === 'mastery' || tier === 'distinction') && !allCheckpointsCorrect) {
+    tier = 'completed'
+  }
+
+  // For Distinction: additionally require every checkpoint answered on first attempt
+  if (tier === 'distinction') {
+    const allFirstAttempt = checkpointQuestionIds.every(qId => {
+      const ans = getQuizAnswer(moduleId, qId)
+      return ans?.isCorrect === true && (ans?.attempts || 1) === 1
+    })
+    if (!allFirstAttempt) tier = 'mastery'
+  }
+
+  return tier
 }
 
 /**

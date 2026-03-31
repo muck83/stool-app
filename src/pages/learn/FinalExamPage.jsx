@@ -24,6 +24,7 @@ import {
   getQuizAnswer,
   getQuizScore,
   completedDimensionIds,
+  getRevisitFlags,
 } from '../../lib/pd/progress.js'
 
 const BADGE_META = {
@@ -534,6 +535,108 @@ export default function FinalExamPage() {
                 )
               })}
             </div>
+
+            {/* ── Before you retake: review recommendations ──────────── */}
+            {(() => {
+              const revisitFlags    = getRevisitFlags(modMeta.id)
+              const flaggedQs       = checkpointQs.filter(q => revisitFlags.has(q.id))
+              const wrongCheckpoints = checkpointQs.filter(q => {
+                const a = getQuizAnswer(modMeta.id, q.id)
+                return a && !a.isCorrect
+              })
+              const wrongExam = examQs.filter(q => {
+                const a = answers[q.id] || getQuizAnswer(modMeta.id, q.id)
+                return a && !a.isCorrect
+              })
+
+              // Merge into a unique set of dim numbers to review (checkpoint items)
+              const reviewDimNums = new Set([
+                ...flaggedQs.map(q => q.dimension_number),
+                ...wrongCheckpoints.map(q => q.dimension_number),
+              ])
+              const reviewDims = allDims.filter(d => reviewDimNums.has(d.dimension_number))
+
+              if (reviewDims.length === 0 && wrongExam.length === 0) return null
+
+              return (
+                <div style={{
+                  marginBottom: '1.5rem',
+                  padding: '1.25rem 1.5rem',
+                  background: '#fffbf0',
+                  border: '1px solid #fcd34d',
+                  borderRadius: 'var(--rl)',
+                }}>
+                  <div style={{
+                    fontSize: '11px', fontWeight: 700, color: '#92400e',
+                    textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: '10px',
+                  }}>
+                    📚 Before you retake — areas to review
+                  </div>
+
+                  {reviewDims.length > 0 && (
+                    <div style={{ marginBottom: wrongExam.length > 0 ? '12px' : 0 }}>
+                      <div style={{ fontSize: '12px', color: '#78350f', fontWeight: 600, marginBottom: '6px' }}>
+                        Dimensions to revisit
+                      </div>
+                      {reviewDims.map(d => (
+                        <Link
+                          key={d.id}
+                          to={`/learn/${slug}/${d.dimension_number}`}
+                          style={{
+                            display: 'flex', alignItems: 'center', gap: '8px',
+                            fontSize: '13px', color: modMeta.color, textDecoration: 'none',
+                            marginBottom: '4px',
+                          }}
+                        >
+                          <span style={{
+                            width: '20px', height: '20px', borderRadius: '50%',
+                            background: `${modMeta.color}15`, color: modMeta.color,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            fontSize: '10px', fontWeight: 700, flexShrink: 0,
+                          }}>
+                            {d.dimension_number}
+                          </span>
+                          {d.title} →
+                          {revisitFlags.has(checkpointQs.find(q => q.dimension_number === d.dimension_number)?.id) && (
+                            <span style={{
+                              fontSize: '10px', color: '#D97706', background: '#fffbeb',
+                              border: '1px solid #fcd34d', borderRadius: '4px', padding: '1px 6px',
+                            }}>
+                              low confidence
+                            </span>
+                          )}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+
+                  {wrongExam.length > 0 && (
+                    <div>
+                      <div style={{ fontSize: '12px', color: '#78350f', fontWeight: 600, marginBottom: '6px' }}>
+                        Exam questions to review
+                      </div>
+                      {wrongExam.map((q, i) => {
+                        const correctOpt = q.options?.find(o => o.isCorrect)
+                        return (
+                          <div key={q.id} style={{
+                            fontSize: '12.5px', color: 'var(--ink-2)',
+                            marginBottom: '8px', lineHeight: 1.5,
+                          }}>
+                            <span style={{ color: 'var(--ink-4)', marginRight: '4px' }}>Q{examQs.indexOf(q) + 1}.</span>
+                            {q.prompt}
+                            {correctOpt && (
+                              <span style={{ display: 'block', fontSize: '12px', color: '#1a7a50', marginTop: '2px' }}>
+                                ✓ {correctOpt.text}
+                              </span>
+                            )}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+              )
+            })()}
 
             {/* Actions */}
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
