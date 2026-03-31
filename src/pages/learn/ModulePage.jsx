@@ -20,6 +20,7 @@ import CompletionBar from '../../components/learn/CompletionBar.jsx'
 import SimulationCard from '../../components/learn/SimulationCard.jsx'
 import { isVocabCompleted } from './VocabPage.jsx'
 import { isCulturalVocabCompleted } from './CulturalVocabPage.jsx'
+import { CULTURAL_VOCAB_BY_SLUG } from '../../../vocab/country-cultural-vocab.jsx'
 
 /**
  * /learn/:slug — module overview with Hofstede radar and dimension list.
@@ -408,12 +409,26 @@ export default function ModulePage() {
                     🌐
                   </span>
                   <div style={{ flex: 1 }}>
-                    <h4 style={{ fontFamily: 'var(--serif)', fontSize: '1rem', color: 'var(--ink)', margin: '0 0 2px 0' }}>
+                    <h4 style={{ fontFamily: 'var(--serif)', fontSize: '1rem', color: 'var(--ink)', margin: '0 0 4px 0' }}>
                       Five Cultural Terms
                     </h4>
-                    <p style={{ fontSize: '12px', color: 'var(--ink-3)', margin: 0 }}>
-                      Insider concepts with no clean English equivalent · 10 min
-                    </p>
+                    {(() => {
+                      const cv = CULTURAL_VOCAB_BY_SLUG[slug]
+                      const hook = cv?.openingHook?.situation?.[0]
+                      if (hook && !culturalVocabDone) {
+                        const preview = hook.length > 110 ? hook.slice(0, 110).trimEnd() + '\u2026' : hook
+                        return (
+                          <p style={{ fontSize: '12px', color: 'var(--ink-3)', margin: 0, lineHeight: 1.5, fontStyle: 'italic' }}>
+                            {preview}
+                          </p>
+                        )
+                      }
+                      return (
+                        <p style={{ fontSize: '12px', color: 'var(--ink-3)', margin: 0 }}>
+                          Insider concepts with no clean English equivalent · 10 min
+                        </p>
+                      )
+                    })()}
                   </div>
                   {culturalVocabDone ? (
                     <span style={{
@@ -428,8 +443,9 @@ export default function ModulePage() {
                       fontSize: '11px', fontWeight: 600, color: modMeta.color,
                       background: `${modMeta.color}10`, border: `1px solid ${modMeta.color}30`,
                       borderRadius: '20px', padding: '3px 10px', flexShrink: 0,
+                      whiteSpace: 'nowrap',
                     }}>
-                      Start →
+                      Find out →
                     </span>
                   )}
                 </div>
