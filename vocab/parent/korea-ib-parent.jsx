@@ -69,12 +69,12 @@ export const koreaIbParent = {
     en: {
       title: 'Understanding Your Child\'s IB School',
       subtitle: 'A guide for Korean families navigating international education',
-      intro: 'IB schools look very different from Korean schools — not because they are less rigorous, but because they are built around different goals. This guide explains five concepts that often confuse Korean parents, and why the approach is designed the way it is.',
+      intro: 'IB schools look very different from Korean schools — not because they are less rigorous, but because they are built around different goals. If you have already had a moment that confused or frustrated you, this guide is for that moment. It covers five core concepts, a PYP section, interactive grade calculators for MYP and DP, and two scenarios that show how the same situation looks with and without this context.',
     },
     ko: {
       title: '자녀의 IB 학교 이해하기',
       subtitle: '국제 교육을 경험하는 한국 가정을 위한 안내서',
-      intro: 'IB 학교는 한국 학교와 매우 다르게 보입니다. 엄격하지 않아서가 아니라 다른 목표를 중심으로 설계되었기 때문입니다. 이 안내서는 한국 학부모들이 자주 혼란스러워하는 다섯 가지 개념과 왜 이 방식이 그렇게 설계되었는지를 설명합니다.',
+      intro: 'IB 학교는 한국 학교와 매우 다르게 보입니다. 엄격하지 않아서가 아니라 다른 목표를 중심으로 설계되었기 때문입니다. 이미 혼란스럽거나 당혹스러운 순간이 있었다면, 이 안내서는 바로 그 순간을 위한 것입니다. 다섯 가지 핵심 개념, PYP 섹션, MYP와 DP를 위한 인터랙티브 성적 계산기, 그리고 같은 상황이 이 맥락의 유무에 따라 어떻게 보이는지를 보여주는 두 가지 시나리오를 다룹니다.',
     },
   },
 
@@ -210,7 +210,7 @@ export const koreaIbParent = {
     },
     {
       id: 'card-005',
-      relevantAt: ['myp-dp'],
+      relevantAt: ['new', 'myp-dp'],
       ibComponent: 'DP Core — CAS',
       en: {
         concept: 'CAS — Creativity, Activity, Service',
@@ -243,14 +243,14 @@ export const koreaIbParent = {
       en: {
         title: 'The grade that isn\'t a grade',
         termsInPlay: ['Criterion-Based Assessment', 'Formative Feedback'],
-        situation: 'Your child\'s MYP report shows "Working Towards" in three subjects and "Meeting" in two. They seem relaxed and say their teacher told them they\'re doing well. You\'re not sure whether to be worried or reassured.',
+        situation: 'Your child\'s MYP report shows "Working Towards" in three subjects and "Meeting" in two. They seem relaxed and say their teacher told them they\'re doing well. You\'re not sure whether to be worried or reassured.\n\n        Note: "Working Towards" and "Meeting" are MYP-specific descriptor language. PYP uses different terms — if your child is in PYP, see Part 4.',
         withUnderstanding: '"Working Towards" is formative language — it tells you where your child is on a progression toward a specific criterion, not where they rank in the class. You ask the teacher what specific evidence would move them to "Meeting" in each subject, and you work on those areas together. You are not behind. You are on a journey with a map.',
         withoutUnderstanding: 'You email the school asking why your child appears to be failing three subjects and what this means for their university application. The school schedules a meeting to explain the difference between formative and summative assessment — a conversation that could have been avoided.',
       },
       ko: {
         title: '점수가 아닌 점수',
         termsInPlay: ['준거 기준 평가', '형성평가와 피드백'],
-        situation: '자녀의 MYP 성적표에 세 과목에서 "달성 중", 두 과목에서 "달성"이 표시되어 있습니다. 아이는 여유로워 보이고 선생님이 잘하고 있다고 했답니다. 걱정해야 할지 안심해야 할지 모르겠습니다.',
+        situation: '자녀의 MYP 성적표에 세 과목에서 "달성 중", 두 과목에서 "달성"이 표시되어 있습니다. 아이는 여유로워 보이고 선생님이 잘하고 있다고 했답니다. 걱정해야 할지 안심해야 할지 모르겠습니다.\n\n        참고: "달성 중"과 "달성"은 MYP 고유의 기술어 언어입니다. PYP는 다른 용어를 사용합니다. 자녀가 PYP에 있다면 4부를 참고하세요.',
         withUnderstanding: '"달성 중"은 형성평가 언어입니다. 반에서의 등수가 아니라 특정 준거를 향한 진행 과정을 알려줍니다. 각 과목에서 "달성"으로 이동하기 위한 구체적인 증거가 무엇인지 선생님께 물어보고 그 부분을 함께 집중합니다. 뒤처진 것이 아닙니다. 지도를 가지고 여정을 걷고 있는 것입니다.',
         withoutUnderstanding: '자녀가 세 과목에서 낙제하는 것처럼 보인다며, 대학 입시에 어떤 영향을 미치는지 학교에 이메일을 보냅니다. 학교는 형성평가와 총괄평가의 차이를 설명하기 위한 면담을 잡습니다. 피할 수 있었던 대화입니다.',
       },
@@ -413,7 +413,7 @@ export const koreaIbParent = {
         title: 'How MYP Grades Work',
         intro: 'MYP subjects do not use percentages or class ranks. Every subject uses four criteria, each marked out of 8. Those four scores are added together to give a total out of 32, which is then converted into a final grade from 1 to 7.',
         criteriaNote: 'The four criteria are labelled A, B, C, and D — and they measure different things depending on the subject. In MYP Mathematics, for example, Criterion A is "Knowing and Understanding" and Criterion D is "Applying Mathematics in Real-Life Contexts." A student can score well on A and struggle on D, and the report will show both.',
-        boundaryNote: 'The conversion from a raw total (out of 32) to a final grade (1–7) is done using grade boundaries. These boundaries are set by each school and can vary slightly, but the standard IB approximation is shown in the calculator below.',
+        boundaryNote: 'The conversion from a raw total (out of 32) to a final grade (1–7) is done using grade boundaries. These boundaries are set by each school and can vary slightly, but the standard IB approximation is shown in the calculator below. There is also variation at the subject level: Maths and Sciences tend to have higher raw scores needed for each grade, while Humanities and Arts boundaries are often set lower. A score of 24/32 in MYP Maths may yield a different final grade than 24/32 in MYP Drama.',
         descriptors: [
           { grade: 1, label: 'Minimal achievement',      ko: '최소한의 성취' },
           { grade: 2, label: 'Very limited achievement', ko: '매우 제한적인 성취' },
@@ -443,7 +443,7 @@ export const koreaIbParent = {
         title: 'MYP 성적 체계 이해하기',
         intro: 'MYP 과목은 백분율이나 석차를 사용하지 않습니다. 모든 과목은 각 8점 만점의 네 가지 준거로 평가됩니다. 이 네 점수를 합산하면 32점 만점의 총점이 되고, 이것이 최종 1~7점 등급으로 변환됩니다.',
         criteriaNote: '네 가지 준거는 A, B, C, D로 표시되며 과목에 따라 다른 것을 측정합니다. 예를 들어 MYP 수학에서 준거 A는 "지식과 이해", 준거 D는 "실생활 맥락에서의 수학 적용"입니다. 학생이 A에서는 높은 점수를 받고 D에서는 어려움을 겪을 수 있으며, 성적표에는 두 점수가 모두 표시됩니다.',
-        boundaryNote: '32점 만점의 원점수를 1~7등급으로 변환하는 것은 등급 경계를 사용합니다. 이 경계는 각 학교에서 설정하며 약간씩 다를 수 있지만, 아래 계산기에 표준 IB 근사값이 제시되어 있습니다.',
+        boundaryNote: '32점 만점의 원점수를 1~7등급으로 변환하는 것은 등급 경계를 사용합니다. 이 경계는 각 학교에서 설정하며 약간씩 다를 수 있지만, 아래 계산기에 표준 IB 근사값이 제시되어 있습니다. 과목 수준에서도 차이가 있습니다. 수학과 과학은 각 등급에 필요한 원점수가 더 높은 경향이 있고, 인문학과 예술은 경계가 낮게 설정되는 경우가 많습니다. MYP 수학에서 24/32점이 MYP 연극에서의 24/32점과 다른 최종 등급을 만들어낼 수 있습니다.',
         watchOut: [
           'MYP에서 "4"는 "적절한 성취"입니다. 통과 등급이며 낙제에 가까운 것이 아닙니다. 한국 학부모들은 4를 D 등급으로 해석하는 경우가 있습니다. 그렇지 않습니다.',
           '자녀는 같은 과목에서 준거별로 다른 점수를 받을 수 있습니다. 준거 A에서 7/8, 준거 C에서 3/8을 받았다면 어디에 집중해야 하는지 정확히 알 수 있습니다. 이는 단순한 결과가 아닌 진단 정보입니다.',
@@ -506,4 +506,57 @@ export const koreaIbParent = {
       },
     },
   },
+
+  glossary: [
+    {
+      term: 'IB',
+      en: { full: 'International Baccalaureate', definition: 'The global organisation that designs and awards the PYP, MYP, and DP programmes. Schools are authorised by the IB to offer these programmes.' },
+      ko: { full: '국제 바칼로레아', definition: 'PYP, MYP, DP 프로그램을 설계하고 수여하는 글로벌 기관입니다. 학교는 IB로부터 인증을 받아 이 프로그램을 제공합니다.' },
+    },
+    {
+      term: 'PYP',
+      en: { full: 'Primary Years Programme', definition: 'The IB programme for students aged 3–11 (roughly nursery to Year 6). Uses inquiry-based, transdisciplinary learning. Narrative reports, no percentage grades.' },
+      ko: { full: '초등 과정', definition: '3~11세 학생(보육~6학년 수준)을 위한 IB 프로그램입니다. 탐구 기반의 탈학문적 학습을 사용합니다. 서술형 성적표로 백분율 성적이 없습니다.' },
+    },
+    {
+      term: 'MYP',
+      en: { full: 'Middle Years Programme', definition: 'The IB programme for students aged 11–16 (roughly Years 7–11). Introduces criterion-based grades (1–7) across eight subject groups.' },
+      ko: { full: '중등 과정', definition: '11~16세 학생(7~11학년 수준)을 위한 IB 프로그램입니다. 8개 과목 그룹에 걸쳐 준거 기반 성적(1~7점)을 도입합니다.' },
+    },
+    {
+      term: 'DP',
+      en: { full: 'Diploma Programme', definition: 'The IB programme for students aged 16–19 (Years 12–13). Leads to the IB Diploma, scored out of 45. Widely recognised by universities worldwide.' },
+      ko: { full: '디플로마 과정', definition: '16~19세 학생(12~13학년)을 위한 IB 프로그램입니다. 45점 만점으로 채점되는 IB 졸업장을 수여합니다. 전 세계 대학교에서 광범위하게 인정받습니다.' },
+    },
+    {
+      term: 'HL',
+      en: { full: 'Higher Level', definition: 'One of two subject tiers in the DP. Students take three HL subjects, which involve more content, hours, and deeper assessment than SL. Universities often set minimum HL grade requirements.' },
+      ko: { full: '상위 수준', definition: 'DP의 두 과목 수준 중 하나입니다. 학생들은 SL보다 더 많은 내용, 수업 시간, 깊이 있는 평가를 포함하는 세 과목을 HL로 수강합니다. 대학교에서는 종종 HL 최소 등급 요건을 설정합니다.' },
+    },
+    {
+      term: 'SL',
+      en: { full: 'Standard Level', definition: 'The second subject tier in the DP. Students take three SL subjects alongside their three HL subjects. Minimum passing grade for SL is 2.' },
+      ko: { full: '표준 수준', definition: 'DP의 두 번째 과목 수준입니다. 학생들은 세 HL 과목과 함께 세 SL 과목을 수강합니다. SL의 최소 통과 등급은 2점입니다.' },
+    },
+    {
+      term: 'IA',
+      en: { full: 'Internal Assessment', definition: 'Coursework that is marked by the classroom teacher, then moderated externally by the IB. Contributes 20–30% of the final DP grade depending on subject. The IB can adjust a teacher\'s mark up or down.' },
+      ko: { full: '내부 평가', definition: '담임 교사가 채점한 후 IB가 외부에서 조정하는 과제물입니다. 과목에 따라 최종 DP 성적의 20~30%를 차지합니다. IB는 교사의 점수를 올리거나 내릴 수 있습니다.' },
+    },
+    {
+      term: 'EE',
+      en: { full: 'Extended Essay', definition: 'A 4,000-word independent research essay completed in Year 12–13, externally assessed by the IB. Graded A–E. Together with ToK, contributes up to 3 bonus points to the diploma total.' },
+      ko: { full: '소논문', definition: '11~12학년에 작성하는 4,000자 분량의 독립적 연구 논문으로 IB에 의해 외부 평가됩니다. A~E로 평가됩니다. ToK와 함께 졸업장 총점에 최대 3점의 보너스 점수를 기여합니다.' },
+    },
+    {
+      term: 'ToK',
+      en: { full: 'Theory of Knowledge', definition: 'A DP core course that asks students to reflect on how we know what we know across different disciplines. Graded A–E. With the EE, contributes up to 3 bonus points.' },
+      ko: { full: '지식이론', definition: '학생들이 다양한 학문 분야에서 우리가 알고 있는 것을 어떻게 아는지 성찰하게 하는 DP 핵심 과목입니다. A~E로 평가됩니다. EE와 함께 최대 3점의 보너스 점수를 기여합니다.' },
+    },
+    {
+      term: 'CAS',
+      en: { full: 'Creativity, Activity, Service', definition: 'A mandatory DP diploma requirement involving 150 documented hours of real-world engagement across creative, physical, and service activities, plus a reflection portfolio.' },
+      ko: { full: '창의·활동·봉사', definition: '창의적, 신체적, 봉사 활동에 걸쳐 150시간의 기록된 실세계 참여와 성찰 포트폴리오를 포함하는 필수 DP 졸업장 요건입니다.' },
+    },
+  ],
 }

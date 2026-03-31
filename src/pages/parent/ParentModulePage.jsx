@@ -813,7 +813,7 @@ export default function ParentModulePage() {
             textTransform: 'uppercase', letterSpacing: '.1em', margin: '2rem 0 1rem',
             display: 'flex', alignItems: 'center', gap: 8,
           }}>
-            <span>{lang === 'en' ? 'Part 4 — If your child is in PYP' : '4부 — 자녀가 PYP에 있다면'}</span>
+            <span>{lang === 'en' ? 'Part 4 — PYP and the Transition to MYP' : '4부 — PYP와 MYP로의 전환'}</span>
             {activeStage === 'pyp-myp' && (
               <span style={{ fontSize: 10, fontWeight: 700, background: STAGE_COLORS['pyp-myp'], color: 'white', padding: '1px 8px', borderRadius: 10 }}>
                 {lang === 'en' ? '★ Most relevant for your stage' : '★ 현재 단계에 가장 관련'}
@@ -845,6 +845,37 @@ export default function ParentModulePage() {
           >
             {lang === 'en' ? '✓ Mark as complete' : '✓ 완료로 표시'}
           </button>
+        </div>
+      )}
+
+      {/* Glossary */}
+      {activity.glossary && activity.glossary.length > 0 && (
+        <div style={{ marginTop: '2.5rem' }}>
+          <div style={{
+            fontSize: 11, fontWeight: 700, color: 'var(--ink-4)',
+            textTransform: 'uppercase', letterSpacing: '.1em', marginBottom: '1rem',
+          }}>
+            {lang === 'en' ? 'IB Acronym Glossary' : 'IB 약어 용어집'}
+          </div>
+          <div style={{ display: 'grid', gap: '.75rem' }}>
+            {activity.glossary.map(g => {
+              const entry = g[lang]
+              return (
+                <div key={g.term} style={{
+                  display: 'grid', gridTemplateColumns: '56px 1fr',
+                  gap: '0 1rem', alignItems: 'start',
+                  padding: '.875rem 1rem', borderRadius: 'var(--r)',
+                  background: 'var(--surface-2)', border: '1px solid var(--border)',
+                }}>
+                  <div style={{ fontWeight: 800, fontSize: 14, color: 'var(--teal)', paddingTop: 1 }}>{g.term}</div>
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--ink)', marginBottom: 3 }}>{entry.full}</div>
+                    <div style={{ fontSize: 12.5, color: 'var(--ink-3)', lineHeight: 1.65 }}>{entry.definition}</div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
         </div>
       )}
 
