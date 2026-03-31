@@ -24,6 +24,7 @@ import ScenariosPage from './pages/learn/ScenariosPage.jsx'
 import SimulationPage from './pages/learn/SimulationPage.jsx'
 import FinalExamPage from './pages/learn/FinalExamPage.jsx'
 import VocabPage from './pages/learn/VocabPage.jsx'
+import CulturalVocabPage from './pages/learn/CulturalVocabPage.jsx'
 
 const TABS = [
   { id: 'overview',    label: 'Overview' },
@@ -89,6 +90,7 @@ export default function App() {
         <Route path="/learn/:slug/scenarios" element={<ScenariosPage />} />
         <Route path="/learn/:slug/exam" element={<FinalExamPage />} />
         <Route path="/learn/:slug/vocab" element={<VocabPage />} />
+        <Route path="/learn/:slug/cultural-vocab" element={<CulturalVocabPage />} />
         <Route path="/learn/:slug/:dimension" element={<DimensionPage />} />
 
         {/* Admin */}
