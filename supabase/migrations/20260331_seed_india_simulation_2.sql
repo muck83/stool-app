@@ -337,5 +337,5 @@ INSERT INTO public.pd_simulations (
   ARRAY[2,4,5],
   20,
   2,
-  'active'
+  'live'
 );
