@@ -33,17 +33,17 @@ export const chinaVocabLearningActivity = {
     },
     {
       citation:
-        'Poole, A., & Bunnell, T. (2023). “Diluting, decoupling, and dovetailing”: Considering new metaphors for understanding the changing International School landscape in China.',
+        'Poole, A., & Bunnell, T. (2023). "Diluting, decoupling, and dovetailing": Considering new metaphors for understanding the changing International School landscape in China.',
       doi: '10.1177/14752409231160710',
       url: 'https://doi.org/10.1177/14752409231160710',
       use: 'Internationalised schools, fusion of national and international logics, and why older expatriate-centered assumptions are no longer enough.',
     },
     {
       citation:
-        'Poole, A., & Bunnell, T. (2024/2025). Host National Teachers’ Perceptions of Foreign Educators: Insights into the Changing International School Sector in China.',
+        'Poole, A., & Bunnell, T. (2024/2025). Host National Teachers' Perceptions of Foreign Educators: Insights into the Changing International School Sector in China.',
       doi: '10.1080/00071005.2024.2393816',
       url: 'https://doi.org/10.1080/00071005.2024.2393816',
-      use: 'Changing teacher roles, host-national expertise, and the shrinking automatic status of foreign educators in China’s internationalised sector.',
+      use: 'Changing teacher roles, host-national expertise, and the shrinking automatic status of foreign educators in China's internationalised sector.',
     },
   ],
   facilitatorNote:
@@ -99,7 +99,7 @@ export const chinaVocabLearningActivity = {
           learnerFriendlyDefinition:
             'A learning model that values diligence, effort, moral seriousness, and disciplined study.',
           deeperMeaning:
-            'In Li’s framework, learning is not only about curiosity or voice. It is also about hard work, endurance, carefulness, and becoming the kind of person who studies properly.',
+            'In Li's framework, learning is not only about curiosity or voice. It is also about hard work, endurance, carefulness, and becoming the kind of person who studies properly.',
           whyItMatters:
             'A student who seems overly cautious may actually be showing seriousness, not disengagement.',
           commonMisread:
@@ -133,7 +133,7 @@ export const chinaVocabLearningActivity = {
           term: 'Pragmatic involvement',
           partOfSpeech: 'noun phrase',
           learnerFriendlyDefinition:
-            'Parent involvement focused on solving practical school problems and protecting the child’s academic path.',
+            'Parent involvement focused on solving practical school problems and protecting the child's academic path.',
           deeperMeaning:
             'Contemporary urban Chinese parents are often actively involved both at home and at school, not as a performance of care only, but as a pragmatic response to competitive educational systems.',
           whyItMatters:
@@ -155,13 +155,13 @@ export const chinaVocabLearningActivity = {
           deeperMeaning:
             'Many schools serving Chinese nationals now blend international curricula, local staffing, national regulation, and market logics. Teachers need to read these settings as hybrid, not purely expatriate spaces.',
           whyItMatters:
-            'Assuming the school is culturally neutral or fully “international” can lead teachers to miss how local expectations shape everyday interactions.',
+            'Assuming the school is culturally neutral or fully "international" can lead teachers to miss how local expectations shape everyday interactions.',
           commonMisread:
             'This is just an international school located in China.',
           betterInterpretation:
             'This is often a hybrid institution where national and international expectations coexist and sometimes collide.',
           example:
-            'A colleague says, “Parents here think more like local school parents than international school parents.” The better frame may be that the school itself is internationalised.',
+            'A colleague says, "Parents here think more like local school parents than international school parents." The better frame may be that the school itself is internationalised.',
           contexts: ['colleagues', 'leadership', 'school identity'],
         },
         {
@@ -173,7 +173,7 @@ export const chinaVocabLearningActivity = {
           deeperMeaning:
             'Recent research suggests foreign teachers are no longer automatically treated as the most authoritative figures. Local teachers often hold stronger curricular, linguistic, and institutional knowledge.',
           whyItMatters:
-            'Foreign teachers can misread colleague dynamics if they assume “international” still means expatriate leadership by default.',
+            'Foreign teachers can misread colleague dynamics if they assume "international" still means expatriate leadership by default.',
           commonMisread:
             'The local colleague is only handling the national side of the school.',
           betterInterpretation:
@@ -276,7 +276,7 @@ export const chinaVocabLearningActivity = {
           correctAnswer: 'Parallel tracks',
           feedback: {
             correct:
-              'Exactly. Both adults may be aiming at the child’s success but operating with different assumptions about how partnership works.',
+              'Exactly. Both adults may be aiming at the child's success but operating with different assumptions about how partnership works.',
             incorrect:
               'The key issue is not messaging platform or hierarchy of expertise. It is shared purpose with mismatched assumptions. That is a parallel-tracks problem.',
           },
@@ -300,7 +300,7 @@ export const chinaVocabLearningActivity = {
               text: 'More worksheets do not mean more learning, so I would encourage you not to compare classes.',
               isCorrect: false,
               rationale:
-                'This may be true, but it does not address the parent’s need for legible diligence or legible rigor.',
+                'This may be true, but it does not address the parent's need for legible diligence or legible rigor.',
             },
             {
               id: 'b',
@@ -349,7 +349,7 @@ export const chinaVocabLearningActivity = {
         {
           id: 'dialogue-3',
           prompt:
-            'Student: "I know the answer. I just don’t want to explain it in front of everyone." Which teacher response best reflects the vocabulary?',
+            'Student: "I know the answer. I just don't want to explain it in front of everyone." Which teacher response best reflects the vocabulary?',
           options: [
             {
               id: 'a',
@@ -360,7 +360,7 @@ export const chinaVocabLearningActivity = {
             },
             {
               id: 'b',
-              text: 'Let’s find another way for you to show your reasoning first, then we can work on sharing it more publicly over time.',
+              text: 'Let's find another way for you to show your reasoning first, then we can work on sharing it more publicly over time.',
               isCorrect: true,
               rationale:
                 'This keeps explanation as a goal while reducing the immediate performance threat.',
@@ -400,7 +400,7 @@ export const chinaVocabLearningActivity = {
         {
           id: 'mc-2',
           stem:
-            'Why is “internationalised school” more accurate than simply saying “international school” in many China-based settings?',
+            'Why is "internationalised school" more accurate than simply saying "international school" in many China-based settings?',
           options: [
             'Because all such schools are run only by foreign staff',
             'Because these schools often fuse international and national curricula, local staffing, regulation, and market logic',

@@ -33,7 +33,7 @@ export const koreaVocabLearningActivity = {
     },
     {
       citation:
-        'Lim, H.-S. (2025). The Impact of Korea’s “Hagwon” Culture on Academic Pressure Among High School Students.',
+        'Lim, H.-S. (2025). The Impact of Korea's "Hagwon" Culture on Academic Pressure Among High School Students.',
       doi: '10.56397/RAE.2025.01.01',
       url: 'https://www.paradigmpress.org/rae/article/view/1488',
       use: 'Private academy culture, academic pressure, family strategy, and why after-school learning shapes daily school life.',
@@ -166,7 +166,7 @@ export const koreaVocabLearningActivity = {
           deeperMeaning:
             'Not all parents can shape school decisions equally. Some can organize faster and speak more effectively because they have more cultural, social, or economic capital.',
           whyItMatters:
-            'This helps teachers distinguish a general “parent mood” from activism driven by specific networks and resources.',
+            'This helps teachers distinguish a general "parent mood" from activism driven by specific networks and resources.',
           commonMisread:
             'All parents feel and act this way equally.',
           betterInterpretation:
@@ -215,7 +215,7 @@ export const koreaVocabLearningActivity = {
           correctAnswer: 'Reform opacity',
           feedback: {
             correct:
-              'Yes. The problem is not innovation alone, but the school’s failure to make the replacement legible and trustworthy.',
+              'Yes. The problem is not innovation alone, but the school's failure to make the replacement legible and trustworthy.',
             incorrect:
               'The key issue here is not student talk style or private tutoring. It is that the reform feels underexplained. That is reform opacity.',
           },
@@ -233,7 +233,7 @@ export const koreaVocabLearningActivity = {
           correctAnswer: 'Prepared participation',
           feedback: {
             correct:
-              'Right. The student’s restraint may reflect a prepared, accuracy-first participation style rather than weak engagement.',
+              'Right. The student's restraint may reflect a prepared, accuracy-first participation style rather than weak engagement.',
             incorrect:
               'This is a classroom participation issue, not a parent-network or policy issue. Prepared participation is the best fit.',
           },
@@ -259,7 +259,7 @@ export const koreaVocabLearningActivity = {
         {
           id: 'sort-4',
           prompt:
-            'A child’s teacher notices that every classroom task is being interpreted through after-school academies, benchmarks, and family strategy. Which term is most useful?',
+            'A child's teacher notices that every classroom task is being interpreted through after-school academies, benchmarks, and family strategy. Which term is most useful?',
           options: [
             'Hagwon ecology',
             'Reform opacity',
@@ -293,7 +293,7 @@ export const koreaVocabLearningActivity = {
               text: 'Projects are better for the future, so I hope families can move beyond test thinking.',
               isCorrect: false,
               rationale:
-                'This moralizes the issue and dismisses the family’s need for fairness signals.',
+                'This moralizes the issue and dismisses the family's need for fairness signals.',
             },
             {
               id: 'b',
@@ -307,7 +307,7 @@ export const koreaVocabLearningActivity = {
               text: 'Leadership made this decision, so there is not much teachers can do.',
               isCorrect: false,
               rationale:
-                'This increases opacity and weakens trust in the school’s interpretive capacity.',
+                'This increases opacity and weakens trust in the school's interpretive capacity.',
             },
           ],
         },
@@ -342,7 +342,7 @@ export const koreaVocabLearningActivity = {
         {
           id: 'dialogue-3',
           prompt:
-            'Parent group organizer: "We had to act early because schools don’t always see how reforms affect high-performing children." Which reply best shows understanding without surrender?',
+            'Parent group organizer: "We had to act early because schools don't always see how reforms affect high-performing children." Which reply best shows understanding without surrender?',
           options: [
             {
               id: 'a',
@@ -353,7 +353,7 @@ export const koreaVocabLearningActivity = {
             },
             {
               id: 'b',
-              text: 'I can see that families are trying to protect legibility and fairness. Let me focus on making the school’s evidence clearer rather than assuming the concern is anti-change.',
+              text: 'I can see that families are trying to protect legibility and fairness. Let me focus on making the school's evidence clearer rather than assuming the concern is anti-change.',
               isCorrect: true,
               rationale:
                 'This acknowledges proactive parenting logic and shifts toward a constructive translation move.',
@@ -408,7 +408,7 @@ export const koreaVocabLearningActivity = {
         {
           id: 'mc-3',
           stem:
-            'Why is “proactive parenting logic” a better term than simply “pushy parents” in many Korean school situations?',
+            'Why is "proactive parenting logic" a better term than simply "pushy parents" in many Korean school situations?',
           options: [
             'Because it recognizes intervention as a form of responsible care inside a competitive system',
             'Because all parents intervene in the same way',
