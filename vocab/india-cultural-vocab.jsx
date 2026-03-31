@@ -6,6 +6,15 @@ export const indiaCulturalVocab = {
   estimatedMinutes: 15,
   difficulty: 'foundational',
   type: 'cultural_vocab',
+  openingHook: {
+    situation: [
+      "You've emailed Arjun's parents three times in six weeks about the reading support plan you'd like to put in place. Polite emails, specific questions, clear next steps. Nothing. You begin to wonder if this family is simply disengaged.",
+      "On a Thursday afternoon, five minutes before dismissal, a man you don't recognise appears at your classroom door. He smiles warmly, introduces himself as Arjun's father, and asks if you have a moment. He's completely relaxed, as if dropping by unannounced is entirely normal.",
+      "You talk for fifteen minutes. He asks good questions. He clearly cares deeply about his son. He listens carefully to everything you say and responds thoughtfully.",
+      "At the end he says, 'Yes, let's sort this out,' shakes your hand, and leaves. You stand in your empty classroom. You're not sure if you agreed on anything specific. You're also not sure why three careful emails produced nothing and an unannounced appearance produced the most engaged conversation you've had with any parent this term.",
+    ],
+    question: "Why didn't the emails work? And what made the doorway conversation real in a way they weren't?",
+  },
   facilitatorNote: "India is vastly diverse, and no five terms can represent every family or region. These concepts are widely shared enough across urban, aspirational, private-school contexts to be genuinely useful \u2014 but always hold them loosely and let individual families teach you their own version.",
   cards: [
     {

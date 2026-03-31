@@ -6,6 +6,15 @@ export const ksaCulturalVocab = {
   estimatedMinutes: 15,
   difficulty: 'foundational',
   type: 'cultural_vocab',
+  openingHook: {
+    situation: [
+      "Three weeks into your new role, your classroom phone rings. It's a parent whose daughter is in your Year 6 class \u2014 someone you've never met. She is warm and friendly. She mentions she knows the school counsellor personally, uses her first name, asks how you're finding things. She doesn't seem to want anything specific. The call lasts about ten minutes and ends with her saying it was lovely to speak with you.",
+      "You hang up feeling slightly confused. Was that a complaint? A welfare check? You mention it to a colleague who has been at the school for several years. She smiles: 'She's introducing herself. You'll be hearing from her again.'",
+      "Six weeks later, an email arrives from the same parent. She would like her daughter moved to the top English group. She is very specific about her reasons and very polite about the request.",
+      "You feel blindsided. Your colleague does not.",
+    ],
+    question: "What happened in that first phone call? And why does your colleague find this completely unsurprising?",
+  },
   facilitatorNote: "These terms come from inside the culture. You don't need to speak Arabic to use them — but recognising them changes how you read everyday school interactions. Each card focuses on a concept that has no clean English equivalent and that regularly shapes parent, student, and colleague behaviour in Saudi school settings.",
   cards: [
     {

@@ -6,6 +6,15 @@ export const koreaCulturalVocab = {
   estimatedMinutes: 15,
   difficulty: 'foundational',
   type: 'cultural_vocab',
+  openingHook: {
+    situation: [
+      "It's a Tuesday afternoon. Your Year 8 class is in the middle of what has genuinely been a very good lesson. The discussion is alive. Then you introduce the next task \u2014 a challenge question, the kind that requires real thinking. You ask them to share their initial thoughts.",
+      "Silence. Not the blank silence of confusion. Something different. Twenty-three students look at you with complete, still attention. No one reaches for a pen. No one whispers to a neighbour. One student \u2014 your most confident \u2014 glances very briefly to her left and right before raising her hand. She gives a careful answer, not a bold one.",
+      "You move on, but something stays with you. What were they waiting for? What was the glance about? You asked the same question at your school in London last year and four hands went up immediately.",
+      "A Korean colleague passes you in the corridor after school. You describe what happened. She nods immediately: 'Yes. They were being careful.' You wait for more. That's all she says.",
+    ],
+    question: "What were the students waiting for before anyone answered? What did the glance mean?",
+  },
   facilitatorNote: "The Korea module already uses the word hagwon. These five terms go deeper into the social and relational logic that sits beneath academic pressure \u2014 the invisible operating system that teachers often sense but struggle to name.",
   cards: [
     {

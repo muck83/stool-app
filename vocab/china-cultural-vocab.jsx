@@ -6,6 +6,15 @@ export const chinaCulturalVocab = {
   estimatedMinutes: 15,
   difficulty: 'foundational',
   type: 'cultural_vocab',
+  openingHook: {
+    situation: [
+      "In September, a parent volunteers to help with class photo day. In October, she organises the Lunar New Year display in your corridor entirely on her own initiative, staying two hours after school to finish it. In late October, a carefully wrapped box of homemade dumplings appears on your desk with a note signed with a smiley face. You eat them at lunch and mean to send a thank-you.",
+      "In November, she emails asking whether her son can be moved to the advanced writing group. You explain that groups are reviewed at end of year, not mid-term, and that her son's current group is a good fit for him. You thank her for all her contributions to the class this term.",
+      "She replies: 'Of course, thank you for explaining.' She does not come to the winter showcase. She does not respond to the class newsletter. When you see her at pickup, she smiles, but something from before is gone.",
+      "You are not sure what you did.",
+    ],
+    question: "What did the dumplings mean? And what happened the moment you said the groups were fixed?",
+  },
   facilitatorNote: "These terms come from inside Chinese social and educational culture. They are not stereotypes \u2014 they are lenses. Each one describes a real mechanism that operates in parent-teacher interactions, often invisibly to educators who have not encountered them before.",
   cards: [
     {

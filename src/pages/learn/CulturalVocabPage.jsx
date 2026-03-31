@@ -38,6 +38,64 @@ const MODULE_ID_BY_SLUG = {
 }
 
 // ---------------------------------------------------------------------------
+// HookSection — baffling opening situation shown before any terms
+// ---------------------------------------------------------------------------
+function HookSection({ hook }) {
+  return (
+    <div style={{
+      background: '#1e1b4b',
+      borderRadius: 12,
+      padding: '28px 28px 24px',
+      marginBottom: 32,
+      color: '#e0e7ff',
+    }}>
+      <div style={{
+        fontSize: 11, fontWeight: 700, color: '#a5b4fc',
+        textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16,
+      }}>
+        Before you begin
+      </div>
+
+      {hook.situation.map((paragraph, i) => (
+        <p key={i} style={{
+          margin: '0 0 14px 0',
+          fontSize: 15,
+          lineHeight: 1.75,
+          color: i === hook.situation.length - 1 ? '#c7d2fe' : '#e0e7ff',
+          fontStyle: i === hook.situation.length - 1 ? 'italic' : 'normal',
+        }}>
+          {paragraph}
+        </p>
+      ))}
+
+      <div style={{
+        borderTop: '1px solid #3730a3',
+        marginTop: 20,
+        paddingTop: 16,
+      }}>
+        <p style={{
+          margin: 0,
+          fontSize: 15,
+          fontWeight: 600,
+          color: '#a5b4fc',
+          lineHeight: 1.6,
+        }}>
+          &#8203;&#x1F914; {hook.question}
+        </p>
+        <p style={{
+          margin: '10px 0 0 0',
+          fontSize: 13,
+          color: '#818cf8',
+          fontStyle: 'italic',
+        }}>
+          Work through the terms below. By the end, you should be able to explain exactly what happened.
+        </p>
+      </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // CardScenario — with / without comparison embedded in card
 // ---------------------------------------------------------------------------
 function CardScenario({ scenario }) {
@@ -416,6 +474,11 @@ export default function CulturalVocabPage() {
             {activity.facilitatorNote}
           </p>
         </div>
+      )}
+
+      {/* Opening hook */}
+      {activity.openingHook && (
+        <HookSection hook={activity.openingHook} />
       )}
 
       {/* Section label: Terms */}
