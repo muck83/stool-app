@@ -94,7 +94,7 @@ export default function Overview() {
         : salGap !== null && salGap < -20 ? `You're earning ${Math.abs(salGap)}% below the median for your region. Is that intentional?`
         : salGap !== null && salGap < 0 ? "You're slightly below the regional median. See the full picture."
         : `You're above the regional median. See how you compare across ${cc || 'your region'}.`,
-      sub: `${liveCount.toLocaleString()} real educator salary records — filterable by country, curriculum, and role. Know what the market pays before your next negotiation.`,
+      sub: `${liveCount.toLocaleString()} real educator salary records — filterable by country, curriculum, and role. Know what the market pays before your next negotiation.${sal > 0 && salGap !== null && salGap < 0 ? ' Note: the median covers all experience levels — a gap is normal early in your career.' : ''}`,
       c: '#1D9E75', bg: '#E1F5EE', badgeCol: '#1D9E75',
       badge: sal > 0 && salGap !== null && salGap < -20 ? 'Worth checking' : 'Explore',
       urgent: sal > 0 && salGap !== null && salGap < -20,
