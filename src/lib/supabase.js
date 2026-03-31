@@ -264,6 +264,29 @@ export async function loadProfileFromCloud(email) {
   return { profile: data.profile, updatedAt: data.updated_at }
 }
 
+export async function insertCulturalFeedback({ activityId, moduleId, country, contextSelected, rating, inaccuracies, whatWasMissing, mostUseful }) {
+  if (!supabase) return { error: 'not-configured' }
+  const { data, error } = await supabase
+    .from('pd_cultural_feedback')
+    .insert([{
+      activity_id:      activityId,
+      module_id:        moduleId,
+      country,
+      context_selected: contextSelected || null,
+      rating:           rating || null,
+      inaccuracies:     inaccuracies?.trim() || null,
+      what_was_missing: whatWasMissing?.trim() || null,
+      most_useful:      mostUseful?.trim() || null,
+    }])
+    .select()
+    .single()
+  if (error) {
+    console.error('Cultural feedback insert error:', error)
+    return { error: error.message }
+  }
+  return { data }
+}
+
 export async function adminFetchAll() {
   if (!supabase) return []
   const { data, error } = await supabase

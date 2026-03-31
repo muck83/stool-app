@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { CULTURAL_VOCAB_BY_SLUG } from '../../../vocab/country-cultural-vocab.jsx'
+import { insertCulturalFeedback } from '../../lib/supabase.js'
 
 // ---------------------------------------------------------------------------
 // localStorage helpers
@@ -486,6 +487,189 @@ function ReviewScenario({ scenario, index }) {
 }
 
 // ---------------------------------------------------------------------------
+// FeedbackForm — shown after mark-complete, submits to Supabase
+// ---------------------------------------------------------------------------
+const FB_STORAGE_KEY = (moduleId) => `pd_cultural_feedback_sent_${moduleId}`
+
+function StarRating({ value, onChange }) {
+  const [hovered, setHovered] = useState(0)
+  return (
+    <div style={{ display: 'flex', gap: 4 }}>
+      {[1, 2, 3, 4, 5].map((n) => (
+        <button
+          key={n}
+          onClick={() => onChange(n)}
+          onMouseEnter={() => setHovered(n)}
+          onMouseLeave={() => setHovered(0)}
+          style={{
+            background: 'none', border: 'none', cursor: 'pointer',
+            fontSize: 28, padding: '0 2px', lineHeight: 1,
+            color: n <= (hovered || value) ? '#f59e0b' : '#cbd5e1',
+            transition: 'color 0.1s',
+          }}
+        >
+          &#9733;
+        </button>
+      ))}
+    </div>
+  )
+}
+
+function FeedbackForm({ activity, moduleId, contextSelected }) {
+  const alreadySent = (() => { try { return !!localStorage.getItem(FB_STORAGE_KEY(moduleId)) } catch { return false } })()
+
+  const [rating, setRating] = useState(0)
+  const [inaccuracies, setInaccuracies] = useState('')
+  const [missing, setMissing] = useState('')
+  const [useful, setUseful] = useState('')
+  const [status, setStatus] = useState(alreadySent ? 'sent' : 'idle') // idle | submitting | sent | error
+
+  async function handleSubmit(e) {
+    e.preventDefault()
+    if (!rating) return
+    setStatus('submitting')
+    const result = await insertCulturalFeedback({
+      activityId:      activity.id,
+      moduleId,
+      country:         activity.country,
+      contextSelected,
+      rating,
+      inaccuracies,
+      whatWasMissing:  missing,
+      mostUseful:      useful,
+    })
+    if (result?.error) {
+      setStatus('error')
+    } else {
+      try { localStorage.setItem(FB_STORAGE_KEY(moduleId), '1') } catch { /* ignore */ }
+      setStatus('sent')
+    }
+  }
+
+  if (status === 'sent') {
+    return (
+      <div style={{
+        background: '#f0fdf4', border: '1px solid #bbf7d0',
+        borderRadius: 12, padding: '20px 24px', textAlign: 'center', marginTop: 32,
+      }}>
+        <div style={{ fontSize: 24, marginBottom: 6 }}>&#128075;</div>
+        <div style={{ fontWeight: 700, color: '#15803d', fontSize: 15, marginBottom: 4 }}>
+          Thanks for the feedback
+        </div>
+        <p style={{ margin: 0, fontSize: 13, color: '#166534' }}>
+          Your response has been recorded and will be used to improve this module.
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <form onSubmit={handleSubmit} style={{
+      background: '#f8fafc', border: '1px solid #e2e8f0',
+      borderRadius: 12, padding: '24px', marginTop: 32,
+    }}>
+      <div style={{ fontSize: 12, fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 4 }}>
+        Help improve this module
+      </div>
+      <p style={{ margin: '0 0 20px 0', fontSize: 13, color: '#64748b', lineHeight: 1.5 }}>
+        You're in an early test group. A few quick questions help us make this more accurate and useful.
+      </p>
+
+      {/* Star rating */}
+      <div style={{ marginBottom: 20 }}>
+        <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: '#334155', marginBottom: 8 }}>
+          How well does this module reflect your students? <span style={{ color: '#ef4444' }}>*</span>
+        </label>
+        <StarRating value={rating} onChange={setRating} />
+        {rating > 0 && (
+          <div style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>
+            {['', 'Not at all accurate', 'Slightly accurate', 'Somewhat accurate', 'Mostly accurate', 'Very accurate'][rating]}
+          </div>
+        )}
+      </div>
+
+      {/* Inaccuracies */}
+      <div style={{ marginBottom: 16 }}>
+        <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: '#334155', marginBottom: 6 }}>
+          Did anything feel inaccurate or off for your context? <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span>
+        </label>
+        <textarea
+          value={inaccuracies}
+          onChange={(e) => setInaccuracies(e.target.value)}
+          placeholder="e.g. The wasta description didn't quite match what I see with UAE families..."
+          rows={3}
+          style={{
+            width: '100%', boxSizing: 'border-box', padding: '10px 12px',
+            borderRadius: 8, border: '1px solid #cbd5e1', fontSize: 13,
+            color: '#334155', resize: 'vertical', fontFamily: 'inherit',
+            lineHeight: 1.5,
+          }}
+        />
+      </div>
+
+      {/* Missing */}
+      <div style={{ marginBottom: 16 }}>
+        <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: '#334155', marginBottom: 6 }}>
+          What did we miss that would have been useful? <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span>
+        </label>
+        <textarea
+          value={missing}
+          onChange={(e) => setMissing(e.target.value)}
+          placeholder="e.g. Nothing about how Korean families in Riyadh interact with the Korean church community..."
+          rows={3}
+          style={{
+            width: '100%', boxSizing: 'border-box', padding: '10px 12px',
+            borderRadius: 8, border: '1px solid #cbd5e1', fontSize: 13,
+            color: '#334155', resize: 'vertical', fontFamily: 'inherit',
+            lineHeight: 1.5,
+          }}
+        />
+      </div>
+
+      {/* Most useful */}
+      <div style={{ marginBottom: 20 }}>
+        <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: '#334155', marginBottom: 6 }}>
+          What was most useful or surprising? <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span>
+        </label>
+        <textarea
+          value={useful}
+          onChange={(e) => setUseful(e.target.value)}
+          placeholder="e.g. The sabr card completely explained a situation I had last term..."
+          rows={3}
+          style={{
+            width: '100%', boxSizing: 'border-box', padding: '10px 12px',
+            borderRadius: 8, border: '1px solid #cbd5e1', fontSize: 13,
+            color: '#334155', resize: 'vertical', fontFamily: 'inherit',
+            lineHeight: 1.5,
+          }}
+        />
+      </div>
+
+      {status === 'error' && (
+        <p style={{ color: '#ef4444', fontSize: 13, marginBottom: 12 }}>
+          Something went wrong \u2014 please try again or note your feedback to share directly.
+        </p>
+      )}
+
+      <button
+        type="submit"
+        disabled={!rating || status === 'submitting'}
+        style={{
+          background: rating ? '#6366f1' : '#e2e8f0',
+          color: rating ? '#fff' : '#94a3b8',
+          border: 'none', borderRadius: 8,
+          padding: '11px 24px', fontSize: 14, fontWeight: 700,
+          cursor: rating ? 'pointer' : 'default',
+          transition: 'background 0.15s',
+        }}
+      >
+        {status === 'submitting' ? 'Sending\u2026' : 'Submit feedback \u2192'}
+      </button>
+    </form>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // CulturalVocabPage — main page component
 // ---------------------------------------------------------------------------
 export default function CulturalVocabPage() {
@@ -495,10 +679,14 @@ export default function CulturalVocabPage() {
 
   const [done, setDone] = useState(false)
   const [marked, setMarked] = useState(false)
+  const [contextSelected, setContextSelected] = useState(null)
 
   useEffect(() => {
     window.scrollTo(0, 0)
-    if (moduleId) setDone(isCulturalVocabCompleted(moduleId))
+    if (moduleId) {
+      setDone(isCulturalVocabCompleted(moduleId))
+      try { setContextSelected(localStorage.getItem(`pd_context_${moduleId}`) || null) } catch { /* ignore */ }
+    }
   }, [moduleId])
 
   function handleMarkComplete() {
@@ -638,6 +826,15 @@ export default function CulturalVocabPage() {
           </button>
         )}
       </div>
+
+      {/* Feedback form — shown once activity is done */}
+      {done && moduleId && (
+        <FeedbackForm
+          activity={activity}
+          moduleId={moduleId}
+          contextSelected={contextSelected}
+        />
+      )}
 
       {/* Return link */}
       <div style={{ textAlign: 'center', marginTop: 24 }}>
