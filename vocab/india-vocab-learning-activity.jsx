@@ -31,7 +31,7 @@ export const indiaVocabLearningActivity = {
     },
     {
       citation:
-        "Babu, S. S., & Mahajan, A. (2021). Branding an 'Inter'national school: Fusing 'Indian values' with a global diploma.",
+        "Babu, S. S., & Mahajan, A. (2021). Branding an 'Inter\'national school: Fusing 'Indian values' with a global diploma.",
       doi: '10.1080/09620214.2020.1853589',
       use: 'The global-plus-rootedness promise of Indian international schools and the gap between branding and lived school experience.',
     },
@@ -89,7 +89,7 @@ export const indiaVocabLearningActivity = {
           commonMisread:
             'The parent is overinvested in branding.',
           betterInterpretation:
-            'The school may stand in for the family's hopes about mobility, respectability, and future belonging.',
+            'The school may stand in for the family\'s hopes about mobility, respectability, and future belonging.',
           example:
             'A parent chose an international school because it promised "global exposure with Indian values." That is school choice as identity work.',
           contexts: ['parents', 'leadership', 'admissions'],
@@ -107,7 +107,7 @@ export const indiaVocabLearningActivity = {
           commonMisread:
             'This parent is impatient and does not trust me.',
           betterInterpretation:
-            'The parent may be checking whether the school's listening turned into an actual process.',
+            'The parent may be checking whether the school\'s listening turned into an actual process.',
           example:
             'After a PTM about group work, the father asks what has happened since the meeting. He is asking for follow-through.',
           contexts: ['parents', 'teacher practice', 'school systems'],
@@ -121,7 +121,7 @@ export const indiaVocabLearningActivity = {
           deeperMeaning:
             'Families may see English-medium education as a route to mobility, confidence, status, and future access. Because of that, English often carries more meaning than just language learning.',
           whyItMatters:
-            'A school's English environment can become part of how families judge quality, seriousness, and future readiness.',
+            'A school\'s English environment can become part of how families judge quality, seriousness, and future readiness.',
           commonMisread:
             'Parents only care about English because it looks prestigious.',
           betterInterpretation:
@@ -153,7 +153,7 @@ export const indiaVocabLearningActivity = {
           term: 'Visible seriousness',
           partOfSpeech: 'noun phrase',
           learnerFriendlyDefinition:
-            'The feeling that a school takes academics and children's futures seriously in ways families can observe.',
+            'The feeling that a school takes academics and children\'s futures seriously in ways families can observe.',
           deeperMeaning:
             'This can show up through punctuality, teacher responsiveness, assessment clarity, homework structure, discipline, and the way the school talks about learning.',
           whyItMatters:
@@ -226,13 +226,13 @@ export const indiaVocabLearningActivity = {
             correct:
               'Yes. The parent is not rejecting the exhibition itself. She is asking for visible proof that the school remains academically serious and trackable.',
             incorrect:
-              'Not quite. The key issue here is not whether the parent likes projects or comparisons in general. It is that the school's standards are not visible enough from home. That is legible rigor.',
+              'Not quite. The key issue here is not whether the parent likes projects or comparisons in general. It is that the school\'s standards are not visible enough from home. That is legible rigor.',
           },
         },
         {
           id: 'sort-2',
           prompt:
-            'At a PTM, a teacher says, "I'll keep an eye on it." Two weeks later the parent asks what has actually changed. Which term best fits this tension?',
+            'At a PTM, a teacher says, "I\'ll keep an eye on it." Two weeks later the parent asks what has actually changed. Which term best fits this tension?',
           options: [
             'Global-plus-rooted',
             'Follow-through',
@@ -268,7 +268,7 @@ export const indiaVocabLearningActivity = {
         {
           id: 'sort-4',
           prompt:
-            'A student refuses to share an idea until she knows exactly how it will be graded and whether her answer is fully correct. Which term best frames the teacher's next learning goal?',
+            'A student refuses to share an idea until she knows exactly how it will be graded and whether her answer is fully correct. Which term best frames the teacher\'s next learning goal?',
           options: [
             'English as capital',
             'Intellectual risk-taking',
@@ -295,14 +295,14 @@ export const indiaVocabLearningActivity = {
         {
           id: 'dialogue-1',
           prompt:
-            'Parent: "I'm not against projects. I just need to know this school is still serious." Which teacher reply best addresses the actual concern?',
+            'Parent: "I\'m not against projects. I just need to know this school is still serious." Which teacher reply best addresses the actual concern?',
           options: [
             {
               id: 'a',
               text: 'Projects are the future, so parents need to move beyond marks.',
               isCorrect: false,
               rationale:
-                'This dismisses the parent's need for legible rigor and frames the concern as backward rather than understandable.',
+                'This dismisses the parent\'s need for legible rigor and frames the concern as backward rather than understandable.',
             },
             {
               id: 'b',
@@ -369,7 +369,7 @@ export const indiaVocabLearningActivity = {
             },
             {
               id: 'c',
-              text: 'It's best not to think too much about parent motives.',
+              text: 'It\'s best not to think too much about parent motives.',
               isCorrect: false,
               rationale:
                 'The whole point of this vocabulary is to improve interpretation, not avoid it.',
@@ -388,7 +388,7 @@ export const indiaVocabLearningActivity = {
         {
           id: 'mc-1',
           stem:
-            'Which concept best explains why a teacher's warm PTM response may still leave a parent dissatisfied?',
+            'Which concept best explains why a teacher\'s warm PTM response may still leave a parent dissatisfied?',
           options: [
             'English as capital',
             'Follow-through',

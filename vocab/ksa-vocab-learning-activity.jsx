@@ -64,7 +64,7 @@ export const ksaVocabLearningActivity = {
           betterInterpretation:
             'The parent may be trying to hold future opportunity and cultural continuity together at the same time.',
           example:
-            'A mother likes the school's English program but asks what "student voice" really means in practice. She is testing cultural fit.',
+            'A mother likes the school\'s English program but asks what "student voice" really means in practice. She is testing cultural fit.',
           contexts: ['parents', 'leadership', 'school choice'],
         },
         {
@@ -126,7 +126,7 @@ export const ksaVocabLearningActivity = {
           term: 'Values readability',
           partOfSpeech: 'noun phrase',
           learnerFriendlyDefinition:
-            'How easy it is for families to understand what a school's values language actually means in daily life.',
+            'How easy it is for families to understand what a school\'s values language actually means in daily life.',
           deeperMeaning:
             'A school can have strong values branding, but if the link between slogan and practice is vague, parents may experience the school as morally unclear rather than merely ambitious.',
           whyItMatters:
@@ -134,7 +134,7 @@ export const ksaVocabLearningActivity = {
           commonMisread:
             'The parent is overthinking school language.',
           betterInterpretation:
-            'The parent may be trying to decode whether the school's stated values align with lived practice.',
+            'The parent may be trying to decode whether the school\'s stated values align with lived practice.',
           example:
             'A family is comfortable once "leadership" is explained through respectful peer mentoring rather than abstract personal freedom. That is values readability.',
           contexts: ['parents', 'leadership', 'school communications'],
@@ -162,7 +162,7 @@ export const ksaVocabLearningActivity = {
           term: 'Institutional dissonance',
           partOfSpeech: 'noun phrase',
           learnerFriendlyDefinition:
-            'A mismatch between what the school's international ethos says and what local families hear or expect.',
+            'A mismatch between what the school\'s international ethos says and what local families hear or expect.',
           deeperMeaning:
             'Tension in Saudi international schools is often not located in one parent or one teacher. It sits in the institution itself, where imported educational language meets local moral and cultural expectations.',
           whyItMatters:
@@ -170,9 +170,9 @@ export const ksaVocabLearningActivity = {
           commonMisread:
             'This parent is unusually difficult.',
           betterInterpretation:
-            'The conflict may be built into the school's operating language and identity.',
+            'The conflict may be built into the school\'s operating language and identity.',
           example:
-            'Several parents interpret "student leadership" very differently from leadership's intended meaning. That suggests institutional dissonance.',
+            'Several parents interpret "student leadership" very differently from leadership\'s intended meaning. That suggests institutional dissonance.',
           contexts: ['leadership', 'teachers', 'parents'],
         },
         {
@@ -188,7 +188,7 @@ export const ksaVocabLearningActivity = {
           commonMisread:
             'If I explain too much, I am giving ground.',
           betterInterpretation:
-            'Clear explanation can protect the school's purpose while reducing unnecessary anxiety.',
+            'Clear explanation can protect the school\'s purpose while reducing unnecessary anxiety.',
           example:
             'A teacher explains exactly what students will and will not be asked to do in a values-themed week. That is respectful clarification.',
           contexts: ['parents', 'teacher communication', 'leadership'],
@@ -205,7 +205,7 @@ export const ksaVocabLearningActivity = {
         {
           id: 'sort-1',
           prompt:
-            'A parent says, "I support the school's confidence-building, but I want to understand the boundaries of what you mean by student voice." Which concept best fits?',
+            'A parent says, "I support the school\'s confidence-building, but I want to understand the boundaries of what you mean by student voice." Which concept best fits?',
           options: [
             'Bounded voice',
             'Private-school rationality',
@@ -233,7 +233,7 @@ export const ksaVocabLearningActivity = {
           correctAnswer: 'Values readability',
           feedback: {
             correct:
-              'Right. The key issue is whether the school's values language is readable and interpretable in daily practice.',
+              'Right. The key issue is whether the school\'s values language is readable and interpretable in daily practice.',
             incorrect:
               'There may be institutional tension too, but the immediate problem is that the values language is hard to read. That is values readability.',
           },
@@ -259,7 +259,7 @@ export const ksaVocabLearningActivity = {
         {
           id: 'sort-4',
           prompt:
-            'A teacher treats a parent's question as a personal challenge, but the same concern keeps surfacing across families because it is built into the school's rhetoric. Which concept is most useful?',
+            'A teacher treats a parent\'s question as a personal challenge, but the same concern keeps surfacing across families because it is built into the school\'s rhetoric. Which concept is most useful?',
           options: [
             'Institutional dissonance',
             'Bounded voice',
@@ -411,12 +411,12 @@ export const ksaVocabLearningActivity = {
             'What does "institutional dissonance" help teachers see more clearly?',
           options: [
             'That the problem is always one difficult parent',
-            'That some recurring tensions are built into the school's ethos language and context, not just into individual personalities',
+            'That some recurring tensions are built into the school\'s ethos language and context, not just into individual personalities',
             'That cultural fit is impossible',
             'That leadership and teachers should never change their wording',
           ],
           correctAnswer:
-            'That some recurring tensions are built into the school's ethos language and context, not just into individual personalities',
+            'That some recurring tensions are built into the school\'s ethos language and context, not just into individual personalities',
           explanation:
             'This concept shifts interpretation from blame to context, which often leads to better teacher responses.',
         },
