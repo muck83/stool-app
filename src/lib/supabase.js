@@ -98,6 +98,7 @@ export async function insertSalarySubmission(rec) {
       curr: rec.curr,
       role: rec.role,
       usd: rec.usd,
+      exp_bracket: rec.exp_bracket || null,
       housing: rec.housing,
       flights: rec.flights,
       tax: rec.tax,

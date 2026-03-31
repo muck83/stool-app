@@ -213,6 +213,9 @@ export default function Overview() {
                 {flt === 'Yes' && <span style={{ color: 'var(--teal-dark)' }}> + Flights covered.</span>}
                 {tax === 'Tax-free' && <span style={{ color: 'var(--teal-dark)' }}> + Tax-free.</span>}
               </div>
+              <div style={{ marginTop: 6, fontSize: 11.5, color: 'var(--ink-4)', lineHeight: 1.5 }}>
+                Note: this median includes all experience levels. Early-career teachers typically earn 15–30% less than senior colleagues in the same market — so if you're just starting out, a negative gap is expected.
+              </div>
               <div onClick={() => setActiveTab('data')} style={{ marginTop: '.75rem', fontSize: 12, fontWeight: 500, color: 'var(--teal-dark)', cursor: 'pointer' }}>See full salary database →</div>
             </>
           ) : (
