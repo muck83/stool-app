@@ -3,7 +3,7 @@ export const chinaCulturalVocab = {
   country: 'China',
   title: 'China: Five Cultural Terms',
   subtitle: 'Chinese concepts that shape how families think about reputation, relationship, and the purpose of education.',
-  estimatedMinutes: 10,
+  estimatedMinutes: 15,
   difficulty: 'foundational',
   type: 'cultural_vocab',
   facilitatorNote: "These terms come from inside Chinese social and educational culture. They are not stereotypes \u2014 they are lenses. Each one describes a real mechanism that operates in parent-teacher interactions, often invisibly to educators who have not encountered them before.",
@@ -15,10 +15,15 @@ export const chinaCulturalVocab = {
       pronunciation: 'MYEN-dzuh',
       literalTranslation: 'face / social reputation',
       learnerFriendlyDefinition: "Social reputation as a publicly held resource \u2014 something that can be given, maintained, or lost in the presence of others. Unlike internal shame, mianzi is about external standing in the eyes of the community.",
-      whyItMatters: "Criticism delivered in a group setting, feedback that implies incompetence, or a student being visibly corrected in front of peers all carry mianzi costs. Parents may resist accurate feedback not because they disbelieve it, but because acknowledging it in the wrong setting damages their child\u2019s standing.",
+      whyItMatters: "Criticism delivered in a group setting, feedback that implies incompetence, or a student being visibly corrected in front of peers all carry mianzi costs. Parents may resist accurate feedback not because they disbelieve it, but because acknowledging it in the wrong setting damages their child's standing.",
       schoolExample: "A teacher praises six students publicly and gives one child quieter feedback afterward. The parent of that child thanks the teacher at the next PTM. The teacher handled mianzi correctly \u2014 the praise was public, the correction was private.",
       watchFor: "Strong reactions to public criticism. Parents who request private meetings before issues escalate. Students who shut down entirely after a visible failure rather than trying again.",
       contexts: ['parents', 'feedback', 'classroom'],
+      cardScenario: {
+        situation: "A student gives a wrong answer in class. You correct it directly and move on, keeping the pace of the lesson.",
+        withUnderstanding: "You soften the correction: 'Good direction \u2014 let's explore that further. Who can build on this idea?' The student's mianzi is preserved. They contribute again fifteen minutes later.",
+        withoutUnderstanding: "'That's not quite right \u2014 can anyone help?' The student goes quiet for the rest of the lesson and avoids eye contact. For the following two weeks their hand stays down.",
+      },
     },
     {
       id: 'guanxi',
@@ -31,6 +36,11 @@ export const chinaCulturalVocab = {
       schoolExample: "A mother asks to have her son moved to the top maths group mid-term. The request seems pushy. She has volunteered for three school events this year. In her frame, she is making a reasonable relational request, not an unreasonable academic one.",
       watchFor: "Disproportionate generosity early in the year. Warm relationship investment that precedes a specific ask. Requests framed as coming from a friend or someone who knows the school.",
       contexts: ['parents', 'relationships', 'communication'],
+      cardScenario: {
+        situation: "A parent who attended every event this term and organised a class gift for teacher appreciation day now asks if their daughter can join the advanced writing group mid-year.",
+        withUnderstanding: "You understand this as a guanxi activation. You take the request seriously, explain your grouping criteria clearly, and offer a specific path to re-evaluation. The relationship is preserved and the parent feels their investment was acknowledged.",
+        withoutUnderstanding: "You explain that groupings are fixed for the year and suggest they raise it at the annual review. The parent is visibly confused. Their investment in the school community feels unreciprocated. Their involvement drops noticeably.",
+      },
     },
     {
       id: 'jiaoyu',
@@ -43,6 +53,11 @@ export const chinaCulturalVocab = {
       schoolExample: "A teacher reports that a student is performing well academically but struggles to cooperate in group tasks. The parents respond with deeper concern than the teacher expected. For them, the social failure is a jiaoyu failure \u2014 arguably more serious than an academic one.",
       watchFor: "Parental concern that extends beyond grades to character, conduct, or social behaviour. Questions about what the school is teaching children to be, not only what it is teaching them to do.",
       contexts: ['parents', 'behaviour', 'reporting'],
+      cardScenario: {
+        situation: "A student scores in the top band on all assessments but regularly dominates group discussions, interrupts peers, and refuses to compromise on shared decisions.",
+        withUnderstanding: "You frame this as a jiaoyu concern in your next report: the child's academic development is strong, but their character formation needs attention. The parents engage deeply and take the concern home seriously.",
+        withoutUnderstanding: "You note 'strong academically, some social skills to develop' in the report and move on. The parents focus only on the academic affirmation. Nothing changes. At the next review you raise the same issue.",
+      },
     },
     {
       id: 'suzhi',
@@ -55,6 +70,11 @@ export const chinaCulturalVocab = {
       schoolExample: "A family enrols their daughter in English tutoring, piano, and swimming on top of school. The teacher worries about overload. The parents see a developing person becoming more capable across all the domains that matter for a complete life.",
       watchFor: "Dense extra-curricular investment. Questions about confidence, articulacy, and character alongside academic performance. Parents who want the whole child developed, not just test scores improved.",
       contexts: ['parents', 'aspiration', 'extra-curricular'],
+      cardScenario: {
+        situation: "A family asks why the school doesn't offer more structured opportunities for public speaking and leadership across the school day.",
+        withUnderstanding: "You understand they are asking about suzhi cultivation. You explain how these elements are embedded in your programme and share how you personally track whole-child development. The conversation becomes a genuine dialogue about what education is for.",
+        withoutUnderstanding: "You explain that the curriculum is already full. The family nods politely. Over the following term they begin quietly investigating other schools.",
+      },
     },
     {
       id: 'keqi',
@@ -63,10 +83,33 @@ export const chinaCulturalVocab = {
       pronunciation: 'kuh-CHEE',
       literalTranslation: 'polite restraint / not imposing',
       learnerFriendlyDefinition: "The social virtue of not placing burdens on others, expressed through indirect communication, declining before accepting, or softening requests to the point of near-invisibility. The indirect form is the culturally appropriate form.",
-      whyItMatters: "A parent who says 'please don\u2019t trouble yourself' while clearly expecting a response is being k\u00e8q\u00ec. Reading this as disinterest or acceptance is a common misread. Repeated soft mentions of the same concern are not passive \u2014 they are a serious request in the only form that felt polite.",
+      whyItMatters: "A parent who says 'please don't trouble yourself' while clearly expecting a response is being k\u00e8q\u00ec. Reading this as disinterest or acceptance is a common misread. Repeated soft mentions of the same concern are not passive \u2014 they are a serious request in the only form that felt polite.",
       schoolExample: "A father emails to say: 'I know you are very busy and this is probably not important, but I was wondering if perhaps...' The teacher marks it low priority. The father has been making a serious request in the only form that felt appropriate to him.",
       watchFor: "Requests that arrive heavily hedged. Repeated soft mentions of the same concern across separate conversations. Emails that seem to minimise their own importance.",
       contexts: ['parents', 'communication', 'email'],
+      cardScenario: {
+        situation: "A parent sends two emails three weeks apart, both beginning with 'I'm sure this isn't a big deal' and both referencing their child's homework load. You read both as low-priority and send a brief acknowledgment.",
+        withUnderstanding: "On the second email you recognise the pattern: repeated k\u00e8q\u00ec framing of the same concern is a strong signal. You schedule a call. The concern is real and has been building for weeks.",
+        withoutUnderstanding: "You reply a third time with a brief note suggesting they contact the year group admin. At the next PTM the parent raises the homework concern formally, visibly frustrated that it was never addressed.",
+      },
+    },
+  ],
+  reviewScenarios: [
+    {
+      id: 'china-review-1',
+      title: 'The Year-End Report Meeting',
+      termsInPlay: ['mianzi', 'keqi', 'jiaoyu'],
+      situation: "A parent who has been warm and consistently helpful all year attends the end-of-year report meeting. Their child has had a difficult social year \u2014 some peer conflict, withdrawal from group tasks, and one incident involving unkind comments to a classmate. Academically the child is strong. The parent smiles throughout the meeting, asks few questions, and says everything sounds 'very helpful.'",
+      withUnderstanding: "You recognise the k\u00e8q\u00ec politeness as a container, not a signal of acceptance. You know the social concerns carry jiaoyu weight and that raising them in this meeting \u2014 privately, gently, framed as character development rather than behaviour problems \u2014 is the right approach. You name the incidents carefully, frame them as growth areas, and invite the parent's perspective with open questions. Mianzi is protected; the real conversation happens.",
+      withoutUnderstanding: "You follow the parent's positive energy and leave the social concerns for a note in the written report. The parent reads the report at home, sees the behaviour comments, and feels blindsided. They email to ask why this wasn't raised in person. The relationship is slightly damaged.",
+    },
+    {
+      id: 'china-review-2',
+      title: 'The Community Parent',
+      termsInPlay: ['guanxi', 'mianzi', 'suzhi'],
+      situation: "A parent who has invested heavily in the school community \u2014 organising the Lunar New Year celebration, donating books to the library, attending every open event \u2014 asks if their son can present at the school's showcase assembly, reserved for outstanding student work. His work is good but not quite at showcase level.",
+      withUnderstanding: "You recognise all three terms at play. The parent's investment is guanxi-building. The request carries mianzi stakes \u2014 the showcase is a public, visible honour. And it connects to suzhi aspiration: they want their son to develop as a public communicator. You meet with the parent, acknowledge their contribution to school life genuinely, explain the showcase criteria clearly, and offer an alternative: a smaller class presentation that develops the same suzhi goal. The relationship holds.",
+      withoutUnderstanding: "You email to say the showcase is for top-level work and the child's submission didn't meet the standard. The parent does not respond. Their involvement in school events stops. Other Chinese-heritage families notice.",
     },
   ],
 }

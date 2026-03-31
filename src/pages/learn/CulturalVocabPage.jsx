@@ -28,13 +28,78 @@ function saveCulturalVocabComplete(moduleId) {
 }
 
 // ---------------------------------------------------------------------------
-// Slug → module id map (mirrors ModulePage logic)
+// Slug -> module id map
 // ---------------------------------------------------------------------------
 const MODULE_ID_BY_SLUG = {
   'saudi-arabia': 'ksa-001',
   china:          'china-001',
   'south-korea':  'korea-001',
   india:          'india-001',
+}
+
+// ---------------------------------------------------------------------------
+// CardScenario — with / without comparison embedded in card
+// ---------------------------------------------------------------------------
+function CardScenario({ scenario }) {
+  const [revealed, setRevealed] = useState(false)
+
+  return (
+    <div style={{ marginTop: 16 }}>
+      <div style={{
+        fontSize: 12, fontWeight: 700, color: '#7c3aed',
+        textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8,
+      }}>
+        In practice
+      </div>
+      <p style={{
+        margin: '0 0 12px 0', fontSize: 14, color: '#334155',
+        lineHeight: 1.6, fontStyle: 'italic',
+        borderLeft: '3px solid #c4b5fd', paddingLeft: 12,
+      }}>
+        {scenario.situation}
+      </p>
+
+      {!revealed ? (
+        <button
+          onClick={() => setRevealed(true)}
+          style={{
+            background: '#ede9fe', color: '#5b21b6', border: '1px solid #c4b5fd',
+            borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600,
+            cursor: 'pointer', width: '100%',
+          }}
+        >
+          See how cultural knowledge changes this &#8595;
+        </button>
+      ) : (
+        <div style={{ display: 'flex', gap: 10, flexDirection: 'column' }}>
+          {/* With understanding */}
+          <div style={{
+            background: '#f0fdf4', border: '1px solid #bbf7d0',
+            borderRadius: 8, padding: '12px 14px',
+          }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#15803d', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
+              With cultural understanding
+            </div>
+            <p style={{ margin: 0, fontSize: 13, color: '#166534', lineHeight: 1.6 }}>
+              {scenario.withUnderstanding}
+            </p>
+          </div>
+          {/* Without understanding */}
+          <div style={{
+            background: '#fff7ed', border: '1px solid #fed7aa',
+            borderRadius: 8, padding: '12px 14px',
+          }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#c2410c', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
+              Without cultural understanding
+            </div>
+            <p style={{ margin: 0, fontSize: 13, color: '#9a3412', lineHeight: 1.6 }}>
+              {scenario.withoutUnderstanding}
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+  )
 }
 
 // ---------------------------------------------------------------------------
@@ -57,35 +122,18 @@ function CulturalCard({ card, index }) {
       <button
         onClick={() => setOpen(!open)}
         style={{
-          width: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 16,
-          padding: '16px 20px',
-          background: 'none',
-          border: 'none',
-          cursor: 'pointer',
-          textAlign: 'left',
+          width: '100%', display: 'flex', alignItems: 'center', gap: 16,
+          padding: '16px 20px', background: 'none', border: 'none',
+          cursor: 'pointer', textAlign: 'left',
         }}
       >
-        {/* Number badge */}
         <span style={{
-          flexShrink: 0,
-          width: 32,
-          height: 32,
-          borderRadius: '50%',
-          background: '#6366f1',
-          color: '#fff',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontWeight: 700,
-          fontSize: 14,
+          flexShrink: 0, width: 32, height: 32, borderRadius: '50%',
+          background: '#6366f1', color: '#fff', display: 'flex',
+          alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 14,
         }}>
           {index + 1}
         </span>
-
-        {/* Term + script */}
         <div style={{ flex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
             <span style={{ fontSize: 18, fontWeight: 700, color: '#1e293b' }}>
@@ -108,14 +156,10 @@ function CulturalCard({ card, index }) {
             </div>
           )}
         </div>
-
-        {/* Chevron */}
         <span style={{
-          fontSize: 18,
-          color: '#94a3b8',
+          fontSize: 18, color: '#94a3b8',
           transform: open ? 'rotate(180deg)' : 'none',
-          transition: 'transform 0.2s',
-          flexShrink: 0,
+          transition: 'transform 0.2s', flexShrink: 0,
         }}>
           &#8964;
         </span>
@@ -123,17 +167,11 @@ function CulturalCard({ card, index }) {
 
       {/* Expanded body */}
       {open && (
-        <div style={{
-          padding: '0 20px 20px 20px',
-          borderTop: '1px solid #f1f5f9',
-        }}>
+        <div style={{ padding: '0 20px 20px 20px', borderTop: '1px solid #f1f5f9' }}>
           {/* Definition */}
           <div style={{
-            background: '#f8fafc',
-            borderRadius: 8,
-            padding: '12px 16px',
-            marginTop: 12,
-            marginBottom: 16,
+            background: '#f8fafc', borderRadius: 8,
+            padding: '12px 16px', marginTop: 12, marginBottom: 16,
           }}>
             <p style={{ margin: 0, fontSize: 15, color: '#334155', lineHeight: 1.6 }}>
               {card.learnerFriendlyDefinition}
@@ -159,13 +197,8 @@ function CulturalCard({ card, index }) {
                 In school
               </div>
               <p style={{
-                margin: 0,
-                fontSize: 14,
-                color: '#334155',
-                lineHeight: 1.6,
-                borderLeft: '3px solid #0ea5e9',
-                paddingLeft: 12,
-                fontStyle: 'italic',
+                margin: 0, fontSize: 14, color: '#334155', lineHeight: 1.6,
+                borderLeft: '3px solid #0ea5e9', paddingLeft: 12, fontStyle: 'italic',
               }}>
                 {card.schoolExample}
               </p>
@@ -175,10 +208,8 @@ function CulturalCard({ card, index }) {
           {/* Watch for */}
           {card.watchFor && (
             <div style={{
-              background: '#fef9c3',
-              borderRadius: 8,
-              padding: '10px 14px',
-              marginBottom: 4,
+              background: '#fef9c3', borderRadius: 8,
+              padding: '10px 14px', marginBottom: 4,
             }}>
               <div style={{ fontSize: 12, fontWeight: 700, color: '#92400e', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>
                 Watch for
@@ -189,18 +220,18 @@ function CulturalCard({ card, index }) {
             </div>
           )}
 
+          {/* Card scenario — reveal on demand */}
+          {card.cardScenario && (
+            <CardScenario scenario={card.cardScenario} />
+          )}
+
           {/* Context tags */}
           {card.contexts && card.contexts.length > 0 && (
-            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 12 }}>
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 14 }}>
               {card.contexts.map((ctx) => (
                 <span key={ctx} style={{
-                  background: '#ede9fe',
-                  color: '#5b21b6',
-                  borderRadius: 20,
-                  padding: '2px 10px',
-                  fontSize: 11,
-                  fontWeight: 600,
-                  textTransform: 'capitalize',
+                  background: '#ede9fe', color: '#5b21b6', borderRadius: 20,
+                  padding: '2px 10px', fontSize: 11, fontWeight: 600, textTransform: 'capitalize',
                 }}>
                   {ctx}
                 </span>
@@ -209,6 +240,98 @@ function CulturalCard({ card, index }) {
           )}
         </div>
       )}
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// ReviewScenario — richer cross-term scenario at bottom of page
+// ---------------------------------------------------------------------------
+function ReviewScenario({ scenario, index }) {
+  const [revealed, setRevealed] = useState(false)
+
+  return (
+    <div style={{
+      border: '1px solid #ddd6fe', borderRadius: 12,
+      marginBottom: 16, background: '#faf5ff', overflow: 'hidden',
+    }}>
+      {/* Header */}
+      <div style={{ padding: '16px 20px', borderBottom: '1px solid #ede9fe' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+          <span style={{
+            flexShrink: 0, width: 28, height: 28, borderRadius: '50%',
+            background: '#7c3aed', color: '#fff', display: 'flex',
+            alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 13,
+          }}>
+            {index + 1}
+          </span>
+          <h4 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: '#1e293b' }}>
+            {scenario.title}
+          </h4>
+        </div>
+        {/* Terms in play */}
+        {scenario.termsInPlay && (
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {scenario.termsInPlay.map((t) => (
+              <span key={t} style={{
+                background: '#ede9fe', color: '#5b21b6', borderRadius: 20,
+                padding: '2px 10px', fontSize: 11, fontWeight: 600,
+                textTransform: 'capitalize', fontStyle: 'italic',
+              }}>
+                {t}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Situation */}
+      <div style={{ padding: '16px 20px' }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: '#7c3aed', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>
+          Situation
+        </div>
+        <p style={{ margin: '0 0 16px 0', fontSize: 14, color: '#334155', lineHeight: 1.7 }}>
+          {scenario.situation}
+        </p>
+
+        {!revealed ? (
+          <button
+            onClick={() => setRevealed(true)}
+            style={{
+              background: '#7c3aed', color: '#fff', border: 'none',
+              borderRadius: 8, padding: '10px 20px', fontSize: 14, fontWeight: 600,
+              cursor: 'pointer', width: '100%',
+            }}
+          >
+            Reveal: how does cultural knowledge change this? &#8595;
+          </button>
+        ) : (
+          <div style={{ display: 'flex', gap: 12, flexDirection: 'column' }}>
+            <div style={{
+              background: '#f0fdf4', border: '1px solid #bbf7d0',
+              borderRadius: 10, padding: '14px 16px',
+            }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#15803d', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>
+                With cultural literacy
+              </div>
+              <p style={{ margin: 0, fontSize: 14, color: '#166534', lineHeight: 1.7 }}>
+                {scenario.withUnderstanding}
+              </p>
+            </div>
+            <div style={{
+              background: '#fff7ed', border: '1px solid #fed7aa',
+              borderRadius: 10, padding: '14px 16px',
+            }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#c2410c', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>
+                Without cultural literacy
+              </div>
+              <p style={{ margin: 0, fontSize: 14, color: '#9a3412', lineHeight: 1.7 }}>
+                {scenario.withoutUnderstanding}
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
@@ -239,7 +362,7 @@ export default function CulturalVocabPage() {
       <div style={{ padding: 40, textAlign: 'center', color: '#64748b' }}>
         <p>No cultural vocabulary found for this module.</p>
         <Link to={`/learn/${slug}`} style={{ color: '#6366f1' }}>
-          &larr; Back to module
+          &#8592; Back to module
         </Link>
       </div>
     )
@@ -266,22 +389,15 @@ export default function CulturalVocabPage() {
         <p style={{ margin: 0, fontSize: 16, color: '#64748b', lineHeight: 1.6 }}>
           {activity.subtitle}
         </p>
-
-        {/* Meta row */}
         <div style={{ display: 'flex', gap: 16, marginTop: 14, flexWrap: 'wrap' }}>
-          <span style={{ fontSize: 13, color: '#64748b', display: 'flex', alignItems: 'center', gap: 4 }}>
-            &#128337; {activity.estimatedMinutes} min
-          </span>
-          <span style={{ fontSize: 13, color: '#64748b', display: 'flex', alignItems: 'center', gap: 4 }}>
-            &#127891; {activity.difficulty}
-          </span>
-          <span style={{ fontSize: 13, color: '#64748b', display: 'flex', alignItems: 'center', gap: 4 }}>
-            &#128218; {activity.cards.length} terms
-          </span>
+          <span style={{ fontSize: 13, color: '#64748b' }}>&#128337; {activity.estimatedMinutes} min</span>
+          <span style={{ fontSize: 13, color: '#64748b' }}>&#127891; {activity.difficulty}</span>
+          <span style={{ fontSize: 13, color: '#64748b' }}>&#128218; {activity.cards.length} terms</span>
+          {activity.reviewScenarios && (
+            <span style={{ fontSize: 13, color: '#64748b' }}>&#128196; {activity.reviewScenarios.length} review scenarios</span>
+          )}
           {done && (
-            <span style={{ fontSize: 13, color: '#16a34a', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
-              &#10003; Completed
-            </span>
+            <span style={{ fontSize: 13, color: '#16a34a', fontWeight: 600 }}>&#10003; Completed</span>
           )}
         </div>
       </div>
@@ -289,11 +405,8 @@ export default function CulturalVocabPage() {
       {/* Facilitator note */}
       {activity.facilitatorNote && (
         <div style={{
-          background: '#f0fdf4',
-          border: '1px solid #bbf7d0',
-          borderRadius: 10,
-          padding: '14px 18px',
-          marginBottom: 28,
+          background: '#f0fdf4', border: '1px solid #bbf7d0',
+          borderRadius: 10, padding: '14px 18px', marginBottom: 28,
         }}>
           <div style={{ fontSize: 12, fontWeight: 700, color: '#15803d', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
             How to use this activity
@@ -304,22 +417,45 @@ export default function CulturalVocabPage() {
         </div>
       )}
 
+      {/* Section label: Terms */}
+      <div style={{
+        fontSize: 12, fontWeight: 700, color: '#64748b',
+        textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 12,
+      }}>
+        Part 1 — Learn the terms
+      </div>
+
       {/* Cards */}
-      <div>
+      <div style={{ marginBottom: 40 }}>
         {activity.cards.map((card, i) => (
           <CulturalCard key={card.id} card={card} index={i} />
         ))}
       </div>
 
+      {/* Review scenarios section */}
+      {activity.reviewScenarios && activity.reviewScenarios.length > 0 && (
+        <div style={{ marginBottom: 40 }}>
+          <div style={{
+            fontSize: 12, fontWeight: 700, color: '#64748b',
+            textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4,
+          }}>
+            Part 2 — Apply and review
+          </div>
+          <p style={{ fontSize: 14, color: '#64748b', margin: '0 0 16px 0', lineHeight: 1.6 }}>
+            Each scenario combines multiple terms. Read the situation, then reveal how cultural knowledge changes the outcome.
+          </p>
+          {activity.reviewScenarios.map((scenario, i) => (
+            <ReviewScenario key={scenario.id} scenario={scenario} index={i} />
+          ))}
+        </div>
+      )}
+
       {/* Mark complete */}
-      <div style={{ marginTop: 32, textAlign: 'center' }}>
+      <div style={{ textAlign: 'center' }}>
         {marked ? (
           <div style={{
-            background: '#f0fdf4',
-            border: '1px solid #bbf7d0',
-            borderRadius: 10,
-            padding: '16px 24px',
-            display: 'inline-block',
+            background: '#f0fdf4', border: '1px solid #bbf7d0',
+            borderRadius: 10, padding: '16px 24px', display: 'inline-block',
           }}>
             <div style={{ fontSize: 22, marginBottom: 4 }}>&#9989;</div>
             <div style={{ fontWeight: 700, color: '#15803d', fontSize: 16 }}>Marked as read</div>
@@ -333,25 +469,19 @@ export default function CulturalVocabPage() {
             style={{
               background: done ? '#e2e8f0' : '#6366f1',
               color: done ? '#64748b' : '#fff',
-              border: 'none',
-              borderRadius: 10,
-              padding: '14px 32px',
-              fontSize: 16,
-              fontWeight: 700,
+              border: 'none', borderRadius: 10,
+              padding: '14px 32px', fontSize: 16, fontWeight: 700,
               cursor: done ? 'default' : 'pointer',
             }}
           >
-            {done ? '&#10003; Already completed' : 'Mark as read \u2192'}
+            {done ? '\u2713 Already completed' : 'Mark as read \u2192'}
           </button>
         )}
       </div>
 
-      {/* Back to module */}
+      {/* Return link */}
       <div style={{ textAlign: 'center', marginTop: 24 }}>
-        <Link
-          to={`/learn/${slug}`}
-          style={{ color: '#6366f1', fontSize: 14, textDecoration: 'none' }}
-        >
+        <Link to={`/learn/${slug}`} style={{ color: '#6366f1', fontSize: 14, textDecoration: 'none' }}>
           &#8592; Return to module
         </Link>
       </div>
