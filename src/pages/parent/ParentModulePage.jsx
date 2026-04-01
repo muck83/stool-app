@@ -172,7 +172,7 @@ function HookSection({ hook, lang }) {
 }
 
 // ─── Concept Card ────────────────────────────────────────────────────────────
-function ConceptCard({ card, lang, index, activeStage }) {
+function ConceptCard({ card, lang, index, activeStage, whatToAskNote }) {
   const [open, setOpen] = useState(false)
   const c = card[lang]
   const colors = ['#1D9E75', '#185FA5', '#BA7517', '#534AB7', '#C0392B']
@@ -279,9 +279,9 @@ function ConceptCard({ card, lang, index, activeStage }) {
                 {lang === 'en' ? 'What to ask at your next meeting' : '다음 면담에서 물어볼 것'}
               </div>
               <div style={{ fontSize: 11, color: '#A16207', marginBottom: 8, lineHeight: 1.5 }}>
-                {lang === 'en'
+                {whatToAskNote || (lang === 'en'
                   ? 'IB teachers expect and welcome these questions — asking directly is normal, not rude.'
-                  : 'IB 교사들은 이런 질문을 기대하고 환영합니다. 직접적으로 묻는 것은 일반적인 일입니다.'}
+                  : 'IB 교사들은 이런 질문을 기대하고 환영합니다. 직접적으로 묻는 것은 일반적인 일입니다.')}
               </div>
               {c.whatToAsk.map((q, i) => (
                 <div key={i} style={{ fontSize: 12.5, color: '#78350F', lineHeight: 1.65, paddingLeft: 10, borderLeft: '2px solid #F0C060', marginBottom: i < c.whatToAsk.length - 1 ? 8 : 0 }}>
@@ -784,9 +784,9 @@ function DpCalculator({ data, lang }) {
             {lang === 'en' ? 'University context' : '대학교 입시 맥락'}
           </div>
           <div style={{ fontSize: 12, color: 'var(--ink-3)', lineHeight: 1.65 }}>
-            {lang === 'en'
+            {data[lang]?.universityContext || (lang === 'en'
               ? `Top universities typically require 36–40+ points. With ${total} points, your child is ${total >= 40 ? 'in range for the most selective programs' : total >= 36 ? 'competitive for most international universities' : total >= 30 ? 'within range for many universities — with room to improve' : 'in the earlier stages of their IB preparation'}. Note: universities also consider predicted grades, HL subject choices, and personal statements.`
-              : `상위 대학교들은 일반적으로 36~40점 이상을 요구합니다. ${total}점으로, 자녀는 ${total >= 40 ? '가장 까다로운 프로그램에 지원 가능한 수준입니다' : total >= 36 ? '대부분의 국제 대학교에 경쟁력 있는 수준입니다' : total >= 30 ? '많은 대학교에 지원 가능한 범위 내에 있습니다 — 발전 여지가 있습니다' : '아직 IB 준비의 초기 단계에 있습니다'}. 참고: 대학교들은 예상 점수, HL 과목 선택, 자기소개서도 함께 고려합니다.`}
+              : `상위 대학교들은 일반적으로 36~40점 이상을 요구합니다. ${total}점으로, 자녀는 ${total >= 40 ? '가장 까다로운 프로그램에 지원 가능한 수준입니다' : total >= 36 ? '대부분의 국제 대학교에 경쟁력 있는 수준입니다' : total >= 30 ? '많은 대학교에 지원 가능한 범위 내에 있습니다 — 발전 여지가 있습니다' : '아직 IB 준비의 초기 단계에 있습니다'}. 참고: 대학교들은 예상 점수, HL 과목 선택, 자기소개서도 함께 고려합니다.`)}
           </div>
         </div>
 
@@ -1066,7 +1066,7 @@ export default function ParentModulePage() {
             </div>
           )}
           {activity.cards.map((card, i) => (
-            <ConceptCard key={card.id} card={card} lang={lang} index={i} activeStage={activeStage} />
+            <ConceptCard key={card.id} card={card} lang={lang} index={i} activeStage={activeStage} whatToAskNote={activity.meta[lang]?.whatToAskNote} />
           ))}
           <SectionFooter />
         </div>
@@ -1129,7 +1129,7 @@ export default function ParentModulePage() {
               : 'PYP(초등 과정, 3~11세)는 이후에 오는 것과 매우 다르게 보입니다. 이 다섯 장의 카드는 무슨 일이 일어나고 있는지, 그리고 자녀가 MYP와 그 이후를 위해 무엇을 쌓고 있는지를 설명합니다.'}
           </p>
           {activity.pypCards.map((card, i) => (
-            <ConceptCard key={card.id} card={card} lang={lang} index={i} activeStage={activeStage} />
+            <ConceptCard key={card.id} card={card} lang={lang} index={i} activeStage={activeStage} whatToAskNote={activity.meta[lang]?.whatToAskNote} />
           ))}
           <SectionFooter />
         </div>
