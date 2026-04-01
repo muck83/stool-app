@@ -18,12 +18,12 @@ const LS_VISITED  = slug => `pd_parent_visited_${slug}`
 
 // ─── Section definitions ──────────────────────────────────────────────────────
 const SECTIONS = [
-  { id: 'start',     en: 'Start Here',       ko: '시작하기'  },
-  { id: 'concepts',  en: 'Core Concepts',    ko: '핵심 개념' },
-  { id: 'grades',    en: 'Grade System',     ko: '성적 체계' },
-  { id: 'pyp',       en: 'PYP',              ko: 'PYP'       },
-  { id: 'scenarios', en: 'Real Situations',  ko: '실제 상황' },
-  { id: 'next',      en: 'Next Steps',       ko: '다음 단계' },
+  { id: 'start',     en: 'Start Here',       ko: '시작하기',  zh: '从这里开始' },
+  { id: 'concepts',  en: 'Core Concepts',    ko: '핵심 개념', zh: '核心概念'   },
+  { id: 'grades',    en: 'Grade System',     ko: '성적 체계', zh: '成绩体系'   },
+  { id: 'pyp',       en: 'PYP',              ko: 'PYP',       zh: 'PYP'        },
+  { id: 'scenarios', en: 'Real Situations',  ko: '실제 상황', zh: '真实情境'   },
+  { id: 'next',      en: 'Next Steps',       ko: '다음 단계', zh: '下一步'     },
 ]
 
 // First recommended section for each stage
@@ -93,9 +93,13 @@ const NEXT_STEPS = {
 }
 
 // ─── Language Toggle ────────────────────────────────────────────────────────
-function LangToggle({ lang, setLang }) {
-  const btn = (l, label) => (
+const LANG_LABELS = { en: 'English', ko: '한국어', zh: '中文' }
+
+function LangToggle({ lang, setLang, languages }) {
+  const langs = languages && languages.length > 1 ? languages : ['en', 'ko']
+  const btn = (l) => (
     <button
+      key={l}
       onClick={() => setLang(l)}
       style={{
         padding: '5px 16px', fontSize: 13, fontWeight: 600,
@@ -104,7 +108,7 @@ function LangToggle({ lang, setLang }) {
         color: lang === l ? 'white' : 'var(--ink-3)',
         transition: 'background .15s, color .15s',
       }}
-    >{label}</button>
+    >{LANG_LABELS[l] || l}</button>
   )
   return (
     <div style={{
@@ -112,8 +116,7 @@ function LangToggle({ lang, setLang }) {
       background: 'var(--surface-2)', borderRadius: 24,
       padding: 3, border: '1px solid var(--border)',
     }}>
-      {btn('en', 'English')}
-      {btn('ko', '한국어')}
+      {langs.map(l => btn(l))}
     </div>
   )
 }
@@ -129,7 +132,7 @@ function HookSection({ hook, lang }) {
       padding: '1.25rem 1.4rem', marginBottom: '2rem',
     }}>
       <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: '.75rem' }}>
-        {lang === 'en' ? 'Opening situation' : '도입 상황'}
+        {lang === 'zh' ? '开场情境' : lang === 'ko' ? '도입 상황' : 'Opening situation'}
       </div>
       {h.situation.map((p, i) => (
         <p key={i} style={{ fontSize: 14, color: 'var(--ink)', lineHeight: 1.75, margin: '0 0 .75rem' }}>{p}</p>
@@ -144,7 +147,7 @@ function HookSection({ hook, lang }) {
             padding: '5px 16px', cursor: 'pointer',
           }}
         >
-          {lang === 'en' ? 'See the question →' : '질문 보기 →'}
+          {lang === 'zh' ? '查看问题 →' : lang === 'ko' ? '질문 보기 →' : 'See the question →'}
         </button>
       ) : (
         <div>
@@ -198,11 +201,11 @@ function ConceptCard({ card, lang, index, activeStage, whatToAskNote }) {
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
               <span style={{ fontSize: 11, fontWeight: 600, color: col, textTransform: 'uppercase', letterSpacing: '.07em' }}>
-                {lang === 'en' ? `Concept ${index + 1}` : `개념 ${index + 1}`}
+                {lang === 'zh' ? `概念 ${index + 1}` : lang === 'ko' ? `개념 ${index + 1}` : `Concept ${index + 1}`}
               </span>
               {isRelevant && (
                 <span style={{ fontSize: 10, fontWeight: 700, background: stageCol, color: 'white', padding: '1px 7px', borderRadius: 10 }}>
-                  {lang === 'en' ? '★ Relevant now' : '★ 지금 중요'}
+                  {lang === 'zh' ? '★ 当前重要' : lang === 'ko' ? '★ 지금 중요' : '★ Relevant now'}
                 </span>
               )}
             </div>
@@ -223,7 +226,7 @@ function ConceptCard({ card, lang, index, activeStage, whatToAskNote }) {
         {/* Concern */}
         <div style={{ marginTop: '1rem' }}>
           <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 6 }}>
-            {lang === 'en' ? 'A common concern' : '자주 하는 걱정'}
+            {lang === 'zh' ? '常见顾虑' : lang === 'ko' ? '자주 하는 걱정' : 'A common concern'}
           </div>
           <div style={{
             fontSize: 13.5, color: 'var(--ink-2)', lineHeight: 1.7,
@@ -246,14 +249,14 @@ function ConceptCard({ card, lang, index, activeStage, whatToAskNote }) {
               borderRadius: 20, padding: '6px 18px', cursor: 'pointer',
             }}
           >
-            {lang === 'en' ? 'What the school is doing →' : '학교가 하는 일 보기 →'}
+            {lang === 'zh' ? '学校的做法 →' : lang === 'ko' ? '학교가 하는 일 보기 →' : 'What the school is doing →'}
           </button>
         </div>
       ) : (
         <div style={{ padding: '1rem 1.2rem 1.25rem', borderTop: `1px solid ${col}22` }}>
           <div style={{ marginBottom: '1rem' }}>
             <div style={{ fontSize: 11, fontWeight: 600, color: col, textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 6 }}>
-              {lang === 'en' ? 'What the school is doing' : '학교가 하는 일'}
+              {lang === 'zh' ? '学校的做法' : lang === 'ko' ? '학교가 하는 일' : 'What the school is doing'}
             </div>
             <div style={{ fontSize: 13.5, color: 'var(--ink)', lineHeight: 1.75 }}>
               {c.bridge}
@@ -261,7 +264,7 @@ function ConceptCard({ card, lang, index, activeStage, whatToAskNote }) {
           </div>
           <div style={{ marginBottom: '1rem' }}>
             <div style={{ fontSize: 11, fontWeight: 600, color: col, textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 6 }}>
-              {lang === 'en' ? 'How this connects to your goal' : '목표와의 연결'}
+              {lang === 'zh' ? '与您目标的联系' : lang === 'ko' ? '목표와의 연결' : 'How this connects to your goal'}
             </div>
             <div style={{ fontSize: 13.5, color: 'var(--ink)', lineHeight: 1.75 }}>
               {c.goal}
@@ -278,12 +281,14 @@ function ConceptCard({ card, lang, index, activeStage, whatToAskNote }) {
           {c.whatToAsk && (
             <div style={{ padding: '.875rem 1rem', background: '#FFFBEB', border: '1px solid #F0C060', borderRadius: 'var(--r)' }}>
               <div style={{ fontSize: 11, fontWeight: 600, color: '#92400E', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 4 }}>
-                {lang === 'en' ? 'What to ask at your next meeting' : '다음 면담에서 물어볼 것'}
+                {lang === 'zh' ? '下次面谈时要问的问题' : lang === 'ko' ? '다음 면담에서 물어볼 것' : 'What to ask at your next meeting'}
               </div>
               <div style={{ fontSize: 11, color: '#A16207', marginBottom: 8, lineHeight: 1.5 }}>
-                {whatToAskNote || (lang === 'en'
-                  ? 'IB teachers expect and welcome these questions — asking directly is normal, not rude.'
-                  : 'IB 교사들은 이런 질문을 기대하고 환영합니다. 직접적으로 묻는 것은 일반적인 일입니다.')}
+                {whatToAskNote || (lang === 'zh'
+                  ? 'IB教师欢迎并期待这些问题——直接提问是正常的，不是失礼。'
+                  : lang === 'ko'
+                  ? 'IB 교사들은 이런 질문을 기대하고 환영합니다. 직접적으로 묻는 것은 일반적인 일입니다.'
+                  : 'IB teachers expect and welcome these questions — asking directly is normal, not rude.')}
               </div>
               {c.whatToAsk.map((q, i) => (
                 <div key={i} style={{ fontSize: 12.5, color: '#78350F', lineHeight: 1.65, paddingLeft: 10, borderLeft: '2px solid #F0C060', marginBottom: i < c.whatToAsk.length - 1 ? 8 : 0 }}>
@@ -352,7 +357,7 @@ function ReviewScenario({ scenario, lang, index }) {
               borderRadius: 20, padding: '6px 18px', cursor: 'pointer',
             }}
           >
-            {lang === 'en' ? 'See both responses →' : '두 가지 반응 보기 →'}
+            {lang === 'zh' ? '查看两种回应 →' : lang === 'ko' ? '두 가지 반응 보기 →' : 'See both responses →'}
           </button>
         )}
 
@@ -363,7 +368,7 @@ function ReviewScenario({ scenario, lang, index }) {
               background: '#E1F5EE', border: '1px solid #1D9E7544',
             }}>
               <div style={{ fontSize: 11, fontWeight: 600, color: '#1D9E75', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 6 }}>
-                {lang === 'en' ? 'With understanding' : '이해했을 때'}
+                {lang === 'zh' ? '了解情况时' : lang === 'ko' ? '이해했을 때' : 'With understanding'}
               </div>
               <div style={{ fontSize: 13.5, color: 'var(--ink)', lineHeight: 1.75 }}>{s.withUnderstanding}</div>
             </div>
@@ -372,7 +377,7 @@ function ReviewScenario({ scenario, lang, index }) {
               background: '#FEF3F2', border: '1px solid #C0392B44',
             }}>
               <div style={{ fontSize: 11, fontWeight: 600, color: '#C0392B', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 6 }}>
-                {lang === 'en' ? 'Without understanding' : '이해하지 못했을 때'}
+                {lang === 'zh' ? '不了解情况时' : lang === 'ko' ? '이해하지 못했을 때' : 'Without understanding'}
               </div>
               <div style={{ fontSize: 13.5, color: 'var(--ink)', lineHeight: 1.75 }}>{s.withoutUnderstanding}</div>
             </div>
@@ -395,7 +400,7 @@ function JourneyTimeline({ stages, activeStage, setActiveStage, lang }) {
   return (
     <div style={{ marginBottom: '2rem' }}>
       <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.1em', marginBottom: '.75rem' }}>
-        {lang === 'en' ? 'Where are you in the journey?' : '지금 어느 단계에 계신가요?'}
+        {lang === 'zh' ? '您目前处于哪个阶段？' : lang === 'ko' ? '지금 어느 단계에 계신가요?' : 'Where are you in the journey?'}
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
         {stages.map((stage, i) => {
@@ -448,10 +453,10 @@ function SectionNav({ sections, active, visited, lang, onChange, recommended }) 
       {/* Progress bar + label */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '.4rem' }}>
         <div style={{ fontSize: 10.5, fontWeight: 600, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.07em' }}>
-          {lang === 'en' ? 'Guide sections' : '안내서 섹션'}
+          {lang === 'zh' ? '指南章节' : lang === 'ko' ? '안내서 섹션' : 'Guide sections'}
         </div>
         <div style={{ fontSize: 11, color: 'var(--ink-4)' }}>
-          {lang === 'en' ? `${visitedCount} of ${total} visited` : `${total}개 중 ${visitedCount}개 방문`}
+          {lang === 'zh' ? `已访问 ${visitedCount}/${total}` : lang === 'ko' ? `${total}개 중 ${visitedCount}개 방문` : `${visitedCount} of ${total} visited`}
         </div>
       </div>
       <div style={{ height: 3, background: 'var(--surface-2)', borderRadius: 3, marginBottom: '.75rem', overflow: 'hidden', border: '1px solid var(--border)' }}>
@@ -509,7 +514,7 @@ function MypCalculator({ data, lang }) {
   const boundary = data.en.boundaries.find(b => total >= b.min && total <= b.max)
   const grade = boundary ? boundary.grade : null
   const descriptor = grade ? data.en.descriptors.find(d => d.grade === grade) : null
-  const descriptorLabel = descriptor ? (lang === 'ko' ? descriptor.ko : descriptor.label) : '—'
+  const descriptorLabel = descriptor ? (lang === 'zh' ? (descriptor.zh || descriptor.label) : lang === 'ko' ? descriptor.ko : descriptor.label) : '—'
 
   const gradeColor = grade >= 6 ? '#1D9E75' : grade >= 4 ? '#185FA5' : grade >= 2 ? '#BA7517' : '#C0392B'
 
@@ -517,7 +522,7 @@ function MypCalculator({ data, lang }) {
     <div style={{ marginBottom: '1rem' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
         <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink-2)' }}>
-          {lang === 'en' ? `Criterion ${label}` : `준거 ${label}`}
+          {lang === 'zh' ? `维度 ${label}` : lang === 'ko' ? `준거 ${label}` : `Criterion ${label}`}
         </span>
         <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--teal-dark)', minWidth: 32, textAlign: 'right' }}>{val} / 8</span>
       </div>
@@ -536,10 +541,10 @@ function MypCalculator({ data, lang }) {
     <div style={{ border: '1px solid var(--border)', borderRadius: 'var(--r)', overflow: 'hidden', marginBottom: '1.5rem' }}>
       <div style={{ padding: '.875rem 1.2rem', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)' }}>
         <div style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--ink)' }}>
-          {lang === 'en' ? 'MYP Grade Calculator' : 'MYP 등급 계산기'}
+          {lang === 'zh' ? 'MYP成绩计算器' : lang === 'ko' ? 'MYP 등급 계산기' : 'MYP Grade Calculator'}
         </div>
         <div style={{ fontSize: 12, color: 'var(--ink-4)', marginTop: 3 }}>
-          {lang === 'en' ? 'Drag each slider to set the criterion score (0–8)' : '각 슬라이더를 드래그하여 준거 점수(0~8)를 설정하세요'}
+          {lang === 'zh' ? '拖动滑块设置各维度得分（0–8）' : lang === 'ko' ? '각 슬라이더를 드래그하여 준거 점수(0~8)를 설정하세요' : 'Drag each slider to set the criterion score (0–8)'}
         </div>
       </div>
 
@@ -557,24 +562,25 @@ function MypCalculator({ data, lang }) {
         }}>
           <div style={{ textAlign: 'center', minWidth: 64 }}>
             <div style={{ fontSize: 11, color: 'var(--ink-4)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 2 }}>
-              {lang === 'en' ? 'Total' : '총점'}
+              {lang === 'zh' ? '总分' : lang === 'ko' ? '총점' : 'Total'}
             </div>
             <div style={{ fontSize: 22, fontWeight: 700, color: gradeColor }}>{total}<span style={{ fontSize: 13, fontWeight: 400, color: 'var(--ink-4)' }}>/32</span></div>
           </div>
           <div style={{ width: 1, height: 40, background: 'var(--border)' }} />
           <div style={{ textAlign: 'center', minWidth: 56 }}>
             <div style={{ fontSize: 11, color: 'var(--ink-4)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 2 }}>
-              {lang === 'en' ? 'Grade' : '등급'}
+              {lang === 'zh' ? '等级' : lang === 'ko' ? '등급' : 'Grade'}
             </div>
             <div style={{ fontSize: 28, fontWeight: 800, color: gradeColor, lineHeight: 1 }}>{grade || '—'}</div>
-            <div style={{ fontSize: 10, color: 'var(--ink-4)', marginTop: 2 }}>{lang === 'en' ? 'out of 7' : '7점 만점'}</div>
+            <div style={{ fontSize: 10, color: 'var(--ink-4)', marginTop: 2 }}>{lang === 'zh' ? '满分7' : lang === 'ko' ? '7점 만점' : 'out of 7'}</div>
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 13, fontWeight: 600, color: gradeColor }}>{descriptorLabel}</div>
             <div style={{ fontSize: 11, color: 'var(--ink-4)', marginTop: 3, lineHeight: 1.5 }}>
-              {lang === 'en'
-                ? `Boundaries: ${boundary ? boundary.min + '–' + boundary.max : '—'} points`
-                : `경계: ${boundary ? boundary.min + '~' + boundary.max : '—'} 점`}
+              {lang === 'zh'
+                ? `分数区间：${boundary ? boundary.min + '–' + boundary.max : '—'} 分`
+                : lang === 'ko' ? `경계: ${boundary ? boundary.min + '~' + boundary.max : '—'} 점`
+                : `Boundaries: ${boundary ? boundary.min + '–' + boundary.max : '—'} points`}
             </div>
           </div>
         </div>
@@ -582,7 +588,7 @@ function MypCalculator({ data, lang }) {
         {/* All grade boundaries reference table */}
         <div style={{ marginTop: '1.25rem' }}>
           <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 6 }}>
-            {lang === 'en' ? 'Grade boundary reference' : '등급 경계 참고표'}
+            {lang === 'zh' ? '等级边界参考' : lang === 'ko' ? '등급 경계 참고표' : 'Grade boundary reference'}
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4 }}>
             {data.en.boundaries.map(b => {
@@ -604,7 +610,7 @@ function MypCalculator({ data, lang }) {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4, marginTop: 3 }}>
             {data.en.descriptors.map(desc => {
-              const label = lang === 'ko' ? desc.ko : desc.label
+              const label = lang === 'zh' ? (desc.zh || desc.label) : lang === 'ko' ? desc.ko : desc.label
               return (
                 <div key={desc.grade} style={{ fontSize: 8.5, color: 'var(--ink-4)', textAlign: 'center', lineHeight: 1.3 }}>
                   {label}
@@ -631,6 +637,7 @@ function MypCalculator({ data, lang }) {
 // ─── DP Grade Calculator ──────────────────────────────────────────────────────
 const DP_SUBJECTS_EN = ['Subject 1 (HL)', 'Subject 2 (HL)', 'Subject 3 (HL)', 'Subject 4 (SL)', 'Subject 5 (SL)', 'Subject 6 (SL)']
 const DP_SUBJECTS_KO = ['과목 1 (HL)', '과목 2 (HL)', '과목 3 (HL)', '과목 4 (SL)', '과목 5 (SL)', '과목 6 (SL)']
+const DP_SUBJECTS_ZH = ['科目 1 (HL)', '科目 2 (HL)', '科目 3 (HL)', '科目 4 (SL)', '科目 5 (SL)', '科目 6 (SL)']
 const DP_HL = [true, true, true, false, false, false]
 const EE_TOK_GRADES = ['A', 'B', 'C', 'D', 'E']
 
@@ -657,16 +664,16 @@ function DpCalculator({ data, lang }) {
 
   const totalColor = passes ? '#1D9E75' : '#C0392B'
 
-  const subjectLabels = lang === 'ko' ? DP_SUBJECTS_KO : DP_SUBJECTS_EN
+  const subjectLabels = lang === 'zh' ? DP_SUBJECTS_ZH : lang === 'ko' ? DP_SUBJECTS_KO : DP_SUBJECTS_EN
 
   return (
     <div style={{ border: '1px solid var(--border)', borderRadius: 'var(--r)', overflow: 'hidden', marginBottom: '1.5rem' }}>
       <div style={{ padding: '.875rem 1.2rem', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)' }}>
         <div style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--ink)' }}>
-          {lang === 'en' ? 'DP Grade Calculator' : 'DP 등급 계산기'}
+          {lang === 'zh' ? 'DP成绩计算器' : lang === 'ko' ? 'DP 등급 계산기' : 'DP Grade Calculator'}
         </div>
         <div style={{ fontSize: 12, color: 'var(--ink-4)', marginTop: 3 }}>
-          {lang === 'en' ? 'Set grades for 6 subjects and the EE/ToK core' : '6개 과목과 소논문/지식이론 핵심 등급을 설정하세요'}
+          {lang === 'zh' ? '设留6门科目及EE/ToK核心分数' : lang === 'ko' ? '6개 과목과 소논문/지식이론 핵심 등급을 설정하세요' : 'Set grades for 6 subjects and the EE/ToK core'}
         </div>
       </div>
 
@@ -698,7 +705,7 @@ function DpCalculator({ data, lang }) {
                 />
                 {failing && (
                   <div style={{ fontSize: 10, color: '#C0392B', marginTop: 2 }}>
-                    {lang === 'en' ? `Min ${minPass} required for ${isHL ? 'HL' : 'SL'}` : `${isHL ? 'HL' : 'SL'} 최소 ${minPass}점 필요`}
+                    {lang === 'zh' ? `${isHL ? 'HL' : 'SL'}最低需要${minPass}分` : lang === 'ko' ? `${isHL ? 'HL' : 'SL'} 최소 ${minPass}점 필요` : `Min ${minPass} required for ${isHL ? 'HL' : 'SL'}`}
                   </div>
                 )}
               </div>
@@ -709,8 +716,8 @@ function DpCalculator({ data, lang }) {
         {/* EE + ToK */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 1.5rem', marginTop: '.5rem', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>
           {[
-            { key: 'ee', val: ee, set: setEe, label: lang === 'en' ? 'Extended Essay (EE)' : '소논문 (EE)' },
-            { key: 'tok', val: tok, set: setTok, label: lang === 'en' ? 'Theory of Knowledge (ToK)' : '지식이론 (ToK)' },
+            { key: 'ee', val: ee, set: setEe, label: lang === 'zh' ? '课题论文 (EE)' : lang === 'ko' ? '소논문 (EE)' : 'Extended Essay (EE)' },
+            { key: 'tok', val: tok, set: setTok, label: lang === 'zh' ? '知识论 (ToK)' : lang === 'ko' ? '지식이론 (ToK)' : 'Theory of Knowledge (ToK)' },
           ].map(({ key, val, set, label }) => (
             <div key={key}>
               <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--ink-2)', marginBottom: 6 }}>{label}</div>
@@ -737,10 +744,10 @@ function DpCalculator({ data, lang }) {
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         }}>
           <div style={{ fontSize: 12.5, color: 'var(--ink-2)', fontWeight: 500 }}>
-            {lang === 'en' ? 'EE + ToK bonus' : '소논문 + 지식이론 보너스'}
+            {lang === 'zh' ? 'EE + ToK 加分' : lang === 'ko' ? '소논문 + 지식이론 보너스' : 'EE + ToK bonus'}
           </div>
           <div style={{ fontSize: 18, fontWeight: 800, color: corePoints > 0 ? '#1D9E75' : corePoints === -1 ? '#C0392B' : 'var(--ink-4)' }}>
-            {corePoints === -1 ? lang === 'en' ? '⚠ Diploma at risk' : '⚠ 졸업장 위험' : `+${corePoints} pts`}
+            {corePoints === -1 ? (lang === 'zh' ? '⚠ 毕业证书存在风险' : lang === 'ko' ? '⚠ 졸업장 위험' : '⚠ Diploma at risk') : `+${corePoints} pts`}
           </div>
         </div>
 
@@ -752,7 +759,7 @@ function DpCalculator({ data, lang }) {
         }}>
           <div>
             <div style={{ fontSize: 11, color: 'var(--ink-4)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 3 }}>
-              {lang === 'en' ? 'Total points' : '총 점수'}
+              {lang === 'zh' ? '总分' : lang === 'ko' ? '총 점수' : 'Total points'}
             </div>
             <div style={{ fontSize: 32, fontWeight: 800, color: totalColor, lineHeight: 1 }}>
               {total}<span style={{ fontSize: 14, fontWeight: 400, color: 'var(--ink-4)' }}>/45</span>
@@ -763,30 +770,32 @@ function DpCalculator({ data, lang }) {
             background: passes ? '#1D9E75' : '#C0392B', color: 'white',
           }}>
             {passes
-              ? (lang === 'en' ? '✓ Diploma awarded' : '✓ 졸업장 수여')
-              : (lang === 'en' ? '✗ Diploma not awarded' : '✗ 졸업장 미수여')}
+              ? (lang === 'zh' ? '✓ 获得毕业证书' : lang === 'ko' ? '✓ 졸업장 수여' : '✓ Diploma awarded')
+              : (lang === 'zh' ? '✗ 未获得毕业证书' : lang === 'ko' ? '✗ 졸업장 미수여' : '✗ Diploma not awarded')}
           </div>
         </div>
 
         {/* Fail conditions */}
         {!passes && (
           <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: 5 }}>
-            {totalFail && <div style={{ fontSize: 12, color: '#C0392B', lineHeight: 1.5 }}>• {lang === 'en' ? 'Total below 24 points' : '총점 24점 미만'}</div>}
-            {hlFail && <div style={{ fontSize: 12, color: '#C0392B', lineHeight: 1.5 }}>• {lang === 'en' ? 'One or more HL subjects below grade 3' : 'HL 과목 중 3점 미만 있음'}</div>}
-            {slFail && <div style={{ fontSize: 12, color: '#C0392B', lineHeight: 1.5 }}>• {lang === 'en' ? 'One or more SL subjects below grade 2' : 'SL 과목 중 2점 미만 있음'}</div>}
-            {tooManyOnes && <div style={{ fontSize: 12, color: '#C0392B', lineHeight: 1.5 }}>• {lang === 'en' ? '3 or more grade 1s' : '1점 과목 3개 이상'}</div>}
-            {eeEFail && <div style={{ fontSize: 12, color: '#C0392B', lineHeight: 1.5 }}>• {lang === 'en' ? 'Grade E on both EE and ToK' : '소논문과 지식이론 모두 E 등급'}</div>}
-            {corePoints === -1 && !eeEFail && <div style={{ fontSize: 12, color: '#C0392B', lineHeight: 1.5 }}>• {lang === 'en' ? 'EE/ToK combination fails the diploma condition' : '소논문/지식이론 조합이 졸업장 조건 미충족'}</div>}
+            {totalFail && <div style={{ fontSize: 12, color: '#C0392B', lineHeight: 1.5 }}>• {lang === 'zh' ? '总分低于24分' : lang === 'ko' ? '총점 24점 미만' : 'Total below 24 points'}</div>}
+            {hlFail && <div style={{ fontSize: 12, color: '#C0392B', lineHeight: 1.5 }}>• {lang === 'zh' ? '一门或多门HL科目低于3分' : lang === 'ko' ? 'HL 과목 중 3점 미만 있음' : 'One or more HL subjects below grade 3'}</div>}
+            {slFail && <div style={{ fontSize: 12, color: '#C0392B', lineHeight: 1.5 }}>• {lang === 'zh' ? '一门或多门SL科目低于2分' : lang === 'ko' ? 'SL 과목 중 2점 미만 있음' : 'One or more SL subjects below grade 2'}</div>}
+            {tooManyOnes && <div style={{ fontSize: 12, color: '#C0392B', lineHeight: 1.5 }}>• {lang === 'zh' ? '3门或以上科目得1分' : lang === 'ko' ? '1점 과목 3개 이상' : '3 or more grade 1s'}</div>}
+            {eeEFail && <div style={{ fontSize: 12, color: '#C0392B', lineHeight: 1.5 }}>• {lang === 'zh' ? 'EE和ToK均为E等级' : lang === 'ko' ? '소논문과 지식이론 모두 E 등급' : 'Grade E on both EE and ToK'}</div>}
+            {corePoints === -1 && !eeEFail && <div style={{ fontSize: 12, color: '#C0392B', lineHeight: 1.5 }}>• {lang === 'zh' ? 'EE/ToK组合不符合毕业证书条件' : lang === 'ko' ? '소논문/지식이론 조합이 졸업장 조건 미충족' : 'EE/ToK combination fails the diploma condition'}</div>}
           </div>
         )}
 
         {/* University context */}
         <div style={{ marginTop: '1.25rem', padding: '.875rem 1rem', background: 'var(--surface-2)', borderRadius: 'var(--r)', border: '1px solid var(--border)' }}>
           <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 6 }}>
-            {lang === 'en' ? 'University context' : '대학교 입시 맥락'}
+            {lang === 'zh' ? '大学录取背景' : lang === 'ko' ? '대학교 입시 맥락' : 'University context'}
           </div>
           <div style={{ fontSize: 12, color: 'var(--ink-3)', lineHeight: 1.65 }}>
-            {data[lang]?.universityContext || (lang === 'en'
+            {data[lang]?.universityContext || (lang === 'zh'
+              ? `顶尖大学通常要求36–40分以上。以${total}分来看，您的孩子${total >= 40 ? '已达到最严选拔项目的申请标准' : total >= 36 ? '在大多数国际大学具有竞争力' : total >= 30 ? '在许多大学的录取范围内——仍有提升空间' : '目前仍处于IB备考的早期阶段'}。注意：大学同时考量预测成绩、HL科目选择及个人陈述。`
+              : lang === 'en'
               ? `Top universities typically require 36–40+ points. With ${total} points, your child is ${total >= 40 ? 'in range for the most selective programs' : total >= 36 ? 'competitive for most international universities' : total >= 30 ? 'within range for many universities — with room to improve' : 'in the earlier stages of their IB preparation'}. Note: universities also consider predicted grades, HL subject choices, and personal statements.`
               : `상위 대학교들은 일반적으로 36~40점 이상을 요구합니다. ${total}점으로, 자녀는 ${total >= 40 ? '가장 까다로운 프로그램에 지원 가능한 수준입니다' : total >= 36 ? '대부분의 국제 대학교에 경쟁력 있는 수준입니다' : total >= 30 ? '많은 대학교에 지원 가능한 범위 내에 있습니다 — 발전 여지가 있습니다' : '아직 IB 준비의 초기 단계에 있습니다'}. 참고: 대학교들은 예상 점수, HL 과목 선택, 자기소개서도 함께 고려합니다.`)}
           </div>
@@ -914,7 +923,7 @@ export default function ParentModulePage() {
         background: 'transparent', border: '1px solid var(--teal)44',
         borderRadius: 20, padding: '7px 20px', cursor: 'pointer',
       }}>
-        {lang === 'en' ? `Next: ${nextSection.en}` : `다음: ${nextSection.ko}`} →
+        {lang === 'zh' ? `下一节：${nextSection.zh || nextSection.en}` : lang === 'ko' ? `다음: ${nextSection.ko}` : `Next: ${nextSection.en}`} →
       </button>
     </div>
   ) : null
@@ -926,7 +935,7 @@ export default function ParentModulePage() {
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem', marginBottom: '1.75rem', flexWrap: 'wrap' }}>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 6 }}>
-            {lang === 'en' ? 'Parent Guide · IB' : '학부모 안내 · IB'}
+            {lang === 'zh' ? '家长指南 · IB' : lang === 'ko' ? '학부모 안내 · IB' : 'Parent Guide · IB'}
           </div>
           <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--ink)', lineHeight: 1.25, margin: 0 }}>
             {m.title}
@@ -936,7 +945,7 @@ export default function ParentModulePage() {
           </p>
         </div>
         {(!activity.languages || activity.languages.length > 1) && (
-          <LangToggle lang={lang} setLang={setLang} />
+          <LangToggle lang={lang} setLang={setLang} languages={activity.languages} />
         )}
       </div>
 
@@ -955,7 +964,7 @@ export default function ParentModulePage() {
             fontSize: 11.5, color: 'var(--ink-4)', background: 'none',
             border: 'none', cursor: 'pointer', padding: 0, textDecoration: 'underline',
           }}>
-            {lang === 'en' ? 'change stage' : '단계 변경'}
+            {lang === 'zh' ? '更换阶段' : lang === 'ko' ? '단계 변경' : 'change stage'}
           </button>
         </div>
       )}
@@ -984,7 +993,7 @@ export default function ParentModulePage() {
               border: '1px solid #1D9E7533',
             }}>
               <div style={{ fontSize: 11, fontWeight: 600, color: '#1D9E75', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 5 }}>
-                {lang === 'en' ? 'What stays the same' : '변하지 않는 것'}
+                {lang === 'zh' ? '不变的是什么' : lang === 'ko' ? '변하지 않는 것' : 'What stays the same'}
               </div>
               <div style={{ fontSize: 13, color: '#1D4030', lineHeight: 1.65 }}>
                 {m.reassurance}
@@ -995,7 +1004,7 @@ export default function ParentModulePage() {
           {(m.koreanUniversityNote || m.indianUniversityNote || m.chineseUniversityNote) && (() => {
             const uniNote = m.koreanUniversityNote || m.indianUniversityNote || m.chineseUniversityNote
             const uniLabel = m.koreanUniversityNote
-              ? (lang === 'en' ? 'Korean university admission' : '한국 대학교 입시')
+              ? (lang === 'zh' ? '韩国大学入学' : lang === 'ko' ? '한국 대학교 입시' : 'Korean university admission')
               : m.indianUniversityNote
               ? 'Indian universities & pathways'
               : 'Chinese universities & pathways'
@@ -1041,9 +1050,10 @@ export default function ParentModulePage() {
                 background: STAGE_COLORS[activeStage], border: 'none',
                 borderRadius: 20, padding: '5px 16px', cursor: 'pointer',
               }}>
-                {lang === 'en'
-                  ? `Go to ${SECTIONS.find(s => s.id === recommended)?.en} →`
-                  : `${SECTIONS.find(s => s.id === recommended)?.ko}로 이동 →`}
+                {lang === 'zh'
+                  ? `前往 ${SECTIONS.find(s => s.id === recommended)?.zh || SECTIONS.find(s => s.id === recommended)?.en} →`
+                  : lang === 'ko' ? `${SECTIONS.find(s => s.id === recommended)?.ko}로 이동 →`
+                  : `Go to ${SECTIONS.find(s => s.id === recommended)?.en} →`}
               </button>
             </div>
           )}
@@ -1057,9 +1067,10 @@ export default function ParentModulePage() {
       {activeSection === 'concepts' && (
         <div>
           <p style={{ fontSize: 13.5, color: 'var(--ink-3)', lineHeight: 1.65, marginBottom: '1.25rem' }}>
-            {lang === 'en'
-              ? 'Five concepts that often challenge parents new to IB — and why the IB approach is designed the way it is. Each card shows a concern that makes complete sense, then reveals what the school is actually doing and how it connects to your goals.'
-              : '학부모들이 자주 혼란스러워하는 다섯 가지 개념과 IB 방식이 그렇게 설계된 이유입니다. 각 카드는 완전히 이해되는 걱정을 보여주고, 학교가 실제로 하고 있는 일과 그것이 목표와 어떻게 연결되는지를 설명합니다.'}
+            {lang === 'zh'
+              ? '五个让IB新手家长倍感困惑的概念，以及IB体系如此设计的原因。每张卡片先呈现一个完全合理的顾虑，再揭示学校实际在做什么，以及这与您的目标有何关联。'
+              : lang === 'ko' ? '학부모들이 자주 혼란스러워하는 다섯 가지 개념과 IB 방식이 그렇게 설계된 이유입니다. 각 카드는 완전히 이해되는 걱정을 보여주고, 학교가 실제로 하고 있는 일과 그것이 목표와 어떻게 연결되는지를 설명합니다.'
+              : 'Five concepts that often challenge parents new to IB — and why the IB approach is designed the way it is. Each card shows a concern that makes complete sense, then reveals what the school is actually doing and how it connects to your goals.'}
           </p>
           {activeStage && (
             <div style={{
@@ -1068,9 +1079,10 @@ export default function ParentModulePage() {
               border: `1px solid ${STAGE_COLORS[activeStage]}33`,
               fontSize: 12, color: STAGE_COLORS[activeStage], fontWeight: 500,
             }}>
-              {lang === 'en'
-                ? 'Cards with a "★ Relevant now" badge are most important for your current stage.'
-                : '"★ 지금 중요" 배지가 있는 카드가 현재 단계에서 가장 중요합니다.'}
+              {lang === 'zh'
+                ? '带有"★ 当前重要"标记的卡片最值得关注。'
+                : lang === 'ko' ? '"★ 지금 중요" 배지가 있는 카드가 현재 단계에서 가장 중요합니다.'
+                : 'Cards with a "★ Relevant now" badge are most important for your current stage.'}
             </div>
           )}
           {activity.cards.map((card, i) => (
@@ -1084,9 +1096,11 @@ export default function ParentModulePage() {
       {activeSection === 'grades' && activity.gradingSystem && (
         <div>
           <p style={{ fontSize: 13.5, color: 'var(--ink-3)', lineHeight: 1.65, marginBottom: '1.25rem' }}>
-            {lang === 'en'
-              ? 'IB grades are not percentages and they are not ranks. Use the calculators to understand exactly how MYP and DP scores are built — and what they actually mean for university applications.'
-              : 'IB 성적은 백분율도 석차도 아닙니다. 계산기를 사용하여 MYP와 DP 점수가 어떻게 구성되는지, 그리고 대학교 입시에서 실제로 무엇을 의미하는지 정확히 이해해 보세요.'}
+            {lang === 'zh'
+              ? 'IB成绩既不是百分制，也不是排名。使用计算器准确了解MYP和DP分数的构成，以及它们对大学申请的真正意义。'
+              : lang === 'ko'
+              ? 'IB 성적은 백분율도 석차도 아닙니다. 계산기를 사용하여 MYP와 DP 점수가 어떻게 구성되는지, 그리고 대학교 입시에서 실제로 무엇을 의미하는지 정확히 이해해 보세요.'
+              : 'IB grades are not percentages and they are not ranks. Use the calculators to understand exactly how MYP and DP scores are built — and what they actually mean for university applications.'}
           </p>
 
           {/* Before you calculate callout */}
@@ -1096,13 +1110,19 @@ export default function ParentModulePage() {
             border: '1px solid var(--border)', borderLeft: '3px solid var(--teal)',
           }}>
             <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 8 }}>
-              {lang === 'en' ? 'The basics — before you use the calculators' : '계산기 사용 전 기본 내용'}
+              {lang === 'zh' ? '基础知识 — 使用计算器前必读' : lang === 'ko' ? '계산기 사용 전 기본 내용' : 'The basics — before you use the calculators'}
             </div>
             {lang === 'en' ? (
               <div style={{ fontSize: 13, color: 'var(--ink-2)', lineHeight: 1.7 }}>
                 <strong>MYP (Years 7–11):</strong> Every subject is assessed on four criteria (A, B, C, D), each out of 8. They add up to a total out of 32, which converts to a final grade of 1–7. The criteria measure different skills in each subject — in Maths, Criterion A is "Knowing and Understanding"; Criterion D is "Applying Maths in Real Life." Your child's report shows each criterion separately, which tells you precisely where to focus.
                 <br /><br />
                 <strong>DP (Years 12–13):</strong> Six subjects are each graded 1–7. On top of that, the Extended Essay and Theory of Knowledge contribute up to 3 bonus points. Total out of 45. Most competitive universities require 36–40+.
+              </div>
+            ) : lang === 'zh' ? (
+              <div style={{ fontSize: 13, color: 'var(--ink-2)', lineHeight: 1.7 }}>
+                <strong>MYP（7–11年级）：</strong>每门学科按四个维度（A、B、C、D）进行评估，每个维度最高8分，总分上限是32分，最终转换为1–7等级。不同学科的维度衡量不同技能——数学中维度A是“知识与理解”，维度D是“将数学应用于现实情境”。成绩单上会分别显示各维度得分，让您清楚了解需要重点关注的方向。
+                <br /><br />
+                <strong>DP（12–13年级）：</strong>六门学科各自以1–7分评分。此外，课题论文（EE）和知识论（ToK）最多可贡献3分额外加分。总分上限是45分。大多数竞争激烈的大学要求36–40分以上。
               </div>
             ) : (
               <div style={{ fontSize: 13, color: 'var(--ink-2)', lineHeight: 1.7 }}>
@@ -1123,18 +1143,19 @@ export default function ParentModulePage() {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '1rem', flexWrap: 'wrap' }}>
             <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--ink)' }}>
-              {lang === 'en' ? 'PYP and the Transition to MYP' : 'PYP와 MYP로의 전환'}
+              {lang === 'zh' ? 'PYP及向MYP的过渡' : lang === 'ko' ? 'PYP와 MYP로의 전환' : 'PYP and the Transition to MYP'}
             </div>
             {activeStage === 'pyp-myp' && (
               <span style={{ fontSize: 10, fontWeight: 700, background: STAGE_COLORS['pyp-myp'], color: 'white', padding: '1px 8px', borderRadius: 10 }}>
-                {lang === 'en' ? '★ Most relevant for your stage' : '★ 현재 단계에 가장 관련'}
+                {lang === 'zh' ? '★ 最适合您当前阶段' : lang === 'ko' ? '★ 현재 단계에 가장 관련' : '★ Most relevant for your stage'}
               </span>
             )}
           </div>
           <p style={{ fontSize: 13.5, color: 'var(--ink-3)', lineHeight: 1.65, marginBottom: '1.25rem' }}>
-            {lang === 'en'
-              ? 'PYP (Primary Years Programme, ages 3–11) looks very different from what comes after. These five cards explain what is happening — and what your child is building toward MYP and beyond.'
-              : 'PYP(초등 과정, 3~11세)는 이후에 오는 것과 매우 다르게 보입니다. 이 다섯 장의 카드는 무슨 일이 일어나고 있는지, 그리고 자녀가 MYP와 그 이후를 위해 무엇을 쌓고 있는지를 설명합니다.'}
+            {lang === 'zh'
+              ? 'PYP（小学阶段课程，3–11岁）与后续课程看起来截然不同。这五张卡片解释了正在发生什么，以及您的孩子正在为MYP及更远的未来积累什么。'
+              : lang === 'ko' ? 'PYP(초등 과정, 3~11세)는 이후에 오는 것과 매우 다르게 보입니다. 이 다섯 장의 카드는 무슨 일이 일어나고 있는지, 그리고 자녀가 MYP와 그 이후를 위해 무엇을 쌓고 있는지를 설명합니다.'
+              : 'PYP (Primary Years Programme, ages 3–11) looks very different from what comes after. These five cards explain what is happening — and what your child is building toward MYP and beyond.'}
           </p>
           {activity.pypCards.map((card, i) => (
             <ConceptCard key={card.id} card={card} lang={lang} index={i} activeStage={activeStage} whatToAskNote={activity.meta[lang]?.whatToAskNote} />
@@ -1147,9 +1168,10 @@ export default function ParentModulePage() {
       {activeSection === 'scenarios' && (
         <div>
           <p style={{ fontSize: 13.5, color: 'var(--ink-3)', lineHeight: 1.65, marginBottom: '1.25rem' }}>
-            {lang === 'en'
-              ? 'Two situations you may recognise. Read the scenario, then reveal how the same moment looks with and without this context.'
-              : '익숙하게 느껴질 수 있는 두 가지 상황입니다. 시나리오를 읽고, 같은 순간이 이 맥락의 유무에 따라 어떻게 달라지는지 확인해 보세요.'}
+            {lang === 'zh'
+              ? '两个您可能会认出的情境。阅读场景，然后揭示同一时刻在有无这些背景知识的情况下看起来有何不同。'
+              : lang === 'ko' ? '익숙하게 느껴질 수 있는 두 가지 상황입니다. 시나리오를 읽고, 같은 순간이 이 맥락의 유무에 따라 어떻게 달라지는지 확인해 보세요.'
+              : 'Two situations you may recognise. Read the scenario, then reveal how the same moment looks with and without this context.'}
           </p>
           {activity.reviewScenarios.map((s, i) => (
             <ReviewScenario key={s.id} scenario={s} lang={lang} index={i} />
@@ -1168,23 +1190,21 @@ export default function ParentModulePage() {
               borderRadius: 'var(--r)', fontSize: 13.5,
               color: 'var(--teal-dark)', fontWeight: 500,
             }}>
-              {lang === 'en' ? '✓ You\'ve completed this guide.' : '✓ 이 안내서를 완료했습니다.'}
+              {lang === 'zh' ? '✓ 您已完成本指南。' : lang === 'ko' ? '✓ 이 안내서를 완료했습니다.' : '✓ You\'ve completed this guide.'}
             </div>
           )}
 
           {/* Stage-aware next steps */}
           <div style={{ marginBottom: '2rem' }}>
             <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--ink)', marginBottom: '.5rem' }}>
-              {lang === 'en' ? 'Three things to do this week' : '이번 주에 할 세 가지'}
+              {lang === 'zh' ? '本周要做的三件事' : lang === 'ko' ? '이번 주에 할 세 가지' : 'Three things to do this week'}
             </div>
             <p style={{ fontSize: 12.5, color: 'var(--ink-4)', marginBottom: '1rem', lineHeight: 1.6 }}>
-              {lang === 'en'
-                ? activeStage
-                  ? `Personalised for your selected stage.`
-                  : `Select your stage on Start Here for personalised suggestions.`
-                : activeStage
-                  ? `선택한 단계에 맞게 개인화된 제안입니다.`
-                  : `시작하기 섹션에서 단계를 선택하면 맞춤 제안을 받을 수 있습니다.`}
+              {lang === 'zh'
+                ? (activeStage ? `根据您选择的阶段个性化推荐。` : `在“从这里开始”中选择您的阶段，获取个性化建议。`)
+                : lang === 'ko'
+                  ? (activeStage ? `선택한 단계에 맞게 개인화된 제안입니다.` : `시작하기 섹션에서 단계를 선택하면 맞춤 제안을 받을 수 있습니다.`)
+                  : (activeStage ? `Personalised for your selected stage.` : `Select your stage on Start Here for personalised suggestions.`)}
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {nextStepsItems.map((step, i) => (
@@ -1217,7 +1237,7 @@ export default function ParentModulePage() {
                   cursor: 'pointer', letterSpacing: '.01em',
                 }}
               >
-                {lang === 'en' ? '✓ Mark as complete' : '✓ 완료로 표시'}
+                {lang === 'zh' ? '✓ 标记为已完成' : lang === 'ko' ? '✓ 완료로 표시' : '✓ Mark as complete'}
               </button>
             </div>
           )}
@@ -1229,7 +1249,7 @@ export default function ParentModulePage() {
                 fontSize: 11, fontWeight: 700, color: 'var(--ink-4)',
                 textTransform: 'uppercase', letterSpacing: '.1em', marginBottom: '1rem',
               }}>
-                {lang === 'en' ? 'IB Acronym Glossary' : 'IB 약어 용어집'}
+                {lang === 'zh' ? 'IB缩略语词汇表' : lang === 'ko' ? 'IB 약어 용어집' : 'IB Acronym Glossary'}
               </div>
               <div style={{ display: 'grid', gap: '.75rem' }}>
                 {activity.glossary.map(g => {
@@ -1256,9 +1276,10 @@ export default function ParentModulePage() {
           {/* Footer note */}
           <div style={{ padding: '1rem 1.1rem', background: 'var(--surface-2)', borderRadius: 'var(--r)', border: '1px solid var(--border)' }}>
             <div style={{ fontSize: 12, color: 'var(--ink-4)', lineHeight: 1.7 }}>
-              {lang === 'en'
-                ? 'This guide was written for international families navigating IB schools. If something feels inaccurate or is missing, your school can share feedback with the module author.'
-                : '이 안내서는 IB 학교를 경험하는 국제 가정을 위해 작성되었습니다. 부정확하거나 누락된 내용이 있으면 학교를 통해 모듈 작성자에게 피드백을 전달할 수 있습니다.'}
+              {lang === 'zh'
+                ? '本指南专为在IB学校就读的国际家庭而写。如有不准确或遗漏之处，您的学校可向模块作者提供反馈。'
+              : lang === 'ko' ? '이 안내서는 IB 학교를 경험하는 국제 가정을 위해 작성되었습니다. 부정확하거나 누락된 내용이 있으면 학교를 통해 모듈 작성자에게 피드백을 전달할 수 있습니다.'
+              : 'This guide was written for international families navigating IB schools. If something feels inaccurate or is missing, your school can share feedback with the module author.'}
             </div>
           </div>
         </div>
