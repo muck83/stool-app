@@ -3,11 +3,13 @@ import { useParams, Link } from 'react-router-dom'
 import { koreaIbParent } from '../../../vocab/parent/korea-ib-parent.jsx'
 import { indiaIbParent } from '../../../vocab/parent/india-ib-parent.jsx'
 import { chinaIbParent } from '../../../vocab/parent/china-ib-parent.jsx'
+import { ksaIbParent }   from '../../../vocab/parent/ksa-ib-parent.jsx'
 
 const MODULES = {
   'korea-ib': koreaIbParent,
   'india-ib': indiaIbParent,
   'china-ib': chinaIbParent,
+  'ksa-ib':   ksaIbParent,
 }
 
 const LS_LANG     = slug => `pd_parent_lang_${slug}`
