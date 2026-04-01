@@ -12,15 +12,11 @@ import {
   isSimCompleted,
   checkAndMaybeAwardSimBadge,
   getSimProgress,
-  isExamUnlocked,
-  getModuleBadgeRecord,
 } from '../../lib/pd/progress.js'
 import DimensionCard from '../../components/learn/DimensionCard.jsx'
 import CompletionBar from '../../components/learn/CompletionBar.jsx'
+import HofstedeRadar from '../../components/learn/HofstedeRadar.jsx'
 import SimulationCard from '../../components/learn/SimulationCard.jsx'
-import { isVocabCompleted } from './VocabPage.jsx'
-import { isCulturalVocabCompleted } from './CulturalVocabPage.jsx'
-import { CULTURAL_VOCAB_BY_SLUG } from '../../../vocab/country-cultural-vocab.jsx'
 
 /**
  * /learn/:slug — module overview with Hofstede radar and dimension list.
@@ -41,10 +37,6 @@ export default function ModulePage() {
   const [nextDim, setNextDim] = useState(null)
   const [badgeHeld, setBadgeHeld] = useState(false)
   const [simCompletedCount, setSimCompletedCount] = useState(0)
-  const [examUnlocked, setExamUnlocked] = useState(false)
-  const [badgeRecord, setBadgeRecord] = useState(null)
-  const [vocabDone, setVocabDone] = useState(false)
-  const [culturalVocabDone, setCulturalVocabDone] = useState(false)
 
   // Sticky progress bar — shown once user scrolls past the header card
   const [stickyVisible, setStickyVisible] = useState(false)
@@ -72,10 +64,6 @@ export default function ModulePage() {
       setNextDim(nextIncompleteDimension(modMeta.id, dims))
       setBadgeHeld(hasBadge(modMeta.id))
       setSimCompletedCount(simCompletionCount(modMeta.id, sims))
-      setExamUnlocked(isExamUnlocked(modMeta.id, dims))
-      setBadgeRecord(getModuleBadgeRecord(modMeta.id))
-      setVocabDone(isVocabCompleted(modMeta.id))
-      setCulturalVocabDone(isCulturalVocabCompleted(modMeta.id))
 
       setLoading(false)
     }
@@ -111,6 +99,12 @@ export default function ModulePage() {
   const pct = dimensions.length > 0 ? Math.round((completedCount / dimensions.length) * 100) : 0
   const allDone = completedCount === dimensions.length && dimensions.length > 0
   const started = isInProgress(modMeta.id, dimensions)
+
+  // Parse Hofstede scores
+  const hofstedeScores = mod?.hofstede_data
+    ? [mod.hofstede_data.PDI, mod.hofstede_data.IDV, mod.hofstede_data.MAS,
+       mod.hofstede_data.UAI, mod.hofstede_data.LTO, mod.hofstede_data.IND]
+    : null
 
   // Count research statuses
   const statusCounts = dimensions.reduce((acc, d) => {
@@ -234,53 +228,6 @@ export default function ModulePage() {
                 </Link>
               ) : null}
 
-              {/* Exam status + badge */}
-              <div style={{
-                marginTop: '1rem', paddingTop: '1rem',
-                borderTop: '1px solid var(--border)',
-                display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap',
-              }}>
-                {badgeRecord ? (
-                  <>
-                    {badgeRecord.badge === 'distinction' && (
-                      <span style={{ fontSize: '12px', fontWeight: 700, color: '#8B5CF6', background: '#f5f3ff', border: '1px solid #d8b4fe', borderRadius: '20px', padding: '4px 12px' }}>
-                        🏅 Distinction — {Math.round((badgeRecord.moduleScore || 0) * 100)}%
-                      </span>
-                    )}
-                    {badgeRecord.badge === 'mastery' && (
-                      <span style={{ fontSize: '12px', fontWeight: 700, color: '#D97706', background: '#fffbeb', border: '1px solid #fcd34d', borderRadius: '20px', padding: '4px 12px' }}>
-                        ⭐ Mastery — {Math.round((badgeRecord.moduleScore || 0) * 100)}%
-                      </span>
-                    )}
-                    {badgeRecord.badge === 'completed' && (
-                      <span style={{ fontSize: '12px', fontWeight: 700, color: '#059669', background: '#f0fdf4', border: '1px solid #6ee7b7', borderRadius: '20px', padding: '4px 12px' }}>
-                        ✓ Completed — {Math.round((badgeRecord.moduleScore || 0) * 100)}%
-                      </span>
-                    )}
-                    <Link to={`/learn/${slug}/exam`} style={{ fontSize: '12px', color: modMeta.color, textDecoration: 'none', fontWeight: 500 }}>
-                      View exam results →
-                    </Link>
-                  </>
-                ) : examUnlocked ? (
-                  <Link to={`/learn/${slug}/exam`} style={{
-                    display: 'inline-flex', alignItems: 'center', gap: '6px',
-                    fontSize: '12px', fontWeight: 600, color: 'white',
-                    background: modMeta.color, padding: '5px 14px',
-                    borderRadius: '20px', textDecoration: 'none',
-                  }}>
-                    📋 Take Module Exam →
-                  </Link>
-                ) : (
-                  <span style={{
-                    fontSize: '12px', color: 'var(--ink-4)',
-                    background: 'var(--surface-2)', border: '1px solid var(--border)',
-                    borderRadius: '20px', padding: '4px 12px',
-                  }}>
-                    🔒 Exam unlocks after all dimensions
-                  </span>
-                )}
-              </div>
-
               {/* Research backbone */}
               {mod.research_backbone && mod.research_backbone.length > 0 && (
                 <div style={{ marginTop: '1rem' }}>
@@ -334,176 +281,73 @@ export default function ModulePage() {
               </div>
             )}
 
-            {/* Vocab Lab entry card */}
-            <div style={{ marginBottom: '2rem' }}>
-              <div style={{
-                fontSize: '12px', fontWeight: 600, color: 'var(--ink-4)',
-                textTransform: 'uppercase', letterSpacing: '.05em',
-                marginBottom: '12px',
-              }}>
-                Vocabulary Lab
+            {/* Two-column layout: radar + dimensions */}
+            <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: '1.5rem', alignItems: 'start' }}>
+              {/* Radar */}
+              <div className="card" style={{ position: 'sticky', top: '70px' }}>
+                {hofstedeScores && (
+                  <HofstedeRadar scores={hofstedeScores} country={mod.title} color={modMeta.color} />
+                )}
               </div>
-              <Link to={`/learn/${slug}/vocab`} style={{ textDecoration: 'none' }}>
-                <div className="card" style={{
-                  borderLeft: `3px solid ${modMeta.color}`,
-                  cursor: 'pointer',
-                  transition: 'box-shadow .18s',
-                  display: 'flex', alignItems: 'center', gap: '14px',
-                }}
-                  onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,.08)' }}
-                  onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none' }}
-                >
-                  <span style={{
-                    width: '36px', height: '36px', borderRadius: '50%',
-                    background: `${modMeta.color}15`, color: modMeta.color,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '18px', flexShrink: 0,
+
+              {/* Dimension list + scenarios */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {/* Reference library header */}
+                {dimensions.length > 0 && (
+                  <div style={{
+                    fontSize: '12px', fontWeight: 600, color: 'var(--ink-4)',
+                    textTransform: 'uppercase', letterSpacing: '.05em',
+                    marginBottom: '0px',
                   }}>
-                    📖
-                  </span>
-                  <div style={{ flex: 1 }}>
-                    <h4 style={{ fontFamily: 'var(--serif)', fontSize: '1rem', color: 'var(--ink)', margin: '0 0 2px 0' }}>
-                      Vocabulary Lab
-                    </h4>
-                    <p style={{ fontSize: '12px', color: 'var(--ink-3)', margin: 0 }}>
-                      Key terms, scenario practice, and mastery check · 15 min
-                    </p>
+                    Reference Library
                   </div>
-                  {vocabDone ? (
-                    <span style={{
-                      fontSize: '11px', fontWeight: 700, color: '#1a7a50',
-                      background: '#f0fdf6', border: '1px solid #bbf0d6',
-                      borderRadius: '20px', padding: '3px 10px', flexShrink: 0,
-                    }}>
-                      ✓ Done
-                    </span>
-                  ) : (
-                    <span style={{
-                      fontSize: '11px', fontWeight: 600, color: modMeta.color,
-                      background: `${modMeta.color}10`, border: `1px solid ${modMeta.color}30`,
-                      borderRadius: '20px', padding: '3px 10px', flexShrink: 0,
-                    }}>
-                      Start →
-                    </span>
-                  )}
-                </div>
-              </Link>
-            </div>
+                )}
 
-            {/* Cultural Vocabulary entry card */}
-            <div style={{ marginTop: 8 }}>
-              <div style={{
-                fontSize: '12px', fontWeight: 600, color: 'var(--ink-4)',
-                textTransform: 'uppercase', letterSpacing: '.05em',
-                marginBottom: '12px',
-              }}>
-                Cultural Vocabulary
-              </div>
-              <Link to={`/learn/${slug}/cultural-vocab`} style={{ textDecoration: 'none' }}>
-                <div className="card" style={{
-                  borderLeft: `3px solid ${modMeta.color}`,
-                  display: 'flex', alignItems: 'center', gap: '14px',
-                  padding: '14px 16px', cursor: 'pointer',
-                }}>
-                  <span style={{ fontSize: '24px', flexShrink: 0 }}>
-                    🌐
-                  </span>
-                  <div style={{ flex: 1 }}>
-                    <h4 style={{ fontFamily: 'var(--serif)', fontSize: '1rem', color: 'var(--ink)', margin: '0 0 4px 0' }}>
-                      Five Cultural Terms
-                    </h4>
-                    {(() => {
-                      const cv = CULTURAL_VOCAB_BY_SLUG[slug]
-                      const hook = cv?.openingHook?.situation?.[0]
-                      if (hook && !culturalVocabDone) {
-                        const preview = hook.length > 110 ? hook.slice(0, 110).trimEnd() + '\u2026' : hook
-                        return (
-                          <p style={{ fontSize: '12px', color: 'var(--ink-3)', margin: 0, lineHeight: 1.5, fontStyle: 'italic' }}>
-                            {preview}
+                {dimensions.map(dim => (
+                  <DimensionCard
+                    key={dim.id}
+                    dimension={dim}
+                    slug={slug}
+                    isCompleted={completionCount(modMeta.id, [dim]) > 0}
+                    moduleColor={modMeta.color}
+                  />
+                ))}
+
+                {/* Scenarios link */}
+                {scenarioCount > 0 && (
+                  <Link to={`/learn/${slug}/scenarios`} style={{ textDecoration: 'none' }}>
+                    <div className="card" style={{
+                      borderLeft: `3px solid ${modMeta.color}`,
+                      cursor: 'pointer',
+                      transition: 'box-shadow .18s',
+                    }}
+                      onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,.08)' }}
+                      onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none' }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span style={{
+                          width: '28px', height: '28px', borderRadius: '50%',
+                          background: `${modMeta.color}15`, color: modMeta.color,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontSize: '14px', flexShrink: 0,
+                        }}>
+                          ?
+                        </span>
+                        <div>
+                          <h4 style={{
+                            fontFamily: 'var(--serif)', fontSize: '1rem', color: 'var(--ink)', margin: 0,
+                          }}>
+                            Practical scenarios
+                          </h4>
+                          <p style={{ fontSize: '12px', color: 'var(--ink-3)', margin: '2px 0 0 0' }}>
+                            {scenarioCount} scenario{scenarioCount !== 1 ? 's' : ''} — common friction points with diagnosis and response
                           </p>
-                        )
-                      }
-                      return (
-                        <p style={{ fontSize: '12px', color: 'var(--ink-3)', margin: 0 }}>
-                          Insider concepts with no clean English equivalent · 10 min
-                        </p>
-                      )
-                    })()}
-                  </div>
-                  {culturalVocabDone ? (
-                    <span style={{
-                      fontSize: '11px', fontWeight: 700, color: '#1a7a50',
-                      background: '#f0fdf6', border: '1px solid #bbf0d6',
-                      borderRadius: '20px', padding: '3px 10px', flexShrink: 0,
-                    }}>
-                      ✓ Done
-                    </span>
-                  ) : (
-                    <span style={{
-                      fontSize: '11px', fontWeight: 600, color: modMeta.color,
-                      background: `${modMeta.color}10`, border: `1px solid ${modMeta.color}30`,
-                      borderRadius: '20px', padding: '3px 10px', flexShrink: 0,
-                      whiteSpace: 'nowrap',
-                    }}>
-                      Find out →
-                    </span>
-                  )}
-                </div>
-              </Link>
-            </div>
-
-            {/* Dimension list + scenarios — full width */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {dimensions.length > 0 && (
-                <div style={{
-                  fontSize: '12px', fontWeight: 600, color: 'var(--ink-4)',
-                  textTransform: 'uppercase', letterSpacing: '.05em',
-                }}>
-                  Reference Library
-                </div>
-              )}
-
-              {dimensions.map(dim => (
-                <DimensionCard
-                  key={dim.id}
-                  dimension={dim}
-                  slug={slug}
-                  isCompleted={completionCount(modMeta.id, [dim]) > 0}
-                  moduleColor={modMeta.color}
-                />
-              ))}
-
-              {scenarioCount > 0 && (
-                <Link to={`/learn/${slug}/scenarios`} style={{ textDecoration: 'none' }}>
-                  <div className="card" style={{
-                    borderLeft: `3px solid ${modMeta.color}`,
-                    cursor: 'pointer',
-                    transition: 'box-shadow .18s',
-                  }}
-                    onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,.08)' }}
-                    onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none' }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <span style={{
-                        width: '28px', height: '28px', borderRadius: '50%',
-                        background: `${modMeta.color}15`, color: modMeta.color,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: '14px', flexShrink: 0,
-                      }}>
-                        ?
-                      </span>
-                      <div>
-                        <h4 style={{ fontFamily: 'var(--serif)', fontSize: '1rem', color: 'var(--ink)', margin: 0 }}>
-                          Practical scenarios
-                        </h4>
-                        <p style={{ fontSize: '12px', color: 'var(--ink-3)', margin: '2px 0 0 0' }}>
-                          {scenarioCount} scenario{scenarioCount !== 1 ? 's' : ''} — common friction points with diagnosis and response
-                        </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </Link>
-              )}
+                  </Link>
+                )}
+              </div>
             </div>
           </>
         )}

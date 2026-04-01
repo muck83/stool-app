@@ -60,11 +60,11 @@ export default function ModuleCard({ mod, dimensions = [], completedCount = 0, b
 }
 
 function findSlug(id) {
-  const map = { 'ksa-001': 'saudi-arabia', 'china-001': 'china', 'korea-001': 'south-korea', 'india-001': 'india' }
+  const map = { 'ksa-001': 'saudi-arabia', 'china-001': 'china', 'korea-001': 'south-korea' }
   return map[id] || id
 }
 
 function modColor(id) {
-  const map = { 'ksa-001': '#BA7517', 'china-001': '#D85A30', 'korea-001': '#534AB7', 'india-001': '#C56A2D' }
+  const map = { 'ksa-001': '#BA7517', 'china-001': '#D85A30', 'korea-001': '#534AB7' }
   return map[id] || 'var(--teal)'
 }

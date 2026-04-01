@@ -17,7 +17,9 @@ import About from './components/tabs/About.jsx'
 import Admin from './components/Admin.jsx'
 
 // PD Learn pages
+import PlatformHome from './pages/learn/PlatformHome.jsx'
 import LearnHome from './pages/learn/LearnHome.jsx'
+import ParentHome from './pages/parent/ParentHome.jsx'
 import ModulePage from './pages/learn/ModulePage.jsx'
 import DimensionPage from './pages/learn/DimensionPage.jsx'
 import ScenariosPage from './pages/learn/ScenariosPage.jsx'
@@ -85,7 +87,9 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         {/* PD Learn routes */}
-        <Route path="/learn" element={<LearnHome />} />
+        <Route path="/learn" element={<PlatformHome />} />
+        <Route path="/learn/teacher" element={<LearnHome />} />
+        <Route path="/parent" element={<ParentHome />} />
         <Route path="/learn/:slug" element={<ModulePage />} />
         <Route path="/learn/:slug/sim/:simId" element={<SimulationPage />} />
         <Route path="/learn/:slug/scenarios" element={<ScenariosPage />} />

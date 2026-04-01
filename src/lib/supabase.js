@@ -98,7 +98,6 @@ export async function insertSalarySubmission(rec) {
       curr: rec.curr,
       role: rec.role,
       usd: rec.usd,
-      exp_bracket: rec.exp_bracket || null,
       housing: rec.housing,
       flights: rec.flights,
       tax: rec.tax,
@@ -263,29 +262,6 @@ export async function loadProfileFromCloud(email) {
     .single()
   if (error || !data) return null
   return { profile: data.profile, updatedAt: data.updated_at }
-}
-
-export async function insertCulturalFeedback({ activityId, moduleId, country, contextSelected, rating, inaccuracies, whatWasMissing, mostUseful }) {
-  if (!supabase) return { error: 'not-configured' }
-  const { data, error } = await supabase
-    .from('pd_cultural_feedback')
-    .insert([{
-      activity_id:      activityId,
-      module_id:        moduleId,
-      country,
-      context_selected: contextSelected || null,
-      rating:           rating || null,
-      inaccuracies:     inaccuracies?.trim() || null,
-      what_was_missing: whatWasMissing?.trim() || null,
-      most_useful:      mostUseful?.trim() || null,
-    }])
-    .select()
-    .single()
-  if (error) {
-    console.error('Cultural feedback insert error:', error)
-    return { error: error.message }
-  }
-  return { data }
 }
 
 export async function adminFetchAll() {

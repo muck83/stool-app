@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { koreaIbParent } from '../../../vocab/parent/korea-ib-parent.jsx'
+import { indiaIbParent } from '../../../vocab/parent/india-ib-parent.jsx'
 
 const MODULES = {
   'korea-ib': koreaIbParent,
+  'india-ib': indiaIbParent,
 }
 
 const LS_LANG     = slug => `pd_parent_lang_${slug}`
@@ -894,7 +896,7 @@ export default function ParentModulePage() {
   const currentIdx = visibleSections.findIndex(s => s.id === activeSection)
   const nextSection = currentIdx < visibleSections.length - 1 ? visibleSections[currentIdx + 1] : null
   const recommended = activeStage ? STAGE_RECOMMENDED[activeStage] : null
-  const ns = NEXT_STEPS[lang]
+  const ns = activity.nextSteps?.[lang] || activity.nextSteps?.en || NEXT_STEPS[lang]
   const nextStepsItems = (activeStage && ns[activeStage]) ? ns[activeStage] : ns.default
 
   const markDone = () => {
@@ -931,7 +933,9 @@ export default function ParentModulePage() {
             {m.subtitle}
           </p>
         </div>
-        <LangToggle lang={lang} setLang={setLang} />
+        {(!activity.languages || activity.languages.length > 1) && (
+          <LangToggle lang={lang} setLang={setLang} />
+        )}
       </div>
 
       {/* Stage chip — visible when stage selected + not on start section */}
@@ -986,17 +990,19 @@ export default function ParentModulePage() {
             </div>
           )}
 
-          {m.koreanUniversityNote && (
+          {(m.koreanUniversityNote || m.indianUniversityNote) && (
             <div style={{
               marginBottom: '1.75rem', padding: '.875rem 1rem',
               background: 'var(--surface-2)', borderRadius: 'var(--r)',
               border: '1px solid var(--border)', borderLeft: '3px solid var(--teal)',
             }}>
               <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 5 }}>
-                {lang === 'en' ? 'Korean university admission' : '한국 대학교 입시'}
+                {m.koreanUniversityNote
+                  ? (lang === 'en' ? 'Korean university admission' : '한국 대학교 입시')
+                  : 'Indian universities & pathways'}
               </div>
               <div style={{ fontSize: 13, color: 'var(--ink-3)', lineHeight: 1.65 }}>
-                {m.koreanUniversityNote}
+                {m.koreanUniversityNote || m.indianUniversityNote}
               </div>
             </div>
           )}
@@ -1044,8 +1050,8 @@ export default function ParentModulePage() {
         <div>
           <p style={{ fontSize: 13.5, color: 'var(--ink-3)', lineHeight: 1.65, marginBottom: '1.25rem' }}>
             {lang === 'en'
-              ? 'Five concepts that often confuse Korean parents — and why the IB approach is designed the way it is. Each card shows a concern that makes complete sense, then reveals what the school is actually doing and how it connects to your goals.'
-              : '한국 학부모들이 자주 혼란스러워하는 다섯 가지 개념과 IB 방식이 그렇게 설계된 이유입니다. 각 카드는 완전히 이해되는 걱정을 보여주고, 학교가 실제로 하고 있는 일과 그것이 목표와 어떻게 연결되는지를 설명합니다.'}
+              ? 'Five concepts that often challenge parents new to IB — and why the IB approach is designed the way it is. Each card shows a concern that makes complete sense, then reveals what the school is actually doing and how it connects to your goals.'
+              : '학부모들이 자주 혼란스러워하는 다섯 가지 개념과 IB 방식이 그렇게 설계된 이유입니다. 각 카드는 완전히 이해되는 걱정을 보여주고, 학교가 실제로 하고 있는 일과 그것이 목표와 어떻게 연결되는지를 설명합니다.'}
           </p>
           {activeStage && (
             <div style={{
@@ -1243,8 +1249,8 @@ export default function ParentModulePage() {
           <div style={{ padding: '1rem 1.1rem', background: 'var(--surface-2)', borderRadius: 'var(--r)', border: '1px solid var(--border)' }}>
             <div style={{ fontSize: 12, color: 'var(--ink-4)', lineHeight: 1.7 }}>
               {lang === 'en'
-                ? 'This guide was written for Korean families navigating IB schools. If something feels inaccurate or is missing, your school can share feedback with the module author.'
-                : '이 안내서는 IB 학교를 경험하는 한국 가정을 위해 작성되었습니다. 부정확하거나 누락된 내용이 있으면 학교를 통해 모듈 작성자에게 피드백을 전달할 수 있습니다.'}
+                ? 'This guide was written for international families navigating IB schools. If something feels inaccurate or is missing, your school can share feedback with the module author.'
+                : '이 안내서는 IB 학교를 경험하는 국제 가정을 위해 작성되었습니다. 부정확하거나 누락된 내용이 있으면 학교를 통해 모듈 작성자에게 피드백을 전달할 수 있습니다.'}
             </div>
           </div>
         </div>

@@ -72,11 +72,11 @@ export default function LearnHome() {
     <div style={{ maxWidth: '960px', margin: '0 auto', padding: '2rem 1.5rem' }}>
       {/* Header */}
       <div style={{ marginBottom: '1.5rem' }}>
-        <Link to="/" style={{
+        <Link to="/learn" style={{
           fontSize: '12px', color: 'var(--ink-4)', textDecoration: 'none',
           display: 'inline-block', marginBottom: '12px',
         }}>
-          ← Back to stool
+          ← Back to Learn
         </Link>
         <h1 style={{
           fontFamily: 'var(--serif)', fontSize: '2rem', color: 'var(--ink)',

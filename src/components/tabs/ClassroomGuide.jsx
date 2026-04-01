@@ -613,23 +613,14 @@ function BehaviorCard({ f, viewCountry, viewH }) {
         onClick={() => setOpen(!open)}
         style={{
           width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          padding: '.85rem 1rem', background: open ? '#F8F7FF' : 'none', border: 'none', cursor: 'pointer', textAlign: 'left', gap: 12,
-          transition: 'background .15s',
+          padding: '.85rem 1rem', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', gap: 10,
         }}
-        onMouseEnter={e => { if (!open) e.currentTarget.style.background = '#F8F8F8' }}
-        onMouseLeave={e => { if (!open) e.currentTarget.style.background = 'none' }}
       >
         <div style={{ fontSize: 13.5, color: 'var(--ink)', lineHeight: 1.4, fontWeight: open ? 500 : 400 }}>{f.behavior}</div>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0, gap: 1 }}>
-          <div style={{ fontSize: 9, fontWeight: 700, color: open ? '#534AB7' : 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: '.05em', whiteSpace: 'nowrap' }}>
-            {open ? 'close' : 'why + strategy'}
-          </div>
-          <div style={{
-            fontSize: 16, color: open ? '#534AB7' : 'var(--ink-3)',
-            transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .2s',
-            lineHeight: 1,
-          }}>⌄</div>
-        </div>
+        <div style={{
+          fontSize: 11, color: 'var(--ink-4)', flexShrink: 0,
+          transform: open ? 'rotate(90deg)' : 'none', transition: 'transform .2s',
+        }}>▶</div>
       </button>
       {open && (
         <div style={{ padding: '0 1rem 1rem', borderTop: '1px solid var(--border)' }}>
