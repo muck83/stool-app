@@ -324,9 +324,19 @@ function ReviewScenario({ scenario, lang, index }) {
       </div>
 
       <div style={{ padding: '1rem 1.2rem' }}>
-        <div style={{ fontSize: 13.5, color: 'var(--ink)', lineHeight: 1.75, marginBottom: '1rem' }}>
+        <div style={{ fontSize: 13.5, color: 'var(--ink)', lineHeight: 1.75, marginBottom: s.situationNote ? '.75rem' : '1rem' }}>
           {s.situation}
         </div>
+        {s.situationNote && (
+          <div style={{
+            fontSize: 12, color: 'var(--ink-4)', lineHeight: 1.6,
+            padding: '.6rem .875rem', marginBottom: '1rem',
+            background: 'var(--surface-2)', borderRadius: 'var(--r)',
+            border: '1px solid var(--border)', borderLeft: '3px solid var(--teal)',
+          }}>
+            {s.situationNote}
+          </div>
+        )}
 
         {phase === 'situation' && (
           <button
@@ -957,9 +967,24 @@ export default function ParentModulePage() {
       {/* ── START HERE ──────────────────────────────────────────────────── */}
       {activeSection === 'start' && (
         <div>
-          <p style={{ fontSize: 14, color: 'var(--ink-2)', lineHeight: 1.75, marginBottom: '1.5rem' }}>
+          <p style={{ fontSize: 14, color: 'var(--ink-2)', lineHeight: 1.75, marginBottom: '1.25rem' }}>
             {m.intro}
           </p>
+
+          {m.reassurance && (
+            <div style={{
+              marginBottom: '1.25rem', padding: '.875rem 1rem',
+              background: '#E1F5EE', borderRadius: 'var(--r)',
+              border: '1px solid #1D9E7533',
+            }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: '#1D9E75', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 5 }}>
+                {lang === 'en' ? 'What stays the same' : '변하지 않는 것'}
+              </div>
+              <div style={{ fontSize: 13, color: '#1D4030', lineHeight: 1.65 }}>
+                {m.reassurance}
+              </div>
+            </div>
+          )}
 
           {m.koreanUniversityNote && (
             <div style={{
@@ -1044,11 +1069,36 @@ export default function ParentModulePage() {
       {/* ── GRADE SYSTEM ────────────────────────────────────────────────── */}
       {activeSection === 'grades' && activity.gradingSystem && (
         <div>
-          <p style={{ fontSize: 13.5, color: 'var(--ink-3)', lineHeight: 1.65, marginBottom: '1.5rem' }}>
+          <p style={{ fontSize: 13.5, color: 'var(--ink-3)', lineHeight: 1.65, marginBottom: '1.25rem' }}>
             {lang === 'en'
               ? 'IB grades are not percentages and they are not ranks. Use the calculators to understand exactly how MYP and DP scores are built — and what they actually mean for university applications.'
               : 'IB 성적은 백분율도 석차도 아닙니다. 계산기를 사용하여 MYP와 DP 점수가 어떻게 구성되는지, 그리고 대학교 입시에서 실제로 무엇을 의미하는지 정확히 이해해 보세요.'}
           </p>
+
+          {/* Before you calculate callout */}
+          <div style={{
+            marginBottom: '1.5rem', padding: '1rem 1.1rem',
+            background: 'var(--surface-2)', borderRadius: 'var(--r)',
+            border: '1px solid var(--border)', borderLeft: '3px solid var(--teal)',
+          }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 8 }}>
+              {lang === 'en' ? 'The basics — before you use the calculators' : '계산기 사용 전 기본 내용'}
+            </div>
+            {lang === 'en' ? (
+              <div style={{ fontSize: 13, color: 'var(--ink-2)', lineHeight: 1.7 }}>
+                <strong>MYP (Years 7–11):</strong> Every subject is assessed on four criteria (A, B, C, D), each out of 8. They add up to a total out of 32, which converts to a final grade of 1–7. The criteria measure different skills in each subject — in Maths, Criterion A is "Knowing and Understanding"; Criterion D is "Applying Maths in Real Life." Your child's report shows each criterion separately, which tells you precisely where to focus.
+                <br /><br />
+                <strong>DP (Years 12–13):</strong> Six subjects are each graded 1–7. On top of that, the Extended Essay and Theory of Knowledge contribute up to 3 bonus points. Total out of 45. Most competitive universities require 36–40+.
+              </div>
+            ) : (
+              <div style={{ fontSize: 13, color: 'var(--ink-2)', lineHeight: 1.7 }}>
+                <strong>MYP (7~11학년):</strong> 모든 과목은 네 가지 준거(A, B, C, D)로 평가됩니다. 각 준거는 8점 만점이며 합산하면 32점 만점의 총점이 됩니다. 이것이 최종 1~7등급으로 변환됩니다. 준거는 과목마다 다른 기술을 측정합니다. 수학에서 준거 A는 "지식과 이해", 준거 D는 "실생활 맥락에서의 수학 적용"입니다. 자녀의 성적표에는 각 준거가 별도로 표시되어 어디에 집중해야 하는지 정확히 알 수 있습니다.
+                <br /><br />
+                <strong>DP (12~13학년):</strong> 여섯 과목이 각 1~7점으로 평가됩니다. 여기에 소논문과 지식이론이 최대 3점의 보너스 점수를 추가합니다. 45점 만점입니다. 대부분의 경쟁력 있는 대학교는 36~40점 이상을 요구합니다.
+              </div>
+            )}
+          </div>
+
           <GradingSection gradingSystem={activity.gradingSystem} lang={lang} />
           <SectionFooter />
         </div>

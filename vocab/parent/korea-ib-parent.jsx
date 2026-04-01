@@ -71,12 +71,14 @@ export const koreaIbParent = {
       subtitle: 'A guide for Korean families navigating international education',
       intro: 'IB schools look very different from Korean schools — not because they are less rigorous, but because they are built around different goals. If you have already had a moment that confused or frustrated you, this guide is for that moment. It covers five core concepts, interactive grade calculators for MYP and DP, a PYP section, and two scenarios that show how the same situation looks with and without this context.',
       koreanUniversityNote: 'For families considering returning to Korea: Korean universities — including SKY (Seoul National, Yonsei, Korea University) and most major institutions — recognise the IB Diploma. Students can apply through the 재외국민 (overseas Korean) special admission pathway. If this matters to your family, your school\'s university counsellor can advise on specific university requirements.',
+      reassurance: 'One thing that does not change: your child is still learning Mathematics, Science, and Languages. They are still being rigorously assessed. They are still being prepared for university. The differences are in how progress is tracked and how learning is structured — not in whether rigour exists.',
     },
     ko: {
       title: '자녀의 IB 학교 이해하기',
       subtitle: '국제 교육을 경험하는 한국 가정을 위한 안내서',
       intro: 'IB 학교는 한국 학교와 매우 다르게 보입니다. 엄격하지 않아서가 아니라 다른 목표를 중심으로 설계되었기 때문입니다. 이미 혼란스럽거나 당혹스러운 순간이 있었다면, 이 안내서는 바로 그 순간을 위한 것입니다. 다섯 가지 핵심 개념, MYP와 DP를 위한 인터랙티브 성적 계산기, PYP 섹션, 그리고 같은 상황이 이 맥락의 유무에 따라 어떻게 보이는지를 보여주는 두 가지 시나리오를 다룹니다.',
       koreanUniversityNote: '한국 귀국을 고려하는 가정에 대해: SKY(서울대, 연세대, 고려대)를 포함한 대부분의 주요 한국 대학교는 IB 졸업장을 인정합니다. 학생들은 재외국민 특별전형으로 지원할 수 있습니다. 가족에게 중요한 사항이라면 학교 진학 상담사가 구체적인 대학교 요건을 안내해 드릴 수 있습니다.',
+      reassurance: '변하지 않는 한 가지: 자녀는 여전히 수학, 과학, 언어를 배우고 있습니다. 여전히 엄격하게 평가받고 있습니다. 여전히 대학교를 위해 준비되고 있습니다. 차이는 진행 상황을 추적하는 방법과 학습이 구조화되는 방식에 있습니다. 엄격함이 존재하는지 여부가 아닙니다.',
     },
   },
 
@@ -138,7 +140,7 @@ export const koreaIbParent = {
       en: {
         concept: 'Criterion-Based Assessment',
         concern: 'Class rank is genuinely useful in competitive exam systems — it tells you directly whether your child is on track for the university places you\'re aiming for. Receiving a grade out of 7 without any comparative context can feel like the school is withholding information you need.',
-        bridge: 'IB grades measure mastery against a fixed standard — not against other students. Two students can both receive a 7. This isn\'t the school avoiding transparency; it\'s a system that gives you more precise information than a rank does. A criterion score tells you exactly which skills need work. A rank never can.',
+        bridge: 'Unlike the Suneung, which ranks every student nationally by how they perform relative to the entire cohort on a single day, IB grades measure what your child can actually do against a defined standard. Two students can both receive a 7. This isn\'t the school avoiding transparency; it\'s a system that gives you more precise information than a rank does. A criterion score tells you exactly which skills need work. A rank never can.',
         goal: 'When university applications open, IB grades are consistent across every school in the world — admissions teams know exactly what a 6 in Mathematics means regardless of which country it was earned in. That global credibility is built on this system, and it is what makes the credential valuable.',
         ibConnection: 'IB assessment descriptors are published and consistent worldwide. A 6 in Bangkok means the same as a 6 in London.',
         whatToAsk: [
@@ -149,7 +151,7 @@ export const koreaIbParent = {
       ko: {
         concept: '준거 기준 평가',
         concern: '반 석차는 경쟁적인 입시 시스템에서 진정으로 유용한 정보입니다. 자녀가 목표로 하는 대학교에 합격할 궤도에 있는지 직접적으로 알려주기 때문입니다. 비교 맥락 없이 7점 만점 중 몇 점이라는 숫자만 받으면 학교가 필요한 정보를 숨기는 것처럼 느껴질 수 있습니다.',
-        bridge: 'IB 성적은 다른 학생이 아닌 고정된 기준에 대한 숙달을 측정합니다. 두 학생이 모두 7점을 받을 수 있습니다. 학교가 투명성을 피하는 것이 아니라 석차보다 더 정확한 정보를 제공하는 시스템입니다. 준거 점수는 어떤 기술을 발전시켜야 하는지 정확히 알려주는데, 석차는 절대 그럴 수 없습니다.',
+        bridge: '수능이 시험 당일 전체 응시자 집단에서의 상대적 위치로 모든 학생의 등수를 매기는 것과 달리, IB 성적은 정해진 기준에 대해 자녀가 실제로 무엇을 할 수 있는지를 측정합니다. 두 학생이 모두 7점을 받을 수 있습니다. 학교가 투명성을 피하는 것이 아니라 석차보다 더 정확한 정보를 제공하는 시스템입니다. 준거 점수는 어떤 기술을 발전시켜야 하는지 정확히 알려주는데, 석차는 절대 그럴 수 없습니다.',
         goal: '대학교 지원이 시작될 때, IB 성적은 전 세계 모든 학교에서 일관됩니다. 입학처는 수학 6점이 어느 나라에서 받은 것이든 정확히 무엇을 의미하는지 알고 있습니다. 그 세계적 신뢰성이 바로 이 시스템 위에 구축되어 있으며, 이것이 이 자격증을 가치 있게 만드는 것입니다.',
         ibConnection: 'IB 평가 기술어는 전 세계 모든 IB 학교에서 발행되고 일관됩니다. 방콕에서의 6점은 런던에서의 6점과 동일합니다.',
         whatToAsk: [
@@ -247,14 +249,16 @@ export const koreaIbParent = {
       en: {
         title: 'The grade that isn\'t a grade',
         termsInPlay: ['Criterion-Based Assessment', 'Formative Feedback'],
-        situation: 'Your child\'s MYP report shows "Working Towards" in three subjects and "Meeting" in two. They seem relaxed and say their teacher told them they\'re doing well. You\'re not sure whether to be worried or reassured.\n\n        Note: "Working Towards" and "Meeting" are MYP-specific descriptor language. PYP uses different terms — if your child is in PYP, see Part 4.',
+        situation: 'Your child\'s MYP report shows "Working Towards" in three subjects and "Meeting" in two. They seem relaxed and say their teacher told them they\'re doing well. You\'re not sure whether to be worried or reassured.',
+        situationNote: '"Working Towards" and "Meeting" are MYP descriptor language — they appear from Year 7 onwards. PYP (ages 3–11) uses different terms. If your child is still in PYP, the PYP section of this guide explains what their reports mean.',
         withUnderstanding: '"Working Towards" is formative language — it tells you where your child is on a progression toward a specific criterion, not where they rank in the class. You ask the teacher what specific evidence would move them to "Meeting" in each subject, and you work on those areas together. You are not behind. You are on a journey with a map.',
         withoutUnderstanding: 'You email the school asking why your child appears to be failing three subjects and what this means for their university application. The school schedules a meeting to explain the difference between formative and summative assessment — a conversation that could have been avoided.',
       },
       ko: {
         title: '점수가 아닌 점수',
         termsInPlay: ['준거 기준 평가', '형성평가와 피드백'],
-        situation: '자녀의 MYP 성적표에 세 과목에서 "달성 중", 두 과목에서 "달성"이 표시되어 있습니다. 아이는 여유로워 보이고 선생님이 잘하고 있다고 했답니다. 걱정해야 할지 안심해야 할지 모르겠습니다.\n\n        참고: "달성 중"과 "달성"은 MYP 고유의 기술어 언어입니다. PYP는 다른 용어를 사용합니다. 자녀가 PYP에 있다면 4부를 참고하세요.',
+        situation: '자녀의 MYP 성적표에 세 과목에서 "달성 중", 두 과목에서 "달성"이 표시되어 있습니다. 아이는 여유로워 보이고 선생님이 잘하고 있다고 했답니다. 걱정해야 할지 안심해야 할지 모르겠습니다.',
+        situationNote: '"달성 중"과 "달성"은 MYP(7학년 이상) 고유의 기술어 언어입니다. PYP(3~11세)는 다른 용어를 사용합니다. 자녀가 아직 PYP에 있다면 이 안내서의 PYP 섹션에서 성적표의 의미를 확인하세요.',
         withUnderstanding: '"달성 중"은 형성평가 언어입니다. 반에서의 등수가 아니라 특정 준거를 향한 진행 과정을 알려줍니다. 각 과목에서 "달성"으로 이동하기 위한 구체적인 증거가 무엇인지 선생님께 물어보고 그 부분을 함께 집중합니다. 뒤처진 것이 아닙니다. 지도를 가지고 여정을 걷고 있는 것입니다.',
         withoutUnderstanding: '자녀가 세 과목에서 낙제하는 것처럼 보인다며, 대학 입시에 어떤 영향을 미치는지 학교에 이메일을 보냅니다. 학교는 형성평가와 총괄평가의 차이를 설명하기 위한 면담을 잡습니다. 피할 수 있었던 대화입니다.',
       },
