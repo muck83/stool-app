@@ -148,6 +148,26 @@ export async function fetchSimulation(simId) {
   return data || null
 }
 
+/* ─── Quiz Questions ─── */
+
+/**
+ * Fetch quiz questions for a module.
+ * @param {string} moduleId
+ * @param {'checkpoint'|'final_exam'|null} quizType — omit to get all
+ */
+export async function fetchQuizQuestions(moduleId, quizType = null) {
+  if (!supabase || !moduleId) return []
+  let query = supabase
+    .from('pd_quiz_questions')
+    .select('*')
+    .eq('module_id', moduleId)
+    .order('sort_order')
+  if (quizType) query = query.eq('quiz_type', quizType)
+  const { data, error } = await query
+  if (error) { console.error('PD fetchQuizQuestions:', error); return [] }
+  return data || []
+}
+
 export async function saveSimulationResponse(sessionId, simulationId, nodeId, choiceId, reflectionText) {
   if (!supabase) return
   try {

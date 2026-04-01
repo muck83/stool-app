@@ -189,6 +189,7 @@ export default function Salaries() {
     flt:     normaliseFlights(profile.flt)    || '',
     tax:     normaliseTax(profile.tax)        || '',
     extras:  '',
+    exp:     '',
   }))
   const [msg, setMsg] = useState('')
   const [newIds, setNewIds] = useState(new Set())
@@ -273,6 +274,7 @@ export default function Salaries() {
       school: resolveSchoolName(school.trim()),
       curr: form.curr || 'Other', role: form.role || 'Teacher',
       usd: Math.round(parseFloat(sal)),
+      exp_bracket: form.exp || null,
       housing: form.hous || 'Not stated',
       housingQuality: form.housQuality || '',
       allowanceCoverage: form.allowCoverage || '',
@@ -295,6 +297,7 @@ export default function Salaries() {
       flt:     normaliseFlights(profile.flt)  || '',
       tax:     normaliseTax(profile.tax)      || '',
       extras:  '',
+      exp:     '',
     })
     setTimeout(() => setNewIds(prev => { const n = new Set(prev); n.delete(id); return n }), 8000)
 
@@ -469,6 +472,16 @@ export default function Salaries() {
             </select>
           </div>
           <div className="fg"><label>Your role / subject</label><input value={form.role} onChange={e => setF('role', e.target.value)} placeholder="e.g. IB DP Mathematics" /></div>
+          <div className="fg">
+            <label>Years of international teaching experience</label>
+            <select value={form.exp} onChange={e => setF('exp', e.target.value)}>
+              <option value="">Select (optional)</option>
+              <option value="0-2">0–2 years (early career)</option>
+              <option value="3-6">3–6 years</option>
+              <option value="7-14">7–14 years</option>
+              <option value="15+">15+ years (senior)</option>
+            </select>
+          </div>
           <div className="fg">
             <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               Monthly take-home salary (USD)

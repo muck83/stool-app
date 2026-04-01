@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
+import CharacterAvatar from '../../components/learn/CharacterAvatar.jsx'
 import { moduleBySlug } from '../../lib/slugMap.js'
 import { fetchSimulation, saveSimulationResponse } from '../../lib/pd/queries.js'
 import {
   getSimProgress,
   saveSimProgress,
-  isSimCompleted,
   markSimComplete,
-  checkAndMaybeAwardSimBadge,
 } from '../../lib/pd/progress.js'
 
 /**
@@ -198,7 +197,6 @@ export default function SimulationPage() {
   }
 
   const node = getCurrentNode()
-  const isCompleted = isSimCompleted(simId)
   const estimatedNodeCount = simulation.nodeOrder
     ? simulation.nodeOrder.length
     : Object.keys(simulation.nodes).length
@@ -381,11 +379,63 @@ export default function SimulationPage() {
 // ── Node Components ────────────────────────────────────────────────────────────
 
 function SetupNode({ node, simulation, modMeta, onContinue, locked }) {
+  const schoolLabel = simulation.meta?.schoolContext || modMeta.country
+  const flagEmoji = getFlagEmoji(modMeta.countryCode)
+
   return (
     <div className="card" style={{
-      padding: '2rem',
+      padding: 0,
       borderLeft: `3px solid ${modMeta.color}`,
+      overflow: 'hidden',
+      animation: 'simSetupEnter .35s ease both',
+      boxShadow: '0 10px 30px rgba(16, 24, 40, 0.06)',
     }}>
+      <style>{`
+        @keyframes simSetupEnter {
+          from { opacity: 0; transform: translateY(8px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
+      <div style={{
+        height: '180px',
+        background: `
+          radial-gradient(circle at 20% 20%, ${modMeta.color}20 0%, transparent 32%),
+          radial-gradient(circle at 82% 18%, rgba(255,255,255,.72) 0%, transparent 26%),
+          linear-gradient(135deg, ${modMeta.color}1c 0%, ${modMeta.color}07 58%, rgba(255,255,255,.92) 100%)
+        `,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        textAlign: 'center',
+        padding: '1.5rem',
+        borderBottom: `1px solid ${modMeta.color}14`,
+      }}>
+        <div>
+          <div style={{
+            fontSize: '11px',
+            textTransform: 'uppercase',
+            letterSpacing: '.12em',
+            color: modMeta.color,
+            fontWeight: 700,
+            marginBottom: '12px',
+          }}>
+            {modMeta.country}
+          </div>
+          <div style={{ fontSize: '2rem', lineHeight: 1, marginBottom: '10px' }}>
+            {flagEmoji}
+          </div>
+          <div style={{
+            fontFamily: 'var(--serif)', fontSize: '1.7rem', color: 'var(--ink)',
+            marginBottom: '6px',
+          }}>
+            {schoolLabel}
+          </div>
+          <div style={{ fontSize: '0.95rem', color: 'var(--ink-3)', fontWeight: 500 }}>
+            {simulation.title}
+          </div>
+        </div>
+      </div>
+      <div style={{ padding: '2rem' }}>
       <h2 style={{
         fontFamily: 'var(--serif)', fontSize: '1.1rem', color: 'var(--ink)',
         marginTop: 0,
@@ -400,19 +450,42 @@ function SetupNode({ node, simulation, modMeta, onContinue, locked }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {simulation.characters.map((char, i) => (
               <div key={i} style={{
-                padding: '10px 12px',
+                padding: '12px 14px',
                 background: `${modMeta.color}08`,
                 borderRadius: 'var(--r)',
-                fontSize: '13px',
+                border: `1px solid ${modMeta.color}10`,
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.55)',
+                position: 'relative',
               }}>
-                <div style={{ fontWeight: 600, color: modMeta.color, marginBottom: '2px' }}>
-                  {char.name}
-                </div>
-                <div style={{ fontSize: '12px', color: 'var(--ink-3)', marginBottom: '4px' }}>
-                  {char.role}
-                </div>
-                <div style={{ fontSize: '12px', color: 'var(--ink-3)', lineHeight: 1.5 }}>
-                  {char.background}
+                <div style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '3px',
+                  background: `linear-gradient(90deg, ${modMeta.color}45 0%, ${modMeta.color}12 100%)`,
+                  borderTopLeftRadius: 'var(--r)',
+                  borderTopRightRadius: 'var(--r)',
+                }} />
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                  <CharacterAvatar
+                    name={char.name}
+                    role={char.role}
+                    color={modMeta.color}
+                    countryCode={modMeta.countryCode}
+                    size={44}
+                  />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 600, color: modMeta.color, marginBottom: '2px' }}>
+                      {char.name}
+                    </div>
+                    <div style={{ fontSize: '12px', color: 'var(--ink-2)', marginBottom: '6px' }}>
+                      {char.role}
+                    </div>
+                    <div style={{ fontSize: '12px', color: 'var(--ink-3)', lineHeight: 1.55 }}>
+                      {char.description || char.background}
+                    </div>
+                  </div>
                 </div>
               </div>
             ))}
@@ -421,9 +494,11 @@ function SetupNode({ node, simulation, modMeta, onContinue, locked }) {
       )}
 
       {/* Context + content */}
-      <p style={{ fontSize: '14px', color: 'var(--ink-2)', lineHeight: 1.7, margin: '1rem 0' }}>
-        {simulation.context}
-      </p>
+      {simulation.context && (
+        <p style={{ fontSize: '14px', color: 'var(--ink-2)', lineHeight: 1.7, margin: '1rem 0' }}>
+          {simulation.context}
+        </p>
+      )}
       {node.content && renderContent(node.content)}
 
       {/* Begin button */}
@@ -448,6 +523,7 @@ function SetupNode({ node, simulation, modMeta, onContinue, locked }) {
         >
           Begin →
         </button>
+      </div>
       </div>
     </div>
   )
@@ -480,7 +556,13 @@ function DilemmaNode({ node, modMeta, onChoice, locked }) {
   }
 
   return (
-    <div className="card" style={{ padding: '2rem' }}>
+    <div className="card" style={{ padding: '2rem', animation: 'simDilemmaEnter .35s ease both' }}>
+      <style>{`
+        @keyframes simDilemmaEnter {
+          from { opacity: 0; transform: translateY(8px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
       {/* Codex format: content is an array where all items are paragraphs.
           If there's a separate prompt field, show content as context + prompt as question.
           If no prompt, render all content items as paragraphs. */}
@@ -523,6 +605,22 @@ function DilemmaNode({ node, modMeta, onChoice, locked }) {
               } : {}),
             }}
           >
+            {choice.label && (
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                marginBottom: '10px',
+                padding: '4px 10px',
+                borderRadius: '999px',
+                background: selected === choice.id ? 'rgba(255,255,255,.18)' : `${modMeta.color}12`,
+                color: selected === choice.id ? 'white' : modMeta.color,
+                fontSize: '11px',
+                fontWeight: 700,
+                letterSpacing: '.01em',
+              }}>
+                {choice.label}
+              </div>
+            )}
             <div style={{ fontSize: '13px', lineHeight: 1.6 }}>
               {choice.text}
             </div>
@@ -535,7 +633,13 @@ function DilemmaNode({ node, modMeta, onChoice, locked }) {
 
 function ConsequenceNode({ node, modMeta, onContinue, locked }) {
   return (
-    <div className="card" style={{ padding: '2rem' }}>
+    <div className="card" style={{ padding: '2rem', animation: 'simConsequenceEnter .35s ease both' }}>
+      <style>{`
+        @keyframes simConsequenceEnter {
+          from { opacity: 0; transform: translateX(-6px); }
+          to { opacity: 1; transform: translateX(0); }
+        }
+      `}</style>
       <div style={{ marginBottom: '1.5rem' }}>
         {renderContent(node.content)}
       </div>
@@ -578,18 +682,41 @@ function PerspectiveNode({ node, modMeta, onContinue, locked }) {
     return 'Their Perspective'
   })()
 
+  const perspectiveName = extractPerspectiveName(perspectiveLabel)
+
   return (
-    <div className="card" style={{ padding: '2rem' }}>
+    <div className="card" style={{ padding: '2rem', animation: 'simPerspectiveEnter .38s ease both' }}>
+      <style>{`
+        @keyframes simPerspectiveEnter {
+          from { opacity: 0; transform: scale(0.98); }
+          to { opacity: 1; transform: scale(1); }
+        }
+      `}</style>
       <div style={{ marginBottom: '1rem' }}>
-        <div style={{
-          fontSize: '11px', fontWeight: 600, color: modMeta.color,
-          textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: '4px',
-        }}>
-          {perspectiveLabel}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+          <CharacterAvatar
+            name={perspectiveName}
+            role={node.character_role}
+            color={modMeta.color}
+            countryCode={modMeta.countryCode}
+            size={36}
+          />
+          <div>
+            <div style={{
+              fontSize: '11px', fontWeight: 600, color: modMeta.color,
+              textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: '2px',
+            }}>
+              Perspective Shift
+            </div>
+            <div style={{ fontSize: '14px', color: 'var(--ink)', fontWeight: 600 }}>
+              {perspectiveLabel}
+            </div>
+          </div>
         </div>
         {node.character_role && (
           <div style={{
             fontSize: '12px', color: 'var(--ink-3)', fontStyle: 'italic',
+            paddingLeft: '46px',
           }}>
             {node.character_role}
           </div>
@@ -641,7 +768,13 @@ function ReflectionNode({
   }
 
   return (
-    <div className="card" style={{ padding: '2rem' }}>
+    <div className="card" style={{ padding: '2rem', animation: 'simReflectionEnter .5s ease both' }}>
+      <style>{`
+        @keyframes simReflectionEnter {
+          from { opacity: 0; transform: translateY(8px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
       <h3 style={{
         fontFamily: 'var(--serif)', fontSize: '1rem', color: 'var(--ink)',
         margin: '0 0 1.5rem 0',
@@ -668,142 +801,166 @@ function ReflectionNode({
         ))}
       </div>
 
-      {/* Freetext */}
-      {node.freetext && (
-        <textarea
-          placeholder="Or describe in your own words..."
-          value={reflectionFreetext}
-          onChange={e => setReflectionFreetext(e.target.value)}
-          style={{
-            width: '100%', minHeight: '80px', padding: '10px',
-            border: `1px solid var(--border)`, borderRadius: 'var(--r)',
-            fontSize: '13px', fontFamily: 'inherit', resize: 'vertical',
-            marginBottom: '1rem', boxSizing: 'border-box',
-          }}
-        />
-      )}
+      {/* Free-text input */}
+      <textarea
+        value={reflectionFreetext}
+        onChange={e => setReflectionFreetext(e.target.value)}
+        placeholder="Or write your own response…"
+        rows={3}
+        style={{
+          width: '100%', padding: '10px 12px',
+          border: '1px solid var(--border)', borderRadius: 'var(--r)',
+          fontSize: '13px', fontFamily: 'inherit', color: 'var(--ink)',
+          lineHeight: 1.6, resize: 'vertical', outline: 'none',
+          marginBottom: '1.25rem', boxSizing: 'border-box',
+        }}
+        onFocus={e => { e.currentTarget.style.borderColor = modMeta.color }}
+        onBlur={e => { e.currentTarget.style.borderColor = 'var(--border)' }}
+      />
 
-      {/* Continue button */}
       <button
         onClick={onSubmit}
         disabled={locked || !hasSelection}
         style={{
           padding: '9px 18px',
-          background: hasSelection ? modMeta.color : 'var(--border)',
+          background: hasSelection ? modMeta.color : 'var(--surface-2)',
           color: hasSelection ? 'white' : 'var(--ink-4)',
-          border: 'none',
-          borderRadius: 'var(--r)',
-          fontSize: '13px',
-          fontWeight: 600,
+          border: 'none', borderRadius: 'var(--r)',
+          fontSize: '13px', fontWeight: 600,
           cursor: locked || !hasSelection ? 'not-allowed' : 'pointer',
           opacity: locked ? 0.6 : 1,
-          transition: 'opacity .15s',
+          transition: 'background .2s, color .2s, opacity .15s',
         }}
-        onMouseEnter={e => { if (hasSelection && !locked) e.currentTarget.style.opacity = '.85' }}
-        onMouseLeave={e => { if (hasSelection && !locked) e.currentTarget.style.opacity = '1' }}
+        onMouseEnter={e => { if (!locked && hasSelection) e.currentTarget.style.opacity = '.85' }}
+        onMouseLeave={e => { if (!locked && hasSelection) e.currentTarget.style.opacity = '1' }}
       >
-        Continue →
+        Submit reflection →
       </button>
     </div>
   )
 }
 
-function DebriefNode({
-  node, simulation, progress, modMeta, debriefText, setDebriefText,
-  onComplete, locked,
-}) {
-  if (!node.sections) {
-    return (
-      <div className="card" style={{ padding: '2rem' }}>
-        <p style={{ color: 'var(--ink-3)' }}>Debrief content not available.</p>
-      </div>
-    )
-  }
+function DebriefNode({ node, simulation, progress, modMeta, debriefText, setDebriefText, onComplete, locked }) {
+  const allChoices = progress?.choices || {}
+  const choiceCount = Object.keys(allChoices).length
 
   return (
-    <div>
-      {/* Choice path reconstruction */}
-      {node.sections[0] && (
-        <div className="card" style={{ padding: '2rem', marginBottom: '1rem' }}>
-          <h3 style={{ fontFamily: 'var(--serif)', fontSize: '1rem', margin: '0 0 1rem 0' }}>
-            Your Choice Path
-          </h3>
-          <div style={{ fontSize: '13px', color: 'var(--ink-2)', lineHeight: 1.8 }}>
-            {Object.entries(progress.choices).map(([nodeId, choiceId], i) => (
-              <div key={i} style={{ paddingBottom: '8px' }}>
-                <strong>Decision {i + 1}:</strong> {choiceId}
-              </div>
-            ))}
+    <div className="card" style={{ padding: '2rem', animation: 'nodeEnter .45s ease both' }}>
+      {/* Header */}
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: '10px',
+        marginBottom: '1.5rem', paddingBottom: '1.25rem', borderBottom: '1px solid var(--border)',
+      }}>
+        <div style={{
+          width: '36px', height: '36px', borderRadius: '50%',
+          background: `${modMeta.color}15`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: '18px', flexShrink: 0,
+        }}>
+          💬
+        </div>
+        <div>
+          <div style={{
+            fontSize: '11px', fontWeight: 700, color: modMeta.color,
+            textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: '2px',
+          }}>
+            Debrief
           </div>
+          <h2 style={{ fontFamily: 'var(--serif)', fontSize: '1.1rem', color: 'var(--ink)', margin: 0 }}>
+            {node.title || 'What did you take away?'}
+          </h2>
+        </div>
+      </div>
+
+      {choiceCount > 0 && (
+        <div style={{
+          background: `${modMeta.color}08`, borderRadius: 'var(--r)',
+          padding: '14px 16px', marginBottom: '1.25rem',
+          fontSize: '13px', color: 'var(--ink-3)', lineHeight: 1.6,
+        }}>
+          <span style={{ fontWeight: 600, color: modMeta.color }}>
+            {choiceCount} decision{choiceCount !== 1 ? 's' : ''} made.
+          </span>
+          {' '}Your choices shaped how this scenario unfolded for your school community.
         </div>
       )}
 
-      {/* Other debrief sections */}
-      {node.sections.slice(1).map((section, i) => (
-        <div key={i} className="card" style={{ padding: '2rem', marginBottom: '1rem' }}>
-          <h3 style={{ fontFamily: 'var(--serif)', fontSize: '1rem', margin: '0 0 1rem 0' }}>
-            {section.heading}
-          </h3>
-          <p style={{ fontSize: '13px', color: 'var(--ink-2)', lineHeight: 1.7, margin: 0 }}>
-            {section.content}
-          </p>
-          {section.dimension_refs && section.dimension_refs.length > 0 && (
-            <div style={{ marginTop: '1rem', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-              {section.dimension_refs.map(dim => (
-                <Link
-                  key={dim}
-                  to={`/learn/${simulation.module_id ? 'placeholder' : 'china'}/reference/${dim}`}
-                  style={{
-                    fontSize: '11px', padding: '4px 10px',
-                    background: `${modMeta.color}15`, color: modMeta.color,
-                    borderRadius: '20px', textDecoration: 'none',
-                  }}
-                >
-                  D{dim} ↗
-                </Link>
-              ))}
-            </div>
-          )}
+      {node.content && (
+        <div style={{ marginBottom: '1.25rem' }}>
+          {renderContent(node.content)}
         </div>
-      ))}
+      )}
 
-      {/* Final reflection */}
-      <div className="card" style={{ padding: '2rem', marginBottom: '1rem' }}>
-        <h3 style={{ fontFamily: 'var(--serif)', fontSize: '1rem', margin: '0 0 1rem 0' }}>
-          What Would You Do Differently?
-        </h3>
-        <textarea
-          placeholder="Reflect on your choices now that you've seen the full picture..."
-          value={debriefText}
-          onChange={e => setDebriefText(e.target.value)}
-          style={{
-            width: '100%', minHeight: '100px', padding: '10px',
-            border: `1px solid var(--border)`, borderRadius: 'var(--r)',
-            fontSize: '13px', fontFamily: 'inherit', resize: 'vertical',
-            marginBottom: '1rem', boxSizing: 'border-box',
-          }}
-        />
-        <button
-          onClick={onComplete}
-          disabled={locked}
-          style={{
-            padding: '10px 20px',
-            background: modMeta.color,
-            color: 'white',
-            border: 'none',
-            borderRadius: 'var(--r)',
-            fontSize: '13px',
-            fontWeight: 600,
-            cursor: locked ? 'not-allowed' : 'pointer',
-            opacity: locked ? 0.6 : 1,
-            transition: 'opacity .15s',
-          }}
-          onMouseEnter={e => { if (!locked) e.currentTarget.style.opacity = '.85' }}
-          onMouseLeave={e => { if (!locked) e.currentTarget.style.opacity = '1' }}
-        >
-          Complete Simulation →
-        </button>
-      </div>
+      {node.prompt && (
+        <>
+          <h3 style={{
+            fontFamily: 'var(--serif)', fontSize: '0.95rem', color: 'var(--ink)',
+            margin: '0 0 10px 0',
+          }}>
+            {node.prompt}
+          </h3>
+          <textarea
+            value={debriefText}
+            onChange={e => setDebriefText(e.target.value)}
+            placeholder="Write your thoughts here… (optional)"
+            rows={4}
+            style={{
+              width: '100%', padding: '10px 12px',
+              border: '1px solid var(--border)', borderRadius: 'var(--r)',
+              fontSize: '13px', fontFamily: 'inherit', color: 'var(--ink)',
+              lineHeight: 1.6, resize: 'vertical', outline: 'none',
+              marginBottom: '1.25rem', boxSizing: 'border-box',
+            }}
+            onFocus={e => { e.currentTarget.style.borderColor = modMeta.color }}
+            onBlur={e => { e.currentTarget.style.borderColor = 'var(--border)' }}
+          />
+        </>
+      )}
+
+      <button
+        onClick={onComplete}
+        disabled={locked}
+        style={{
+          padding: '10px 20px', background: modMeta.color, color: 'white',
+          border: 'none', borderRadius: 'var(--r)',
+          fontSize: '13px', fontWeight: 600,
+          cursor: locked ? 'not-allowed' : 'pointer',
+          opacity: locked ? 0.6 : 1, transition: 'opacity .15s',
+        }}
+        onMouseEnter={e => { if (!locked) e.currentTarget.style.opacity = '.85' }}
+        onMouseLeave={e => { if (!locked) e.currentTarget.style.opacity = '1' }}
+      >
+        Complete simulation ✓
+      </button>
     </div>
   )
+}
+
+// ── Utility components & helpers ───────────────────────────────────────────────
+
+/**
+ * CharacterAvatar — initials-based avatar circle.
+ * Stable hue shift per name gives each character a distinct tint.
+ */
+/**
+ * Map ISO 3166-1 alpha-2 country code to flag emoji.
+ */
+function getFlagEmoji(countryCode) {
+  if (!countryCode) return '🏫'
+  const flags = { SA: '🇸🇦', CN: '🇨🇳', KR: '🇰🇷', IN: '🇮🇳', JP: '🇯🇵', US: '🇺🇸', GB: '🇬🇧' }
+  const code = countryCode.toUpperCase()
+  if (flags[code]) return flags[code]
+  try {
+    return String.fromCodePoint(...[...code].map(c => 0x1F1E6 + c.charCodeAt(0) - 65))
+  } catch { return '🏫' }
+}
+
+/**
+ * Pull the character name out of a perspective label.
+ * "Mrs. Park's Perspective" → "Mrs. Park"
+ */
+function extractPerspectiveName(label) {
+  if (!label) return ''
+  const m = label.match(/^((?:Mr|Mrs|Ms|Dr|Prof)\.?\s+\S+)/i)
+  return m ? m[1] : label.split("'")[0].trim()
 }
