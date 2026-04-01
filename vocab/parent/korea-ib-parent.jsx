@@ -15,12 +15,12 @@ export const koreaIbParent = {
       id: 'new',
       en: {
         label: 'New to IB',
-        description: 'Your child has just started at an IB school, or you\'re preparing for the move. The five concepts in Part 1 are the most important things to understand in your first term.',
+        description: 'Typically your first year. Your child has just started at an IB school, or you\'re preparing for the move. The five concepts in Core Concepts are the most important things to understand in your first term.',
         highlight: 'Start with Part 1',
       },
       ko: {
         label: 'IB 처음 시작',
-        description: '자녀가 IB 학교에 막 입학했거나 전환을 준비 중입니다. 1부의 다섯 가지 개념이 첫 학기에 가장 중요하게 이해해야 할 것들입니다.',
+        description: '보통 첫 번째 해입니다. 자녀가 IB 학교에 막 입학했거나 전환을 준비 중입니다. 핵심 개념의 다섯 가지 개념이 첫 학기에 가장 중요하게 이해해야 할 것들입니다.',
         highlight: '1부부터 시작하세요',
       },
     },
@@ -41,12 +41,12 @@ export const koreaIbParent = {
       id: 'pyp-myp',
       en: {
         label: 'PYP → MYP',
-        description: 'Your child is moving from Primary Years to Middle Years, or has just arrived in MYP from a non-IB primary school. Grades appear for the first time — and the system can feel most confusing right now. See Part 4 for PYP-specific guidance.',
+        description: 'Your child is around 10–12 years old, moving from Primary Years to Middle Years — or has just arrived in MYP from a non-IB primary school. Grades appear for the first time and the system can feel most confusing right now.',
         highlight: 'See Part 4 — PYP concepts — then Part 3 for grade calculators',
       },
       ko: {
         label: 'PYP → MYP 전환',
-        description: '자녀가 PYP(초등)에서 MYP(중등)로 이동 중이거나, 비IB 초등학교에서 MYP로 막 전학했습니다. 처음으로 성적이 등장하는 시기입니다. PYP 관련 안내는 4부를 참고하세요.',
+        description: '자녀가 10~12세 즈음으로 PYP(초등)에서 MYP(중등)로 이동 중이거나, 비IB 초등학교에서 MYP로 막 전학했습니다. 처음으로 성적이 등장하는 시기이며 지금이 가장 혼란스럽게 느껴질 수 있습니다.',
         highlight: '4부(PYP 개념)를 먼저 보신 후 3부(성적 계산기)를 확인하세요',
       },
     },
@@ -54,12 +54,12 @@ export const koreaIbParent = {
       id: 'myp-dp',
       en: {
         label: 'MYP → DP',
-        description: 'Your child is approaching the Diploma Programme. Subject selection, HL/SL choices, and predicted grades are now the decisions that matter. The DP calculator in Part 3 is the most important tool here.',
+        description: 'Your child is typically in Year 10 or 11. Subject selection, HL/SL choices, and predicted grades are the decisions that matter now. The DP calculator is the most important tool here.',
         highlight: 'Focus on Part 3 — the DP calculator — and card 3 (Student Agency) and card 5 (CAS)',
       },
       ko: {
         label: 'MYP → DP 전환',
-        description: '자녀가 DP(디플로마 과정)에 다가가고 있습니다. 과목 선택, HL/SL 결정, 예상 점수가 핵심 사안입니다. 3부의 DP 계산기가 지금 가장 중요한 도구입니다.',
+        description: '자녀가 보통 10학년 또는 11학년입니다. 과목 선택, HL/SL 결정, 예상 점수가 지금 핵심 사안입니다. DP 계산기가 지금 가장 중요한 도구입니다.',
         highlight: '3부(DP 계산기)와 3번 카드(학습자 주도성), 5번 카드(CAS)에 집중하세요',
       },
     },
@@ -69,12 +69,14 @@ export const koreaIbParent = {
     en: {
       title: 'Understanding Your Child\'s IB School',
       subtitle: 'A guide for Korean families navigating international education',
-      intro: 'IB schools look very different from Korean schools — not because they are less rigorous, but because they are built around different goals. If you have already had a moment that confused or frustrated you, this guide is for that moment. It covers five core concepts, a PYP section, interactive grade calculators for MYP and DP, and two scenarios that show how the same situation looks with and without this context.',
+      intro: 'IB schools look very different from Korean schools — not because they are less rigorous, but because they are built around different goals. If you have already had a moment that confused or frustrated you, this guide is for that moment. It covers five core concepts, interactive grade calculators for MYP and DP, a PYP section, and two scenarios that show how the same situation looks with and without this context.',
+      koreanUniversityNote: 'For families considering returning to Korea: Korean universities — including SKY (Seoul National, Yonsei, Korea University) and most major institutions — recognise the IB Diploma. Students can apply through the 재외국민 (overseas Korean) special admission pathway. If this matters to your family, your school\'s university counsellor can advise on specific university requirements.',
     },
     ko: {
       title: '자녀의 IB 학교 이해하기',
       subtitle: '국제 교육을 경험하는 한국 가정을 위한 안내서',
-      intro: 'IB 학교는 한국 학교와 매우 다르게 보입니다. 엄격하지 않아서가 아니라 다른 목표를 중심으로 설계되었기 때문입니다. 이미 혼란스럽거나 당혹스러운 순간이 있었다면, 이 안내서는 바로 그 순간을 위한 것입니다. 다섯 가지 핵심 개념, PYP 섹션, MYP와 DP를 위한 인터랙티브 성적 계산기, 그리고 같은 상황이 이 맥락의 유무에 따라 어떻게 보이는지를 보여주는 두 가지 시나리오를 다룹니다.',
+      intro: 'IB 학교는 한국 학교와 매우 다르게 보입니다. 엄격하지 않아서가 아니라 다른 목표를 중심으로 설계되었기 때문입니다. 이미 혼란스럽거나 당혹스러운 순간이 있었다면, 이 안내서는 바로 그 순간을 위한 것입니다. 다섯 가지 핵심 개념, MYP와 DP를 위한 인터랙티브 성적 계산기, PYP 섹션, 그리고 같은 상황이 이 맥락의 유무에 따라 어떻게 보이는지를 보여주는 두 가지 시나리오를 다룹니다.',
+      koreanUniversityNote: '한국 귀국을 고려하는 가정에 대해: SKY(서울대, 연세대, 고려대)를 포함한 대부분의 주요 한국 대학교는 IB 졸업장을 인정합니다. 학생들은 재외국민 특별전형으로 지원할 수 있습니다. 가족에게 중요한 사항이라면 학교 진학 상담사가 구체적인 대학교 요건을 안내해 드릴 수 있습니다.',
     },
   },
 
@@ -87,6 +89,7 @@ export const koreaIbParent = {
         'You have been an international school parent for two years. You still don\'t have a number.',
       ],
       question: 'Why won\'t the school tell you where your child stands?',
+      directAnswer: 'The short answer: IB schools are built to develop independent thinkers, not to rank them. The school is tracking your child\'s progress carefully — through different tools than you may be used to. The five concepts in this guide explain what those tools are and why they work.',
     },
     ko: {
       situation: [
@@ -96,6 +99,7 @@ export const koreaIbParent = {
         '국제학교 학부모가 된 지 2년이 됐습니다. 아직도 숫자를 받지 못했습니다.',
       ],
       question: '왜 학교는 자녀의 위치를 알려주지 않을까요?',
+      directAnswer: '간단한 답변: IB 학교는 학생의 등수를 매기는 것이 아니라 독립적으로 생각하는 사람을 기르도록 설계되어 있습니다. 학교는 자녀의 진행 상황을 주의 깊게 추적하고 있습니다. 다만 익숙한 것과 다른 도구를 사용할 뿐입니다. 이 안내서의 다섯 가지 개념이 그 도구가 무엇인지, 왜 그것이 효과적인지를 설명합니다.',
     },
   },
 
@@ -217,7 +221,7 @@ export const koreaIbParent = {
         concern: 'In highly competitive academic systems, time is finite and university entrance is determined by exam performance. Watching your child spend significant hours on art, sport, and community work while peers in other systems focus on exam preparation is a real trade-off — not an irrational concern.',
         bridge: 'CAS is a core diploma requirement — your child cannot receive the IB Diploma without it. But more importantly, it exists because the universities the IB targets have told the IB what they want: students who demonstrate genuine sustained commitment outside the classroom. A student who has led a project, sustained a creative practice, or completed a physical challenge brings something to an application that grades alone cannot. This is not enrichment. It is part of the qualification.',
         goal: 'CAS also develops what exam preparation cannot: the resilience, leadership, and ability to work with people unlike yourself that make a university student succeed after admission — and that employers look for long after graduation.',
-        ibConnection: 'CAS requires 150 documented hours across Creativity, Activity, and Service, plus a reflection portfolio. It is reviewed as a diploma completion requirement — not as an afterthought.',
+        ibConnection: 'CAS is a requirement of the DP, which begins in Year 12. It requires 150 documented hours across Creativity, Activity, and Service, plus a reflection portfolio. It is reviewed as a diploma completion requirement — not as an afterthought.',
         whatToAsk: [
           'Ask your child: "What are you actually getting out of your CAS activity?" — genuine reflection matters more than hours logged.',
           'Ask the CAS coordinator: "Which activities tend to produce the strongest university application stories?" — not all CAS carries equal weight in practice.',
@@ -228,7 +232,7 @@ export const koreaIbParent = {
         concern: '경쟁이 치열한 학문적 시스템에서 시간은 유한하고 대학 입학은 시험 성적에 의해 결정됩니다. 다른 시스템의 또래들이 시험 준비에 집중하는 동안 자녀가 예술, 스포츠, 봉사활동에 많은 시간을 쓰는 것은 실질적인 트레이드오프입니다. 비합리적인 걱정이 아닙니다.',
         bridge: 'CAS는 핵심 졸업장 요건입니다. CAS 없이는 IB 졸업장을 받을 수 없습니다. 더 중요한 것은, IB가 목표로 하는 대학교들이 원하는 것을 IB에 알려줬기 때문에 존재한다는 것입니다. 수업 밖에서 진정한 지속적 헌신을 보여준 학생 말입니다. 프로젝트를 이끌거나, 창의적인 활동을 꾸준히 해왔거나, 도전적인 신체 활동을 완료한 학생은 성적만으로는 제공할 수 없는 무언가를 지원서에 가져옵니다. 이것은 과외 활동이 아닙니다. 자격 요건의 일부입니다.',
         goal: 'CAS는 시험 준비가 할 수 없는 것을 발전시킵니다. 입학 후 대학 생활에서 성공하게 만드는 회복력, 리더십, 그리고 자신과 다른 사람들과 일하는 능력입니다. 졸업 후 오랫동안 고용주들이 찾는 것이기도 합니다.',
-        ibConnection: 'CAS는 창의, 활동, 봉사 전반에 걸쳐 150시간의 기록된 활동과 성찰 포트폴리오를 요구합니다. 부가적인 요소가 아닌 졸업장 완료 요건으로 검토됩니다.',
+        ibConnection: 'CAS는 12학년부터 시작되는 DP의 요건입니다. 창의, 활동, 봉사 전반에 걸쳐 150시간의 기록된 활동과 성찰 포트폴리오를 요구합니다. 부가적인 요소가 아닌 졸업장 완료 요건으로 검토됩니다.',
         whatToAsk: [
           '자녀에게 "CAS 활동에서 실제로 무엇을 얻고 있어?"라고 물어보세요. 기록된 시간보다 진정한 성찰이 더 중요합니다.',
           'CAS 코디네이터에게 "어떤 활동이 대학교 지원서에서 가장 강력한 이야기를 만들어내는 경향이 있나요?" — 모든 CAS 활동이 실제로 동등한 비중을 갖지는 않습니다.',

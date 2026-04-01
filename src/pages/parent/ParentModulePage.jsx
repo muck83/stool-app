@@ -6,9 +6,87 @@ const MODULES = {
   'korea-ib': koreaIbParent,
 }
 
-const LS_LANG   = slug => `pd_parent_lang_${slug}`
-const LS_DONE   = slug => `pd_parent_done_${slug}`
-const LS_STAGE  = slug => `pd_parent_stage_${slug}`
+const LS_LANG     = slug => `pd_parent_lang_${slug}`
+const LS_DONE     = slug => `pd_parent_done_${slug}`
+const LS_STAGE    = slug => `pd_parent_stage_${slug}`
+const LS_SECTION  = slug => `pd_parent_section_${slug}`
+const LS_VISITED  = slug => `pd_parent_visited_${slug}`
+
+// ─── Section definitions ──────────────────────────────────────────────────────
+const SECTIONS = [
+  { id: 'start',     en: 'Start Here',       ko: '시작하기'  },
+  { id: 'concepts',  en: 'Core Concepts',    ko: '핵심 개념' },
+  { id: 'grades',    en: 'Grade System',     ko: '성적 체계' },
+  { id: 'pyp',       en: 'PYP',              ko: 'PYP'       },
+  { id: 'scenarios', en: 'Real Situations',  ko: '실제 상황' },
+  { id: 'next',      en: 'Next Steps',       ko: '다음 단계' },
+]
+
+// First recommended section for each stage
+const STAGE_RECOMMENDED = {
+  new:      'concepts',
+  settled:  'grades',
+  'pyp-myp':'pyp',
+  'myp-dp': 'grades',
+}
+
+// ─── Next Steps content (stage-aware, bilingual) ──────────────────────────────
+const NEXT_STEPS = {
+  en: {
+    default: [
+      'Ask your child\'s teacher: "Is this formative or summative work?" — that one question changes how you read every piece of feedback.',
+      'Find the assessment criteria for one of your child\'s subjects on the school\'s learning platform. Read criteria A–D and notice what each one measures.',
+      'Review the IB Learner Profile with your child — ask them which attribute they feel strongest in right now.',
+    ],
+    new: [
+      'Ask your child tonight: "What question is your class exploring this week?" — if they can answer clearly, inquiry is working.',
+      'Ask the school for the assessment criteria for one subject. Read what criteria A–D each measure — this is the vocabulary all their future feedback will use.',
+      'Try the MYP Grade Calculator in the Grade System section with your child\'s most recent report scores to understand what the numbers actually mean.',
+    ],
+    settled: [
+      'Find your child\'s most recent MYP report and enter the criterion scores into the Grade Calculator. Identify the lowest criterion and ask the subject teacher: "What would a stronger score on this criterion look like?"',
+      'Ask your child: "Which criterion do you find hardest in [subject]?" — if they can name it, they understand the system.',
+      'Review the DP Calculator even if DP is a year or two away — knowing the diploma structure now removes surprises later.',
+    ],
+    'pyp-myp': [
+      'Ask your child\'s MYP form tutor: "How will my child be supported in understanding criterion-based assessment this year?" — most IB schools have a deliberate transition programme.',
+      'Try the MYP Grade Calculator with your child present — let them move the sliders to connect their scores to what they mean.',
+      'Read the PYP section to understand what foundations your child already has. PYP graduates arrive in MYP with more self-awareness than parents often realise.',
+    ],
+    'myp-dp': [
+      'Open the DP Calculator and set your child\'s predicted grades — check whether any subject is at risk of failing a diploma condition.',
+      'Ask your child: "Have you chosen your Extended Essay topic?" — the earlier this conversation starts, the better the outcome.',
+      'Ask the CAS coordinator: "What kinds of activities tend to produce the strongest university application stories?" — not all CAS carries equal weight.',
+    ],
+  },
+  ko: {
+    default: [
+      '선생님께 "이 과제는 형성평가인가요, 총괄평가인가요?"라고 물어보세요. 이 질문 하나가 모든 피드백을 읽는 방식을 바꿉니다.',
+      '학교 학습 플랫폼에서 자녀의 한 과목 평가 준거를 찾아보세요. 준거 A~D를 읽고 각각 무엇을 측정하는지 파악하세요.',
+      'IB 학습자 프로파일을 자녀와 함께 살펴보세요. 지금 어떤 속성에서 가장 강하다고 느끼는지 물어보세요.',
+    ],
+    new: [
+      '오늘 밤 자녀에게 "이번 주 수업에서 어떤 질문을 탐구하고 있어?"라고 물어보세요. 명확하게 대답할 수 있다면 탐구 기반 학습이 작동하고 있는 것입니다.',
+      '학교에 한 과목의 평가 준거를 요청하세요. 준거 A~D가 각각 무엇을 측정하는지 읽어보세요. 앞으로 받게 될 모든 피드백이 이 언어를 사용합니다.',
+      '자녀의 가장 최근 성적표 점수로 성적 체계 섹션의 MYP 등급 계산기를 사용해보세요. 숫자가 실제로 무엇을 의미하는지 이해하는 데 도움이 됩니다.',
+    ],
+    settled: [
+      '자녀의 가장 최근 MYP 성적표를 찾아 준거 점수를 성적 계산기에 입력하세요. 가장 낮은 준거를 파악하고 과목 교사에게 "이 준거에서 더 강한 점수가 어떤 모습인가요?"라고 물어보세요.',
+      '자녀에게 "[과목]에서 어떤 준거가 가장 어려워?"라고 물어보세요. 이름을 댈 수 있다면 시스템을 이해하고 있는 것입니다.',
+      'DP가 1~2년 후라도 지금 DP 계산기를 살펴보세요. 졸업장 구조를 미리 알면 나중에 놀라는 일이 없습니다.',
+    ],
+    'pyp-myp': [
+      'MYP 담임 선생님께 "이번 학년에 준거 기반 평가를 이해하는 데 어떻게 지원해주실 건가요?"라고 물어보세요. 대부분의 IB 학교에는 의도적인 전환 프로그램이 있습니다.',
+      '자녀와 함께 MYP 등급 계산기를 사용해보세요. 자녀가 직접 슬라이더를 움직여 자신의 점수가 무엇을 의미하는지 연결하게 하세요.',
+      'PYP 섹션을 읽어서 자녀가 이미 쌓은 기초를 이해하세요. PYP 졸업생들은 학부모들이 종종 생각하는 것보다 더 많은 자기 인식을 가지고 MYP에 진입합니다.',
+    ],
+    'myp-dp': [
+      'DP 등급 계산기를 열고 자녀의 예상 점수를 설정하세요. 졸업장 조건을 충족하지 못할 위험이 있는 과목이 있는지 확인하세요.',
+      '자녀에게 "소논문 주제를 정했어?"라고 물어보세요. 이 대화가 일찍 시작될수록 결과가 좋습니다.',
+      'CAS 코디네이터에게 "어떤 활동이 대학교 지원서에서 가장 강력한 이야기를 만들어내는 경향이 있나요?"라고 물어보세요.',
+    ],
+  },
+}
 
 // ─── Language Toggle ────────────────────────────────────────────────────────
 function LangToggle({ lang, setLang }) {
@@ -65,14 +143,26 @@ function HookSection({ hook, lang }) {
           {lang === 'en' ? 'See the question →' : '질문 보기 →'}
         </button>
       ) : (
-        <div style={{
-          marginTop: '1rem', padding: '.875rem 1rem',
-          background: 'var(--teal-faint, #E1F5EE)',
-          borderRadius: 'var(--r)', fontSize: 14,
-          fontWeight: 600, color: 'var(--teal-dark)',
-          lineHeight: 1.6,
-        }}>
-          {h.question}
+        <div>
+          <div style={{
+            marginTop: '1rem', padding: '.875rem 1rem',
+            background: 'var(--teal-faint, #E1F5EE)',
+            borderRadius: 'var(--r)', fontSize: 14,
+            fontWeight: 600, color: 'var(--teal-dark)',
+            lineHeight: 1.6,
+          }}>
+            {h.question}
+          </div>
+          {h.directAnswer && (
+            <div style={{
+              marginTop: '.75rem', padding: '.875rem 1rem',
+              background: 'var(--surface-2)', borderRadius: 'var(--r)',
+              border: '1px solid var(--border)', fontSize: 13.5,
+              color: 'var(--ink-2)', lineHeight: 1.7,
+            }}>
+              {h.directAnswer}
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -183,8 +273,13 @@ function ConceptCard({ card, lang, index, activeStage }) {
           </div>
           {c.whatToAsk && (
             <div style={{ padding: '.875rem 1rem', background: '#FFFBEB', border: '1px solid #F0C060', borderRadius: 'var(--r)' }}>
-              <div style={{ fontSize: 11, fontWeight: 600, color: '#92400E', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 8 }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: '#92400E', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 4 }}>
                 {lang === 'en' ? 'What to ask at your next meeting' : '다음 면담에서 물어볼 것'}
+              </div>
+              <div style={{ fontSize: 11, color: '#A16207', marginBottom: 8, lineHeight: 1.5 }}>
+                {lang === 'en'
+                  ? 'IB teachers expect and welcome these questions — asking directly is normal, not rude.'
+                  : 'IB 교사들은 이런 질문을 기대하고 환영합니다. 직접적으로 묻는 것은 일반적인 일입니다.'}
               </div>
               {c.whatToAsk.map((q, i) => (
                 <div key={i} style={{ fontSize: 12.5, color: '#78350F', lineHeight: 1.65, paddingLeft: 10, borderLeft: '2px solid #F0C060', marginBottom: i < c.whatToAsk.length - 1 ? 8 : 0 }}>
@@ -321,6 +416,68 @@ function JourneyTimeline({ stages, activeStage, setActiveStage, lang }) {
                   → {s.highlight}
                 </div>
               )}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+// ─── Section Nav ─────────────────────────────────────────────────────────────
+function SectionNav({ sections, active, visited, lang, onChange, recommended }) {
+  const total = sections.length
+  const visitedCount = sections.filter(s => visited.has(s.id)).length
+
+  return (
+    <div style={{ marginBottom: '1.75rem' }}>
+      {/* Progress bar + label */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '.4rem' }}>
+        <div style={{ fontSize: 10.5, fontWeight: 600, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.07em' }}>
+          {lang === 'en' ? 'Guide sections' : '안내서 섹션'}
+        </div>
+        <div style={{ fontSize: 11, color: 'var(--ink-4)' }}>
+          {lang === 'en' ? `${visitedCount} of ${total} visited` : `${total}개 중 ${visitedCount}개 방문`}
+        </div>
+      </div>
+      <div style={{ height: 3, background: 'var(--surface-2)', borderRadius: 3, marginBottom: '.75rem', overflow: 'hidden', border: '1px solid var(--border)' }}>
+        <div style={{
+          height: '100%',
+          width: `${(visitedCount / total) * 100}%`,
+          background: 'var(--teal)',
+          borderRadius: 3,
+          transition: 'width .4s ease',
+        }} />
+      </div>
+      {/* Section pills */}
+      <div style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 4 }}>
+        {sections.map(s => {
+          const isActive = active === s.id
+          const isVisited = visited.has(s.id)
+          const isRec = recommended === s.id && !isVisited
+          return (
+            <button
+              key={s.id}
+              onClick={() => onChange(s.id)}
+              style={{
+                flexShrink: 0, whiteSpace: 'nowrap',
+                padding: '5px 13px', fontSize: 12, fontWeight: 600,
+                borderRadius: 20, cursor: 'pointer',
+                background: isActive
+                  ? 'var(--teal)'
+                  : isRec
+                  ? 'var(--teal-faint, #E1F5EE)'
+                  : 'var(--surface-2)',
+                color: isActive ? 'white' : isRec ? 'var(--teal)' : isVisited ? 'var(--ink-3)' : 'var(--ink-4)',
+                border: isActive
+                  ? '1px solid var(--teal)'
+                  : isRec
+                  ? '1px solid var(--teal)'
+                  : '1px solid var(--border)',
+                transition: 'all .15s',
+              }}
+            >
+              {isVisited && !isActive ? '✓ ' : ''}{s[lang]}{isRec ? ' ★' : ''}
             </button>
           )
         })}
@@ -681,14 +838,15 @@ export default function ParentModulePage() {
   const { slug } = useParams()
   const activity = MODULES[slug]
 
-  const [lang, setLang] = useState(() => {
-    return localStorage.getItem(LS_LANG(slug)) || 'en'
-  })
-  const [done, setDone] = useState(() => {
-    return localStorage.getItem(LS_DONE(slug)) === 'true'
-  })
-  const [activeStage, setActiveStageState] = useState(() => {
-    return localStorage.getItem(LS_STAGE(slug)) || null
+  const [lang, setLang] = useState(() => localStorage.getItem(LS_LANG(slug)) || 'en')
+  const [done, setDone] = useState(() => localStorage.getItem(LS_DONE(slug)) === 'true')
+  const [activeStage, setActiveStageState] = useState(() => localStorage.getItem(LS_STAGE(slug)) || null)
+  const [activeSection, setActiveSectionState] = useState(() => localStorage.getItem(LS_SECTION(slug)) || 'start')
+  const [visitedSections, setVisitedSections] = useState(() => {
+    const stored = localStorage.getItem(LS_VISITED(slug))
+    const s = stored ? new Set(stored.split(',')) : new Set()
+    s.add('start') // always mark start as visited on load
+    return s
   })
 
   const setActiveStage = (s) => {
@@ -697,7 +855,18 @@ export default function ParentModulePage() {
     else localStorage.removeItem(LS_STAGE(slug))
   }
 
-  useEffect(() => { window.scrollTo(0, 0) }, [])
+  const goToSection = (id) => {
+    setActiveSectionState(id)
+    localStorage.setItem(LS_SECTION(slug), id)
+    setVisitedSections(prev => {
+      const next = new Set(prev)
+      next.add(id)
+      localStorage.setItem(LS_VISITED(slug), [...next].join(','))
+      return next
+    })
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   useEffect(() => { localStorage.setItem(LS_LANG(slug), lang) }, [lang, slug])
 
   if (!activity) {
@@ -711,12 +880,30 @@ export default function ParentModulePage() {
   }
 
   const m = activity.meta[lang]
+  const visibleSections = SECTIONS.filter(s => s.id !== 'pyp' || !!activity.pypCards)
+  const currentIdx = visibleSections.findIndex(s => s.id === activeSection)
+  const nextSection = currentIdx < visibleSections.length - 1 ? visibleSections[currentIdx + 1] : null
+  const recommended = activeStage ? STAGE_RECOMMENDED[activeStage] : null
+  const ns = NEXT_STEPS[lang]
+  const nextStepsItems = (activeStage && ns[activeStage]) ? ns[activeStage] : ns.default
 
   const markDone = () => {
     localStorage.setItem(LS_DONE(slug), 'true')
     setDone(true)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
+
+  // Footer nav shown at bottom of each section except the last
+  const SectionFooter = () => nextSection ? (
+    <div style={{ marginTop: '2.5rem', display: 'flex', justifyContent: 'flex-end' }}>
+      <button onClick={() => goToSection(nextSection.id)} style={{
+        fontSize: 12.5, fontWeight: 600, color: 'var(--teal)',
+        background: 'transparent', border: '1px solid var(--teal)44',
+        borderRadius: 20, padding: '7px 20px', cursor: 'pointer',
+      }}>
+        {lang === 'en' ? `Next: ${nextSection.en}` : `다음: ${nextSection.ko}`} →
+      </button>
+    </div>
+  ) : null
 
   return (
     <div style={{ maxWidth: 680, margin: '0 auto', padding: '1.5rem 1.25rem 4rem' }}>
@@ -737,83 +924,143 @@ export default function ParentModulePage() {
         <LangToggle lang={lang} setLang={setLang} />
       </div>
 
-      {/* Completion banner */}
-      {done && (
-        <div style={{
-          marginBottom: '1.5rem', padding: '.875rem 1.1rem',
-          background: '#E1F5EE', border: '1px solid #1D9E7544',
-          borderRadius: 'var(--r)', fontSize: 13.5,
-          color: 'var(--teal-dark)', fontWeight: 500,
-        }}>
-          {lang === 'en' ? '✓ You\'ve completed this guide.' : '✓ 이 안내서를 완료했습니다.'}
+      {/* Stage chip — visible when stage selected + not on start section */}
+      {activeStage && activeSection !== 'start' && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '1rem', flexWrap: 'wrap' }}>
+          <span style={{
+            background: STAGE_COLORS[activeStage] + '18',
+            border: `1px solid ${STAGE_COLORS[activeStage]}55`,
+            borderRadius: 20, padding: '3px 11px',
+            fontSize: 11.5, fontWeight: 600, color: STAGE_COLORS[activeStage],
+          }}>
+            {activity.journeyStages.find(s => s.id === activeStage)?.[lang]?.label}
+          </span>
+          <button onClick={() => goToSection('start')} style={{
+            fontSize: 11.5, color: 'var(--ink-4)', background: 'none',
+            border: 'none', cursor: 'pointer', padding: 0, textDecoration: 'underline',
+          }}>
+            {lang === 'en' ? 'change stage' : '단계 변경'}
+          </button>
         </div>
       )}
 
-      {/* Intro */}
-      <p style={{ fontSize: 14, color: 'var(--ink-2)', lineHeight: 1.75, marginBottom: '2rem' }}>
-        {m.intro}
-      </p>
+      {/* Section nav */}
+      <SectionNav
+        sections={visibleSections}
+        active={activeSection}
+        visited={visitedSections}
+        lang={lang}
+        onChange={goToSection}
+        recommended={recommended}
+      />
 
-      {/* Journey timeline */}
-      {activity.journeyStages && (
-        <JourneyTimeline
-          stages={activity.journeyStages}
-          activeStage={activeStage}
-          setActiveStage={setActiveStage}
-          lang={lang}
-        />
+      {/* ── START HERE ──────────────────────────────────────────────────── */}
+      {activeSection === 'start' && (
+        <div>
+          <p style={{ fontSize: 14, color: 'var(--ink-2)', lineHeight: 1.75, marginBottom: '1.5rem' }}>
+            {m.intro}
+          </p>
+
+          {m.koreanUniversityNote && (
+            <div style={{
+              marginBottom: '1.75rem', padding: '.875rem 1rem',
+              background: 'var(--surface-2)', borderRadius: 'var(--r)',
+              border: '1px solid var(--border)', borderLeft: '3px solid var(--teal)',
+            }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 5 }}>
+                {lang === 'en' ? 'Korean university admission' : '한국 대학교 입시'}
+              </div>
+              <div style={{ fontSize: 13, color: 'var(--ink-3)', lineHeight: 1.65 }}>
+                {m.koreanUniversityNote}
+              </div>
+            </div>
+          )}
+
+          {activity.journeyStages && (
+            <JourneyTimeline
+              stages={activity.journeyStages}
+              activeStage={activeStage}
+              setActiveStage={setActiveStage}
+              lang={lang}
+            />
+          )}
+
+          {/* Stage-driven recommendation prompt */}
+          {activeStage && recommended && (
+            <div style={{
+              marginBottom: '1.5rem', padding: '.875rem 1rem',
+              background: STAGE_COLORS[activeStage] + '12',
+              border: `1px solid ${STAGE_COLORS[activeStage]}33`,
+              borderRadius: 'var(--r)',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap',
+            }}>
+              <div style={{ fontSize: 13, color: STAGE_COLORS[activeStage], fontWeight: 500 }}>
+                {activity.journeyStages.find(s => s.id === activeStage)?.[lang]?.highlight}
+              </div>
+              <button onClick={() => goToSection(recommended)} style={{
+                fontSize: 12.5, fontWeight: 600, color: 'white', flexShrink: 0,
+                background: STAGE_COLORS[activeStage], border: 'none',
+                borderRadius: 20, padding: '5px 16px', cursor: 'pointer',
+              }}>
+                {lang === 'en'
+                  ? `Go to ${SECTIONS.find(s => s.id === recommended)?.en} →`
+                  : `${SECTIONS.find(s => s.id === recommended)?.ko}로 이동 →`}
+              </button>
+            </div>
+          )}
+
+          <HookSection hook={activity.openingHook} lang={lang} />
+          <SectionFooter />
+        </div>
       )}
 
-      {/* Hook */}
-      <HookSection hook={activity.openingHook} lang={lang} />
-
-      {/* Part 1 */}
-      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.1em', marginBottom: '1rem' }}>
-        {lang === 'en' ? 'Part 1 — Five concepts to know' : '1부 — 알아야 할 다섯 가지 개념'}
-      </div>
-
-      {activity.cards.map((card, i) => (
-        <ConceptCard key={card.id} card={card} lang={lang} index={i} activeStage={activeStage} />
-      ))}
-
-      {/* Part 2 */}
-      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.1em', margin: '2rem 0 1rem' }}>
-        {lang === 'en' ? 'Part 2 — Real situations' : '2부 — 실제 상황'}
-      </div>
-      <p style={{ fontSize: 13.5, color: 'var(--ink-3)', lineHeight: 1.65, marginBottom: '1.25rem' }}>
-        {lang === 'en'
-          ? 'Two scenarios that bring the concepts together. Read the situation, then reveal how the outcome changes with and without cultural understanding.'
-          : '개념들을 종합하는 두 가지 시나리오입니다. 상황을 읽고, 이해 유무에 따라 결과가 어떻게 달라지는지 확인해 보세요.'}
-      </p>
-
-      {activity.reviewScenarios.map((s, i) => (
-        <ReviewScenario key={s.id} scenario={s} lang={lang} index={i} />
-      ))}
-
-      {/* Part 3 — Understanding the grades */}
-      {activity.gradingSystem && (
-        <>
-          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.1em', margin: '2rem 0 1rem' }}>
-            {lang === 'en' ? 'Part 3 — Understanding the grades' : '3부 — 성적 체계 이해하기'}
-          </div>
+      {/* ── CORE CONCEPTS ───────────────────────────────────────────────── */}
+      {activeSection === 'concepts' && (
+        <div>
           <p style={{ fontSize: 13.5, color: 'var(--ink-3)', lineHeight: 1.65, marginBottom: '1.25rem' }}>
             {lang === 'en'
-              ? 'IB grades are not percentages, and they are not ranks. Use the calculators below to understand exactly how MYP and DP scores are built — and what they actually mean.'
-              : 'IB 성적은 백분율도 석차도 아닙니다. 아래 계산기를 사용하여 MYP와 DP 점수가 어떻게 구성되는지, 그리고 실제로 무엇을 의미하는지 정확히 이해해 보세요.'}
+              ? 'Five concepts that often confuse Korean parents — and why the IB approach is designed the way it is. Each card shows a concern that makes complete sense, then reveals what the school is actually doing and how it connects to your goals.'
+              : '한국 학부모들이 자주 혼란스러워하는 다섯 가지 개념과 IB 방식이 그렇게 설계된 이유입니다. 각 카드는 완전히 이해되는 걱정을 보여주고, 학교가 실제로 하고 있는 일과 그것이 목표와 어떻게 연결되는지를 설명합니다.'}
           </p>
-          <GradingSection gradingSystem={activity.gradingSystem} lang={lang} />
-        </>
+          {activeStage && (
+            <div style={{
+              marginBottom: '1.25rem', padding: '.625rem 1rem', borderRadius: 'var(--r)',
+              background: STAGE_COLORS[activeStage] + '12',
+              border: `1px solid ${STAGE_COLORS[activeStage]}33`,
+              fontSize: 12, color: STAGE_COLORS[activeStage], fontWeight: 500,
+            }}>
+              {lang === 'en'
+                ? 'Cards with a "★ Relevant now" badge are most important for your current stage.'
+                : '"★ 지금 중요" 배지가 있는 카드가 현재 단계에서 가장 중요합니다.'}
+            </div>
+          )}
+          {activity.cards.map((card, i) => (
+            <ConceptCard key={card.id} card={card} lang={lang} index={i} activeStage={activeStage} />
+          ))}
+          <SectionFooter />
+        </div>
       )}
 
-      {/* Part 4 — PYP */}
-      {activity.pypCards && (
-        <>
-          <div style={{
-            fontSize: 11, fontWeight: 700, color: 'var(--ink-4)',
-            textTransform: 'uppercase', letterSpacing: '.1em', margin: '2rem 0 1rem',
-            display: 'flex', alignItems: 'center', gap: 8,
-          }}>
-            <span>{lang === 'en' ? 'Part 4 — PYP and the Transition to MYP' : '4부 — PYP와 MYP로의 전환'}</span>
+      {/* ── GRADE SYSTEM ────────────────────────────────────────────────── */}
+      {activeSection === 'grades' && activity.gradingSystem && (
+        <div>
+          <p style={{ fontSize: 13.5, color: 'var(--ink-3)', lineHeight: 1.65, marginBottom: '1.5rem' }}>
+            {lang === 'en'
+              ? 'IB grades are not percentages and they are not ranks. Use the calculators to understand exactly how MYP and DP scores are built — and what they actually mean for university applications.'
+              : 'IB 성적은 백분율도 석차도 아닙니다. 계산기를 사용하여 MYP와 DP 점수가 어떻게 구성되는지, 그리고 대학교 입시에서 실제로 무엇을 의미하는지 정확히 이해해 보세요.'}
+          </p>
+          <GradingSection gradingSystem={activity.gradingSystem} lang={lang} />
+          <SectionFooter />
+        </div>
+      )}
+
+      {/* ── PYP ─────────────────────────────────────────────────────────── */}
+      {activeSection === 'pyp' && activity.pypCards && (
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '1rem', flexWrap: 'wrap' }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--ink)' }}>
+              {lang === 'en' ? 'PYP and the Transition to MYP' : 'PYP와 MYP로의 전환'}
+            </div>
             {activeStage === 'pyp-myp' && (
               <span style={{ fontSize: 10, fontWeight: 700, background: STAGE_COLORS['pyp-myp'], color: 'white', padding: '1px 8px', borderRadius: 10 }}>
                 {lang === 'en' ? '★ Most relevant for your stage' : '★ 현재 단계에 가장 관련'}
@@ -822,71 +1069,136 @@ export default function ParentModulePage() {
           </div>
           <p style={{ fontSize: 13.5, color: 'var(--ink-3)', lineHeight: 1.65, marginBottom: '1.25rem' }}>
             {lang === 'en'
-              ? 'PYP (Primary Years Programme, ages 3–11) looks very different from what comes after. These five cards explain what is happening — and what your child is building for later.'
-              : 'PYP(초등 과정, 3~11세)는 이후에 오는 것과 매우 다르게 보입니다. 이 다섯 장의 카드는 무슨 일이 일어나고 있는지, 그리고 자녀가 이후를 위해 무엇을 쌓고 있는지를 설명합니다.'}
+              ? 'PYP (Primary Years Programme, ages 3–11) looks very different from what comes after. These five cards explain what is happening — and what your child is building toward MYP and beyond.'
+              : 'PYP(초등 과정, 3~11세)는 이후에 오는 것과 매우 다르게 보입니다. 이 다섯 장의 카드는 무슨 일이 일어나고 있는지, 그리고 자녀가 MYP와 그 이후를 위해 무엇을 쌓고 있는지를 설명합니다.'}
           </p>
           {activity.pypCards.map((card, i) => (
             <ConceptCard key={card.id} card={card} lang={lang} index={i} activeStage={activeStage} />
           ))}
-        </>
-      )}
-
-      {/* Mark complete */}
-      {!done && (
-        <div style={{ marginTop: '2.5rem', textAlign: 'center' }}>
-          <button
-            onClick={markDone}
-            style={{
-              fontSize: 14, fontWeight: 600, color: 'white',
-              background: 'var(--teal)', border: 'none',
-              borderRadius: 24, padding: '10px 32px',
-              cursor: 'pointer', letterSpacing: '.01em',
-            }}
-          >
-            {lang === 'en' ? '✓ Mark as complete' : '✓ 완료로 표시'}
-          </button>
+          <SectionFooter />
         </div>
       )}
 
-      {/* Glossary */}
-      {activity.glossary && activity.glossary.length > 0 && (
-        <div style={{ marginTop: '2.5rem' }}>
-          <div style={{
-            fontSize: 11, fontWeight: 700, color: 'var(--ink-4)',
-            textTransform: 'uppercase', letterSpacing: '.1em', marginBottom: '1rem',
-          }}>
-            {lang === 'en' ? 'IB Acronym Glossary' : 'IB 약어 용어집'}
-          </div>
-          <div style={{ display: 'grid', gap: '.75rem' }}>
-            {activity.glossary.map(g => {
-              const entry = g[lang]
-              return (
-                <div key={g.term} style={{
-                  display: 'grid', gridTemplateColumns: '56px 1fr',
-                  gap: '0 1rem', alignItems: 'start',
+      {/* ── REAL SITUATIONS ─────────────────────────────────────────────── */}
+      {activeSection === 'scenarios' && (
+        <div>
+          <p style={{ fontSize: 13.5, color: 'var(--ink-3)', lineHeight: 1.65, marginBottom: '1.25rem' }}>
+            {lang === 'en'
+              ? 'Two situations you may recognise. Read the scenario, then reveal how the same moment looks with and without this context.'
+              : '익숙하게 느껴질 수 있는 두 가지 상황입니다. 시나리오를 읽고, 같은 순간이 이 맥락의 유무에 따라 어떻게 달라지는지 확인해 보세요.'}
+          </p>
+          {activity.reviewScenarios.map((s, i) => (
+            <ReviewScenario key={s.id} scenario={s} lang={lang} index={i} />
+          ))}
+          <SectionFooter />
+        </div>
+      )}
+
+      {/* ── NEXT STEPS ──────────────────────────────────────────────────── */}
+      {activeSection === 'next' && (
+        <div>
+          {done && (
+            <div style={{
+              marginBottom: '1.5rem', padding: '.875rem 1.1rem',
+              background: '#E1F5EE', border: '1px solid #1D9E7544',
+              borderRadius: 'var(--r)', fontSize: 13.5,
+              color: 'var(--teal-dark)', fontWeight: 500,
+            }}>
+              {lang === 'en' ? '✓ You\'ve completed this guide.' : '✓ 이 안내서를 완료했습니다.'}
+            </div>
+          )}
+
+          {/* Stage-aware next steps */}
+          <div style={{ marginBottom: '2rem' }}>
+            <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--ink)', marginBottom: '.5rem' }}>
+              {lang === 'en' ? 'Three things to do this week' : '이번 주에 할 세 가지'}
+            </div>
+            <p style={{ fontSize: 12.5, color: 'var(--ink-4)', marginBottom: '1rem', lineHeight: 1.6 }}>
+              {lang === 'en'
+                ? activeStage
+                  ? `Personalised for your selected stage.`
+                  : `Select your stage on Start Here for personalised suggestions.`
+                : activeStage
+                  ? `선택한 단계에 맞게 개인화된 제안입니다.`
+                  : `시작하기 섹션에서 단계를 선택하면 맞춤 제안을 받을 수 있습니다.`}
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {nextStepsItems.map((step, i) => (
+                <div key={i} style={{
+                  display: 'flex', gap: '1rem', alignItems: 'flex-start',
                   padding: '.875rem 1rem', borderRadius: 'var(--r)',
                   background: 'var(--surface-2)', border: '1px solid var(--border)',
                 }}>
-                  <div style={{ fontWeight: 800, fontSize: 14, color: 'var(--teal)', paddingTop: 1 }}>{g.term}</div>
-                  <div>
-                    <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--ink)', marginBottom: 3 }}>{entry.full}</div>
-                    <div style={{ fontSize: 12.5, color: 'var(--ink-3)', lineHeight: 1.65 }}>{entry.definition}</div>
-                  </div>
+                  <span style={{
+                    width: 24, height: 24, borderRadius: '50%', flexShrink: 0,
+                    background: 'var(--teal)', color: 'white',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 12, fontWeight: 700,
+                  }}>{i + 1}</span>
+                  <div style={{ fontSize: 13.5, color: 'var(--ink)', lineHeight: 1.7 }}>{step}</div>
                 </div>
-              )
-            })}
+              ))}
+            </div>
+          </div>
+
+          {/* Mark complete */}
+          {!done && (
+            <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
+              <button
+                onClick={markDone}
+                style={{
+                  fontSize: 14, fontWeight: 600, color: 'white',
+                  background: 'var(--teal)', border: 'none',
+                  borderRadius: 24, padding: '10px 32px',
+                  cursor: 'pointer', letterSpacing: '.01em',
+                }}
+              >
+                {lang === 'en' ? '✓ Mark as complete' : '✓ 완료로 표시'}
+              </button>
+            </div>
+          )}
+
+          {/* Glossary */}
+          {activity.glossary && activity.glossary.length > 0 && (
+            <div style={{ marginBottom: '2rem' }}>
+              <div style={{
+                fontSize: 11, fontWeight: 700, color: 'var(--ink-4)',
+                textTransform: 'uppercase', letterSpacing: '.1em', marginBottom: '1rem',
+              }}>
+                {lang === 'en' ? 'IB Acronym Glossary' : 'IB 약어 용어집'}
+              </div>
+              <div style={{ display: 'grid', gap: '.75rem' }}>
+                {activity.glossary.map(g => {
+                  const entry = g[lang]
+                  return (
+                    <div key={g.term} style={{
+                      display: 'grid', gridTemplateColumns: '56px 1fr',
+                      gap: '0 1rem', alignItems: 'start',
+                      padding: '.875rem 1rem', borderRadius: 'var(--r)',
+                      background: 'var(--surface-2)', border: '1px solid var(--border)',
+                    }}>
+                      <div style={{ fontWeight: 800, fontSize: 14, color: 'var(--teal)', paddingTop: 1 }}>{g.term}</div>
+                      <div>
+                        <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--ink)', marginBottom: 3 }}>{entry.full}</div>
+                        <div style={{ fontSize: 12.5, color: 'var(--ink-3)', lineHeight: 1.65 }}>{entry.definition}</div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Footer note */}
+          <div style={{ padding: '1rem 1.1rem', background: 'var(--surface-2)', borderRadius: 'var(--r)', border: '1px solid var(--border)' }}>
+            <div style={{ fontSize: 12, color: 'var(--ink-4)', lineHeight: 1.7 }}>
+              {lang === 'en'
+                ? 'This guide was written for Korean families navigating IB schools. If something feels inaccurate or is missing, your school can share feedback with the module author.'
+                : '이 안내서는 IB 학교를 경험하는 한국 가정을 위해 작성되었습니다. 부정확하거나 누락된 내용이 있으면 학교를 통해 모듈 작성자에게 피드백을 전달할 수 있습니다.'}
+            </div>
           </div>
         </div>
       )}
-
-      {/* Footer note */}
-      <div style={{ marginTop: '2.5rem', padding: '1rem 1.1rem', background: 'var(--surface-2)', borderRadius: 'var(--r)', border: '1px solid var(--border)' }}>
-        <div style={{ fontSize: 12, color: 'var(--ink-4)', lineHeight: 1.7 }}>
-          {lang === 'en'
-            ? 'This guide was written for Korean families navigating IB schools. If something feels inaccurate or is missing, your school can share feedback with the module author.'
-            : '이 안내서는 IB 학교를 경험하는 한국 가정을 위해 작성되었습니다. 부정확하거나 누락된 내용이 있으면 학교를 통해 모듈 작성자에게 피드백을 전달할 수 있습니다.'}
-        </div>
-      </div>
 
     </div>
   )
