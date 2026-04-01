@@ -1,16 +1,18 @@
 import { Link } from 'react-router-dom'
 import { koreaIbParent } from '../../../vocab/parent/korea-ib-parent.jsx'
 import { indiaIbParent } from '../../../vocab/parent/india-ib-parent.jsx'
+import { chinaIbParent } from '../../../vocab/parent/china-ib-parent.jsx'
 
 /**
  * /parent — listing of all parent guide modules.
  */
 
-const PARENT_MODULES = [koreaIbParent, indiaIbParent]
+const PARENT_MODULES = [koreaIbParent, indiaIbParent, chinaIbParent]
 
 const COUNTRY_META = {
   korea: { flag: '🇰🇷', color: '#1D9E75', label: 'Korea' },
   india: { flag: '🇮🇳', color: '#E67E22', label: 'India' },
+  china: { flag: '🇨🇳', color: '#C0392B', label: 'China' },
 }
 
 export default function ParentHome() {
@@ -145,7 +147,7 @@ export default function ParentHome() {
           Coming next
         </div>
         <div style={{ fontSize: 13, color: 'var(--ink-3)', lineHeight: 1.65 }}>
-          China · IB and KSA · IB guides are in development. If your school is not represented,
+          KSA · IB is in development. If your school is not represented,
           your school can request a guide through the module author.
         </div>
       </div>

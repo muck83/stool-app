@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { koreaIbParent } from '../../../vocab/parent/korea-ib-parent.jsx'
 import { indiaIbParent } from '../../../vocab/parent/india-ib-parent.jsx'
+import { chinaIbParent } from '../../../vocab/parent/china-ib-parent.jsx'
 
 const MODULES = {
   'korea-ib': koreaIbParent,
   'india-ib': indiaIbParent,
+  'china-ib': chinaIbParent,
 }
 
 const LS_LANG     = slug => `pd_parent_lang_${slug}`
@@ -990,22 +992,28 @@ export default function ParentModulePage() {
             </div>
           )}
 
-          {(m.koreanUniversityNote || m.indianUniversityNote) && (
-            <div style={{
-              marginBottom: '1.75rem', padding: '.875rem 1rem',
-              background: 'var(--surface-2)', borderRadius: 'var(--r)',
-              border: '1px solid var(--border)', borderLeft: '3px solid var(--teal)',
-            }}>
-              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 5 }}>
-                {m.koreanUniversityNote
-                  ? (lang === 'en' ? 'Korean university admission' : '한국 대학교 입시')
-                  : 'Indian universities & pathways'}
+          {(m.koreanUniversityNote || m.indianUniversityNote || m.chineseUniversityNote) && (() => {
+            const uniNote = m.koreanUniversityNote || m.indianUniversityNote || m.chineseUniversityNote
+            const uniLabel = m.koreanUniversityNote
+              ? (lang === 'en' ? 'Korean university admission' : '한국 대학교 입시')
+              : m.indianUniversityNote
+              ? 'Indian universities & pathways'
+              : 'Chinese universities & pathways'
+            return (
+              <div style={{
+                marginBottom: '1.75rem', padding: '.875rem 1rem',
+                background: 'var(--surface-2)', borderRadius: 'var(--r)',
+                border: '1px solid var(--border)', borderLeft: '3px solid var(--teal)',
+              }}>
+                <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 5 }}>
+                  {uniLabel}
+                </div>
+                <div style={{ fontSize: 13, color: 'var(--ink-3)', lineHeight: 1.65 }}>
+                  {uniNote}
+                </div>
               </div>
-              <div style={{ fontSize: 13, color: 'var(--ink-3)', lineHeight: 1.65 }}>
-                {m.koreanUniversityNote || m.indianUniversityNote}
-              </div>
-            </div>
-          )}
+            )
+          })()}
 
           {activity.journeyStages && (
             <JourneyTimeline

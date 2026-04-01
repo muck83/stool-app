@@ -27,8 +27,8 @@ const TRACKS = [
     cta: 'Browse parent guides →',
     href: '/parent',
     color: '#185FA5',
-    tags: ['Korea · IB', 'India · IB'],
-    tagNote: '2 guides available',
+    tags: ['Korea · IB', 'India · IB', 'China · IB'],
+    tagNote: '3 guides available',
   },
 ]
 
