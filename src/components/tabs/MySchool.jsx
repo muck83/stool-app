@@ -5,6 +5,8 @@ import { SALARY_DB_SEED } from '../../data/salaryDb.js'
 import { HOF } from '../../data/hofstede.js'
 import SchoolAutocomplete from '../SchoolAutocomplete.jsx'
 import { insertSchoolReview, searchSchoolReviews, fetchRatedSchools } from '../../lib/supabase.js'
+import BigFiveQuiz from '../BigFiveQuiz.jsx'
+import { loadB5, getB5Labels, b5Similarity } from '../../data/bigFiveQuiz.js'
 
 const DIM_LABELS = {
   q1: 'Leadership', q2: 'Honesty',  q3: 'Workload', q4: 'Autonomy',
@@ -247,6 +249,102 @@ function getSchoolStats(reviews) {
   return { avg, count: active.length, enough: true, early: active.length < 3, dimAvgs, avgNotice }
 }
 
+// ── Individual review card ────────────────────────────────────────────────────
+
+function ReviewCard({ review }) {
+  const scores = DIM_KEYS_ALL.map(k => review.answers?.[k]?.score).filter(s => s != null)
+  const overall = scores.length
+    ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length * 10) / 10
+    : null
+  const year = review.created_at ? new Date(review.created_at).getFullYear() : null
+
+  // Find weakest and strongest core dimension
+  const dimScores = DIM_KEYS
+    .map(k => ({ key: k, score: review.answers?.[k]?.score }))
+    .filter(d => d.score != null)
+    .sort((a, b) => a.score - b.score)
+  const weakest  = dimScores[0]
+  const strongest = dimScores[dimScores.length - 1]
+
+  const b5Labels = getB5Labels(review.big_five)
+  const [showTooltip, setShowTooltip] = useState(null)
+
+  return (
+    <div style={{ display: 'flex', gap: '.875rem', padding: '.875rem 1rem', borderBottom: '1px solid var(--border)', alignItems: 'flex-start' }}>
+      {/* Score + year */}
+      <div style={{ flexShrink: 0, textAlign: 'center', width: 38 }}>
+        <div style={{ fontSize: '1.4rem', fontWeight: 300, color: overall ? scoreColor(overall) : '#ccc', lineHeight: 1 }}>
+          {overall || '—'}
+        </div>
+        <div style={{ fontSize: 9, color: 'var(--ink-4)', marginTop: 3 }}>{year || '—'}</div>
+      </div>
+
+      {/* Signals + personality */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        {(weakest || strongest) && (
+          <div style={{ fontSize: 12, color: 'var(--ink-3)', lineHeight: 1.5, marginBottom: '.3rem' }}>
+            {weakest && weakest.score <= 5 && (
+              <span>
+                <span style={{ color: 'var(--ink-4)' }}>Lowest: </span>
+                <span style={{ color: SR_DIM_COLORS[weakest.key], fontWeight: 500 }}>
+                  {DIM_LABELS[weakest.key]} ({weakest.score})
+                </span>
+              </span>
+            )}
+            {weakest && weakest.score <= 5 && strongest && strongest.score >= 7 && (
+              <span style={{ color: 'var(--ink-4)' }}> · </span>
+            )}
+            {strongest && strongest.score >= 7 && (
+              <span>
+                <span style={{ color: 'var(--ink-4)' }}>Highest: </span>
+                <span style={{ color: SR_DIM_COLORS[strongest.key], fontWeight: 500 }}>
+                  {DIM_LABELS[strongest.key]} ({strongest.score})
+                </span>
+              </span>
+            )}
+          </div>
+        )}
+
+        {b5Labels.length > 0 && (
+          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: '.3rem' }}>
+            {b5Labels.map(l => (
+              <span
+                key={l.trait}
+                title={l.context}
+                onMouseEnter={() => setShowTooltip(l.trait)}
+                onMouseLeave={() => setShowTooltip(null)}
+                style={{
+                  position: 'relative',
+                  fontSize: 10,
+                  padding: '2px 8px',
+                  borderRadius: 10,
+                  background: l.high ? '#EBF3FF' : '#FFF0E8',
+                  color: l.high ? '#1A5FA8' : '#A35020',
+                  fontWeight: 500,
+                  cursor: 'default',
+                  border: `1px solid ${l.high ? '#B8D4F5' : '#F5CCAD'}`,
+                }}
+              >
+                {l.label}
+                {showTooltip === l.trait && l.context && (
+                  <span style={{
+                    position: 'absolute', bottom: '120%', left: '50%', transform: 'translateX(-50%)',
+                    background: 'var(--ink)', color: 'white', fontSize: 10.5, lineHeight: 1.5,
+                    padding: '.4rem .65rem', borderRadius: 6, whiteSpace: 'nowrap', maxWidth: 240,
+                    whiteSpace: 'normal', zIndex: 10, pointerEvents: 'none', boxShadow: '0 2px 8px rgba(0,0,0,.2)',
+                  }}>
+                    {l.context}
+                  </span>
+                )}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // ── School Search / Browse ────────────────────────────────────────────────────
 
 function SchoolSearchPanel() {
@@ -254,7 +352,9 @@ function SchoolSearchPanel() {
   const [query, setQuery]       = useState('')
   const [results, setResults]   = useState(null)
   const [loading, setLoading]   = useState(false)
+  const [b5Filter, setB5Filter] = useState('all')
   const debounceRef = useRef(null)
+  const myB5 = loadB5()
 
   const search = async (q) => {
     if (!q.trim() || q.trim().length < 2) { setResults(null); return }
@@ -373,6 +473,53 @@ function SchoolSearchPanel() {
                     </div>
                   </div>
                 )}
+
+                {/* ── Individual reviews ──────────────────────────────── */}
+                {stats.enough && (() => {
+                  const activeReviews = reviews.filter(r => !r.status || r.status === 'active' || r.status === 'verified')
+                  const filtered = b5Filter === 'similar' && myB5
+                    ? activeReviews.filter(r => {
+                        if (!r.big_five) return false
+                        const sim = b5Similarity(myB5, r.big_five)
+                        return sim != null && sim >= 0.55
+                      })
+                    : activeReviews
+                  const hasSomeB5 = activeReviews.some(r => r.big_five)
+                  return (
+                    <div style={{ borderTop: '1px solid var(--border)' }}>
+                      <div style={{ padding: '.75rem 1.25rem .5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '.5rem', flexWrap: 'wrap' }}>
+                        <div style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.08em', color: 'var(--ink-4)' }}>
+                          Individual reviews ({filtered.length}{filtered.length !== activeReviews.length ? ` of ${activeReviews.length}` : ''})
+                        </div>
+                        {myB5 && hasSomeB5 && (
+                          <div style={{ display: 'flex', gap: 4 }}>
+                            {['all', 'similar'].map(f => (
+                              <button
+                                key={f}
+                                onClick={() => setB5Filter(f)}
+                                style={{
+                                  fontSize: 10.5, padding: '3px 9px', borderRadius: 10, cursor: 'pointer',
+                                  border: b5Filter === f ? '1.5px solid #BA7517' : '1.5px solid var(--border-2)',
+                                  background: b5Filter === f ? '#FAEEDA' : 'white',
+                                  color: b5Filter === f ? '#BA7517' : 'var(--ink-3)',
+                                  fontWeight: b5Filter === f ? 600 : 400,
+                                }}
+                              >
+                                {f === 'all' ? 'All reviewers' : 'Similar to me'}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      {filtered.length === 0 && (
+                        <div style={{ padding: '.5rem 1.25rem .875rem', fontSize: 12, color: 'var(--ink-4)', fontStyle: 'italic' }}>
+                          No reviews match this filter yet.
+                        </div>
+                      )}
+                      {filtered.map((r, i) => <ReviewCard key={i} review={r} />)}
+                    </div>
+                  )
+                })()}
               </div>
             )
           })}
@@ -448,7 +595,8 @@ export default function MySchool() {
       setAnswers({})
     }
     setStep(0)
-    setMode('review')
+    // Gate on Big Five quiz — show once, then never again
+    setMode(loadB5() ? 'review' : 'b5quiz')
   }
 
   const next = () => {
@@ -460,7 +608,7 @@ export default function MySchool() {
       if (currentQ && !answers[currentQ.key]) return // require an answer
       setStep(step + 1)
     } else {
-      const review = { school, country, answers: { ...answers }, hours, noticePeriod }
+      const review = { school, country, answers: { ...answers }, hours, noticePeriod, big_five: loadB5() }
       setReviews(r => [...r, review])
       insertSchoolReview(review)
       // Update the profile's school score if reviewing own school
@@ -674,20 +822,39 @@ export default function MySchool() {
 
         {/* ── How it works ─────────────────────────────────────────────────── */}
         <div style={{
-          display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '.75rem',
+          display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '.75rem',
           padding: '1rem', background: 'var(--surface-2)', borderRadius: 'var(--r)',
         }}>
           {[
-            ['10 questions', 'Leadership, honesty, workload, autonomy, colleagues, mission — plus exit safety, parents, and family package.'],
-            ['Personal diagnosis', 'You get a named diagnosis with a prognosis and specific advice for your situation.'],
+            ['10 school questions', 'Leadership, honesty, workload, autonomy, colleagues, mission — plus exit safety, parent culture, and family package.'],
+            ['Personal diagnosis', 'You get a named diagnosis with a prognosis and specific advice for your situation — not a generic summary.'],
             ['Community profiles', 'Every review builds a school profile visible to the community. More reviews mean stronger, more reliable ratings.'],
+            ['Reviewer context', 'Before you submit, you\'ll answer 10 quick personality statements. This tells readers the lens your review comes from — not to judge it, but to calibrate it. Saved once to your device.'],
           ].map(([title, desc]) => (
-            <div key={title} style={{ textAlign: 'center', padding: '.5rem' }}>
+            <div key={title} style={{ padding: '.5rem' }}>
               <div style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--ink)', marginBottom: '.25rem' }}>{title}</div>
               <div style={{ fontSize: 11.5, color: 'var(--ink-3)', lineHeight: 1.45 }}>{desc}</div>
             </div>
           ))}
         </div>
+      </div>
+    )
+  }
+
+  // ── BIG FIVE QUIZ MODE ─────────────────────────────────────────────────────
+  if (mode === 'b5quiz') {
+    return (
+      <div className="tp active">
+        <button
+          onClick={reset}
+          style={{ background: 'none', border: 'none', color: 'var(--ink-3)', cursor: 'pointer', fontSize: 12, fontWeight: 500, marginBottom: '1rem', padding: 0 }}
+        >
+          &larr; Back to My School
+        </button>
+        <BigFiveQuiz
+          onComplete={() => setMode('review')}
+          onSkip={() => setMode('review')}
+        />
       </div>
     )
   }

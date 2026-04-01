@@ -117,7 +117,7 @@ export async function insertSalarySubmission(rec) {
   return { data, flagged }
 }
 
-export async function insertSchoolReview({ school, country, answers, hours }) {
+export async function insertSchoolReview({ school, country, answers, hours, noticePeriod, big_five }) {
   if (!supabase) return null
   const ip = await getClientIp()
   const { data, error } = await supabase
@@ -127,6 +127,8 @@ export async function insertSchoolReview({ school, country, answers, hours }) {
       country,
       answers,
       hours_per_week: hours ? parseInt(hours, 10) : null,
+      notice_period: noticePeriod ? parseInt(noticePeriod, 10) : null,
+      big_five: big_five || null,
       ip_address: ip,
     }])
     .select()
