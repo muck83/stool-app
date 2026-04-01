@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
-import { koreaIbParent } from '../../vocab/parent/korea-ib-parent.jsx'
-import { indiaIbParent } from '../../vocab/parent/india-ib-parent.jsx'
+import { koreaIbParent } from '../../../vocab/parent/korea-ib-parent.jsx'
+import { indiaIbParent } from '../../../vocab/parent/india-ib-parent.jsx'
 
 /**
  * /parent — listing of all parent guide modules.

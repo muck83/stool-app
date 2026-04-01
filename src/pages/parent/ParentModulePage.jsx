@@ -816,7 +816,7 @@ function GradingSection({ gradingSystem, lang }) {
         {['myp', 'dp'].map(t => (
           <button key={t} onClick={() => setTab(t)} style={{
             padding: '6px 20px', fontSize: 13, fontWeight: 600,
-            borderRadius: 20, border: 'none', cursor: 'pointer',
+            borderRadius: 20, cursor: 'pointer',
             background: tab === t ? 'var(--teal)' : 'var(--surface-2)',
             color: tab === t ? 'white' : 'var(--ink-3)',
             border: `1px solid ${tab === t ? 'var(--teal)' : 'var(--border)'}`,
