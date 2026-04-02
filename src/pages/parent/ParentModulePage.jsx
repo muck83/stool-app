@@ -3,13 +3,15 @@ import { useParams, Link } from 'react-router-dom'
 import { koreaIbParent } from '../../../vocab/parent/korea-ib-parent.jsx'
 import { indiaIbParent } from '../../../vocab/parent/india-ib-parent.jsx'
 import { chinaIbParent } from '../../../vocab/parent/china-ib-parent.jsx'
-import { ksaIbParent }   from '../../../vocab/parent/ksa-ib-parent.jsx'
+import { ksaIbParent }     from '../../../vocab/parent/ksa-ib-parent.jsx'
+import { vietnamIbParent } from '../../../vocab/parent/vietnam-ib-parent.jsx'
 
 const MODULES = {
   'korea-ib': koreaIbParent,
   'india-ib': indiaIbParent,
   'china-ib': chinaIbParent,
-  'ksa-ib':   ksaIbParent,
+  'ksa-ib':      ksaIbParent,
+  'vietnam-ib':  vietnamIbParent,
 }
 
 const LS_LANG     = slug => `pd_parent_lang_${slug}`
@@ -20,12 +22,12 @@ const LS_VISITED  = slug => `pd_parent_visited_${slug}`
 
 // ─── Section definitions ──────────────────────────────────────────────────────
 const SECTIONS = [
-  { id: 'start',     en: 'Start Here',       ko: '시작하기',  zh: '从这里开始', ar: 'ابدأ هنا'           },
-  { id: 'concepts',  en: 'Core Concepts',    ko: '핵심 개념', zh: '核心概念',   ar: 'المفاهيم الأساسية'  },
+  { id: 'start',     en: 'Start Here',       ko: '시작하기',  zh: '从这里开始', ar: 'ابدأ هنا',          vi: 'Bắt đầu ở đây'       },
+  { id: 'concepts',  en: 'Core Concepts',    ko: '핵심 개념', zh: '核心概念',   ar: 'المفاهيم الأساسية', vi: 'Khái niệm cốt lõi'   },
   { id: 'grades',    en: 'Grade System',     ko: '성적 체계', zh: '成绩体系',   ar: 'نظام الدرجات'       },
-  { id: 'pyp',       en: 'PYP',              ko: 'PYP',       zh: 'PYP',        ar: 'PYP'                },
-  { id: 'scenarios', en: 'Real Situations',  ko: '실제 상황', zh: '真实情境',   ar: 'مواقف حقيقية'       },
-  { id: 'next',      en: 'Next Steps',       ko: '다음 단계', zh: '下一步',     ar: 'الخطوات التالية'    },
+  { id: 'pyp',       en: 'PYP',              ko: 'PYP',       zh: 'PYP',        ar: 'PYP',               vi: 'PYP'                  },
+  { id: 'scenarios', en: 'Real Situations',  ko: '실제 상황', zh: '真实情境',   ar: 'مواقف حقيقية',      vi: 'Tình huống thực tế'  },
+  { id: 'next',      en: 'Next Steps',       ko: '다음 단계', zh: '下一步',     ar: 'الخطوات التالية',   vi: 'Bước tiếp theo'      },
 ]
 
 // First recommended section for each stage
@@ -95,7 +97,7 @@ const NEXT_STEPS = {
 }
 
 // ─── Language Toggle ────────────────────────────────────────────────────────
-const LANG_LABELS = { en: 'English', ko: '한국어', zh: '中文', ar: 'العربية' }
+const LANG_LABELS = { en: 'English', ko: '한국어', zh: '中文', ar: 'العربية', vi: 'Tiếng Việt' }
 
 function LangToggle({ lang, setLang, languages }) {
   const langs = languages && languages.length > 1 ? languages : ['en', 'ko']
@@ -134,7 +136,7 @@ function HookSection({ hook, lang }) {
       padding: '1.25rem 1.4rem', marginBottom: '2rem',
     }}>
       <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: '.75rem' }}>
-        {lang === 'ar' ? 'الموقف الافتتاحي' : lang === 'zh' ? '开场情境' : lang === 'ko' ? '도입 상황' : 'Opening situation'}
+        {lang === 'vi' ? 'Tình huống mở đầu' : lang === 'ar' ? 'الموقف الافتتاحي' : lang === 'zh' ? '开场情境' : lang === 'ko' ? '도입 상황' : 'Opening situation'}
       </div>
       {h.situation.map((p, i) => (
         <p key={i} style={{ fontSize: 14, color: 'var(--ink)', lineHeight: 1.75, margin: '0 0 .75rem' }}>{p}</p>
@@ -149,7 +151,7 @@ function HookSection({ hook, lang }) {
             padding: '5px 16px', cursor: 'pointer',
           }}
         >
-          {lang === 'ar' ? '← اطّلع على السؤال' : lang === 'zh' ? '查看问题 →' : lang === 'ko' ? '질문 보기 →' : 'See the question →'}
+          {lang === 'vi' ? 'Xem câu hỏi →' : lang === 'ar' ? '← اطّلع على السؤال' : lang === 'zh' ? '查看问题 →' : lang === 'ko' ? '질문 보기 →' : 'See the question →'}
         </button>
       ) : (
         <div>
@@ -203,11 +205,11 @@ function ConceptCard({ card, lang, index, activeStage, whatToAskNote }) {
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
               <span style={{ fontSize: 11, fontWeight: 600, color: col, textTransform: 'uppercase', letterSpacing: '.07em' }}>
-                {lang === 'ar' ? `المفهوم ${index + 1}` : lang === 'zh' ? `概念 ${index + 1}` : lang === 'ko' ? `개념 ${index + 1}` : `Concept ${index + 1}`}
+                {lang === 'vi' ? `Khái niệm ${index + 1}` : lang === 'ar' ? `المفهوم ${index + 1}` : lang === 'zh' ? `概念 ${index + 1}` : lang === 'ko' ? `개념 ${index + 1}` : `Concept ${index + 1}`}
               </span>
               {isRelevant && (
                 <span style={{ fontSize: 10, fontWeight: 700, background: stageCol, color: 'white', padding: '1px 7px', borderRadius: 10 }}>
-                  {lang === 'ar' ? '★ مهم الآن' : lang === 'zh' ? '★ 当前重要' : lang === 'ko' ? '★ 지금 중요' : '★ Relevant now'}
+                  {lang === 'vi' ? '★ Liên quan ngay' : lang === 'ar' ? '★ مهم الآن' : lang === 'zh' ? '★ 当前重要' : lang === 'ko' ? '★ 지금 중요' : '★ Relevant now'}
                 </span>
               )}
             </div>
@@ -228,7 +230,7 @@ function ConceptCard({ card, lang, index, activeStage, whatToAskNote }) {
         {/* Concern */}
         <div style={{ marginTop: '1rem' }}>
           <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 6 }}>
-            {lang === 'ar' ? 'قلق شائع' : lang === 'zh' ? '常见顾虑' : lang === 'ko' ? '자주 하는 걱정' : 'A common concern'}
+            {lang === 'vi' ? 'Mối lo thường gặp' : lang === 'ar' ? 'قلق شائع' : lang === 'zh' ? '常见顾虑' : lang === 'ko' ? '자주 하는 걱정' : 'A common concern'}
           </div>
           <div style={{
             fontSize: 13.5, color: 'var(--ink-2)', lineHeight: 1.7,
@@ -251,14 +253,14 @@ function ConceptCard({ card, lang, index, activeStage, whatToAskNote }) {
               borderRadius: 20, padding: '6px 18px', cursor: 'pointer',
             }}
           >
-            {lang === 'ar' ? '← ما تفعله المدرسة' : lang === 'zh' ? '学校的做法 →' : lang === 'ko' ? '학교가 하는 일 보기 →' : 'What the school is doing →'}
+            {lang === 'vi' ? 'Nhà trường làm gì →' : lang === 'ar' ? '← ما تفعله المدرسة' : lang === 'zh' ? '学校的做法 →' : lang === 'ko' ? '학교가 하는 일 보기 →' : 'What the school is doing →'}
           </button>
         </div>
       ) : (
         <div style={{ padding: '1rem 1.2rem 1.25rem', borderTop: `1px solid ${col}22` }}>
           <div style={{ marginBottom: '1rem' }}>
             <div style={{ fontSize: 11, fontWeight: 600, color: col, textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 6 }}>
-              {lang === 'ar' ? 'ما تفعله المدرسة' : lang === 'zh' ? '学校的做法' : lang === 'ko' ? '학교가 하는 일' : 'What the school is doing'}
+              {lang === 'vi' ? 'Nhà trường làm gì' : lang === 'ar' ? 'ما تفعله المدرسة' : lang === 'zh' ? '学校的做法' : lang === 'ko' ? '학교가 하는 일' : 'What the school is doing'}
             </div>
             <div style={{ fontSize: 13.5, color: 'var(--ink)', lineHeight: 1.75 }}>
               {c.bridge}
@@ -266,7 +268,7 @@ function ConceptCard({ card, lang, index, activeStage, whatToAskNote }) {
           </div>
           <div style={{ marginBottom: '1rem' }}>
             <div style={{ fontSize: 11, fontWeight: 600, color: col, textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 6 }}>
-              {lang === 'ar' ? 'كيف يرتبط هذا بهدفك' : lang === 'zh' ? '与您目标的联系' : lang === 'ko' ? '목표와의 연결' : 'How this connects to your goal'}
+              {lang === 'vi' ? 'Cách điều này kết nối với mục tiêu của bạn' : lang === 'ar' ? 'كيف يرتبط هذا بهدفك' : lang === 'zh' ? '与您目标的联系' : lang === 'ko' ? '목표와의 연결' : 'How this connects to your goal'}
             </div>
             <div style={{ fontSize: 13.5, color: 'var(--ink)', lineHeight: 1.75 }}>
               {c.goal}
@@ -283,7 +285,7 @@ function ConceptCard({ card, lang, index, activeStage, whatToAskNote }) {
           {c.whatToAsk && (
             <div style={{ padding: '.875rem 1rem', background: '#FFFBEB', border: '1px solid #F0C060', borderRadius: 'var(--r)' }}>
               <div style={{ fontSize: 11, fontWeight: 600, color: '#92400E', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 4 }}>
-                {lang === 'ar' ? 'ما تسأل عنه في لقائك القادم' : lang === 'zh' ? '下次面谈时要问的问题' : lang === 'ko' ? '다음 면담에서 물어볼 것' : 'What to ask at your next meeting'}
+                {lang === 'vi' ? 'Câu hỏi cho buổi họp tiếp theo' : lang === 'ar' ? 'ما تسأل عنه في لقائك القادم' : lang === 'zh' ? '下次面谈时要问的问题' : lang === 'ko' ? '다음 면담에서 물어볼 것' : 'What to ask at your next meeting'}
               </div>
               <div style={{ fontSize: 11, color: '#A16207', marginBottom: 8, lineHeight: 1.5 }}>
                 {whatToAskNote || (lang === 'ar'

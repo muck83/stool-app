@@ -3,23 +3,25 @@ import { koreaIbParent }    from '../../../vocab/parent/korea-ib-parent.jsx'
 import { indiaIbParent }    from '../../../vocab/parent/india-ib-parent.jsx'
 import { chinaIbParent }    from '../../../vocab/parent/china-ib-parent.jsx'
 import { ksaIbParent }      from '../../../vocab/parent/ksa-ib-parent.jsx'
+import { vietnamIbParent }  from '../../../vocab/parent/vietnam-ib-parent.jsx'
 import { woodstockParent }  from '../../../vocab/parent/woodstock-parent.jsx'
 
 /**
  * /parent — listing of all parent guide modules.
  */
 
-const PARENT_MODULES = [woodstockParent, koreaIbParent, indiaIbParent, chinaIbParent, ksaIbParent]
+const PARENT_MODULES = [woodstockParent, koreaIbParent, indiaIbParent, chinaIbParent, ksaIbParent, vietnamIbParent]
 
 const COUNTRY_META = {
   korea:         { flag: '🇰🇷', color: '#1D9E75', label: 'Korea' },
   india:         { flag: '🇮🇳', color: '#E67E22', label: 'India' },
   china:         { flag: '🇨🇳', color: '#C0392B', label: 'China' },
   'saudi-arabia':{ flag: '🇸🇦', color: '#006C35', label: 'Saudi Arabia' },
+  vietnam:       { flag: '🇻🇳', color: '#DA251D', label: 'Vietnam' },
   woodstock:     { flag: '🌲', color: '#8B1A1A', label: 'Woodstock · Mussoorie' },
 }
 
-const LANG_CHIP_LABELS = { en: 'English', ko: '한국어', zh: '中文', ar: 'العربية' }
+const LANG_CHIP_LABELS = { en: 'English', ko: '한국어', zh: '中文', ar: 'العربية', vi: 'Tiếng Việt' }
 
 export default function ParentHome() {
   return (
