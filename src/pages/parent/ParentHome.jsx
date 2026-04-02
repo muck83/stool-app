@@ -2,18 +2,22 @@ import { Link } from 'react-router-dom'
 import { koreaIbParent } from '../../../vocab/parent/korea-ib-parent.jsx'
 import { indiaIbParent } from '../../../vocab/parent/india-ib-parent.jsx'
 import { chinaIbParent } from '../../../vocab/parent/china-ib-parent.jsx'
+import { ksaIbParent }   from '../../../vocab/parent/ksa-ib-parent.jsx'
 
 /**
  * /parent — listing of all parent guide modules.
  */
 
-const PARENT_MODULES = [koreaIbParent, indiaIbParent, chinaIbParent]
+const PARENT_MODULES = [koreaIbParent, indiaIbParent, chinaIbParent, ksaIbParent]
 
 const COUNTRY_META = {
-  korea: { flag: '🇰🇷', color: '#1D9E75', label: 'Korea' },
-  india: { flag: '🇮🇳', color: '#E67E22', label: 'India' },
-  china: { flag: '🇨🇳', color: '#C0392B', label: 'China' },
+  korea:         { flag: '🇰🇷', color: '#1D9E75', label: 'Korea' },
+  india:         { flag: '🇮🇳', color: '#E67E22', label: 'India' },
+  china:         { flag: '🇨🇳', color: '#C0392B', label: 'China' },
+  'saudi-arabia':{ flag: '🇸🇦', color: '#006C35', label: 'Saudi Arabia' },
 }
+
+const LANG_CHIP_LABELS = { en: 'English', ko: '한국어', zh: '中文', ar: 'العربية' }
 
 export default function ParentHome() {
   return (
@@ -114,7 +118,7 @@ export default function ParentHome() {
                       border: '1px solid var(--border)',
                       padding: '2px 8px', borderRadius: 10,
                     }}>
-                      EN / KO
+                      {(mod.languages || []).map(l => LANG_CHIP_LABELS[l] || l.toUpperCase()).join(' / ')}
                     </span>
                   )}
                 </div>
@@ -144,10 +148,10 @@ export default function ParentHome() {
         border: '1px solid var(--border)',
       }}>
         <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 5 }}>
-          Coming next
+          More guides coming
         </div>
         <div style={{ fontSize: 13, color: 'var(--ink-3)', lineHeight: 1.65 }}>
-          KSA · IB is in development. If your school is not represented,
+          Additional country guides are in development. If your school is not represented,
           your school can request a guide through the module author.
         </div>
       </div>

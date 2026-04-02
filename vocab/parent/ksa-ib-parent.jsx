@@ -14,7 +14,7 @@ export const ksaIbParent = {
   slug: 'ksa-ib',
   country: 'saudi-arabia',
   program: 'IB',
-  languages: ['en'],
+  languages: ['en', 'ar'],
 
   journeyStages: [
     {
@@ -24,6 +24,11 @@ export const ksaIbParent = {
         description: 'Typically your first year. Your child has moved from the Saudi national curriculum — percentage marks, class ranks, formal semester exams — into an IB school. The shift to open-ended inquiry, criterion-based grades, and no percentage score often arrives without enough explanation at orientation. This guide starts with the five things that confuse Saudi families most.',
         highlight: 'Start with Core Concepts — especially how criterion-based grades work and what they actually mean.',
       },
+      ar: {
+        label: 'جديد على IB',
+        description: 'عادةً تكون هذه السنة الأولى. انتقل طفلك من المنهج الوطني السعودي — بدرجاته المئوية وترتيباته الصفية وامتحاناته الفصلية الرسمية — إلى مدرسة IB. يصل هذا التحول نحو التقصير المفتوح والدرجات القائمة على المعايير وغياب النسبة المئوية في الغالب دون شرح كافٍ في جلسة الاستقبال. يبدأ هذا الدليل بالأشياء الخمسة التي تُحيّر العائلات السعودية أكثر من سواها.',
+        highlight: 'ابدأ بالمفاهيم الأساسية — وبخاصة كيف تعمل الدرجات القائمة على المعايير وماذا تعني فعلاً.',
+      },
     },
     {
       id: 'settled',
@@ -31,6 +36,11 @@ export const ksaIbParent = {
         label: 'Settling in',
         description: 'Year 2 or beyond. You have received several reports and are beginning to read the language. But questions from extended family, comparisons with peers at government schools, and the university pathway question may still be creating pressure. The Grade System calculators are the most useful tools at this stage.',
         highlight: 'Jump to Grade System — use the calculators to read your child\'s reports accurately.',
+      },
+      ar: {
+        label: 'في طور الاستقرار',
+        description: 'السنة الثانية أو ما بعدها. تلقيت عدة تقارير وبدأت تفهم اللغة. لكن أسئلة العائلة الممتدة والمقارنات مع أقران في مدارس حكومية وسؤال المسار الجامعي قد لا تزال تُشكّل ضغطاً. حاسبات نظام الدرجات هي أكثر الأدوات فائدةً في هذه المرحلة.',
+        highlight: 'انتقل مباشرةً إلى نظام الدرجات — استخدم الحاسبات لقراءة تقارير طفلك بدقة.',
       },
     },
     {
@@ -40,6 +50,11 @@ export const ksaIbParent = {
         description: 'Your child is around 10–12 years old, moving from Primary Years to Middle Years — or has just transferred into MYP from a Saudi national school. Formal criterion-based grades appear for the first time and the contrast with Saudi school reporting can feel most disorienting right now. PYP is also where Arabic language and Islamic education questions are often sharpest.',
         highlight: 'See PYP section first, then Grade System to understand the new grading pattern.',
       },
+      ar: {
+        label: 'PYP → MYP',
+        description: 'طفلك في حدود العاشرة إلى الثانية عشرة من عمره، ينتقل من مرحلة السنوات الأولى إلى السنوات المتوسطة — أو انتقل للتو إلى MYP من مدرسة وطنية سعودية. تظهر درجات معيارية رسمية لأول مرة والتناقض مع تقارير المدارس السعودية قد يبدو مربكاً أكثر من أي وقت مضى. هذه أيضاً المرحلة التي تكون فيها أسئلة اللغة العربية والتعليم الإسلامي في أحدّها.',
+        highlight: 'اطّلع على قسم PYP أولاً، ثم نظام الدرجات لفهم نمط التقييم الجديد.',
+      },
     },
     {
       id: 'myp-dp',
@@ -47,6 +62,11 @@ export const ksaIbParent = {
         label: 'MYP → DP',
         description: 'Your child is typically in Year 10 or 11. Subject selection, HL/SL choices, and the university pathway decision are urgent now. The question of whether your child can access Saudi government universities — and what the Vision 2030 landscape means for IB graduates — needs a direct conversation with the school counsellor before Year 12.',
         highlight: 'Focus on Grade System (DP calculator) and Card 5 on university pathways. Do not defer the Saudi university conversation.',
+      },
+      ar: {
+        label: 'MYP → DP',
+        description: 'طفلك في السنة العاشرة أو الحادية عشرة في الغالب. اختيار المواد ومستويات HL/SL وقرار المسار الجامعي أمور عاجلة الآن. مسألة ما إذا كان بإمكان طفلك الالتحاق بالجامعات الحكومية السعودية — وما تعنيه رؤية 2030 لخريجي IB — تستدعي محادثة مباشرة مع مستشار المدرسة قبل الصف الثاني عشر.',
+        highlight: 'ركّز على نظام الدرجات (حاسبة DP) والبطاقة الخامسة حول المسارات الجامعية. لا تؤجّل محادثة الجامعات السعودية.',
       },
     },
   ],
@@ -60,6 +80,14 @@ export const ksaIbParent = {
       visionNote: 'Saudi Arabia\'s Vision 2030 explicitly identifies the development of a knowledge-based economy as a national priority — and the IB Diploma is specifically designed to produce exactly the independent thinkers, researchers, and internationally-oriented graduates that Vision 2030 calls for. Saudi Aramco, SABIC, NEOM, and the major Saudi professional services firms increasingly recruit graduates with IB backgrounds. The Ministry of Education has been expanding pathways for IB recognition. You are not choosing between tradition and progress — IB is what Vision 2030 looks like in a school.',
       whatToAskNote: 'IB teachers expect direct, evidence-based questions from parents. This may feel different from Saudi government school culture, where parent involvement typically means receiving information rather than asking specific questions. In IB, the question "My child scored 4 on Criterion C in Sciences — what does a 6 look like in practice?" is exactly the right kind of question. Bring your child\'s most recent report to any meeting. Teachers will have the criteria rubric in front of them and can answer specifically.',
     },
+    ar: {
+      title: 'فهم مدرسة IB لطفلك',
+      subtitle: 'دليل للعائلات السعودية والمقيمين للتعامل مع التعليم الدولي في المملكة',
+      intro: 'تبدو مدارس IB مختلفةً جداً عن مدارس المنهج الوطني السعودي — ليس لأنها أقل صرامةً، بل لأنها بُنيت حول أهداف مختلفة. إذا صادفت بالفعل شيئاً أربكك أو أقلقك — تقرير بلا نسبة مئوية، درس بلا كتاب مدرسي، تقييم مفتوح النهاية، مادة تُدعى «نظرية المعرفة» — فهذا الدليل لتلك اللحظة بالذات. يغطي خمسة مفاهيم أساسية وحاسبات درجات تفاعلية لـ MYP وDP وقسماً عن PYP وسيناريوهَين يُظهران بدقة ما يحدث بوجود هذا السياق وبدونه.',
+      reassurance: 'شيء واحد لا يتغيّر: طفلك لا يزال يتعلم الرياضيات والعلوم واللغات بمستوى رفيع. رياضيات HL وعلوم HL في IB من أكثر المناهج صرامةً في المرحلة الثانوية على مستوى العالم. الفوارق في كيفية هيكلة التعلم وكيفية عمل التقييم وكيفية الإبلاغ عن التقدم — لا في وجود الصرامة من عدمه. بشأن اللغة العربية: تقدّم مدارس IB مادة اللغة العربية وآدابها (العربية A) للناطقين بالعربية أصالةً. هو نفس منهج الأدب المتطلِّب كمنهج اللغة الإنجليزية A — نصوص كلاسيكية وحديثة وكتابة مقالات نقدية وتعليق شفهي. لن تتوقف عربية طفلك عند باب المدرسة.',
+      visionNote: 'تُحدّد رؤية المملكة العربية السعودية 2030 صراحةً تطوير اقتصاد قائم على المعرفة بوصفه أولويةً وطنية — وشهادة IB مصمَّمة تحديداً لإنتاج المفكرين المستقلين والباحثين والخريجين ذوي التوجه الدولي الذين تنادي بهم رؤية 2030. أرامكو السعودية وسابك ونيوم وكبرى شركات الخدمات المهنية السعودية تُعيّن بصورة متزايدة خريجين من خلفيات IB. وزارة التعليم توسّع المسارات المعترِفة بـ IB. أنت لا تختار بين التراث والتقدم — IB هو ما تبدو عليه رؤية 2030 في المدرسة.',
+      whatToAskNote: 'يتوقع معلمو IB أسئلةً مباشرة قائمة على الأدلة من أولياء الأمور. قد يبدو هذا مختلفاً عن ثقافة مدارس الحكومة السعودية حيث تعني مشاركة الوالدين عادةً تلقّي المعلومات لا طرح أسئلة محددة. في IB، السؤال «حصل طفلي على 4 في المعيار C في العلوم — كيف تبدو الدرجة 6 في الواقع العملي؟» هو تحديداً النوع الصحيح من الأسئلة. أحضر أحدث تقرير لطفلك إلى أي اجتماع. سيكون أمام المعلمين جدول معايير التقييم ويستطيعون الإجابة بتحديد.',
+    },
   },
 
   openingHook: {
@@ -71,6 +99,15 @@ export const ksaIbParent = {
       ],
       question: 'Was choosing an IB school a mistake?',
       directAnswer: 'A 5 in IB Sciences is not 71%. It is "substantial achievement" — a strong result against internationally published, externally verified criteria. The conversion you just did is not valid and will mislead you every time. Your child may be performing considerably better than the number suggests. The sections below explain how to read IB grades accurately — and why the percentage frame, however familiar, does not apply here.',
+    },
+    ar: {
+      situation: [
+        'يصل تقرير طفلك للصف الثامن MYP. بدلاً من درجة مئوية وترتيب صفي، هناك أربع درجات لكل مادة — كل منها من 8. التعليقات مفصّلة. لا يوجد رقم كـ 87% أو 92%. لا يوجد ترتيب في الصف.',
+        'تُصوّره وترسله إلى مجموعة واتساب العائلة، متسائلاً إن كان أحد يعرف كيف يقرأ درجات IB. يسأل والدك أين يقع حفيده في ترتيب الصف. أخوك — الذي لديه ابن في مدرسة حكومية بمتوسط 95% — يقول إن الدرجات تبدو منخفضة. عمّ زوجتك، المسؤول الكبير في وزارة التعليم، يسأل هل المدرسة «معترف بها» من قِبل الحكومة السعودية.',
+        'تلك الليلة تحاول تحويل درجة MYP. حصل طفلك على 5 من 7 في العلوم. تفكّر: 5 ÷ 7 = 71%. في المدارس الحكومية السعودية، 71% في العلوم يُعدّ مثاراً للقلق الجدي. تبدأ بالتساؤل إن كنت قد أخطأت في اختيار المدرسة.',
+      ],
+      question: 'هل كان اختيار مدرسة IB خطأً؟',
+      directAnswer: 'الخمسة في علوم IB ليست 71%. إنها «إنجاز ملموس» — نتيجة قوية وفق معايير منشورة دولياً ومُتحقَّق منها خارجياً. التحويل الذي أجريته غير صالح وسيُضلّلك في كل مرة. قد يكون أداء طفلك أفضل بكثير مما يوحي به الرقم. تشرح الأقسام أدناه كيفية قراءة درجات IB بدقة — ولماذا لا ينطبق إطار النسب المئوية، مهما بدا مألوفاً، هنا.',
     },
   },
 
@@ -89,6 +126,17 @@ export const ksaIbParent = {
           '"Which criterion is my child\'s lowest this term, and what would move it?" — one targeted criterion conversation is more valuable than a general progress discussion.',
         ],
       },
+      ar: {
+        concept: 'لا توجد نسبة مئوية — وهذا مقصود',
+        concern: 'توفّر المدارس الحكومية السعودية درجات مئوية واضحة وترتيبات صفية. بدون نسبة مئوية، كيف أعرف إن كان طفلي يؤدي أداءً جيداً؟ «5 من 7» لا يخبرني شيئاً عما إذا كان في مقدمة الصف أو في المنتصف أو يعاني.',
+        bridge: 'درجات IB ليست نسباً مئوية ولم تُصمَّم لتحويلها إلى نسب مئوية. الخمسة في أي مادة تعني «إنجاز ملموس» وفق معايير منشورة دولياً — وتعني أن طفلك أظهر فهماً وتطبيقاً قوياً في تلك المادة. الدرجات الأربع للمعايير تخبرك بشيء لا تستطيع النسبة المئوية قوله أبداً: تحديداً أي بُعد من أبعاد المادة يتفوق فيه طفلك وأين تحديداً يجب أن يركّز التحسين. الطالب الذي يحصل على 7/8 في المعيار A (المعرفة) و3/8 في المعيار D (التطبيق في السياق) لديه هدف تنموي محدد وقابل للتنفيذ. الدرجة المئوية 71% لا تخبرك بشيء بهذا المستوى من الفائدة.',
+        goal: 'فهم التقييم القائم على المعايير يُتيح لك محادثات أكثر إنتاجيةً بكثير مع المعلمين. «كيف تبدو الدرجة 6 في المعيار D؟» سؤال أفضل من «لماذا لم يحصل على 90%؟» — ومعلمو IB مدرَّبون تحديداً على الإجابة عنه. النظام تشخيصي بطبيعة تصميمه.',
+        ibConnection: 'يستخدم MYP أربعة معايير لكل مادة يُقيَّم كل منها من 8. المجموع من 32 يتحول إلى درجة من 1–7 باستخدام حدود تضعها المدرسة. يستخدم DP درجة من 1–7 لكل مادة، وست مواد بحد أقصى 42 نقطة، إضافةً إلى 3 نقاط إضافية من المقالة الموسّعة ونظرية المعرفة.',
+        whatToAsk: [
+          '«كيف تبدو الدرجة 6 في المعيار C في هذه المادة؟» — إذا حصل طفلك على 4، يستطيع المعلم أن يخبرك بالضبط كيف يبدو الأداء الأقوى.',
+          '«ما أدنى معيار لدى طفلي هذا الفصل، وما الذي سيرفعه؟» — محادثة معيار واحد مستهدفة أكثر قيمةً من نقاش التقدم العام.',
+        ],
+      },
     },
     {
       id: 'card-002',
@@ -102,6 +150,17 @@ export const ksaIbParent = {
         whatToAsk: [
           '"Can you show me the scope and sequence for this subject?" — every IB teacher has one; it maps every concept and skill being developed across the year.',
           '"What content will my child need to know for this unit\'s summative assessment?" — there is always specific content knowledge being assessed, even in inquiry-led units.',
+        ],
+      },
+      ar: {
+        concept: 'التعلم التقصيري صارم — لكن هيكله أقل ظهوراً',
+        concern: 'يبدو أن الدروس ليس لها كتاب مقرر ثابت والمعلم يطرح أسئلةً بدلاً من شرح المحتوى. ينبغي أن يتلقى طفلي تعليماً منظماً. بدون تسلسل فصلي واضح ومحتوى مُختبَر، كيف أعرف أنه يتعلم المادة فعلاً؟',
+        bridge: 'يتبع معلمو IB نطاقاً وتسلسلاً مفصّلاً يغطي جميع المحتوى المطلوب — المنهج موجود، غير أنه مُعبَّأ بشكل مختلف. في التعلم التقصيري، يواجه الطلاب المفاهيم من خلال البحث والتجريب والتساؤل بدلاً من الاستقبال السلبي. المعلم ليس غائباً عن العملية — بل يُصمّم التحقيق ويوجّه التفكير ويُقيّم بصرامة. يُطوّر هذا النهج نوعاً مختلفاً من الفهم: فهم يمكن تطبيقه على مواقف جديدة لا مجرد استرجاعه في امتحان مألوف. التقليد العلمي الإسلامي — من منهجية ابن رشد المنطقية إلى تحقيق الغزالي في أسس المعرفة — أقرّ دائماً أن الفهم الحقيقي يأتي بالتقصير والاستقراء لا بالحفظ وحده. IB يتخذ الموقف ذاته في التعلم.',
+        goal: 'يُطوّر الطلاب الذين يتعلمون بالتقصير انتقال معرفة أقوى — يستطيعون تطبيق ما يعرفونه على مسائل جديدة. هذا بالضبط ما تبحث عنه مؤسسات رؤية 2030 والجامعات الدولية الكبرى. مهندسو أرامكو السعودية ونيوم ومحلّلوها يحتاجون إلى حل مشكلات جديدة لا إلى استرجاع إجابات الكتاب المدرسي. عادة التقصير التي تتشكّل على مدى سنوات IB مهارة مهنية حقيقية.',
+        ibConnection: 'يُعرّف إطار مناهج التعلم ATL الخاص بـ IB خمس فئات من المهارات: التفكير والتواصل والمهارات الاجتماعية وإدارة الذات والبحث. تُنمَّى هذه المهارات بتعمّد عبر جميع المواد وتُقيَّم صراحةً في DP. هي الكفاءات التي تُحدّدها الجامعات وأصحاب العمل بوصفها الأكثر أهميةً للنجاح.',
+        whatToAsk: [
+          '«هل يمكنك أن تُريني النطاق والتسلسل لهذه المادة؟» — لكل معلم IB واحد؛ فهو يُحدّد كل مفهوم ومهارة يُنمّيها على مدار العام.',
+          '«ما المحتوى الذي سيحتاج طفلي معرفته لتقييم الوحدة التجميعي؟» — هناك دائماً معرفة محتوى محددة يتم تقييمها حتى في وحدات التقصير.',
         ],
       },
     },
@@ -119,6 +178,17 @@ export const ksaIbParent = {
           '"What does my child\'s TOK journal cover this term?" — the journal is ongoing; seeing the actual content usually resolves parent concerns more quickly than any general explanation.',
         ],
       },
+      ar: {
+        concept: 'نظرية المعرفة لا تُعلّم الشك في الإيمان',
+        concern: 'يُخبرني طفلي أن لديه مادةً تُدعى «نظرية المعرفة» يُسأل فيها عن كيفية معرفتنا للأشياء. أخشى أن هذه المادة تُعلّم طفلي الشك في القيم الإسلامية والمعرفة الدينية. إيماننا ليس شيئاً نتساءل عنه — بل هو أساس أسرتنا.',
+        bridge: 'نظرية المعرفة مادة في الإبستيمولوجيا — دراسة كيفية عمل أنواع المعرفة المختلفة. تُميّز بين المعرفة الرياضية والعلمية والتاريخية والمعرفة الأصيلة والمعرفة الشخصية وغيرها. لا تطلب من الطلاب التشكيك في وجود الله أو صحة القيم الإسلامية. ما تطرحه هو: كيف ينتج التقصير العلمي معرفةً؟ كيف تعمل الأدلة التاريخية؟ ما العلاقة بين العقل والإيمان؟ هذه الأسئلة لها تقليد عريق ومُبجَّل في الفكر الإسلامي. كتب الغزالي «تهافت الفلاسفة» بوصفه تحديداً هذا النوع من التقصير الإبستيمولوجي المنهجي. وبنى ابن سينا أحد أكثر أطر المعرفة تطوراً في التاريخ البشري. نظرية المعرفة في جوهرها تطرح الأسئلة ذاتها التي طرحها المفكرون المسلمون منذ أكثر من ألف عام. الطلاب الذين يفهمون هذا يجدون أن نظرية المعرفة تُثري إيمانهم لا تُهدّده.',
+        goal: 'يكتب كثير من الطلاب السعوديين مقالاتهم في نظرية المعرفة مستكشفين الإبستيمولوجيا الإسلامية — كيف ينتج تقليد الاجتهاد معرفةً دينية، وكيف طوّرت علوم الحديث معايير الأدلة، وكيف ميّز العلماء المسلمون بين المعرفة القطعية والظنية. تقبل IB هذه الرؤى وتُقدّرها. المادة ليست معادية للإيمان؛ بل تهتم بكيفية عمل جميع أشكال المعرفة — بما فيها المعرفة الدينية — فعلياً.',
+        ibConnection: 'نظرية المعرفة مادة إلزامية تمتد عامَين في DP تُفضي إلى عرض شفهي ومقال من 1600 كلمة يُقيّمه IB. إلى جانب المقالة الموسّعة، تُسهم بما يصل إلى 3 نقاط إضافية نحو درجة الشهادة البالغة 45 نقطة. هي المكوّن الذي يُميّز IB أكثر من غيره عن A-levels وأغلب الامتحانات الدولية في السياق السعودي.',
+        whatToAsk: [
+          '«هل يمكنك إعطائي مثالاً على سؤال في نظرية المعرفة يستكشف المعرفة الدينية أو الإسلامية؟» — معظم معلمي نظرية المعرفة ذوي الخبرة يستطيعون فوراً إعطاء أمثلة على مقالات قوية متجذّرة في التقاليد الإيمانية.',
+          '«ما الذي يغطيه سجل طفلي في نظرية المعرفة هذا الفصل؟» — السجل مستمر؛ الاطلاع على المحتوى الفعلي يُزيل مخاوف الوالدين عادةً أسرع من أي تفسير عام.',
+        ],
+      },
     },
     {
       id: 'card-004',
@@ -132,6 +202,17 @@ export const ksaIbParent = {
         whatToAsk: [
           '"Does the school offer Arabic A, and what texts are on the reading list this year?" — the reading list tells you the quality of the literary programme immediately.',
           '"How is my child\'s written Arabic assessed separately from their English skills?" — Arabic A has independent assessment criteria, not dependent on English performance.',
+        ],
+      },
+      ar: {
+        concept: 'العربية A: عربية طفلك لن تتوقف عند باب المدرسة',
+        concern: 'إذا كان طفلي يدرس بالإنجليزية أساساً، هل ستتراجع عربيته؟ هل سيفقد الطلاقة والدقة والصلة بالعربية الفصحى؟ وماذا عن عربية القرآن — هل لها مكان في تعليم IB؟',
+        bridge: 'تقدّم IB اللغة العربية وآدابها (العربية A) بوصفها مادة لغة أولى كاملة للناطقين بالعربية أصالةً. هو نفس المنهج الأدبي المتطلِّب كمنهج اللغة الإنجليزية A — يدرس الطلاب الشعر العربي الكلاسيكي والنثر العربي الحديث والتحليل النقدي والتعليق الشفهي والكتابة الموسّعة. ليست مادة تراثية؛ بل دورة أكاديمية صارمة تُعمّق الأمية العربية. كثير من الطلاب السعوديين في IB يجدون أن كتابتهم العربية الرسمية تتحسن تحسناً ملحوظاً من خلال العربية A لأن المادة تتطلب دقةً تحليلية لا تشترطها العربية المحكية. بشأن عربية القرآن: الطلاب الذين يدرسون الشعر الجاهلي والنثر الكلاسيكي والتقليد الأدبي العربي الرسمي يعملون مع اللغة الأقرب إلى العربية القرآنية. العربية A تبني بالضبط الأساس الكلاسيكي الذي تتطلبه الأمية القرآنية.',
+        goal: 'يتخرّج طلاب IB السعوديون الذين يأخذون العربية A بأمية عربية رسمية تحليلية صارمة تُكمّل إتقانهم للإنجليزية. هذا الأساس الأكاديمي الثنائي اللغة مُقدَّر جداً من الجامعات السعودية وأرامكو السعودية ومؤسسات رؤية 2030. القدرة على العمل باللغتين العربية والإنجليزية على المستوى الأكاديمي ميزة مهنية حقيقية — وعربية IB A تبنيها بتعمّد.',
+        ibConnection: 'اللغة A في أي لغة تُقيَّم على أعلى مستوى في إطار اللغات الخاص بـ IB. يؤدي طلاب العربية A نفس الامتحانات الخارجية التي يؤديها طلاب الإنجليزية A، وتُقيَّم من قِبل IB وفق معايير عالمية. العربية من أكثر خيارات اللغة A شيوعاً على مستوى العالم. تقدّم مدارس في المملكة العربية السعودية والإمارات ومصر تعليم العربية A كاملاً.',
+        whatToAsk: [
+          '«هل تقدّم المدرسة العربية A، وما النصوص في قائمة القراءة هذا العام؟» — قائمة النصوص تُخبرك بجودة البرنامج الأدبي فوراً.',
+          '«كيف تُقيَّم عربية طفلك المكتوبة بمعزل عن مهاراته الإنجليزية؟» — للعربية A معايير تقييم مستقلة غير مرتبطة بالأداء في الإنجليزية.',
         ],
       },
     },
@@ -149,6 +230,17 @@ export const ksaIbParent = {
           '"How does the school document CAS completion for university applications?" — strong programmes produce a CAS portfolio that actively supports the application narrative.',
         ],
       },
+      ar: {
+        concept: 'CAS متطلّب تخرج، لا تقويم نشاط',
+        concern: 'يقضي طفلي وقتاً كبيراً في الأنشطة والرياضة والخدمة المجتمعية ضمن ما يُسمى CAS. هذا يبدو وقتاً مأخوذاً من الدراسة. قبول الجامعات السعودية تنافسي — كل ساعة لا تُنفَق في المواد الأساسية تكلفة.',
+        bridge: 'CAS — الإبداع والنشاط والخدمة — متطلّب إلزامي في DP. بدون إتمام CAS وتوثيقه بإشراف مشرف، لا يستطيع الطالب الحصول على شهادة IB بصرف النظر عن درجات موادّه. جعل IB هذا إلزامياً لأن الجامعات الكبرى التي يخدمها IB أخبرت IB بما تريده تحديداً: طلاب يُثبتون التزاماً حقيقياً خارج الفصل الدراسي. الطالب السعودي الذي يقود مشروعاً مجتمعياً في حيّه ويطوّر ناتجاً إبداعياً ويحافظ على انضباط بدني يُحضر إلى طلب الجامعة شيئاً لا تستطيع أي نتيجة امتحان وحدها أن تُنتجه. هذا متوافق أيضاً مع القيم الإسلامية حول خدمة المجتمع وتنمية الإنسان كلّه.',
+        goal: 'للطلاب السعوديين الذين يستهدفون مؤسسات رؤية 2030 أو برامج قيادة أرامكو السعودية أو الجامعات الدولية: CAS ليس صرفاً للانتباه عن المؤهلات — بل هو جزء من المؤهل. المنحدرون في منح أرامكو السعودية متوقَّع منهم إثبات القيادة والخدمة لا مجرد سجلات أكاديمية. عادات المبادرة والمساهمة التي يبنيها CAS هي بالضبط ما تختار له هذه المؤسسات.',
+        ibConnection: 'CAS متطلّب إلزامي في DP من الصف الثاني عشر. يتطلب عملاً موثّقاً عبر الإبداع والنشاط البدني والخدمة بمجموع نحو 150 ساعة مع ملف تأمّلات. لا يمكن الإعفاء منه.',
+        whatToAsk: [
+          '«ما تجارب CAS التي يخطط لها طفلي، ومن مشرفه في CAS؟» — علاقة المشرف مهمة؛ المشرف الجيد يوجّه جودة التأمل بفاعلية.',
+          '«كيف توثّق المدرسة إتمام CAS لطلبات الجامعة؟» — البرامج القوية تُنتج ملف CAS يدعم سرد الطلب بفاعلية.',
+        ],
+      },
     },
   ],
 
@@ -163,6 +255,14 @@ export const ksaIbParent = {
         withUnderstanding: 'You explain to the group that IB grades run from 1–7, not percentages, and that a 5 means "substantial achievement" — a strong result. You share the criterion breakdown with your father and explain that his grandchild scored 7/8 on knowledge but 4/8 on application in context — which means one specific conversation with the teacher will help. Your uncle asks about accreditation: you can confirm the school is IB-authorised, which is an internationally recognised standard. Your brother\'s 95% comparison doesn\'t apply — different systems, different scales. The group conversation ends with clarity rather than doubt.',
         withoutUnderstanding: 'You cannot explain the scores confidently to the group. Your father\'s question about class rank goes unanswered. Your brother\'s 95% comparison sits unaddressed and starts to feel meaningful. Your uncle\'s question about government accreditation makes you uncertain — you\'re not sure what "IB authorised" means versus Saudi Ministry of Education approval. The WhatsApp group moves on, but the doubt remains. You book a meeting with the school to get answers — which is the right move, but it comes from anxiety rather than curiosity.',
       },
+      ar: {
+        title: 'مجموعة واتساب العائلة',
+        termsInPlay: ['الدرجات القائمة على المعايير', 'الترتيب الصفي'],
+        situation: 'يصل أول تقرير MYP كامل لطفلك في نهاية الصف الثامن. تلتقط صورة له وترسلها إلى مجموعة واتساب العائلة الممتدة، متسائلاً إن كان أحد يعرف كيف يقرأ درجات IB. يسأل والدك أين يقع حفيده في ترتيب الصف. أخوك — الذي لديه ابن في مدرسة حكومية بمتوسط 95% — يقول إن الدرجات تبدو منخفضة له. عمّ زوجتك، المسؤول الكبير في وزارة التعليم، يسأل هل المدرسة معتمدة بشكل صحيح من قِبل الحكومة السعودية.',
+        situationNote: 'مجموعات واتساب العائلة هي المكان الذي تجري فيه هذه المحادثات في الثقافة السعودية — وهي المكان المناسب لها. السؤال هو هل تملك المجموعة السياق الكافي لتفسير ما تراه.',
+        withUnderstanding: 'تشرح للمجموعة أن درجات IB تتراوح من 1–7 لا نسباً مئوية، وأن الخمسة تعني «إنجاز ملموس» — نتيجة قوية. تشارك تفاصيل المعايير مع والدك وتوضّح أن حفيده حصل على 7/8 في المعرفة و4/8 في التطبيق في السياق — مما يعني أن محادثةً واحدة محددة مع المعلم ستُفيد. يسأل عمّك عن الاعتماد: يمكنك تأكيد أن المدرسة مُفوَّضة من IB، وهو معيار دولي معترف به. مقارنة أخيك بالـ 95% لا تنطبق — أنظمة مختلفة ومقاييس مختلفة. تنتهي محادثة المجموعة بوضوح لا بشك.',
+        withoutUnderstanding: 'لا تستطيع شرح الدرجات بثقة للمجموعة. يظل سؤال والدك عن الترتيب الصفي بلا إجابة. مقارنة أخيك بالـ 95% تجلس دون معالجة وتبدأ تبدو ذات معنى. سؤال عمّك عن اعتماد الحكومة يجعلك غير متأكد — لست مدركاً ما يعنيه «مُفوَّض من IB» مقارنةً باعتماد وزارة التعليم السعودية. تمضي مجموعة واتساب قدماً، لكن الشك يبقى. تحجز اجتماعاً مع المدرسة للحصول على إجابات — وهو الخطوة الصحيحة، لكنها تأتي من القلق لا الفضول.',
+      },
     },
     {
       id: 'review-002',
@@ -173,6 +273,14 @@ export const ksaIbParent = {
         situationNote: 'This question usually arrives at a family gathering, not in a school meeting room. The answer matters — and the time to get it is before Year 11, not after HL subject selection.',
         withUnderstanding: 'You meet with the school\'s university counsellor. You learn: students on the IB track at international schools typically do not sit the Tawjihiyya, which means direct entry to Saudi government universities (King Saud, King Abdulaziz, KFUPM) following the standard track is not available. However: KAUST accepts IB and specifically values it. Some private Saudi universities accept IB. Saudi Aramco\'s scholarship and employment programmes specifically recruit IB graduates. Most Saudi IB families are targeting UK, US, Australian, and UAE universities — where the IB Diploma is very well recognised. If your family has a specific Saudi government university in mind, this conversation needs to happen now, in Year 10, while options remain open. You leave with a clear map.',
         withoutUnderstanding: 'The uncertainty sits. In Year 12, when DP subject selection is locked and examinations are approaching, your father-in-law asks the question again at another family gathering. You still cannot answer it confidently. The path your child is on has been decided by default. If there was a Saudi government university pathway your family needed, the window to act has closed.',
+      },
+      ar: {
+        title: 'سؤال الثانوية العامة',
+        termsInPlay: ['شهادة DP', 'المسارات الجامعية', 'المنهج الوطني السعودي'],
+        situation: 'طفلك في الصف العاشر. في تجمّع عائلي، يسأل حمو والدك طفلك أي جامعة يخطط لها وهل سيؤدي امتحان الثانوية العامة. يقول طفلك إنه يدرس IB لا الثانوية العامة. يلتفت الحمو إليك: «إذن لا يستطيع التقديم إلى الجامعات السعودية؟» تقول إنك تظن بعض الجامعات تقبل IB، لكنك لست متأكداً. في اليوم التالي تدرك أنك لم تجرِ أبداً محادثةً محددة مع المدرسة حول هذا.',
+        situationNote: 'عادةً يطرح هذا السؤال في تجمّع عائلي لا في غرفة اجتماعات المدرسة. الإجابة مهمة — والوقت المناسب للحصول عليها قبل الصف الحادي عشر لا بعد اختيار مواد HL.',
+        withUnderstanding: 'تلتقي بمستشار الجامعة في المدرسة. تتعلم: الطلاب في مسار IB في المدارس الدولية عادةً لا يؤدون الثانوية العامة، مما يعني أن الدخول المباشر إلى الجامعات الحكومية السعودية (جامعة الملك سعود، جامعة الملك عبدالعزيز، جامعة الملك فهد للبترول والمعادن) وفق المسار المعتاد غير متاح. لكن: جامعة الملك عبدالله للعلوم والتقنية (كاوست) تقبل IB وتُقدّره تحديداً. بعض الجامعات السعودية الخاصة تقبل IB. برامج المنح والتوظيف في أرامكو السعودية تستقطب خريجي IB تحديداً. معظم عائلات IB السعودية تستهدف جامعات في المملكة المتحدة والولايات المتحدة وأستراليا والإمارات — حيث تحظى شهادة IB بتقدير كبير. إذا كانت عائلتك تستهدف جامعةً حكومية سعودية بعينها، فهذه المحادثة يجب أن تجري الآن، في الصف العاشر، بينما الخيارات لا تزال مفتوحة. تغادر المقابلة بخريطة واضحة.',
+        withoutUnderstanding: 'يبقى الغموض. في الصف الثاني عشر، حين يكون اختيار مواد DP محدداً والامتحانات تقترب، يطرح حمو والدك السؤال ذاته في تجمّع عائلي آخر. لا تزال غير قادر على الإجابة بثقة. المسار الذي يسير عليه طفلك قُرِّر بالوضع الافتراضي. إذا كان ثمة مسار نحو جامعة حكومية سعودية تحتاجه عائلتك، فقد أغلق النافذة.',
       },
     },
   ],
@@ -192,6 +300,17 @@ export const ksaIbParent = {
           '"Which areas of the IB Learner Profile is my child developing most strongly right now, and which are still developing?" — the Learner Profile is the framework underlying PYP assessment.',
         ],
       },
+      ar: {
+        concept: 'لا درجات مئوية في PYP',
+        concern: 'تمنح المدارس الابتدائية السعودية درجات مئوية واضحة يمكنني من خلالها رؤية أين يقف طفلي بالنسبة لتوقعات الصف. يستخدم تقرير PYP لغةً وصفية وملاحظات ملف تعلّم، لكن بلا أرقام. بدون درجة، لا أستطيع تحديد هل طفلي في مقدمة الصف أم يعاني.',
+        bridge: 'يستخدم PYP التقارير السردية لأنه في أعمار 3–11 يُبسّط الرقم الواحد ما يتعلمه الطفل فعلاً. يخبرك التقرير السردي بما يفهمه طفلك وكيف يتعامل مع التحديات وأين يتطور لاحقاً — وهو أكثر تشخيصاً من النسبة المئوية لا أقل. المعلم يُقيَّم باستمرار؛ التقرير يُقدّم الأدلة بطريقة مختلفة. حين يدخل طفلك MYP (نحو عمر 11)، تظهر الدرجات المعيارية. عادات التأمل والتقييم الذاتي التي بُنيت في PYP تعني أنهم يدخلون ذلك النظام المدرَّج مدركين كيف يفكرون في تعلّمهم.',
+        goal: 'يتأقلم الطلاب القادمون إلى MYP من خلفيات PYP مع التقييم القائم على المعايير بشكل أسرع من الطلاب المنتقلين من مدارس ابتدائية تركّز على المحتوى، لأنهم يفهمون التعلم بالفعل بوصفه عملية — لا مجرد نتيجة. الغياب الظاهر للبيانات في PYP ليس إشارةً إلى أنه لا يُقاس شيء.',
+        ibConnection: 'تقارير PYP مبنية وفق معايير منهج IB PYP الخاص، لا نطاق المنهج الوطني السعودي وتسلسله. يُقيّم المعلمون وفق نتائج التعلم في IB PYP ويمكنهم إظهار الكفاءات التي تُقيَّم بالضبط.',
+        whatToAsk: [
+          '«ما الأدلة المحددة على التقدم التي رأيتها من طفلي هذا الفصل؟» — طلب الأدلة يُحوّل السرد إلى شيء ملموس.',
+          '«في أي مجالات ملف المتعلم IB يتطور طفلي أكثر الآن، وأيها لا يزال في طور التطور؟» — ملف المتعلم هو الإطار الأساسي لتقييم PYP.',
+        ],
+      },
     },
     {
       id: 'pyp-002',
@@ -205,6 +324,17 @@ export const ksaIbParent = {
         whatToAsk: [
           '"How many hours per week does my child receive Arabic instruction, and against which curriculum standards?" — this is the critical question.',
           '"Does the school offer Arabic A in DP, and what literary texts are on the reading list?" — the text list tells you immediately whether the Arabic programme is rigorous.',
+        ],
+      },
+      ar: {
+        concept: 'هل لا يزال طفلي يتعلم العربية في مدرسة PYP؟',
+        concern: 'تعمل المدرسة أساساً بالإنجليزية. يعود طفلي يتكلم الإنجليزية أكثر من العربية. أخشى أن عربيته الرسمية تضعف — وأن صلته بالقرآن والعربية الفصحى ستتأثر بسنوات في بيئة إنجليزية الوسيط.',
+        bridge: 'يعتمد تعليم اللغة العربية في مدرسة PYP اعتماداً كبيراً على كيفية هيكلة المدرسة لبرنامجها اللغوي. معظم مدارس IB في المملكة العربية السعودية والخليج الأوسع تقدّم العربية لغةً تعليميةً أو برنامجاً لغوياً موازياً صارماً. في مدرسة PYP جيدة الإدارة، تُطوَّر الأمية العربية باستمرار جنباً إلى جنب مع الإنجليزية — لا على حسابها. اسأل المدرسة تحديداً: ما الوقت الأسبوعي لتعليم اللغة العربية، وبموجب أي معايير يُقيَّم؟ حين يدخل طفلك MYP وصولاً إلى DP، تتاح العربية A مادةً كاملة للغة الأولى — وهنا تتعمّق الأمية الأكاديمية العربية بشكل ملحوظ.',
+        goal: 'الطفل الذي يتقدم عبر PYP وMYP وDP مع العربية A يتخرج بأمية عربية رسمية تحليلية صارمة — نصوص كلاسيكية ودقة مقالية وتعليق شفهي — قد لا تطوّره كثير من مدارس المناهج العربية الحكومية بنفس العمق. الخطر ليس في IB نفسها؛ بل في كيفية إدارة أي مدرسة بعينها للبرنامج العربي. هذا هو السؤال الذي يجب استيضاحه تحديداً في مدرستك.',
+        ibConnection: 'يجب على مدارس IB تقديم لغتين على الأقل عبر PYP وMYP وDP. في السياقات الناطقة بالعربية، يجب أن يكون خيار العربية A أو العربية B متاحاً. اطّلع على وثيقة السياسة اللغوية للمدرسة — كل مدرسة IB مُلزَمة بامتلاكها.',
+        whatToAsk: [
+          '«كم ساعة أسبوعياً يتلقى طفلي تعليماً بالعربية، وبموجب أي معايير مناهج يُقيَّم؟» — هذا هو السؤال المحوري.',
+          '«هل تقدّم المدرسة العربية A في DP، وما النصوص الأدبية في قائمة القراءة؟» — قائمة النصوص تخبرك فوراً هل البرنامج العربي صارم أم لا.',
         ],
       },
     },
@@ -222,6 +352,17 @@ export const ksaIbParent = {
           '"How does the school support Muslim students during Ramadan and around prayer times?" — how a school handles this tells you a great deal about how seriously it takes its Muslim students.',
         ],
       },
+      ar: {
+        concept: 'القيم الإسلامية والهوية في مدرسة IB',
+        concern: 'تتضمن المدارس الوطنية السعودية مادة التربية الإسلامية مادةً أساسية. مدارس IB ليس فيها منهج إسلامي دراسي إلزامي. أخشى أن ينشأ طفلي بدون تأسيس ديني سليم — وأن الزملاء الدوليين والقيم الغربية ستُضعف هويته.',
+        bridge: 'تقدّم مدارس IB في المملكة العربية السعودية عادةً التربية الإسلامية كجزء من متطلبات المنهج المحلي — تُلزم وزارة التعليم السعودية بها للطلاب السعوديين في المدارس المرخّصة. تحقّق من مدرستك مباشرةً عما يُقدَّم وعدد ساعات التدريس. بشأن القيم: ملف المتعلم IB — الإطار الأساسي لجميع برامج IB — يُؤكّد على كون الطالب مبدأياً ومهتماً بالآخرين ومتأمّلاً ومنفتح الذهن. هذه ليست قيماً غربية؛ بل قيم إنسانية متوافقة تماماً مع الأخلاق الإسلامية. لا تطلب IB من الطلاب التخلي عن تقاليدهم الإيمانية — بل تدعوهم للتعامل بتفكّر مع عالم معقّد. كثير من أكثر المسلمين ثقةً وبلاغةً الذين ستلتقي بهم في الجامعات العالمية من خريجي IB.',
+        goal: 'الهوية في الطفل المثقّف دولياً لا تضعف بالتعرض — بل تتقوى بالتعبير الصريح عنها في سياق يهمّ. الطلاب السعوديون في IB الذين يستطيعون شرح قيمهم والدفاع عن وجهة نظرهم في ندوة والتفاعل باحترام مع رؤى مختلفة يعودون من الجامعة بهوية متعززة لا مضعَّفة. بيئة IB — حين تُدار بشكل جيد — تُنتج هذا بالضبط.',
+        ibConnection: 'مدارس IB في المملكة العربية السعودية تعمل بموجب كل من ترخيص IB وترخيص وزارة التعليم. وهذا يعني أن متطلبات التربية الإسلامية للمواطنين السعوديين شرط في رخصة تشغيل المدرسة. يستطيع المدرسة إظهار كيفية تغطية هذا تحديداً.',
+        whatToAsk: [
+          '«كم ساعة أسبوعياً يتلقى طفلي التربية الإسلامية، ومن يُدرّسها؟» — هذا سؤال مباشر يمكن الإجابة عنه.',
+          '«كيف تدعم المدرسة الطلاب المسلمين خلال رمضان وأوقات الصلاة؟» — طريقة تعامل المدرسة مع هذا تخبرك كثيراً عن مدى جدّيتها تجاه طلابها المسلمين.',
+        ],
+      },
     },
     {
       id: 'pyp-004',
@@ -235,6 +376,17 @@ export const ksaIbParent = {
         whatToAsk: [
           '"What learning outcome is my child\'s current investigation building toward?" — the teacher always has an answer to this; it demonstrates the structure underneath the choice.',
           '"How does the class come together to share findings?" — the collaborative presentation of inquiry is where individual agency becomes collective learning.',
+        ],
+      },
+      ar: {
+        concept: 'اختيار الطالب والتقصير في السنوات الأولى',
+        concern: 'يبدو أن طفلي يتخذ قدراً كبيراً من الاختيارات في تعلمه — اختيار الموضوعات وتصميم تحقيقاته الخاصة وإدارة مشاريعه. في المدارس السعودية، المعلم هو السلطة والمنهج واضح. هذا المستوى من اختيار الطالب يبدو غير منضبط، وأخشى أن طفلي لا يطوّر الاحترام للسلطة والتعلم المنظّم الذي سيحتاجه لاحقاً.',
+        bridge: 'وكالة الطالب في PYP لا تعني حرية لا محدودة — كل وحدة لها نتائج تعلّم واضحة والمعلم يوجّه التقصير دائماً. الاختيار في كيفية مقاربة التحقيق، لا في ما إذا كان المنهج يُغطَّى. بشأن احترام السلطة: يتعلم طلاب IB التعامل مع خبرة المعلم من خلال التبادل الفكري الحقيقي — وهو شكل أعمق من الاحترام من الاستقبال السلبي. تقليد سؤال المعلم سؤالاً جيداً — كما حثّ عليه النبي ﷺ من خلال ثقافة طلب العلم — هو بالضبط ما يبنيه PYP. الهدف طلاب فضوليون مركّزون قادرون على استيعاب التوجيه — لا طلاب سلبيون.',
+        goal: 'الطلاب الذين يطوّرون الوكالة في PYP — القدرة على البدء والتخطيط والمثابرة في السؤال — يصلون إلى المرحلة الثانوية بدافعية أكاديمية أقوى وعادات دراسة مستقلة أفضل. هؤلاء الطلاب هم من ينجحون في DP والجامعة حيث لا أحد يقف فوق رؤوسهم. الحرية المهيكلة المبكرة هي الاستثمار.',
+        ibConnection: 'المفهوم المركزي لـ PYP هو ملف المتعلم — مجموعة السمات التي تهدف IB لتنميتها: متقصّي ومفكّر ومتواصل ومبدئي ومنفتح الذهن ومهتم بالآخرين ومجازف ومتوازن ومتأمّل وعارف. تنمّي وكالة الطالب كل هذه السمات في آنٍ واحد.',
+        whatToAsk: [
+          '«نحو أي نتيجة تعلّم يبني تحقيق طفلي الحالي؟» — المعلم دائماً لديه إجابة؛ هذا يُظهر البنية الكامنة تحت الاختيار.',
+          '«كيف يجتمع الصف لمشاركة النتائج؟» — العرض التعاوني للتقصير هو حيث تصبح الوكالة الفردية تعلّماً جماعياً.',
         ],
       },
     },
@@ -252,6 +404,17 @@ export const ksaIbParent = {
           '"Which subjects are assessed most differently from how my child experienced them in PYP?" — the teacher can identify where the adjustment will be largest and plan accordingly.',
         ],
       },
+      ar: {
+        concept: 'الاستعداد لـ MYP',
+        concern: 'طفلي ينتقل من PYP إلى MYP. أخشى أن سنوات من التقصير والتقارير السردية لم تُعدّه لشيء سيُدرَّج الآن بشكل صحيح. حين أقارنه بالطلاب القادمين من المدارس الوطنية السعودية بالعمر ذاته، أخشى أن أبناء PYP متأخرون.',
+        bridge: 'التحول إلى MYP حقيقي: تصبح المواد تخصصات منفصلة وتظهر الدرجات المعيارية ويزيد حجم الواجبات وترتفع التوقعات الأكاديمية بشكل ملحوظ. لكن PYP مصمَّم تحديداً لبناء الأسس التي يتطلبها MYP — مهارات التقصير والتوجيه الذاتي والقدرة على التفكير في المسائل بدون نموذج جاهز. الطلاب الذين تعاملوا تعاملاً حقيقياً مع PYP يصلون إلى MYP أفضل استعداداً للتفكير التحليلي القائم على المعايير من الطلاب القادمين من مناهج ابتدائية تركّز على المحتوى. ما قد يكونون أقل استعداداً له هو الحجم الهائل من المحتوى — لكن هذه الفجوة تُسدّ بسرعة. الأدوات المفاهيمية هي الأصعب في التنمية وPYP يبنيها.',
+        goal: 'الطلاب السعوديون المنتقلون من المدارس الوطنية إلى MYP عادةً لديهم معرفة محتوى قوية لكنهم يحتاجون وقتاً للتكيف مع التقييم بناءً على التفكير التحليلي لا استرجاع المحتوى. طلاب PYP كثيراً ما يكونون العكس — التفكير التحليلي موجود وثقة المحتوى تأتي بسرعة. لا خلفية أفضل من الأخرى؛ بل مزايا مختلفة في بداية رحلة مشتركة.',
+        ibConnection: 'تصمّم IB بشكل صريح PYP وMYP بوصفهما سلسلة متصلة. تُحمَل مقاربات التقصير وسمات ملف المتعلم ومهارات مناهج التعلم من PYP إلى MYP ثم إلى DP. الانتقال تصعيد لا إعادة ضبط.',
+        whatToAsk: [
+          '«كيف ستدعم المدرسة انتقال طفلي إلى التقييم القائم على المعايير في السنة الأولى من MYP؟» — معظم مدارس IB لديها برنامج انتقال محدد؛ اطلب الاطلاع عليه.',
+          '«أي المواد تُقيَّم بشكل مختلف أكثر عمّا عايشه طفلي في PYP؟» — يستطيع المعلم تحديد أين سيكون التكيف الأكبر والتخطيط وفقاً لذلك.',
+        ],
+      },
     },
   ],
 
@@ -263,13 +426,13 @@ export const ksaIbParent = {
         criteriaNote: 'The four criteria are labelled A, B, C, and D — and they measure different things in each subject. In MYP Mathematics, Criterion A is "Knowing and Understanding" and Criterion D is "Applying Mathematics in Real-Life Contexts." A student can score strongly on A and poorly on D. The report shows both separately, which tells you exactly where to focus — something a percentage mark never could.',
         boundaryNote: 'The conversion from a raw total (out of 32) to a final grade (1–7) uses grade boundaries set by each school. There is also variation at the subject level: Mathematics and Sciences tend to require higher raw scores for each grade than Humanities and Arts. A 24/32 in MYP Mathematics may yield a different final grade than 24/32 in MYP Drama.',
         descriptors: [
-          { grade: 1, label: 'Minimal achievement'      },
-          { grade: 2, label: 'Very limited achievement' },
-          { grade: 3, label: 'Limited achievement'      },
-          { grade: 4, label: 'Adequate achievement'     },
-          { grade: 5, label: 'Substantial achievement'  },
-          { grade: 6, label: 'Accomplished achievement' },
-          { grade: 7, label: 'Excellent achievement'    },
+          { grade: 1, label: 'Minimal achievement',      ar: 'إنجاز ضئيل'        },
+          { grade: 2, label: 'Very limited achievement', ar: 'إنجاز محدود جداً'  },
+          { grade: 3, label: 'Limited achievement',      ar: 'إنجاز محدود'       },
+          { grade: 4, label: 'Adequate achievement',     ar: 'إنجاز كافٍ'        },
+          { grade: 5, label: 'Substantial achievement',  ar: 'إنجاز ملموس'       },
+          { grade: 6, label: 'Accomplished achievement', ar: 'إنجاز متميز'       },
+          { grade: 7, label: 'Excellent achievement',    ar: 'إنجاز ممتاز'       },
         ],
         boundaries: [
           { grade: 1, min: 0,  max: 5  },
@@ -284,6 +447,16 @@ export const ksaIbParent = {
           'A 4 in MYP is "adequate achievement" — it is a passing grade, not near-failure. Do not convert it to 57%. Percentage scales do not apply to IB grades.',
           'Your child can score very differently on each criterion within the same subject. A 7/8 on Criterion A and 3/8 on Criterion D gives precise diagnostic information about where to focus — not just a single result.',
           'Grade boundaries vary by school and subject. Mathematics and Sciences typically require higher raw scores per grade than Humanities. Use the calculator as a guide, not an exact conversion.',
+        ],
+      },
+      ar: {
+        title: 'كيف تعمل درجات MYP',
+        intro: 'لا تستخدم مواد MYP نسباً مئوية أو ترتيبات صفية. تستخدم كل مادة أربعة معايير يُقيَّم كل منها من 8. تُجمع تلك الدرجات الأربع إلى مجموع من 32 يتحول إلى درجة نهائية من 1 إلى 7. الخمسة ليست 71%. الأربعة ليست 57%. لا تحوّل.',
+        criteriaNote: 'المعايير الأربعة مُسمّاة A وB وC وD — وتقيس أشياء مختلفة في كل مادة. في رياضيات MYP، المعيار A هو «المعرفة والفهم» والمعيار D هو «تطبيق الرياضيات في سياقات الحياة الواقعية». يستطيع الطالب أن يسجّل بقوة في A وبضعف في D. يُظهر التقرير كليهما منفصلَين مما يخبرك بالضبط أين تركّز — شيء لا تستطيع النسبة المئوية قوله أبداً.',
+        watchOut: [
+          'الأربعة في MYP تعني «إنجاز كافٍ» — وهي درجة ناجحة لا تكاد تكون قريبة من الرسوب. لا تحوّلها إلى 57%. مقاييس النسب المئوية لا تنطبق على درجات IB.',
+          'يمكن أن يسجّل طفلك بشكل مختلف جداً على كل معيار داخل المادة ذاتها. 7/8 في المعيار A و3/8 في المعيار D يُعطي معلومات تشخيصية دقيقة حول ما تركّز عليه — ليس مجرد نتيجة واحدة.',
+          'تتفاوت حدود الدرجات حسب المدرسة والمادة. الرياضيات والعلوم عادةً تتطلب درجات خام أعلى لكل مستوى مقارنةً بالعلوم الإنسانية. استخدم الحاسبة دليلاً لا تحويلاً دقيقاً.',
         ],
       },
     },
@@ -319,6 +492,18 @@ export const ksaIbParent = {
         ],
         universityContext: 'For international universities: 36–40+ points is competitive for UK Russell Group, most US universities, and leading Australian and UAE institutions; 40+ for the most selective. For Saudi institutions: KAUST explicitly recognises and values the IB Diploma. Some private Saudi universities accept IB. Most Saudi national universities require the Tawjihiyya for standard admission — speak with your school counsellor before Year 10 about which pathway fits your family\'s goals. Saudi Aramco scholarship and graduate recruitment programmes specifically value IB Diploma holders.',
       },
+      ar: {
+        title: 'كيف تعمل درجات DP',
+        intro: 'تُسجَّل شهادة IB من أصل 45 نقطة. تُسهم ست مواد بما يصل إلى 42 نقطة (تُقيَّم كل منها من 1–7)، ويمكن لنواة الشهادة — المقالة الموسّعة ونظرية المعرفة — إضافة ما يصل إلى 3 نقاط إضافية. تطلب معظم الجامعات التنافسية عالمياً 36–40 نقطة أو أكثر.',
+        subjectStructure: 'يدرس الطلاب ست مواد: ثلاث على مستوى أعلى (HL) وثلاث على المستوى العادي (SL). تتضمن مواد HL محتوى أكثر وساعات تدريس أكثر وتقييماً أعمق. كثير من الجامعات البريطانية والأمريكية والدولية تحدد متطلبات درجات HL دنيا للبرامج التنافسية. تتوقع برامج منح أرامكو السعودية عادةً درجات HL قوية في التخصصات التقنية ذات الصلة.',
+        watchOut: [
+          'الطالب الذي لديه 38 نقطة ولكنه يُخفق في شرط (كأن يحصل على 2 في مادة HL) لا يحصل على الشهادة. النقاط وحدها غير كافية.',
+          'تُقدّم الجامعات عروضاً مشروطة بناءً على الدرجات التقديرية قبل الامتحانات النهائية. المحادثة مع معلمي المواد في الصف الثاني عشر حول الدرجات التقديرية عالية المخاطر — تعامل معها بجدية لا تقل عن أي تحضير للامتحان النهائي.',
+          'التقييم الداخلي يخضع للاعتدال الخارجي. يمكن أن تُعدَّل درجة المعلم من قِبل IB. الطالب الذي يُقدّم تقييماً داخلياً ضعيفاً ويؤدي أداءً جيداً في الامتحانات سيحصل على درجة نهائية أدنى مما يُقترح أداؤه في الامتحان وحده.',
+          'إذا كان دخول الجامعة الوطنية السعودية وثيق الصلة بخطط عائلتك، فهذا القرار يجب اتخاذه قبل الصف العاشر. مسار IB DP ومسار الثانوية العامة يتطلبان تحضيراً مختلفاً جوهرياً ولا يمكن السير فيهما معاً.',
+        ],
+        universityContext: 'للجامعات الدولية: 36–40 نقطة أو أكثر تنافسي لمجموعة راسل البريطانية ومعظم الجامعات الأمريكية والمؤسسات الأسترالية والإماراتية الكبرى؛ 40 فأكثر للأكثر انتقائية. للمؤسسات السعودية: جامعة الملك عبدالله للعلوم والتقنية (كاوست) تعترف بشهادة IB وتُقدّرها صراحةً. بعض الجامعات السعودية الخاصة تقبل IB. معظم الجامعات الوطنية السعودية تطلب الثانوية العامة للقبول المعتاد — تحدّث مع مستشار الجامعة في مدرستك قبل الصف العاشر حول المسار الذي يتناسب مع أهداف عائلتك. برامج منح أرامكو السعودية واستقطاب الخريجين تُقدّر تحديداً حاملي شهادة IB.',
+      },
     },
   },
 
@@ -350,6 +535,33 @@ export const ksaIbParent = {
         'Ask your child: "Have you chosen your Extended Essay topic?" — the earlier this conversation starts, the better the research quality. Late topic changes consistently produce weaker EEs.',
       ],
     },
+    ar: {
+      default: [
+        'اسأل معلم طفلك: «هل هذا التقييم تكويني أم تجميعي؟» — سؤال واحد يغيّر طريقة قراءتك لكل تغذية راجعة.',
+        'ابحث عن معايير التقييم لطفلك في مادة واحدة على منصة التعلم في المدرسة. اقرأ المعايير A–D ولاحظ ما يقيسه كل منها — هذه هي اللغة التي ستستخدمها كل تقارير المستقبل.',
+        'لا تحوّل درجات IB إلى نسب مئوية. اسأل بدلاً من ذلك: «كيف تبدو الدرجة 6 في هذه المادة؟» — معرفة الهدف بوضوح تساعد طفلك على الاستهداف بدقة.',
+      ],
+      new: [
+        'الليلة، اسأل طفلك: «ما السؤال الذي يستقصيه صفك هذا الأسبوع؟» — لا «ما الموضوع». إذا استطاع الإجابة بوضوح، فالتعلم التقصيري يعمل.',
+        'اطلب من المدرسة معايير التقييم لمادة واحدة. اقرأ ما تقيسه المعايير A–D. هذه هي اللغة التي ستستخدمها كل تقارير المستقبل — فهمها الآن يغيّر طريقة قراءتك لكل تقرير يلي.',
+        'استخدم حاسبة درجات MYP في قسم نظام الدرجات مع أحدث درجات تقرير طفلك — وقاوم الدافع لتحويل الناتج إلى نسبة مئوية.',
+      ],
+      settled: [
+        'ابحث عن أحدث تقرير MYP لطفلك وأدخل درجات المعايير في الحاسبة. حدّد أدنى معيار، ثم اسأل معلم المادة: «ما الأدلة المحددة التي ستنقل طفلي من 4 إلى 5 في هذا المعيار؟»',
+        'إذا كنت تستخدم تعليماً خصوصياً (مدرس خصوصي)، أخبر المدرس الخاص بمعايير IB التي يعاني معها طفلك واطلب منه محاذاة أسلوب تدريسه مع كيفية تقييم IB لتلك المهارات. الحفظ والتكرار يُفيد في بعض أنواع الأسئلة؛ في الأسئلة التحليلية التي تحمل أكثر الدرجات، قد يعمل ضد الطالب.',
+        'حتى لو كان DP لا يزال سنةً أو سنتَين بعيداً، اطّلع على حاسبة DP الآن. فهم هيكل الشهادة يمنع تفكير النسب المئوية من العودة تحت الضغط في الصف الثاني عشر.',
+      ],
+      "pyp-myp": [
+        'اسأل معلم الفصل الرئيسي في MYP: «كيف ستدعم طفلي في فهم التقييم القائم على المعايير في السنة الأولى من MYP؟» — معظم مدارس IB لديها برنامج انتقال محدد.',
+        'استخدم حاسبة درجات MYP مع طفلك — دعه يحرّك الأشرطة. الهدف أن يفهم درجاته هو، لا أن تُفسّرها أنت فحسب.',
+        'اقرأ قسم PYP لتفهم ما بناه طفلك بالفعل. الطلاب الذين تعاملوا تعاملاً حقيقياً مع PYP يصلون إلى MYP أكثر استعداداً للتفكير التحليلي مما يتوقعه معظم الآباء.',
+      ],
+      "myp-dp": [
+        'إذا كان دخول الجامعة الوطنية السعودية (مسار الثانوية العامة) وثيق الصلة بخطط عائلتك، تحدّث مع مستشار الجامعة في المدرسة الآن — لا في الصف الثاني عشر. مسار IB DP ومسار الثانوية العامة يتطلبان تحضيراً مختلفاً جوهرياً، والنافذة للتغيير تُغلق حول الصف التاسع–العاشر.',
+        'افتح حاسبة DP وأدخل الدرجات التقديرية لطفلك. تحقق هل أي مادة في خطر من الإخفاق في شرط الشهادة — هذا أكثر إلحاحاً من رقم مجموع النقاط.',
+        'اسأل طفلك: «هل اخترت موضوع مقالتك الموسّعة؟» — كلما بدأت هذه المحادثة مبكراً، كانت جودة البحث أفضل. تغيير الموضوع متأخراً يُنتج باستمرار مقالات أضعف.',
+      ],
+    },
   },
 
   glossary: [
@@ -357,51 +569,61 @@ export const ksaIbParent = {
       id: 'gloss-001',
       term: 'IB',
       en: { full: 'International Baccalaureate', definition: 'The global organisation that designs and awards the PYP, MYP, and DP programmes. Schools are authorised by the IB and held to the same standards worldwide. The IB is not affiliated with any national curriculum, including Saudi Arabia\'s national curriculum (المنهج الوطني).' },
+      ar: { full: 'البكالوريا الدولية', definition: 'المنظمة العالمية التي تصمّم برامج PYP وMYP وDP وتمنحها. تحصل المدارس على تفويض IB وتُلتزم بنفس المعايير عالمياً. IB غير مرتبطة بأي منهج وطني، بما فيها المنهج الوطني السعودي (المنهج الوطني).' },
     },
     {
       id: 'gloss-002',
       term: 'PYP',
       en: { full: 'Primary Years Programme', definition: 'The IB programme for students aged 3–11 (roughly KG to Grade 5/6). Uses inquiry-based, transdisciplinary learning. Narrative reports, no percentage marks or class rankings. Arabic language instruction is typically available as part of the school\'s language programme.' },
+      ar: { full: 'برنامج السنوات الأولى', definition: 'برنامج IB للطلاب من 3–11 عاماً (تقريباً من الروضة إلى الصف 5/6). يستخدم التعلم التقصيري متعدد التخصصات. تقارير سردية بلا درجات مئوية أو ترتيبات صفية. تعليم اللغة العربية متاح عادةً كجزء من برنامج المدرسة اللغوي.' },
     },
     {
       id: 'gloss-003',
       term: 'MYP',
       en: { full: 'Middle Years Programme', definition: 'The IB programme for students aged 11–16 (roughly Grades 6–10). Introduces criterion-based grades (1–7) across eight subject groups. First point where formal grades appear — but no percentage marks and no class rank.' },
+      ar: { full: 'برنامج السنوات المتوسطة', definition: 'برنامج IB للطلاب من 11–16 عاماً (تقريباً الصفوف 6–10). يُدخل درجات معيارية (1–7) عبر ثماني مجموعات مواد. أول نقطة تظهر فيها درجات رسمية — لكن بلا نسب مئوية وبلا ترتيب صفي.' },
     },
     {
       id: 'gloss-004',
       term: 'DP',
       en: { full: 'Diploma Programme', definition: 'The IB programme for students aged 16–19 (Grades 11–12). Leads to the IB Diploma, scored out of 45. Widely recognised by universities in the UK, US, Australia, UAE, and internationally. Not a direct substitute for the Tawjihiyya (الثانوية العامة) at most Saudi government universities — check with your school counsellor about the specific universities your family is targeting.' },
+      ar: { full: 'برنامج الدبلوما', definition: 'برنامج IB للطلاب من 16–19 عاماً (الصفوف 11–12). يُفضي إلى شهادة IB من أصل 45 نقطة. معترف به على نطاق واسع من جامعات المملكة المتحدة والولايات المتحدة وأستراليا والإمارات ودولياً. ليس بديلاً مباشراً للثانوية العامة في معظم الجامعات الحكومية السعودية — تحقق مع مستشار الجامعة في مدرستك حول الجامعات المحددة التي تستهدفها عائلتك.' },
     },
     {
       id: 'gloss-005',
       term: 'HL',
       en: { full: 'Higher Level', definition: 'One of two subject tiers in the DP. Students take three HL subjects — more content, more teaching hours, and deeper assessment than SL. Universities often specify minimum HL grade requirements for competitive programmes. Saudi Aramco scholarship programmes typically expect strong HL results.' },
+      ar: { full: 'المستوى الأعلى', definition: 'أحد مستويَي المواد في DP. يأخذ الطلاب ثلاث مواد HL — محتوى أكثر وساعات تدريس أكثر وتقييم أعمق من SL. كثيراً ما تحدد الجامعات متطلبات درجات HL دنيا للبرامج التنافسية. تتوقع برامج منح أرامكو السعودية عادةً نتائج HL قوية.' },
     },
     {
       id: 'gloss-006',
       term: 'SL',
       en: { full: 'Standard Level', definition: 'The second subject tier in the DP. Students take three SL subjects alongside three HL subjects. Minimum passing grade for SL is 2.' },
+      ar: { full: 'المستوى العادي', definition: 'المستوى الثاني للمواد في DP. يأخذ الطلاب ثلاث مواد SL جنباً إلى جنب مع ثلاث مواد HL. الدرجة الدنيا للنجاح في SL هي 2.' },
     },
     {
       id: 'gloss-007',
       term: 'IA',
       en: { full: 'Internal Assessment', definition: 'Coursework marked by the classroom teacher, then externally moderated by the IB. Contributes 20–30% of the final DP grade. Not equivalent to homework or classwork participation marks — the IB moderation process adjusts marks across all schools globally.' },
+      ar: { full: 'التقييم الداخلي', definition: 'أعمال دراسية تُقيَّم من قِبل معلم الفصل ثم تخضع للاعتدال الخارجي من قِبل IB. يُسهم بـ 20–30% من درجة DP النهائية. لا يعادل درجات الواجبات أو مشاركة الصف — عملية اعتدال IB تُعدّل الدرجات عبر جميع المدارس عالمياً.' },
     },
     {
       id: 'gloss-008',
       term: 'EE',
       en: { full: 'Extended Essay', definition: 'A 4,000-word independent research paper completed in Year 12–13, externally assessed by the IB. Graded A–E. Together with ToK, contributes up to 3 bonus diploma points. UK and US universities read the EE during applications. Saudi students may choose to anchor their EE in Islamic studies, Arabic literature, or Saudi history and social science topics.' },
+      ar: { full: 'المقالة الموسّعة', definition: 'ورقة بحثية مستقلة من 4000 كلمة تُكتمل في الصفين 12–13، تُقيَّم خارجياً من قِبل IB. تُقيَّم من A إلى E. جنباً إلى جنب مع نظرية المعرفة، تُسهم بما يصل إلى 3 نقاط إضافية للشهادة. تقرأ جامعات المملكة المتحدة والولايات المتحدة المقالة الموسّعة أثناء الطلبات. يمكن للطلاب السعوديين اختيار تأسيس مقالتهم في الدراسات الإسلامية أو الأدب العربي أو مواضيع التاريخ السعودي والعلوم الاجتماعية.' },
     },
     {
       id: 'gloss-009',
       term: 'ToK',
       en: { full: 'Theory of Knowledge', definition: 'A mandatory two-year DP course exploring how different kinds of knowledge work — mathematical, scientific, historical, indigenous, and personal. Does not ask students to question religious faith; explores how knowledge is produced, evaluated, and communicated across disciplines. Islamic epistemology (the \'ilm tradition, ijtihad, Hadith sciences) is a valid and valued area of inquiry within ToK. Together with EE, contributes up to 3 bonus diploma points.' },
+      ar: { full: 'نظرية المعرفة', definition: 'مادة DP إلزامية لمدة عامَين تستكشف كيفية عمل أنواع المعرفة المختلفة — الرياضية والعلمية والتاريخية والأصيلة والشخصية. لا تطلب من الطلاب التشكيك في الإيمان الديني؛ بل تستكشف كيف تُنتَج المعرفة وتُقيَّم وتُنقَل عبر التخصصات. الإبستيمولوجيا الإسلامية (تقليد العلم والاجتهاد وعلوم الحديث) مجال بحث صالح ومُقدَّر داخل نظرية المعرفة. جنباً إلى جنب مع المقالة الموسّعة، تُسهم بما يصل إلى 3 نقاط إضافية للشهادة.' },
     },
     {
       id: 'gloss-010',
       term: 'CAS',
       en: { full: 'Creativity, Activity, Service', definition: 'A mandatory DP requirement. Students document approximately 150 hours across creativity (artistic or entrepreneurial pursuits), activity (physical challenges), and service (community contribution). Cannot be waived — without signed CAS completion, the diploma is not awarded. Islamic values of service to community (خدمة المجتمع) and developing the whole person align closely with CAS\'s intent.' },
+      ar: { full: 'الإبداع والنشاط والخدمة', definition: 'متطلّب DP إلزامي. يوثّق الطلاب نحو 150 ساعة عبر الإبداع (المساعي الفنية أو الريادية) والنشاط (التحديات البدنية) والخدمة (المساهمة المجتمعية). لا يمكن الإعفاء منه — بدون إتمام CAS موقّعاً، لا تُمنح الشهادة. القيم الإسلامية لخدمة المجتمع وتنمية الإنسان كلّه تتوافق توافقاً وثيقاً مع مقصود CAS.' },
     },
   ],
 };
