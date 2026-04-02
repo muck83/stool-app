@@ -330,8 +330,8 @@ function ReviewCard({ review }) {
                   <span style={{
                     position: 'absolute', bottom: '120%', left: '50%', transform: 'translateX(-50%)',
                     background: 'var(--ink)', color: 'white', fontSize: 10.5, lineHeight: 1.5,
-                    padding: '.4rem .65rem', borderRadius: 6, whiteSpace: 'nowrap', maxWidth: 240,
-                    whiteSpace: 'normal', zIndex: 10, pointerEvents: 'none', boxShadow: '0 2px 8px rgba(0,0,0,.2)',
+                    padding: '.4rem .65rem', borderRadius: 6, whiteSpace: 'normal', maxWidth: 240,
+                    zIndex: 10, pointerEvents: 'none', boxShadow: '0 2px 8px rgba(0,0,0,.2)',
                   }}>
                     {l.context}
                   </span>

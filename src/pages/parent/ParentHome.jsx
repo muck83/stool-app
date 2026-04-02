@@ -1,20 +1,22 @@
 import { Link } from 'react-router-dom'
-import { koreaIbParent } from '../../../vocab/parent/korea-ib-parent.jsx'
-import { indiaIbParent } from '../../../vocab/parent/india-ib-parent.jsx'
-import { chinaIbParent } from '../../../vocab/parent/china-ib-parent.jsx'
-import { ksaIbParent }   from '../../../vocab/parent/ksa-ib-parent.jsx'
+import { koreaIbParent }    from '../../../vocab/parent/korea-ib-parent.jsx'
+import { indiaIbParent }    from '../../../vocab/parent/india-ib-parent.jsx'
+import { chinaIbParent }    from '../../../vocab/parent/china-ib-parent.jsx'
+import { ksaIbParent }      from '../../../vocab/parent/ksa-ib-parent.jsx'
+import { woodstockParent }  from '../../../vocab/parent/woodstock-parent.jsx'
 
 /**
  * /parent — listing of all parent guide modules.
  */
 
-const PARENT_MODULES = [koreaIbParent, indiaIbParent, chinaIbParent, ksaIbParent]
+const PARENT_MODULES = [woodstockParent, koreaIbParent, indiaIbParent, chinaIbParent, ksaIbParent]
 
 const COUNTRY_META = {
   korea:         { flag: '🇰🇷', color: '#1D9E75', label: 'Korea' },
   india:         { flag: '🇮🇳', color: '#E67E22', label: 'India' },
   china:         { flag: '🇨🇳', color: '#C0392B', label: 'China' },
   'saudi-arabia':{ flag: '🇸🇦', color: '#006C35', label: 'Saudi Arabia' },
+  woodstock:     { flag: '🌲', color: '#8B1A1A', label: 'Woodstock · Mussoorie' },
 }
 
 const LANG_CHIP_LABELS = { en: 'English', ko: '한국어', zh: '中文', ar: 'العربية' }
@@ -51,7 +53,7 @@ export default function ParentHome() {
       {/* Module cards */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2.5rem' }}>
         {PARENT_MODULES.map(mod => {
-          const meta = COUNTRY_META[mod.country] || { flag: '🌍', color: 'var(--teal)', label: mod.country }
+          const meta = COUNTRY_META[mod.slug] || COUNTRY_META[mod.country] || { flag: '🌍', color: 'var(--teal)', label: mod.country }
           const m = mod.meta?.en
           const isEnOnly = mod.languages?.length === 1 && mod.languages[0] === 'en'
 

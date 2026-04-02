@@ -28,6 +28,7 @@ import FinalExamPage from './pages/learn/FinalExamPage.jsx'
 import VocabPage from './pages/learn/VocabPage.jsx'
 import CulturalVocabPage from './pages/learn/CulturalVocabPage.jsx'
 import ParentModulePage from './pages/parent/ParentModulePage.jsx'
+import WoodstockParentPage from './pages/parent/WoodstockParentPage.jsx'
 
 const TABS = [
   { id: 'overview',    label: 'Overview' },
@@ -96,6 +97,7 @@ export default function App() {
         <Route path="/learn/:slug/exam" element={<FinalExamPage />} />
         <Route path="/learn/:slug/vocab" element={<VocabPage />} />
         <Route path="/learn/:slug/cultural-vocab" element={<CulturalVocabPage />} />
+        <Route path="/parent/woodstock" element={<WoodstockParentPage />} />
         <Route path="/parent/:slug" element={<ParentModulePage />} />
         <Route path="/learn/:slug/:dimension" element={<DimensionPage />} />
 
