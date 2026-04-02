@@ -17,12 +17,13 @@ const STAGE_COLORS = {
 
 // ─── Sections ────────────────────────────────────────────────────────────────
 const SECTIONS = [
-  { id: 'start',    label: 'Start Here'         },
-  { id: 'concepts', label: 'Core Concepts'      },
-  { id: 'grades',   label: 'Grades Decoded'     },
-  { id: 'diploma',  label: 'WSD'                },
-  { id: 'pathways', label: 'University Pathways' },
-  { id: 'next',     label: 'Next Steps'         },
+  { id: 'start',    label: 'Start Here'          },
+  { id: 'concepts', label: 'Core Concepts'       },
+  { id: 'cultural', label: 'Indian Parent Guide' },
+  { id: 'grades',   label: 'Grades Decoded'      },
+  { id: 'diploma',  label: 'WSD'                 },
+  { id: 'pathways', label: 'University Pathways'  },
+  { id: 'next',     label: 'Next Steps'          },
 ]
 
 // ─── Section nav ─────────────────────────────────────────────────────────────
@@ -626,6 +627,89 @@ function UniversityPathways() {
   )
 }
 
+// ─── Review scenario ──────────────────────────────────────────────────────────
+function ReviewScenario({ scenario: s, index }) {
+  const [revealed, setRevealed] = useState(false)
+  const col = [WS, WG, '#185FA5'][index % 3]
+  return (
+    <div style={{
+      border: `1px solid ${col}33`,
+      borderTop: `3px solid ${col}`,
+      borderRadius: '0 0 var(--r) var(--r)',
+      background: 'var(--surface)',
+      marginBottom: '1.25rem', overflow: 'hidden',
+    }}>
+      <div style={{ padding: '1rem 1.2rem', background: `${col}06` }}>
+        <div style={{ fontSize: 11, fontWeight: 600, color: col, textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 4 }}>
+          Real situation {index + 1}
+        </div>
+        <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--ink)', marginBottom: 8 }}>
+          {s.title.charAt(0).toUpperCase() + s.title.slice(1)}
+        </div>
+        {s.termsInPlay && (
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
+            {s.termsInPlay.map(t => (
+              <span key={t} style={{
+                fontSize: 10.5, fontWeight: 600, color: col,
+                background: `${col}12`, padding: '2px 8px', borderRadius: 10,
+              }}>{t}</span>
+            ))}
+          </div>
+        )}
+        <div style={{
+          fontSize: 13.5, color: 'var(--ink-2)', lineHeight: 1.75,
+          padding: '.75rem 1rem', background: 'var(--surface-2)',
+          borderRadius: 'var(--r)', borderLeft: '3px solid var(--border-strong, #ccc)',
+        }}>
+          {s.situation}
+        </div>
+      </div>
+
+      {!revealed ? (
+        <div style={{ padding: '.875rem 1.2rem' }}>
+          <button
+            onClick={() => setRevealed(true)}
+            style={{
+              fontSize: 12.5, fontWeight: 600, color: col,
+              background: `${col}10`, border: `1px solid ${col}44`,
+              borderRadius: 20, padding: '6px 18px', cursor: 'pointer',
+            }}
+          >
+            See how it plays out →
+          </button>
+        </div>
+      ) : (
+        <div style={{ padding: '1rem 1.2rem 1.25rem', borderTop: `1px solid ${col}22` }}>
+          <div style={{ marginBottom: '1rem' }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: '#1D9E75', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 6 }}>
+              With this context
+            </div>
+            <div style={{
+              fontSize: 13.5, color: 'var(--ink)', lineHeight: 1.75,
+              padding: '.75rem 1rem', background: '#F0FDF4',
+              borderRadius: 'var(--r)', borderLeft: '3px solid #1D9E75',
+            }}>
+              {s.withUnderstanding}
+            </div>
+          </div>
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 600, color: '#C0392B', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 6 }}>
+              Without this context
+            </div>
+            <div style={{
+              fontSize: 13.5, color: 'var(--ink)', lineHeight: 1.75,
+              padding: '.75rem 1rem', background: '#FEF2F2',
+              borderRadius: 'var(--r)', borderLeft: '3px solid #C0392B',
+            }}>
+              {s.withoutUnderstanding}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ─── Next steps ───────────────────────────────────────────────────────────────
 function NextSteps({ activeStage }) {
   const stageKey = activeStage || 'default'
@@ -850,6 +934,45 @@ export default function WoodstockParentPage() {
             {mod.cards.map((card, i) => (
               <ConceptCard key={card.id} card={card} index={i} activeStage={activeStage} />
             ))}
+          </div>
+        )}
+
+        {/* ── INDIAN PARENT GUIDE ── */}
+        {activeSection === 'cultural' && (
+          <div>
+            <div style={{ marginBottom: '1.75rem' }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: WS, textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 6 }}>
+                Indian parent guide
+              </div>
+              <h2 style={{ fontFamily: 'var(--serif, Georgia, serif)', fontSize: '1.3rem', color: 'var(--ink)', margin: '0 0 8px' }}>
+                What CBSE and ICSE prepared you for — and what's different here
+              </h2>
+              <p style={{ fontSize: 13.5, color: 'var(--ink-3)', lineHeight: 1.65, margin: '0 0 1.5rem' }}>
+                These insights are drawn from patterns common to Indian families at international schools. They address
+                the specific instincts and anxieties that the Indian education system reasonably produces — and how
+                those instincts need adjusting at Woodstock.
+              </p>
+            </div>
+
+            {/* Cultural concept cards */}
+            {mod.culturalCards.map((card, i) => (
+              <ConceptCard key={card.id} card={card} index={i} activeStage={activeStage} />
+            ))}
+
+            {/* Review scenarios */}
+            {mod.reviewScenarios && mod.reviewScenarios.length > 0 && (
+              <div style={{ marginTop: '2rem' }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink)', marginBottom: 4 }}>
+                  Real situations
+                </div>
+                <p style={{ fontSize: 13, color: 'var(--ink-3)', lineHeight: 1.6, margin: '0 0 1.25rem' }}>
+                  These scenarios show the same situation with and without the context this guide provides.
+                </p>
+                {mod.reviewScenarios.map((s, i) => (
+                  <ReviewScenario key={s.id} scenario={s} index={i} />
+                ))}
+              </div>
+            )}
           </div>
         )}
 

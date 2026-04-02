@@ -166,6 +166,101 @@ export const woodstockParent = {
     },
   ],
 
+  // ─── Cultural insight cards (drawn from Indian parent context) ───────────────
+  culturalCards: [
+    {
+      id: 'cultural-001',
+      relevantAt: ['igcse', 'ap'],
+      component: 'Indian Parent Context',
+      concept: 'The Tuition Reflex — Getting It Right at Woodstock',
+      concern:
+        "When your child struggles in a subject, the instinct is to hire a tutor — this works reliably in the CBSE system where the syllabus is fixed and the marking scheme rewards correct answers. The same reflex at Woodstock may not produce the same result. A tutor trained in CBSE Mathematics or A-level Sciences will teach to a different marking standard. Their drills may actually work against the Cambridge or AP approach your child is being assessed on.",
+      bridge:
+        "IGCSE and AP reward applied understanding, not recall alone. Cambridge examiners mark against published criteria that require analysis, evaluation, and extended writing — skills that past-paper drilling can build only partially. AP free-response questions require a student to construct arguments under time pressure using content they genuinely understand, not recall. A tutor who is not familiar with Cambridge or AP marking is likely optimising for the wrong thing. The investment is real; the return depends entirely on whether the tutor is working with the right framework.",
+      goal:
+        "If your child needs additional academic support, ask Woodstock first. Many schools at this level have peer tutoring, teacher office hours, and structured academic support that a well-meaning CBSE tutor cannot match for Cambridge content. If you do hire outside support, ask the tutor directly: 'Have you taught IGCSE Cambridge or AP before, and are you familiar with the marking criteria?' If they cannot answer clearly, find someone who can.",
+      woodstockNote:
+        "Woodstock's small class sizes (6:1 student-teacher ratio) mean subject teachers know your child's specific gaps. A ten-minute conversation with the subject teacher is often more targeted than several hours of tuition.",
+      whatToAsk: [
+        '"Does my child need additional support, and what does the school offer?" — ask the subject teacher before engaging outside help.',
+        '"Are you familiar with Cambridge IGCSE / AP marking criteria?" — the right answer from any tutor you are considering.',
+      ],
+    },
+    {
+      id: 'cultural-002',
+      relevantAt: ['igcse', 'new'],
+      component: 'Indian Parent Context',
+      concept: 'No Merit List — Why Woodstock Does Not Rank Students',
+      concern:
+        "In CBSE and ICSE, the merit list told you something concrete: your child was first, fifth, or fifteenth in the class. That ranking was motivating for students who were near the top and actionable for families who wanted to understand where to focus. Woodstock does not publish class ranks. There is no topper, no merit position, no class average shared with parents. The absence of this information can feel like the school is withholding something important.",
+      bridge:
+        "Woodstock does not rank students because ranking within a class of 30 nationalities tells you very little — and actively harms the learning culture. A student ranked fifth in a highly diverse international cohort is not the same as a student ranked fifth in a cohort of 40 students from the same coaching-centre pipeline. More importantly, ranking creates a fixed competition between students that undermines the collaborative residential community Woodstock is deliberately building. What Woodstock gives you instead is criterion-specific feedback: not where your child ranks, but exactly which skills they are demonstrating well and which need development.",
+      goal:
+        "The question that matters for university outcomes is not 'where does my child rank in the class?' but 'is my child building the skills and profile that competitive universities are looking for?' Criterion-based feedback from IGCSE and AP answers the second question with far more precision than a class rank ever could. A student ranked third in a weak cohort may have a weaker university application than a student ranked eighth in a strong one — rank is not the signal you think it is.",
+      woodstockNote:
+        "If you want to understand how your child is performing relative to expectations, ask the subject teacher: 'Is my child performing at, above, or below the expected standard for this point in the course?' That is the right question — and teachers will answer it honestly.",
+      whatToAsk: [
+        '"Is my child performing at, above, or below the expected standard for this stage of the course?" — this is the honest rank equivalent at Woodstock.',
+        '"What does a strong performance look like in this subject at IGCSE level, and how close is my child to that standard?" — gives you a benchmark without a ranking.',
+      ],
+    },
+    {
+      id: 'cultural-003',
+      relevantAt: ['new', 'boarding'],
+      component: 'Indian Parent Context',
+      concept: 'Reading Qualitative Feedback — What International Teachers Mean',
+      concern:
+        "Your child's report from a Woodstock teacher does not give a percentage. Instead, it says things like 'demonstrates strong conceptual understanding but needs to develop precision in written communication' or 'engages enthusiastically in class but would benefit from more independent revision.' These phrases feel vague compared to a number. You are not sure whether this is a good report, a mediocre report, or a polite way of saying something is wrong.",
+      bridge:
+        "Qualitative feedback from international teachers is more diagnostic than a percentage — it tells you exactly where to focus, not just how far from the top your child is. 'Needs to develop precision in written communication' in an IGCSE Science context means your child understands the content but is losing marks in extended-answer questions because they are not using the precise scientific vocabulary Cambridge examiners expect. That is a very specific, fixable problem. A percentage mark of 72% tells you none of that. Learning to read narrative feedback as targeted instruction — not a vague compliment or criticism — is one of the most useful skills a Woodstock parent can develop.",
+      goal:
+        "When you receive a report with qualitative comments, the right response is not to look for the number hidden behind the words. It is to ask the teacher: 'What specifically would a stronger performance look like, and what should my child work on before the next assessment?' International teachers respond very well to this question. It is the kind of parental engagement they are designed to work with — specific, evidence-based, and forward-looking rather than mark-focused.",
+      woodstockNote:
+        "Woodstock teachers are accustomed to parents who are new to narrative feedback. Asking directly about what feedback means is not rude — it is exactly what the teacher-parent relationship at a school like this is designed for. The distance of boarding makes this even more important: a clear email with a specific question is always welcome.",
+      whatToAsk: [
+        '"What specific skill does this feedback comment point to, and how can my child develop it before the next assessment?"',
+        '"If my child addressed this area, what would their performance look like on the next report?" — makes the feedback concrete and future-focused.',
+      ],
+    },
+  ],
+
+  // ─── Review scenarios (real situations Indian parents at Woodstock face) ─────
+  reviewScenarios: [
+    {
+      id: 'review-001',
+      title: 'The grade conversion',
+      termsInPlay: ['IGCSE grades', 'No merit list'],
+      situation:
+        "Your child's end-of-year IGCSE report arrives. Three subjects show B, two show A, one shows C. You open a calculator: B is roughly 70–79%, C is roughly 60–69%. The average comes to about 72%. At their previous CBSE school, 72% in Science would have prompted urgent action — extra tuition, a call to the class teacher. You draft an email to the Woodstock principal expressing concern about your child's academic performance.",
+      withUnderstanding:
+        "You understand that a B in Cambridge IGCSE means 'good achievement' and meets the entry requirements for most UK, US, and international university programmes. A C means 'satisfactory' — a passing grade, not a near-fail. You ask the subject teacher of the C subject: 'What specific skills is my child missing, and what would a stronger grade look like?' You get a targeted answer about extended-answer technique. The email you send is specific and productive rather than general and alarmed.",
+      withoutUnderstanding:
+        "The school responds to your email with a long explanation of IGCSE grade descriptors. It takes two weeks, consumes a teacher's time, and produces some frustration on both sides. The teacher is mildly defensive; you feel the school was not transparent enough at enrolment. Both reactions are understandable. This guide exists so that email doesn't need to happen.",
+    },
+    {
+      id: 'review-002',
+      title: 'The Activity Week call',
+      termsInPlay: ['WSD', 'Outdoor Education', 'Boarding School Learning'],
+      situation:
+        "It is October. Your child's IGCSE mock exams are six weeks away. You receive the termly schedule and notice that every student in Grades 9–12 will spend an entire week off-campus for Activity Week — trekking, cultural visits, service projects. Your child is going to Rajasthan. You are alarmed: this is the most important academic term, your child is already behind in Chemistry, and the school is sending them on what looks like a holiday.",
+      withUnderstanding:
+        "You understand that Activity Week is a core part of the Woodstock education — not an optional extra — and that the resilience, self-direction, and real-world learning it builds are things the WSD is designed to document and that universities in the US and UK actively look for. You speak with the Chemistry teacher before the week: 'What specific revision should my child prioritise the week before they leave, and what support is available when they return?' Your child goes on the trip, returns, and the preparation is focused and targeted.",
+      withoutUnderstanding:
+        "You email the school asking whether your child can remain on campus for self-study during Activity Week. The school explains that attendance is required. You feel the school is prioritising experiences over academic preparation at the wrong moment in the year. The tension is real — but it comes from applying a CBSE calendar logic to a school whose academic calendar is designed differently.",
+    },
+    {
+      id: 'review-003',
+      title: 'The WhatsApp group',
+      termsInPlay: ['No merit list', 'Boarding School Learning'],
+      situation:
+        "Three months after enrolment, you have been added to an informal WhatsApp group of Woodstock parents from India. The group is active: parents share grade comparisons ('my child got A in English — what did yours get?'), worries about the curriculum change from IB, concerns about whether IGCSE is recognised in India, and occasional criticism of specific teachers. One parent mentions their child is already working with a CBSE tutor for 'backup preparation.' You are unsure how much weight to give to the information in the group.",
+      withUnderstanding:
+        "You treat the group as a social connection, not an academic intelligence source. When specific concerns come up — IGCSE recognition, the transition from IB — you verify them directly with the school's university counsellor rather than acting on secondhand anxiety. You find that several concerns circulating in the group are either outdated or inaccurate. You stay connected to the community but anchor your decisions in direct conversations with Woodstock staff.",
+      withoutUnderstanding:
+        "You begin making academic decisions — hiring a tutor, requesting a programme change, escalating concerns to the principal — based on information from the parent group that turns out to be partly incorrect. The school spends time correcting misunderstandings that spread faster than accurate information. The parent community is genuinely valuable for social connection and logistics. It is a poor source of academic guidance.",
+    },
+  ],
+
   igcseGrades: [
     { grade: 'A*', label: 'Outstanding',  color: '#1D9E75', note: 'Highest grade. Meets requirements for all competitive UK, US, and global programmes.' },
     { grade: 'A',  label: 'Excellent',    color: '#1D9E75', note: 'Strong result. Recognised by competitive universities worldwide.' },
