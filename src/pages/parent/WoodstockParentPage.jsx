@@ -896,11 +896,52 @@ export default function WoodstockParentPage() {
               </div>
             </div>
 
+            {/* IB families callout */}
+            <div style={{
+              padding: '.75rem 1rem',
+              background: '#185FA510',
+              border: '1px solid #185FA530',
+              borderRadius: 'var(--r)',
+              marginBottom: '1.75rem',
+            }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: '#185FA5', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 4 }}>
+                Still on the IB pathway?
+              </div>
+              <div style={{ fontSize: 13, color: 'var(--ink-3)', lineHeight: 1.65 }}>
+                This guide focuses on the IGCSE and AP transition. If your child is completing IB (MYP or DP),
+                the{' '}
+                <Link to="/parent/india-ib" style={{ color: '#185FA5', fontWeight: 600 }}>India IB Parent Guide</Link>
+                {' '}covers the IB system in detail and is written for Indian families.
+              </div>
+            </div>
+
             <StageSelector active={activeStage} onSelect={setActiveStage} />
 
             <div style={{ borderTop: '1px solid var(--border)', margin: '2rem 0' }} />
 
             <OpeningHook />
+
+            {/* About this guide + privacy */}
+            <div style={{
+              marginTop: '2rem',
+              padding: '.875rem 1.1rem',
+              background: 'var(--surface-2)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--r)',
+            }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 5 }}>
+                About this guide
+              </div>
+              <p style={{ fontSize: 13, color: 'var(--ink-3)', lineHeight: 1.65, margin: '0 0 .6rem' }}>
+                This guide was created by a Woodstock School staff member to help Indian families navigate the
+                school's academic system and curriculum transition. It is an independent resource — not an official
+                school publication — and reflects the author's best current understanding of Woodstock's programmes.
+                For official information, always follow up directly with the school.
+              </p>
+              <p style={{ fontSize: 12, color: 'var(--ink-4)', lineHeight: 1.6, margin: 0 }}>
+                🔒 No accounts. No tracking. Your progress is saved only in your own browser — nothing is sent anywhere.
+              </p>
+            </div>
           </div>
         )}
 

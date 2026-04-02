@@ -23,9 +23,50 @@ import { isCulturalVocabCompleted } from './CulturalVocabPage.jsx'
 import { CULTURAL_VOCAB_BY_SLUG } from '../../../vocab/country-cultural-vocab.jsx'
 
 /**
- * /learn/:slug — module overview with Hofstede radar and dimension list.
- * Shows real localStorage progress, sticky progress header, and "continue" CTA.
+ * /learn/:slug — module overview with tabbed navigation.
+ * Tabs: Overview · Simulations · Dimensions · Vocab & More
  */
+
+// ─── Tab definitions ─────────────────────────────────────────────────────────
+const TABS = [
+  { id: 'overview',    label: 'Overview'    },
+  { id: 'simulations', label: 'Simulations' },
+  { id: 'dimensions',  label: 'Dimensions'  },
+  { id: 'vocab',       label: 'Vocab & More' },
+]
+
+function TabNav({ active, setActive, color }) {
+  return (
+    <div style={{
+      borderBottom: '1px solid var(--border)',
+      marginBottom: '1.5rem',
+      overflowX: 'auto',
+      WebkitOverflowScrolling: 'touch',
+    }}>
+      <div style={{ display: 'flex', gap: 0, minWidth: 'max-content' }}>
+        {TABS.map(t => (
+          <button
+            key={t.id}
+            onClick={() => setActive(t.id)}
+            style={{
+              padding: '10px 16px',
+              fontSize: 13, fontWeight: 600,
+              border: 'none', cursor: 'pointer',
+              background: 'transparent',
+              color: active === t.id ? color : 'var(--ink-4)',
+              borderBottom: active === t.id ? `2px solid ${color}` : '2px solid transparent',
+              whiteSpace: 'nowrap',
+              transition: 'color .15s',
+            }}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export default function ModulePage() {
   const { slug } = useParams()
   const modMeta = moduleBySlug(slug)
@@ -36,7 +77,6 @@ export default function ModulePage() {
   const [scenarioCount, setScenarioCount] = useState(0)
   const [loading, setLoading] = useState(true)
 
-  // Progress derived from localStorage after data loads
   const [completedCount, setCompletedCount] = useState(0)
   const [nextDim, setNextDim] = useState(null)
   const [badgeHeld, setBadgeHeld] = useState(false)
@@ -46,7 +86,9 @@ export default function ModulePage() {
   const [vocabDone, setVocabDone] = useState(false)
   const [culturalVocabDone, setCulturalVocabDone] = useState(false)
 
-  // Sticky progress bar — shown once user scrolls past the header card
+  const [activeTab, setActiveTab] = useState('overview')
+  const [showResearch, setShowResearch] = useState(false)
+
   const [stickyVisible, setStickyVisible] = useState(false)
   const headerRef = useRef(null)
 
@@ -67,7 +109,6 @@ export default function ModulePage() {
       setSimulations(sims)
       setScenarioCount(scenarios.length)
 
-      // Read progress from localStorage
       setCompletedCount(completionCount(modMeta.id, dims))
       setNextDim(nextIncompleteDimension(modMeta.id, dims))
       setBadgeHeld(hasBadge(modMeta.id))
@@ -83,7 +124,6 @@ export default function ModulePage() {
     return () => { cancelled = true }
   }, [slug])
 
-  // Sticky scroll listener
   useEffect(() => {
     const header = headerRef.current
     if (!header) return
@@ -112,11 +152,13 @@ export default function ModulePage() {
   const allDone = completedCount === dimensions.length && dimensions.length > 0
   const started = isInProgress(modMeta.id, dimensions)
 
-  // Count research statuses
   const statusCounts = dimensions.reduce((acc, d) => {
     acc[d.research_status] = (acc[d.research_status] || 0) + 1
     return acc
   }, {})
+
+  // Count completed sims for tab badge
+  const simsCompletedCount = simulations.filter(s => isSimCompleted(s.id)).length
 
   return (
     <>
@@ -127,7 +169,7 @@ export default function ModulePage() {
         }
       `}</style>
 
-      {/* ── Sticky progress bar (appears on scroll) ── */}
+      {/* ── Sticky progress bar ── */}
       {stickyVisible && !loading && (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
@@ -164,7 +206,6 @@ export default function ModulePage() {
       )}
 
       <div style={{ maxWidth: '960px', margin: '0 auto', padding: '2rem 1.5rem' }}>
-        {/* Breadcrumb */}
         <Link to="/learn" style={{
           fontSize: '12px', color: 'var(--ink-4)', textDecoration: 'none',
           display: 'inline-block', marginBottom: '12px',
@@ -184,7 +225,7 @@ export default function ModulePage() {
           </div>
         ) : (
           <>
-            {/* Module header — observed for sticky trigger */}
+            {/* ── Module header ── */}
             <div ref={headerRef} style={{
               background: 'white', border: '1px solid var(--border)', borderRadius: 'var(--rl)',
               borderTop: `4px solid ${modMeta.color}`, padding: '2rem', marginBottom: '1.5rem',
@@ -234,7 +275,7 @@ export default function ModulePage() {
                 </Link>
               ) : null}
 
-              {/* Exam status + badge */}
+              {/* Exam status */}
               <div style={{
                 marginTop: '1rem', paddingTop: '1rem',
                 borderTop: '1px solid var(--border)',
@@ -279,232 +320,375 @@ export default function ModulePage() {
                     🔒 Exam unlocks after all dimensions
                   </span>
                 )}
-              </div>
 
-              {/* Research backbone */}
-              {mod.research_backbone && mod.research_backbone.length > 0 && (
-                <div style={{ marginTop: '1rem' }}>
-                  <div className="csec">Research backbone</div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    {mod.research_backbone.map((ref, i) => (
-                      <span key={i} style={{ fontSize: '12px', color: 'var(--ink-3)' }}>
-                        {ref.author} ({ref.year}) — <em>{ref.title}</em>
-                      </span>
-                    ))}
-                  </div>
+                {/* Status pills */}
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginLeft: 'auto' }}>
+                  {statusCounts.fully_sourced > 0 && (
+                    <span className="pill pt">◆ {statusCounts.fully_sourced} research-backed</span>
+                  )}
+                  {statusCounts.partial > 0 && (
+                    <span className="pill pa">◇ {statusCounts.partial} partially sourced</span>
+                  )}
+                  {statusCounts.community > 0 && (
+                    <span className="pill pp">○ {statusCounts.community} community-sourced</span>
+                  )}
                 </div>
-              )}
-
-              {/* Status summary pills */}
-              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '1rem' }}>
-                {statusCounts.fully_sourced > 0 && (
-                  <span className="pill pt">◆ {statusCounts.fully_sourced} research-backed</span>
-                )}
-                {statusCounts.partial > 0 && (
-                  <span className="pill pa">◇ {statusCounts.partial} partially sourced</span>
-                )}
-                {statusCounts.community > 0 && (
-                  <span className="pill pp">○ {statusCounts.community} community-sourced</span>
-                )}
               </div>
             </div>
 
-            {/* Simulations section (primary learning path) */}
-            {simulations.length > 0 && (
-              <div style={{ marginBottom: '2rem' }}>
+            {/* ── Tab navigation ── */}
+            <TabNav active={activeTab} setActive={setActiveTab} color={modMeta.color} />
+
+            {/* ══════════════════════════════════════════
+                TAB: OVERVIEW
+            ══════════════════════════════════════════ */}
+            {activeTab === 'overview' && (
+              <div>
+                {/* What's in this module */}
                 <div style={{
-                  fontSize: '12px', fontWeight: 600, color: 'var(--ink-4)',
-                  textTransform: 'uppercase', letterSpacing: '.05em',
-                  marginBottom: '12px',
+                  background: 'white', border: '1px solid var(--border)',
+                  borderRadius: 'var(--rl)', padding: '1.5rem', marginBottom: '1.25rem',
                 }}>
-                  Simulations
+                  <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: '1rem' }}>
+                    What's in this module
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {/* Dimensions summary */}
+                    <button
+                      onClick={() => setActiveTab('dimensions')}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: '12px',
+                        padding: '10px 14px',
+                        background: `${modMeta.color}08`,
+                        border: `1px solid ${modMeta.color}22`,
+                        borderRadius: 'var(--r)', cursor: 'pointer',
+                        textAlign: 'left', width: '100%',
+                        transition: 'background .15s',
+                      }}
+                      onMouseEnter={e => { e.currentTarget.style.background = `${modMeta.color}14` }}
+                      onMouseLeave={e => { e.currentTarget.style.background = `${modMeta.color}08` }}
+                    >
+                      <span style={{
+                        width: 32, height: 32, borderRadius: '50%',
+                        background: `${modMeta.color}18`, color: modMeta.color,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 15, fontWeight: 700, flexShrink: 0,
+                      }}>
+                        {dimensions.length}
+                      </span>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>
+                          Dimensions
+                        </div>
+                        <div style={{ fontSize: 11.5, color: 'var(--ink-4)', marginTop: 1 }}>
+                          {completedCount} of {dimensions.length} read · Reference library
+                        </div>
+                      </div>
+                      <span style={{ fontSize: 12, color: modMeta.color, fontWeight: 600 }}>View →</span>
+                    </button>
+
+                    {/* Simulations summary */}
+                    {simulations.length > 0 && (
+                      <button
+                        onClick={() => setActiveTab('simulations')}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: '12px',
+                          padding: '10px 14px',
+                          background: `${modMeta.color}08`,
+                          border: `1px solid ${modMeta.color}22`,
+                          borderRadius: 'var(--r)', cursor: 'pointer',
+                          textAlign: 'left', width: '100%',
+                          transition: 'background .15s',
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.background = `${modMeta.color}14` }}
+                        onMouseLeave={e => { e.currentTarget.style.background = `${modMeta.color}08` }}
+                      >
+                        <span style={{
+                          width: 32, height: 32, borderRadius: '50%',
+                          background: `${modMeta.color}18`, color: modMeta.color,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontSize: 15, fontWeight: 700, flexShrink: 0,
+                        }}>
+                          {simulations.length}
+                        </span>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>
+                            Simulations
+                          </div>
+                          <div style={{ fontSize: 11.5, color: 'var(--ink-4)', marginTop: 1 }}>
+                            {simsCompletedCount} of {simulations.length} completed · Interactive scenarios
+                          </div>
+                        </div>
+                        <span style={{ fontSize: 12, color: modMeta.color, fontWeight: 600 }}>View →</span>
+                      </button>
+                    )}
+
+                    {/* Vocab summary */}
+                    <button
+                      onClick={() => setActiveTab('vocab')}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: '12px',
+                        padding: '10px 14px',
+                        background: `${modMeta.color}08`,
+                        border: `1px solid ${modMeta.color}22`,
+                        borderRadius: 'var(--r)', cursor: 'pointer',
+                        textAlign: 'left', width: '100%',
+                        transition: 'background .15s',
+                      }}
+                      onMouseEnter={e => { e.currentTarget.style.background = `${modMeta.color}14` }}
+                      onMouseLeave={e => { e.currentTarget.style.background = `${modMeta.color}08` }}
+                    >
+                      <span style={{
+                        width: 32, height: 32, borderRadius: '50%',
+                        background: `${modMeta.color}18`, color: modMeta.color,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 16, flexShrink: 0,
+                      }}>
+                        📖
+                      </span>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>
+                          Vocabulary & Scenarios
+                        </div>
+                        <div style={{ fontSize: 11.5, color: 'var(--ink-4)', marginTop: 1 }}>
+                          Key terms, cultural concepts, and practical friction-point scenarios
+                        </div>
+                      </div>
+                      <span style={{ fontSize: 12, color: modMeta.color, fontWeight: 600 }}>View →</span>
+                    </button>
+                  </div>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {simulations.map(sim => (
-                    <SimulationCard
-                      key={sim.id}
-                      simulation={sim}
-                      moduleSlug={slug}
-                      moduleColor={modMeta.color}
-                      completed={isSimCompleted(sim.id)}
-                      inProgress={getSimProgress(sim.id) !== null && !isSimCompleted(sim.id)}
-                    />
-                  ))}
-                </div>
+
+                {/* Research backbone — collapsed by default */}
+                {mod.research_backbone && mod.research_backbone.length > 0 && (
+                  <div style={{
+                    background: 'white', border: '1px solid var(--border)',
+                    borderRadius: 'var(--rl)', overflow: 'hidden',
+                  }}>
+                    <button
+                      onClick={() => setShowResearch(r => !r)}
+                      style={{
+                        width: '100%', padding: '14px 18px',
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        background: 'transparent', border: 'none', cursor: 'pointer',
+                        textAlign: 'left',
+                      }}
+                    >
+                      <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.05em' }}>
+                        Research backbone — {mod.research_backbone.length} sources
+                      </span>
+                      <span style={{ fontSize: 13, color: 'var(--ink-4)', transition: 'transform .2s', transform: showResearch ? 'rotate(180deg)' : 'none' }}>
+                        ▾
+                      </span>
+                    </button>
+                    {showResearch && (
+                      <div style={{ padding: '0 18px 14px', display: 'flex', flexDirection: 'column', gap: '4px', borderTop: '1px solid var(--border)' }}>
+                        {mod.research_backbone.map((ref, i) => (
+                          <span key={i} style={{ fontSize: '12px', color: 'var(--ink-3)', padding: '4px 0' }}>
+                            {ref.author} ({ref.year}) — <em>{ref.title}</em>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 
-            {/* Vocab Lab entry card */}
-            <div style={{ marginBottom: '2rem' }}>
-              <div style={{
-                fontSize: '12px', fontWeight: 600, color: 'var(--ink-4)',
-                textTransform: 'uppercase', letterSpacing: '.05em',
-                marginBottom: '12px',
-              }}>
-                Vocabulary Lab
-              </div>
-              <Link to={`/learn/${slug}/vocab`} style={{ textDecoration: 'none' }}>
-                <div className="card" style={{
-                  borderLeft: `3px solid ${modMeta.color}`,
-                  cursor: 'pointer',
-                  transition: 'box-shadow .18s',
-                  display: 'flex', alignItems: 'center', gap: '14px',
-                }}
-                  onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,.08)' }}
-                  onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none' }}
-                >
-                  <span style={{
-                    width: '36px', height: '36px', borderRadius: '50%',
-                    background: `${modMeta.color}15`, color: modMeta.color,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '18px', flexShrink: 0,
-                  }}>
-                    📖
-                  </span>
-                  <div style={{ flex: 1 }}>
-                    <h4 style={{ fontFamily: 'var(--serif)', fontSize: '1rem', color: 'var(--ink)', margin: '0 0 2px 0' }}>
-                      Vocabulary Lab
-                    </h4>
-                    <p style={{ fontSize: '12px', color: 'var(--ink-3)', margin: 0 }}>
-                      Key terms, scenario practice, and mastery check · 15 min
+            {/* ══════════════════════════════════════════
+                TAB: SIMULATIONS
+            ══════════════════════════════════════════ */}
+            {activeTab === 'simulations' && (
+              <div>
+                {simulations.length > 0 ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {simulations.map(sim => (
+                      <SimulationCard
+                        key={sim.id}
+                        simulation={sim}
+                        moduleSlug={slug}
+                        moduleColor={modMeta.color}
+                        completed={isSimCompleted(sim.id)}
+                        inProgress={getSimProgress(sim.id) !== null && !isSimCompleted(sim.id)}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="card" style={{ textAlign: 'center', padding: '3rem' }}>
+                    <p style={{ fontSize: '14px', color: 'var(--ink-3)' }}>
+                      No simulations available for this module yet.
                     </p>
                   </div>
-                  {vocabDone ? (
-                    <span style={{
-                      fontSize: '11px', fontWeight: 700, color: '#1a7a50',
-                      background: '#f0fdf6', border: '1px solid #bbf0d6',
-                      borderRadius: '20px', padding: '3px 10px', flexShrink: 0,
-                    }}>
-                      ✓ Done
-                    </span>
-                  ) : (
-                    <span style={{
-                      fontSize: '11px', fontWeight: 600, color: modMeta.color,
-                      background: `${modMeta.color}10`, border: `1px solid ${modMeta.color}30`,
-                      borderRadius: '20px', padding: '3px 10px', flexShrink: 0,
-                    }}>
-                      Start →
-                    </span>
-                  )}
-                </div>
-              </Link>
-            </div>
-
-            {/* Cultural Vocabulary entry card */}
-            <div style={{ marginTop: 8 }}>
-              <div style={{
-                fontSize: '12px', fontWeight: 600, color: 'var(--ink-4)',
-                textTransform: 'uppercase', letterSpacing: '.05em',
-                marginBottom: '12px',
-              }}>
-                Cultural Vocabulary
+                )}
               </div>
-              <Link to={`/learn/${slug}/cultural-vocab`} style={{ textDecoration: 'none' }}>
-                <div className="card" style={{
-                  borderLeft: `3px solid ${modMeta.color}`,
-                  display: 'flex', alignItems: 'center', gap: '14px',
-                  padding: '14px 16px', cursor: 'pointer',
-                }}>
-                  <span style={{ fontSize: '24px', flexShrink: 0 }}>
-                    🌐
-                  </span>
-                  <div style={{ flex: 1 }}>
-                    <h4 style={{ fontFamily: 'var(--serif)', fontSize: '1rem', color: 'var(--ink)', margin: '0 0 4px 0' }}>
-                      Five Cultural Terms
-                    </h4>
-                    {(() => {
-                      const cv = CULTURAL_VOCAB_BY_SLUG[slug]
-                      const hook = cv?.openingHook?.situation?.[0]
-                      if (hook && !culturalVocabDone) {
-                        const preview = hook.length > 110 ? hook.slice(0, 110).trimEnd() + '\u2026' : hook
-                        return (
-                          <p style={{ fontSize: '12px', color: 'var(--ink-3)', margin: 0, lineHeight: 1.5, fontStyle: 'italic' }}>
-                            {preview}
-                          </p>
-                        )
-                      }
-                      return (
-                        <p style={{ fontSize: '12px', color: 'var(--ink-3)', margin: 0 }}>
-                          Insider concepts with no clean English equivalent · 10 min
-                        </p>
-                      )
-                    })()}
+            )}
+
+            {/* ══════════════════════════════════════════
+                TAB: DIMENSIONS
+            ══════════════════════════════════════════ */}
+            {activeTab === 'dimensions' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {dimensions.length > 0 ? (
+                  dimensions.map(dim => (
+                    <DimensionCard
+                      key={dim.id}
+                      dimension={dim}
+                      slug={slug}
+                      isCompleted={completionCount(modMeta.id, [dim]) > 0}
+                      moduleColor={modMeta.color}
+                    />
+                  ))
+                ) : (
+                  <div className="card" style={{ textAlign: 'center', padding: '3rem' }}>
+                    <p style={{ fontSize: '14px', color: 'var(--ink-3)' }}>
+                      No dimensions loaded.
+                    </p>
                   </div>
-                  {culturalVocabDone ? (
-                    <span style={{
-                      fontSize: '11px', fontWeight: 700, color: '#1a7a50',
-                      background: '#f0fdf6', border: '1px solid #bbf0d6',
-                      borderRadius: '20px', padding: '3px 10px', flexShrink: 0,
-                    }}>
-                      ✓ Done
-                    </span>
-                  ) : (
-                    <span style={{
-                      fontSize: '11px', fontWeight: 600, color: modMeta.color,
-                      background: `${modMeta.color}10`, border: `1px solid ${modMeta.color}30`,
-                      borderRadius: '20px', padding: '3px 10px', flexShrink: 0,
-                      whiteSpace: 'nowrap',
-                    }}>
-                      Find out →
-                    </span>
-                  )}
-                </div>
-              </Link>
-            </div>
+                )}
+              </div>
+            )}
 
-            {/* Dimension list + scenarios — full width */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {dimensions.length > 0 && (
-                <div style={{
-                  fontSize: '12px', fontWeight: 600, color: 'var(--ink-4)',
-                  textTransform: 'uppercase', letterSpacing: '.05em',
-                }}>
-                  Reference Library
-                </div>
-              )}
-
-              {dimensions.map(dim => (
-                <DimensionCard
-                  key={dim.id}
-                  dimension={dim}
-                  slug={slug}
-                  isCompleted={completionCount(modMeta.id, [dim]) > 0}
-                  moduleColor={modMeta.color}
-                />
-              ))}
-
-              {scenarioCount > 0 && (
-                <Link to={`/learn/${slug}/scenarios`} style={{ textDecoration: 'none' }}>
+            {/* ══════════════════════════════════════════
+                TAB: VOCAB & MORE
+            ══════════════════════════════════════════ */}
+            {activeTab === 'vocab' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {/* Vocabulary Lab */}
+                <Link to={`/learn/${slug}/vocab`} style={{ textDecoration: 'none' }}>
                   <div className="card" style={{
                     borderLeft: `3px solid ${modMeta.color}`,
                     cursor: 'pointer',
+                    transition: 'box-shadow .18s',
+                    display: 'flex', alignItems: 'center', gap: '14px',
+                  }}
+                    onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,.08)' }}
+                    onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none' }}
+                  >
+                    <span style={{
+                      width: '36px', height: '36px', borderRadius: '50%',
+                      background: `${modMeta.color}15`, color: modMeta.color,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: '18px', flexShrink: 0,
+                    }}>
+                      📖
+                    </span>
+                    <div style={{ flex: 1 }}>
+                      <h4 style={{ fontFamily: 'var(--serif)', fontSize: '1rem', color: 'var(--ink)', margin: '0 0 2px 0' }}>
+                        Vocabulary Lab
+                      </h4>
+                      <p style={{ fontSize: '12px', color: 'var(--ink-3)', margin: 0 }}>
+                        Key terms, scenario practice, and mastery check · 15 min
+                      </p>
+                    </div>
+                    {vocabDone ? (
+                      <span style={{
+                        fontSize: '11px', fontWeight: 700, color: '#1a7a50',
+                        background: '#f0fdf6', border: '1px solid #bbf0d6',
+                        borderRadius: '20px', padding: '3px 10px', flexShrink: 0,
+                      }}>
+                        ✓ Done
+                      </span>
+                    ) : (
+                      <span style={{
+                        fontSize: '11px', fontWeight: 600, color: modMeta.color,
+                        background: `${modMeta.color}10`, border: `1px solid ${modMeta.color}30`,
+                        borderRadius: '20px', padding: '3px 10px', flexShrink: 0,
+                      }}>
+                        Start →
+                      </span>
+                    )}
+                  </div>
+                </Link>
+
+                {/* Cultural Vocabulary */}
+                <Link to={`/learn/${slug}/cultural-vocab`} style={{ textDecoration: 'none' }}>
+                  <div className="card" style={{
+                    borderLeft: `3px solid ${modMeta.color}`,
+                    display: 'flex', alignItems: 'center', gap: '14px',
+                    padding: '14px 16px', cursor: 'pointer',
                     transition: 'box-shadow .18s',
                   }}
                     onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,.08)' }}
                     onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none' }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <span style={{
-                        width: '28px', height: '28px', borderRadius: '50%',
-                        background: `${modMeta.color}15`, color: modMeta.color,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: '14px', flexShrink: 0,
-                      }}>
-                        ?
-                      </span>
-                      <div>
-                        <h4 style={{ fontFamily: 'var(--serif)', fontSize: '1rem', color: 'var(--ink)', margin: 0 }}>
-                          Practical scenarios
-                        </h4>
-                        <p style={{ fontSize: '12px', color: 'var(--ink-3)', margin: '2px 0 0 0' }}>
-                          {scenarioCount} scenario{scenarioCount !== 1 ? 's' : ''} — common friction points with diagnosis and response
-                        </p>
-                      </div>
+                    <span style={{ fontSize: '24px', flexShrink: 0 }}>🌐</span>
+                    <div style={{ flex: 1 }}>
+                      <h4 style={{ fontFamily: 'var(--serif)', fontSize: '1rem', color: 'var(--ink)', margin: '0 0 4px 0' }}>
+                        Five Cultural Terms
+                      </h4>
+                      {(() => {
+                        const cv = CULTURAL_VOCAB_BY_SLUG[slug]
+                        const hook = cv?.openingHook?.situation?.[0]
+                        if (hook && !culturalVocabDone) {
+                          const preview = hook.length > 110 ? hook.slice(0, 110).trimEnd() + '\u2026' : hook
+                          return (
+                            <p style={{ fontSize: '12px', color: 'var(--ink-3)', margin: 0, lineHeight: 1.5, fontStyle: 'italic' }}>
+                              {preview}
+                            </p>
+                          )
+                        }
+                        return (
+                          <p style={{ fontSize: '12px', color: 'var(--ink-3)', margin: 0 }}>
+                            Insider concepts with no clean English equivalent · 10 min
+                          </p>
+                        )
+                      })()}
                     </div>
+                    {culturalVocabDone ? (
+                      <span style={{
+                        fontSize: '11px', fontWeight: 700, color: '#1a7a50',
+                        background: '#f0fdf6', border: '1px solid #bbf0d6',
+                        borderRadius: '20px', padding: '3px 10px', flexShrink: 0,
+                      }}>
+                        ✓ Done
+                      </span>
+                    ) : (
+                      <span style={{
+                        fontSize: '11px', fontWeight: 600, color: modMeta.color,
+                        background: `${modMeta.color}10`, border: `1px solid ${modMeta.color}30`,
+                        borderRadius: '20px', padding: '3px 10px', flexShrink: 0,
+                        whiteSpace: 'nowrap',
+                      }}>
+                        Find out →
+                      </span>
+                    )}
                   </div>
                 </Link>
-              )}
-            </div>
+
+                {/* Practical scenarios */}
+                {scenarioCount > 0 && (
+                  <Link to={`/learn/${slug}/scenarios`} style={{ textDecoration: 'none' }}>
+                    <div className="card" style={{
+                      borderLeft: `3px solid ${modMeta.color}`,
+                      cursor: 'pointer',
+                      transition: 'box-shadow .18s',
+                    }}
+                      onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,.08)' }}
+                      onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none' }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span style={{
+                          width: '28px', height: '28px', borderRadius: '50%',
+                          background: `${modMeta.color}15`, color: modMeta.color,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontSize: '14px', flexShrink: 0,
+                        }}>
+                          ?
+                        </span>
+                        <div>
+                          <h4 style={{ fontFamily: 'var(--serif)', fontSize: '1rem', color: 'var(--ink)', margin: 0 }}>
+                            Practical scenarios
+                          </h4>
+                          <p style={{ fontSize: '12px', color: 'var(--ink-3)', margin: '2px 0 0 0' }}>
+                            {scenarioCount} scenario{scenarioCount !== 1 ? 's' : ''} — common friction points with diagnosis and response
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                )}
+              </div>
+            )}
           </>
         )}
       </div>

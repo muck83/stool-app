@@ -520,7 +520,7 @@ function MypCalculator({ data, lang }) {
   const boundary = data.en.boundaries.find(b => total >= b.min && total <= b.max)
   const grade = boundary ? boundary.grade : null
   const descriptor = grade ? data.en.descriptors.find(d => d.grade === grade) : null
-  const descriptorLabel = descriptor ? (lang === 'ar' ? (descriptor.ar || descriptor.label) : lang === 'zh' ? (descriptor.zh || descriptor.label) : lang === 'ko' ? (descriptor.ko || descriptor.label) : lang === 'vi' ? (descriptor.vi || descriptor.label) : descriptor.label) : '—'
+  const descriptorLabel = descriptor ? (lang === 'ar' ? (descriptor.ar || descriptor.label) : lang === 'zh' ? (descriptor.zh || descriptor.label) : lang === 'ko' ? descriptor.ko : descriptor.label) : '—'
 
   const gradeColor = grade >= 6 ? '#1D9E75' : grade >= 4 ? '#185FA5' : grade >= 2 ? '#BA7517' : '#C0392B'
 
@@ -618,7 +618,7 @@ function MypCalculator({ data, lang }) {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4, marginTop: 3 }}>
             {data.en.descriptors.map(desc => {
-              const label = lang === 'ar' ? (desc.ar || desc.label) : lang === 'zh' ? (desc.zh || desc.label) : lang === 'ko' ? (desc.ko || desc.label) : lang === 'vi' ? (desc.vi || desc.label) : desc.label
+              const label = lang === 'ar' ? (desc.ar || desc.label) : lang === 'zh' ? (desc.zh || desc.label) : lang === 'ko' ? desc.ko : desc.label
               return (
                 <div key={desc.grade} style={{ fontSize: 8.5, color: 'var(--ink-4)', textAlign: 'center', lineHeight: 1.3 }}>
                   {label}
@@ -647,7 +647,6 @@ const DP_SUBJECTS_EN = ['Subject 1 (HL)', 'Subject 2 (HL)', 'Subject 3 (HL)', 'S
 const DP_SUBJECTS_KO = ['과목 1 (HL)', '과목 2 (HL)', '과목 3 (HL)', '과목 4 (SL)', '과목 5 (SL)', '과목 6 (SL)']
 const DP_SUBJECTS_ZH = ['科目 1 (HL)', '科目 2 (HL)', '科目 3 (HL)', '科目 4 (SL)', '科目 5 (SL)', '科目 6 (SL)']
 const DP_SUBJECTS_AR = ['المادة 1 (HL)', 'المادة 2 (HL)', 'المادة 3 (HL)', 'المادة 4 (SL)', 'المادة 5 (SL)', 'المادة 6 (SL)']
-const DP_SUBJECTS_VI = ['Môn 1 (HL)', 'Môn 2 (HL)', 'Môn 3 (HL)', 'Môn 4 (SL)', 'Môn 5 (SL)', 'Môn 6 (SL)']
 const DP_HL = [true, true, true, false, false, false]
 const EE_TOK_GRADES = ['A', 'B', 'C', 'D', 'E']
 
@@ -674,7 +673,7 @@ function DpCalculator({ data, lang }) {
 
   const totalColor = passes ? '#1D9E75' : '#C0392B'
 
-  const subjectLabels = lang === 'ar' ? DP_SUBJECTS_AR : lang === 'zh' ? DP_SUBJECTS_ZH : lang === 'ko' ? DP_SUBJECTS_KO : lang === 'vi' ? DP_SUBJECTS_VI : DP_SUBJECTS_EN
+  const subjectLabels = lang === 'ar' ? DP_SUBJECTS_AR : lang === 'zh' ? DP_SUBJECTS_ZH : lang === 'ko' ? DP_SUBJECTS_KO : DP_SUBJECTS_EN
 
   return (
     <div style={{ border: '1px solid var(--border)', borderRadius: 'var(--r)', overflow: 'hidden', marginBottom: '1.5rem' }}>

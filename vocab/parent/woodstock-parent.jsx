@@ -140,7 +140,7 @@ export const woodstockParent = {
       goal:
         "US and UK admissions readers are not simply adding up exam scores. They are trying to understand whether a student will contribute to campus life, handle challenges independently, and make something of the opportunities available to them. Woodstock's Himalayan setting and residential community create formative experiences that day schools cannot replicate. A student with AP scores of 4–5 and a compelling WSD portfolio is a significantly stronger university applicant than a student with exam scores alone.",
       woodstockNote:
-        'The WSD is still being developed and refined. Woodstock will share more detail over the coming months. Ask the school for the most current information on WSD requirements and how the diploma will be presented in university applications.',
+        "The Woodstock School Diploma is a forward-looking framework that reflects Woodstock's distinctive strengths: its Himalayan setting, residential community, and tradition of whole-person education since 1854. The specific requirements and documentation standards are being finalised as the first WSD cohorts progress. Your university counsellor has the most current detail on how the WSD will be presented in applications.",
       whatToAsk: [
         '"How will the Woodstock School Diploma be documented in university applications?" — the university counsellor will have the current approach.',
         '"What specific experiences will my child need to document for the WSD, and how should they start thinking about this now?" — early awareness helps your child approach activities with intention.',
@@ -250,7 +250,7 @@ export const woodstockParent = {
     },
     {
       id: 'review-003',
-      title: 'The WhatsApp group',
+      title: 'Navigating the parent network',
       termsInPlay: ['No merit list', 'Boarding School Learning'],
       situation:
         "Three months after enrolment, you have been added to an informal WhatsApp group of Woodstock parents from India. The group is active: parents share grade comparisons ('my child got A in English — what did yours get?'), worries about the curriculum change from IB, concerns about whether IGCSE is recognised in India, and occasional criticism of specific teachers. One parent mentions their child is already working with a CBSE tutor for 'backup preparation.' You are unsure how much weight to give to the information in the group.",
