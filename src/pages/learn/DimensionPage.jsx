@@ -174,10 +174,58 @@ export default function DimensionPage() {
         {/* Breadcrumb */}
         <Link to={`/learn/${slug}`} style={{
           fontSize: '12px', color: 'var(--ink-4)', textDecoration: 'none',
-          display: 'inline-block', marginBottom: '16px',
+          display: 'inline-block', marginBottom: '12px',
         }}>
           ← {modMeta.country} module
         </Link>
+
+        {/* Dimension stepper */}
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: '4px',
+          marginBottom: '16px', flexWrap: 'wrap',
+        }}>
+          {allDims.map((d, idx) => {
+            const isCurrent  = d.id === dim.id
+            const isDone     = isCompleted(modMeta.id, d.id)
+            return (
+              <Link
+                key={d.id}
+                to={`/learn/${slug}/${d.dimension_number}`}
+                title={`D${d.dimension_number}: ${d.title}`}
+                style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}
+              >
+                <span style={{
+                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                  width: isCurrent ? 28 : 22, height: isCurrent ? 28 : 22,
+                  borderRadius: '50%',
+                  fontSize: isCurrent ? 11 : 10,
+                  fontWeight: isCurrent ? 700 : 500,
+                  background: isCurrent
+                    ? modMeta.color
+                    : isDone
+                      ? `${modMeta.color}22`
+                      : 'var(--surface-2)',
+                  color: isCurrent
+                    ? 'white'
+                    : isDone
+                      ? modMeta.color
+                      : 'var(--ink-4)',
+                  border: `1.5px solid ${isCurrent ? modMeta.color : isDone ? modMeta.color + '55' : 'var(--border)'}`,
+                  transition: 'all .15s',
+                  flexShrink: 0,
+                }}>
+                  {isDone && !isCurrent ? '✓' : `D${d.dimension_number}`}
+                </span>
+                {idx < allDims.length - 1 && (
+                  <span style={{ width: 12, height: 1.5, background: 'var(--border)', flexShrink: 0 }} />
+                )}
+              </Link>
+            )
+          })}
+          <span style={{ fontSize: 11, color: 'var(--ink-4)', marginLeft: 6 }}>
+            {currentIdx + 1} of {allDims.length}
+          </span>
+        </div>
 
         {/* Header card */}
         <div style={{

@@ -272,27 +272,29 @@ export default function SimulationPage() {
         transition: 'opacity .3s ease, transform .3s ease',
       }}>
 
+        {/* Breadcrumb */}
+        <button
+          onClick={handleBackWithConfirm}
+          style={{
+            background: 'none', border: 'none', padding: 0,
+            fontSize: '12px', color: 'var(--ink-4)', cursor: 'pointer',
+            display: 'inline-block', marginBottom: '12px',
+          }}
+        >
+          ← {modMeta.country} module
+        </button>
+
         {/* Header */}
         <div style={{
           display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '1.5rem',
         }}>
-          <button
-            onClick={handleBackWithConfirm}
-            style={{
-              background: 'none', border: 'none', fontSize: '16px',
-              cursor: 'pointer', color: modMeta.color, padding: '0',
-            }}
-            title="Back to module"
-          >
-            ←
-          </button>
           <h1 style={{
             fontFamily: 'var(--serif)', fontSize: '1.3rem', color: 'var(--ink)',
             margin: 0, flex: 1,
           }}>
             {simulation.title}
           </h1>
-          <Link to={`/learn/${slug}`} style={{
+          <Link to={`/learn/${slug}?tab=dimensions`} style={{
             fontSize: '12px', color: 'var(--ink-4)', textDecoration: 'none',
             whiteSpace: 'nowrap',
           }}>

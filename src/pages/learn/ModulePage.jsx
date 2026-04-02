@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useSearchParams } from 'react-router-dom'
 import { moduleBySlug } from '../../lib/slugMap.js'
 import { fetchModules, fetchDimensions, fetchScenarios, fetchSimulations } from '../../lib/pd/queries.js'
 import {
@@ -27,15 +27,14 @@ import { CULTURAL_VOCAB_BY_SLUG } from '../../../vocab/country-cultural-vocab.js
  * Tabs: Overview · Simulations · Dimensions · Vocab & More
  */
 
-// ─── Tab definitions ─────────────────────────────────────────────────────────
-const TABS = [
-  { id: 'overview',    label: 'Overview'    },
-  { id: 'simulations', label: 'Simulations' },
-  { id: 'dimensions',  label: 'Dimensions'  },
-  { id: 'vocab',       label: 'Vocab & More' },
-]
-
-function TabNav({ active, setActive, color }) {
+// ─── Tab navigation ───────────────────────────────────────────────────────────
+function TabNav({ active, setActive, color, counts }) {
+  const tabs = [
+    { id: 'overview',    label: 'Overview' },
+    { id: 'simulations', label: 'Simulations', count: counts?.sims },
+    { id: 'dimensions',  label: 'Dimensions',  count: counts?.dims },
+    { id: 'vocab',       label: 'Vocab & More' },
+  ]
   return (
     <div style={{
       borderBottom: '1px solid var(--border)',
@@ -44,24 +43,38 @@ function TabNav({ active, setActive, color }) {
       WebkitOverflowScrolling: 'touch',
     }}>
       <div style={{ display: 'flex', gap: 0, minWidth: 'max-content' }}>
-        {TABS.map(t => (
-          <button
-            key={t.id}
-            onClick={() => setActive(t.id)}
-            style={{
-              padding: '10px 16px',
-              fontSize: 13, fontWeight: 600,
-              border: 'none', cursor: 'pointer',
-              background: 'transparent',
-              color: active === t.id ? color : 'var(--ink-4)',
-              borderBottom: active === t.id ? `2px solid ${color}` : '2px solid transparent',
-              whiteSpace: 'nowrap',
-              transition: 'color .15s',
-            }}
-          >
-            {t.label}
-          </button>
-        ))}
+        {tabs.map(t => {
+          const isActive = active === t.id
+          return (
+            <button
+              key={t.id}
+              onClick={() => setActive(t.id)}
+              style={{
+                padding: '10px 16px',
+                fontSize: 13, fontWeight: 600,
+                border: 'none', cursor: 'pointer',
+                background: 'transparent',
+                color: isActive ? color : 'var(--ink-4)',
+                borderBottom: isActive ? `2px solid ${color}` : '2px solid transparent',
+                whiteSpace: 'nowrap',
+                transition: 'color .15s',
+                display: 'flex', alignItems: 'center', gap: 5,
+              }}
+            >
+              {t.label}
+              {t.count != null && (
+                <span style={{
+                  fontSize: 10.5, fontWeight: 700,
+                  padding: '1px 6px', borderRadius: 10,
+                  background: isActive ? `${color}18` : 'var(--surface-2)',
+                  color: isActive ? color : 'var(--ink-4)',
+                }}>
+                  {t.count.done}/{t.count.total}
+                </span>
+              )}
+            </button>
+          )
+        })}
       </div>
     </div>
   )
@@ -86,7 +99,10 @@ export default function ModulePage() {
   const [vocabDone, setVocabDone] = useState(false)
   const [culturalVocabDone, setCulturalVocabDone] = useState(false)
 
-  const [activeTab, setActiveTab] = useState('overview')
+  const [searchParams] = useSearchParams()
+  const VALID_TABS = ['overview', 'simulations', 'dimensions', 'vocab']
+  const initialTab = VALID_TABS.includes(searchParams.get('tab')) ? searchParams.get('tab') : 'overview'
+  const [activeTab, setActiveTab] = useState(initialTab)
   const [showResearch, setShowResearch] = useState(false)
 
   const [stickyVisible, setStickyVisible] = useState(false)
@@ -337,7 +353,15 @@ export default function ModulePage() {
             </div>
 
             {/* ── Tab navigation ── */}
-            <TabNav active={activeTab} setActive={setActiveTab} color={modMeta.color} />
+            <TabNav
+              active={activeTab}
+              setActive={setActiveTab}
+              color={modMeta.color}
+              counts={{
+                dims: { done: completedCount,      total: dimensions.length },
+                sims: { done: simsCompletedCount,  total: simulations.length },
+              }}
+            />
 
             {/* ══════════════════════════════════════════
                 TAB: OVERVIEW
