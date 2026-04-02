@@ -303,6 +303,25 @@ export async function adminFetchAll() {
   return data || []
 }
 
+export async function insertFeedback({ message, email }) {
+  if (!supabase) return { error: 'not-configured' }
+  const ip = await getClientIp()
+  const { data, error } = await supabase
+    .from('feedback')
+    .insert([{
+      message: message?.trim() || null,
+      email: email?.trim().toLowerCase() || null,
+      ip_address: ip,
+    }])
+    .select()
+    .single()
+  if (error) {
+    console.error('Feedback insert error:', error)
+    return { error: error.message }
+  }
+  return { data }
+}
+
 export async function adminUpdateStatus(id, status) {
   if (!supabase) return null
   const { error } = await supabase

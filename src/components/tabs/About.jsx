@@ -1,8 +1,13 @@
 ﻿// About.jsx
+import { useState } from 'react'
 import { useProfile } from '../../context/ProfileContext.jsx'
+import { insertFeedback } from '../../lib/supabase.js'
 
 export default function About() {
   const { setActiveTab } = useProfile()
+  const [msg, setMsg] = useState('')
+  const [replyEmail, setReplyEmail] = useState('')
+  const [status, setStatus] = useState('idle') // idle | sending | done | error
 
   return (
     <div className="tp active">
@@ -110,9 +115,66 @@ export default function About() {
         >
           Take the diagnostic
         </button>
-        <span style={{ fontSize: 12, color: 'var(--ink-4)', marginLeft: '.25rem' }}>
-          Questions or feedback: <a href="mailto:marktcrowell@gmail.com" style={{ color: 'var(--teal-dark)' }}>marktcrowell@gmail.com</a>
-        </span>
+      </div>
+
+      {/* Comment / feedback box */}
+      <div style={{ maxWidth: 660, marginTop: '2.5rem', paddingTop: '2rem', borderTop: '1px solid var(--border)' }}>
+        <div style={{ fontFamily: 'var(--serif)', fontSize: '1.1rem', marginBottom: '.75rem', color: 'var(--ink)' }}>
+          Say something
+        </div>
+        {status === 'done' ? (
+          <div style={{ fontSize: 13, color: 'var(--teal-dark)', lineHeight: 1.7 }}>
+            Got it — thanks for taking the time.
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '.6rem' }}>
+            <textarea
+              rows={4}
+              placeholder="Questions, corrections, ideas, complaints — all welcome."
+              value={msg}
+              onChange={e => setMsg(e.target.value)}
+              style={{
+                width: '100%', boxSizing: 'border-box',
+                padding: '.65rem .75rem', fontSize: 13, lineHeight: 1.65,
+                border: '1px solid var(--border)', borderRadius: 'var(--r)',
+                background: 'var(--surface)', color: 'var(--ink)',
+                resize: 'vertical', fontFamily: 'inherit',
+                outline: 'none',
+              }}
+            />
+            <input
+              type="email"
+              placeholder="Email (optional — only if you want a reply)"
+              value={replyEmail}
+              onChange={e => setReplyEmail(e.target.value)}
+              style={{
+                padding: '.55rem .75rem', fontSize: 13,
+                border: '1px solid var(--border)', borderRadius: 'var(--r)',
+                background: 'var(--surface)', color: 'var(--ink)',
+                fontFamily: 'inherit', outline: 'none',
+              }}
+            />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <button
+                className="btn btn-primary"
+                style={{ fontSize: 13 }}
+                disabled={!msg.trim() || status === 'sending'}
+                onClick={async () => {
+                  setStatus('sending')
+                  const result = await insertFeedback({ message: msg, email: replyEmail })
+                  setStatus(result.error ? 'error' : 'done')
+                }}
+              >
+                {status === 'sending' ? 'Sending…' : 'Send'}
+              </button>
+              {status === 'error' && (
+                <span style={{ fontSize: 12, color: '#c0392b' }}>
+                  Something went wrong — try again in a moment.
+                </span>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
     </div>
