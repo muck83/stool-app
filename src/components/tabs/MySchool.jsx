@@ -4,7 +4,21 @@ import { useProfile } from '../../context/ProfileContext.jsx'
 import { SALARY_DB_SEED } from '../../data/salaryDb.js'
 import { HOF } from '../../data/hofstede.js'
 import SchoolAutocomplete from '../SchoolAutocomplete.jsx'
-import { insertSchoolReview, searchSchoolReviews, fetchRatedSchools } from '../../lib/supabase.js'
+import { insertSchoolReview, searchSchoolReviews, fetchRatedSchools, fetchReviewsByIds } from '../../lib/supabase.js'
+
+const MY_REVIEW_IDS_KEY = 'mystool_my_review_ids'
+
+function loadMyReviewIds() {
+  try { return JSON.parse(localStorage.getItem(MY_REVIEW_IDS_KEY) || '[]') } catch { return [] }
+}
+function saveMyReviewId(id) {
+  try {
+    const ids = loadMyReviewIds()
+    if (!ids.includes(id)) {
+      localStorage.setItem(MY_REVIEW_IDS_KEY, JSON.stringify([id, ...ids].slice(0, 20)))
+    }
+  } catch {}
+}
 import BigFiveQuiz from '../BigFiveQuiz.jsx'
 import { loadB5, getB5Labels, b5Similarity } from '../../data/bigFiveQuiz.js'
 
@@ -557,6 +571,13 @@ export default function MySchool() {
       })
       setRatedSchools(Object.values(grouped))
     })
+    // Restore this device's past reviews from Supabase
+    const savedIds = loadMyReviewIds()
+    if (savedIds.length > 0) {
+      fetchReviewsByIds(savedIds).then(data => {
+        if (data.length > 0) setReviews(data)
+      })
+    }
   }, [])
 
   const hasSchool = !!(profile.school && profile.cc)
@@ -610,7 +631,13 @@ export default function MySchool() {
     } else {
       const review = { school, country, answers: { ...answers }, hours, noticePeriod, big_five: loadB5() }
       setReviews(r => [...r, review])
-      insertSchoolReview(review)
+      insertSchoolReview(review).then(saved => {
+        if (saved?.id) {
+          saveMyReviewId(saved.id)
+          // Swap the optimistic local copy for the server record (has id + created_at)
+          setReviews(r => r.map((x, i) => i === r.length - 1 ? saved : x))
+        }
+      })
       // Update the profile's school score if reviewing own school
       if (school === profile.school) {
         const scores = Object.values(answers).map(a => a?.score).filter(s => s != null)

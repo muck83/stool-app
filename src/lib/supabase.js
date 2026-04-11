@@ -303,6 +303,19 @@ export async function adminFetchAll() {
   return data || []
 }
 
+export async function fetchReviewsByIds(ids) {
+  if (!supabase || !ids || ids.length === 0) return []
+  try {
+    const { data, error } = await supabase
+      .from('school_reviews')
+      .select('*')
+      .in('id', ids)
+      .order('created_at', { ascending: false })
+    if (error) { console.error('fetchReviewsByIds error:', error); return [] }
+    return data || []
+  } catch { return [] }
+}
+
 export async function insertFeedback({ message, email }) {
   if (!supabase) return { error: 'not-configured' }
   const ip = await getClientIp()
