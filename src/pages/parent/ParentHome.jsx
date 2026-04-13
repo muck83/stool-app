@@ -145,37 +145,6 @@ export default function ParentHome() {
         })}
       </div>
 
-
-      {/* PTM Prep Tool CTA */}
-      <Link
-        to="/parent/ptm-prep"
-        style={{
-          textDecoration: 'none',
-          display: 'flex', alignItems: 'center', gap: '1rem',
-          padding: '1.1rem 1.4rem', marginBottom: '1rem',
-          border: '1.5px solid var(--teal)',
-          borderRadius: 'var(--r)',
-          background: 'var(--teal-light, #E8F7F3)',
-          transition: 'box-shadow .15s',
-        }}
-        onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 2px 12px #1D9E7520' }}
-        onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none' }}
-      >
-        <div style={{ fontSize: 28, lineHeight: 1, flexShrink: 0 }}>📋</div>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--ink)', marginBottom: 3 }}>
-            PTM Prep Tool
-          </div>
-          <div style={{ fontSize: 13, color: 'var(--ink-3)', lineHeight: 1.6 }}>
-            Generate culturally-tuned questions to bring to your parent–teacher meeting.
-            Select your country, programme, subjects, and any specific concerns.
-          </div>
-          <div style={{ marginTop: 8, fontSize: 12, fontWeight: 600, color: 'var(--teal)' }}>
-            Prepare now →
-          </div>
-        </div>
-      </Link>
-
       {/* Coming soon */}
       <div style={{
         padding: '1rem 1.1rem',

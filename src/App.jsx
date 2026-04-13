@@ -1,12 +1,4 @@
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
-import { useEffect } from 'react'
-
-/** Scroll to top on every route change. */
-function ScrollToTop() {
-  const { pathname } = useLocation()
-  useEffect(() => { window.scrollTo(0, 0) }, [pathname])
-  return null
-}
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { ProfileProvider, useProfile } from './context/ProfileContext.jsx'
 import Onboarding from './components/Onboarding/index.jsx'
 import Nav from './components/Nav.jsx'
@@ -22,7 +14,6 @@ import Culture from './components/tabs/Culture.jsx'
 import Financial from './components/tabs/Financial.jsx'
 import Research from './components/tabs/Research.jsx'
 import About from './components/tabs/About.jsx'
-import Profile from './components/tabs/Profile.jsx'
 import Admin from './components/Admin.jsx'
 
 // PD Learn pages
@@ -38,7 +29,6 @@ import VocabPage from './pages/learn/VocabPage.jsx'
 import CulturalVocabPage from './pages/learn/CulturalVocabPage.jsx'
 import ParentModulePage from './pages/parent/ParentModulePage.jsx'
 import WoodstockParentPage from './pages/parent/WoodstockParentPage.jsx'
-import PTMPrepPage from './pages/parent/PTMPrepPage.jsx'
 
 const TABS = [
   { id: 'overview',    label: 'Overview' },
@@ -64,7 +54,6 @@ const TAB_COMPONENTS = {
   financial:  Financial,
   research:   Research,
   about:      About,
-  profile:    Profile,
 }
 
 function Dashboard() {
@@ -97,7 +86,6 @@ function StoolApp() {
 export default function App() {
   return (
     <BrowserRouter>
-      <ScrollToTop />
       <Routes>
         {/* PD Learn routes */}
         <Route path="/learn" element={<PlatformHome />} />
@@ -110,7 +98,6 @@ export default function App() {
         <Route path="/learn/:slug/vocab" element={<VocabPage />} />
         <Route path="/learn/:slug/cultural-vocab" element={<CulturalVocabPage />} />
         <Route path="/parent/woodstock" element={<WoodstockParentPage />} />
-        <Route path="/parent/ptm-prep" element={<PTMPrepPage />} />
         <Route path="/parent/:slug" element={<ParentModulePage />} />
         <Route path="/learn/:slug/:dimension" element={<DimensionPage />} />
 

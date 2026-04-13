@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
+import { MYP_SUBJECTS, getBand, getSubjectLabel } from '../../data/mypCriteria.js'
 import { koreaIbParent } from '../../../vocab/parent/korea-ib-parent.jsx'
 import { indiaIbParent } from '../../../vocab/parent/india-ib-parent.jsx'
 import { chinaIbParent } from '../../../vocab/parent/china-ib-parent.jsx'
@@ -515,33 +516,73 @@ function SectionNav({ sections, active, visited, lang, onChange, recommended }) 
 function MypCalculator({ data, lang }) {
   const d = data[lang]
   const [criteria, setCriteria] = useState({ A: 0, B: 0, C: 0, D: 0 })
+  const [selectedSubjectId, setSelectedSubjectId] = useState('')
+
+  const selectedSubject = MYP_SUBJECTS.find(s => s.id === selectedSubjectId) || null
 
   const total = Object.values(criteria).reduce((s, v) => s + v, 0)
   const boundary = data.en.boundaries.find(b => total >= b.min && total <= b.max)
   const grade = boundary ? boundary.grade : null
   const descriptor = grade ? data.en.descriptors.find(d => d.grade === grade) : null
-  const descriptorLabel = descriptor ? (lang === 'ar' ? (descriptor.ar || descriptor.label) : lang === 'zh' ? (descriptor.zh || descriptor.label) : lang === 'ko' ? descriptor.ko : descriptor.label) : '—'
+  const descriptorLabel = descriptor ? (lang === 'ar' ? (descriptor.ar || descriptor.label) : lang === 'zh' ? (descriptor.zh || descriptor.label) : lang === 'ko' ? (descriptor.ko || descriptor.label) : lang === 'vi' ? (descriptor.vi || descriptor.label) : descriptor.label) : '—'
 
   const gradeColor = grade >= 6 ? '#1D9E75' : grade >= 4 ? '#185FA5' : grade >= 2 ? '#BA7517' : '#C0392B'
 
-  const CriterionSlider = ({ label, val, onChange }) => (
-    <div style={{ marginBottom: '1rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink-2)' }}>
-          {lang === 'ar' ? `المعيار ${label}` : lang === 'zh' ? `维度 ${label}` : lang === 'ko' ? `준거 ${label}` : `Criterion ${label}`}
-        </span>
-        <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--teal-dark)', minWidth: 32, textAlign: 'right' }}>{val} / 8</span>
+  const subjectSelectLabel = {
+    ar: 'اختر المادة لعرض أسماء المعايير',
+    zh: '选择科目以显示维度名称',
+    ko: '준거 이름 표시를 위해 과목 선택',
+    vi: 'Chọn môn để xem tên tiêu chí',
+    en: 'Select subject to see criterion names',
+  }
+  const subjectPlaceholder = {
+    ar: '— اختر مادة (اختياري) —',
+    zh: '— 选择科目（可选）—',
+    ko: '— 과목 선택 (선택 사항) —',
+    vi: '— Chọn môn (tùy chọn) —',
+    en: '— Select subject (optional) —',
+  }
+
+  const CriterionSlider = ({ label, val, onChange }) => {
+    const crit = selectedSubject ? selectedSubject.criteria[label] : null
+    const band = crit ? getBand(crit.bands, val) : null
+    const critName = crit
+      ? (lang === 'ar' ? crit.nameAr : crit.name)
+      : null
+
+    return (
+      <div style={{ marginBottom: '1.1rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
+          <div>
+            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink-2)' }}>
+              {lang === 'ar' ? `المعيار ${label}` : lang === 'zh' ? `维度 ${label}` : lang === 'ko' ? `준거 ${label}` : `Criterion ${label}`}
+            </span>
+            {critName && (
+              <span style={{ fontSize: 11, color: 'var(--ink-4)', marginLeft: 6 }}>— {critName}</span>
+            )}
+          </div>
+          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--teal-dark)', minWidth: 32, textAlign: 'right' }}>{val} / 8</span>
+        </div>
+        <input
+          type="range" min={0} max={8} value={val}
+          onChange={e => onChange(parseInt(e.target.value))}
+          style={{ width: '100%', accentColor: 'var(--teal)', cursor: 'pointer' }}
+        />
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--ink-4)', marginTop: 2 }}>
+          <span>0</span><span>4</span><span>8</span>
+        </div>
+        {band && val > 0 && (
+          <div style={{
+            marginTop: 5, fontSize: 11.5, color: 'var(--ink-3)', lineHeight: 1.55,
+            padding: '5px 9px', background: 'var(--surface-2)',
+            borderLeft: `3px solid ${gradeColor}`, borderRadius: '0 4px 4px 0',
+          }}>
+            {lang === 'ar' && band.ar ? band.ar : band.en}
+          </div>
+        )}
       </div>
-      <input
-        type="range" min={0} max={8} value={val}
-        onChange={e => onChange(parseInt(e.target.value))}
-        style={{ width: '100%', accentColor: 'var(--teal)', cursor: 'pointer' }}
-      />
-      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--ink-4)', marginTop: 2 }}>
-        <span>0</span><span>4</span><span>8</span>
-      </div>
-    </div>
-  )
+    )
+  }
 
   return (
     <div style={{ border: '1px solid var(--border)', borderRadius: 'var(--r)', overflow: 'hidden', marginBottom: '1.5rem' }}>
@@ -555,6 +596,30 @@ function MypCalculator({ data, lang }) {
       </div>
 
       <div style={{ padding: '1.1rem 1.2rem' }}>
+        {/* Subject selector — optional, unlocks per-criterion names + band descriptions */}
+        <div style={{ marginBottom: '1rem' }}>
+          <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.05em', display: 'block', marginBottom: 4 }}>
+            {subjectSelectLabel[lang] || subjectSelectLabel.en}
+          </label>
+          <select
+            value={selectedSubjectId}
+            onChange={e => setSelectedSubjectId(e.target.value)}
+            style={{
+              width: '100%', padding: '6px 10px', fontSize: 13,
+              border: '1px solid var(--border)', borderRadius: 6,
+              background: 'var(--surface)', color: 'var(--ink)',
+              cursor: 'pointer', appearance: 'auto',
+            }}
+          >
+            <option value="">{subjectPlaceholder[lang] || subjectPlaceholder.en}</option>
+            {MYP_SUBJECTS.map(s => (
+              <option key={s.id} value={s.id}>
+                {lang === 'ar' ? s.labelAr : lang === 'zh' ? (s.labelZh || s.label) : lang === 'ko' ? (s.labelKo || s.label) : lang === 'vi' ? (s.labelVi || s.label) : s.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
         {['A', 'B', 'C', 'D'].map(l => (
           <CriterionSlider key={l} label={l} val={criteria[l]}
             onChange={v => setCriteria(prev => ({ ...prev, [l]: v }))} />
@@ -618,7 +683,7 @@ function MypCalculator({ data, lang }) {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4, marginTop: 3 }}>
             {data.en.descriptors.map(desc => {
-              const label = lang === 'ar' ? (desc.ar || desc.label) : lang === 'zh' ? (desc.zh || desc.label) : lang === 'ko' ? desc.ko : desc.label
+              const label = lang === 'ar' ? (desc.ar || desc.label) : lang === 'zh' ? (desc.zh || desc.label) : lang === 'ko' ? (desc.ko || desc.label) : lang === 'vi' ? (desc.vi || desc.label) : desc.label
               return (
                 <div key={desc.grade} style={{ fontSize: 8.5, color: 'var(--ink-4)', textAlign: 'center', lineHeight: 1.3 }}>
                   {label}
@@ -647,6 +712,7 @@ const DP_SUBJECTS_EN = ['Subject 1 (HL)', 'Subject 2 (HL)', 'Subject 3 (HL)', 'S
 const DP_SUBJECTS_KO = ['과목 1 (HL)', '과목 2 (HL)', '과목 3 (HL)', '과목 4 (SL)', '과목 5 (SL)', '과목 6 (SL)']
 const DP_SUBJECTS_ZH = ['科目 1 (HL)', '科目 2 (HL)', '科目 3 (HL)', '科目 4 (SL)', '科目 5 (SL)', '科目 6 (SL)']
 const DP_SUBJECTS_AR = ['المادة 1 (HL)', 'المادة 2 (HL)', 'المادة 3 (HL)', 'المادة 4 (SL)', 'المادة 5 (SL)', 'المادة 6 (SL)']
+const DP_SUBJECTS_VI = ['Môn 1 (HL)', 'Môn 2 (HL)', 'Môn 3 (HL)', 'Môn 4 (SL)', 'Môn 5 (SL)', 'Môn 6 (SL)']
 const DP_HL = [true, true, true, false, false, false]
 const EE_TOK_GRADES = ['A', 'B', 'C', 'D', 'E']
 
@@ -673,7 +739,7 @@ function DpCalculator({ data, lang }) {
 
   const totalColor = passes ? '#1D9E75' : '#C0392B'
 
-  const subjectLabels = lang === 'ar' ? DP_SUBJECTS_AR : lang === 'zh' ? DP_SUBJECTS_ZH : lang === 'ko' ? DP_SUBJECTS_KO : DP_SUBJECTS_EN
+  const subjectLabels = lang === 'ar' ? DP_SUBJECTS_AR : lang === 'zh' ? DP_SUBJECTS_ZH : lang === 'ko' ? DP_SUBJECTS_KO : lang === 'vi' ? DP_SUBJECTS_VI : DP_SUBJECTS_EN
 
   return (
     <div style={{ border: '1px solid var(--border)', borderRadius: 'var(--r)', overflow: 'hidden', marginBottom: '1.5rem' }}>
@@ -826,22 +892,140 @@ function DpCalculator({ data, lang }) {
   )
 }
 
+
+// ─── AP Score Table ───────────────────────────────────────────────────────────
+function APScoreTable({ data, lang }) {
+  const d = data[lang] || data.en
+  const [selectedScore, setSelectedScore] = useState(null)
+
+  const scoreColors = { 5: '#1D9E75', 4: '#185FA5', 3: '#BA7517', 2: '#C0392B', 1: '#7F8C8D' }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+
+      {/* Score scale interactive picker */}
+      <div style={{ border: '1px solid var(--border)', borderRadius: 'var(--r)', overflow: 'hidden' }}>
+        <div style={{ padding: '.875rem 1.2rem', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)' }}>
+          <div style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--ink)' }}>
+            {lang === 'vi' ? 'Thang điểm 1–5 & ý nghĩa tín chỉ' : 'Score scale 1–5 & credit meaning'}
+          </div>
+          <div style={{ fontSize: 11.5, color: 'var(--ink-4)', marginTop: 3 }}>
+            {data.en.scoresNote}
+          </div>
+        </div>
+        <div style={{ padding: '1rem 1.2rem' }}>
+          {/* Score chips */}
+          <div style={{ display: 'flex', gap: 8, marginBottom: '1rem' }}>
+            {data.en.scores.map(s => {
+              const color = scoreColors[s.score]
+              const active = selectedScore === s.score
+              return (
+                <button
+                  key={s.score}
+                  onClick={() => setSelectedScore(active ? null : s.score)}
+                  style={{
+                    flex: 1, padding: '10px 4px',
+                    borderRadius: 8, cursor: 'pointer', border: 'none',
+                    background: active ? color : `${color}18`,
+                    color: active ? 'white' : color,
+                    transition: 'background .12s, color .12s',
+                  }}
+                >
+                  <div style={{ fontSize: 22, fontWeight: 800, lineHeight: 1 }}>{s.score}</div>
+                  <div style={{ fontSize: 9, marginTop: 3, opacity: active ? .9 : .7, fontWeight: 600, textTransform: 'uppercase' }}>
+                    {lang === 'vi' ? s.vi : s.label}
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+          {/* Score detail */}
+          {selectedScore && (() => {
+            const s = data.en.scores.find(sc => sc.score === selectedScore)
+            const color = scoreColors[selectedScore]
+            return (
+              <div style={{
+                padding: '1rem', borderRadius: 'var(--r)',
+                background: `${color}10`, border: `1px solid ${color}33`,
+                borderLeft: `4px solid ${color}`,
+              }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color, marginBottom: 6 }}>
+                  {lang === 'vi' ? s.vi : s.label}
+                </div>
+                <div style={{ fontSize: 13, color: 'var(--ink-2)', lineHeight: 1.65 }}>
+                  {lang === 'vi' ? s.creditVi : s.creditEn}
+                </div>
+              </div>
+            )
+          })()}
+          {!selectedScore && (
+            <div style={{ fontSize: 12, color: 'var(--ink-4)', textAlign: 'center', padding: '6px 0' }}>
+              {lang === 'vi' ? 'Chọn điểm số để xem ý nghĩa tín chỉ' : 'Select a score to see credit meaning'}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* High-value subjects */}
+      <div style={{ border: '1px solid var(--border)', borderRadius: 'var(--r)', overflow: 'hidden' }}>
+        <div style={{ padding: '.875rem 1.2rem', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)' }}>
+          <div style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--ink)' }}>
+            {lang === 'vi' ? 'Các môn AP có giá trị tín chỉ cao' : 'High-value AP subjects for credit'}
+          </div>
+          <div style={{ fontSize: 11.5, color: 'var(--ink-4)', marginTop: 3 }}>
+            {lang === 'vi'
+              ? 'Các môn phổ biến tại các trường AP ở Việt Nam với mức công nhận tín chỉ mạnh nhất'
+              : 'Subjects common at Vietnam AP schools with the strongest credit recognition'}
+          </div>
+        </div>
+        <div style={{ padding: '.75rem 1.2rem 1.2rem' }}>
+          {data.en.highValueSubjects.map((s, i) => (
+            <div key={i} style={{
+              padding: '.8rem 0',
+              borderBottom: i < data.en.highValueSubjects.length - 1 ? '1px solid var(--border)' : 'none',
+            }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink)', marginBottom: 4 }}>
+                {lang === 'vi' ? s.subjectVi : s.subject}
+              </div>
+              <div style={{ fontSize: 12.5, color: 'var(--ink-3)', lineHeight: 1.65 }}>
+                {lang === 'vi' ? s.noteVi : s.noteEn}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Watch out */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        {data.en.watchOut.map((note, i) => (
+          <div key={i} style={{
+            fontSize: 12, color: 'var(--ink-3)', lineHeight: 1.6,
+            paddingLeft: 10, borderLeft: '2px solid #E67E22',
+          }}>{note}</div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // ─── Grading Section ──────────────────────────────────────────────────────────
 function GradingSection({ gradingSystem, lang }) {
+  const hasAP = !!gradingSystem.ap
   const [tab, setTab] = useState('myp')
-  const g = gradingSystem[tab]
+  const tabs = hasAP ? ['myp', 'dp', 'ap'] : ['myp', 'dp']
+  const g = tab === 'ap' ? gradingSystem.ap : gradingSystem[tab]
 
   return (
     <div>
       {/* Tab switcher */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: '1.25rem' }}>
-        {['myp', 'dp'].map(t => (
+      <div style={{ display: 'flex', gap: 8, marginBottom: '1.25rem', flexWrap: 'wrap' }}>
+        {tabs.map(t => (
           <button key={t} onClick={() => setTab(t)} style={{
             padding: '6px 20px', fontSize: 13, fontWeight: 600,
             borderRadius: 20, cursor: 'pointer',
-            background: tab === t ? 'var(--teal)' : 'var(--surface-2)',
+            background: tab === t ? (t === 'ap' ? '#E67E22' : 'var(--teal)') : 'var(--surface-2)',
             color: tab === t ? 'white' : 'var(--ink-3)',
-            border: `1px solid ${tab === t ? 'var(--teal)' : 'var(--border)'}`,
+            border: `1px solid ${tab === t ? (t === 'ap' ? '#E67E22' : 'var(--teal)') : 'var(--border)'}`,
             transition: 'background .15s, color .15s',
           }}>
             {t.toUpperCase()}
@@ -850,18 +1034,22 @@ function GradingSection({ gradingSystem, lang }) {
       </div>
 
       <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--ink)', marginBottom: '.75rem' }}>
-        {g[lang].title}
+        {g[lang]?.title || g.en.title}
       </div>
       <p style={{ fontSize: 13.5, color: 'var(--ink-2)', lineHeight: 1.75, marginBottom: '1rem' }}>
-        {g[lang].intro}
+        {g[lang]?.intro || g.en.intro}
       </p>
-      <p style={{ fontSize: 13, color: 'var(--ink-3)', lineHeight: 1.7, marginBottom: '1.5rem' }}>
-        {tab === 'myp' ? g[lang].criteriaNote : g[lang].subjectStructure}
-      </p>
+      {tab !== 'ap' && (
+        <p style={{ fontSize: 13, color: 'var(--ink-3)', lineHeight: 1.7, marginBottom: '1.5rem' }}>
+          {tab === 'myp' ? g[lang].criteriaNote : g[lang].subjectStructure}
+        </p>
+      )}
 
       {tab === 'myp'
         ? <MypCalculator data={gradingSystem.myp} lang={lang} />
-        : <DpCalculator data={gradingSystem.dp} lang={lang} />
+        : tab === 'dp'
+        ? <DpCalculator data={gradingSystem.dp} lang={lang} />
+        : <APScoreTable data={gradingSystem.ap} lang={lang} />
       }
     </div>
   )
@@ -1070,203 +1258,7 @@ export default function ParentModulePage() {
                   : lang === 'ko' ? `${SECTIONS.find(s => s.id === recommended)?.ko}로 이동 →`
                   : `Go to ${SECTIONS.find(s => s.id === recommended)?.en} →`}
               </button>
-            </div>
-          )}
 
-          <HookSection hook={activity.openingHook} lang={lang} />
-          <SectionFooter />
-        </div>
-      )}
-
-      {/* ── CORE CONCEPTS ───────────────────────────────────────────────── */}
-      {activeSection === 'concepts' && (
-        <div>
-          <p style={{ fontSize: 13.5, color: 'var(--ink-3)', lineHeight: 1.65, marginBottom: '1.25rem' }}>
-            {lang === 'zh'
-              ? '五个让IB新手家长倍感困惑的概念，以及IB体系如此设计的原因。每张卡片先呈现一个完全合理的顾虑，再揭示学校实际在做什么，以及这与您的目标有何关联。'
-              : lang === 'ko' ? '학부모들이 자주 혼란스러워하는 다섯 가지 개념과 IB 방식이 그렇게 설계된 이유입니다. 각 카드는 완전히 이해되는 걱정을 보여주고, 학교가 실제로 하고 있는 일과 그것이 목표와 어떻게 연결되는지를 설명합니다.'
-              : lang === 'ar' ? 'خمسة مفاهيم كثيراً ما تُحيّر الآباء الجدد على IB — ولماذا صُمّم نهج IB بهذه الطريقة. تُظهر كل بطاقة قلقاً مفهوماً تماماً، ثم تكشف ما تفعله المدرسة فعلياً وكيف يرتبط بأهدافك.'
-              : 'Five concepts that often challenge parents new to IB — and why the IB approach is designed the way it is. Each card shows a concern that makes complete sense, then reveals what the school is actually doing and how it connects to your goals.'}
-          </p>
-          {activeStage && (
-            <div style={{
-              marginBottom: '1.25rem', padding: '.625rem 1rem', borderRadius: 'var(--r)',
-              background: STAGE_COLORS[activeStage] + '12',
-              border: `1px solid ${STAGE_COLORS[activeStage]}33`,
-              fontSize: 12, color: STAGE_COLORS[activeStage], fontWeight: 500,
-            }}>
-              {lang === 'zh'
-                ? '带有"★ 当前重要"标记的卡片最值得关注。'
-                : lang === 'ko' ? '"★ 지금 중요" 배지가 있는 카드가 현재 단계에서 가장 중요합니다.'
-                : lang === 'ar' ? 'البطاقات التي تحمل شارة "★ مهم الآن" هي الأهم لمرحلتك الحالية.'
-                : 'Cards with a "★ Relevant now" badge are most important for your current stage.'}
-            </div>
-          )}
-          {activity.cards.map((card, i) => (
-            <ConceptCard key={card.id} card={card} lang={lang} index={i} activeStage={activeStage} whatToAskNote={activity.meta[lang]?.whatToAskNote} />
-          ))}
-          <SectionFooter />
-        </div>
-      )}
-
-      {/* ── GRADE SYSTEM ────────────────────────────────────────────────── */}
-      {activeSection === 'grades' && activity.gradingSystem && (
-        <div>
-          <p style={{ fontSize: 13.5, color: 'var(--ink-3)', lineHeight: 1.65, marginBottom: '1.25rem' }}>
-            {lang === 'zh'
-              ? 'IB成绩既不是百分制，也不是排名。使用计算器准确了解MYP和DP分数的构成，以及它们对大学申请的真正意义。'
-              : lang === 'ko'
-              ? 'IB 성적은 백분율도 석차도 아닙니다. 계산기를 사용하여 MYP와 DP 점수가 어떻게 구성되는지, 그리고 대학교 입시에서 실제로 무엇을 의미하는지 정확히 이해해 보세요.'
-              : lang === 'ar' ? 'درجات IB ليست نسباً مئوية وليست ترتيباً. استخدم الحاسبات لتفهم بدقة كيف تُبنى درجات MYP وDP — وماذا تعني فعلياً لطلبات الجامعة.'
-              : 'IB grades are not percentages and they are not ranks. Use the calculators to understand exactly how MYP and DP scores are built — and what they actually mean for university applications.'}
-          </p>
-
-          {/* Before you calculate callout */}
-          <div style={{
-            marginBottom: '1.5rem', padding: '1rem 1.1rem',
-            background: 'var(--surface-2)', borderRadius: 'var(--r)',
-            border: '1px solid var(--border)', borderLeft: '3px solid var(--teal)',
-          }}>
-            <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 8 }}>
-              {lang === 'ar' ? 'الأساسيات — قبل استخدام الحاسبات' : lang === 'zh' ? '基础知识 — 使用计算器前必读' : lang === 'ko' ? '계산기 사용 전 기본 내용' : 'The basics — before you use the calculators'}
-            </div>
-            {lang === 'en' ? (
-              <div style={{ fontSize: 13, color: 'var(--ink-2)', lineHeight: 1.7 }}>
-                <strong>MYP (Years 7–11):</strong> Every subject is assessed on four criteria (A, B, C, D), each out of 8. They add up to a total out of 32, which converts to a final grade of 1–7. The criteria measure different skills in each subject — in Maths, Criterion A is "Knowing and Understanding"; Criterion D is "Applying Maths in Real Life." Your child's report shows each criterion separately, which tells you precisely where to focus.
-                <br /><br />
-                <strong>DP (Years 12–13):</strong> Six subjects are each graded 1–7. On top of that, the Extended Essay and Theory of Knowledge contribute up to 3 bonus points. Total out of 45. Most competitive universities require 36–40+.
-              </div>
-            ) : lang === 'ar' ? (
-              <div style={{ fontSize: 13, color: 'var(--ink-2)', lineHeight: 1.7 }}>
-                <strong>MYP (الصفوف 7–11):</strong> تُقيَّم كل مادة وفق أربعة معايير (A وB وC وD)، كل منها من 8 درجات. يُجمع مجموعها للحصول على إجمالي من 32، يُحوَّل إلى درجة نهائية من 1–7. تقيس المعايير مهارات مختلفة في كل مادة — في الرياضيات، المعيار A هو «المعرفة والفهم»، والمعيار D هو «تطبيق الرياضيات في الحياة الواقعية». يُظهر تقرير طفلك كل معيار على حدة، مما يُخبرك بدقة أين تركّز.
-                <br /><br />
-                <strong>DP (الصفوف 12–13):</strong> تُقيَّم ست مواد من 1–7. علاوةً على ذلك، تُسهم المقالة الموسّعة ونظرية المعرفة بما يصل إلى 3 نقاط إضافية. المجموع الكلي من 45. تشترط معظم الجامعات التنافسية 36–40 نقطة أو أكثر.
-              </div>
-            ) : lang === 'zh' ? (
-              <div style={{ fontSize: 13, color: 'var(--ink-2)', lineHeight: 1.7 }}>
-                <strong>MYP（7–11年级）：</strong>每门学科按四个维度（A、B、C、D）进行评估，每个维度最高8分，总分上限是32分，最终转换为1–7等级。不同学科的维度衡量不同技能——数学中维度A是“知识与理解”，维度D是“将数学应用于现实情境”。成绩单上会分别显示各维度得分，让您清楚了解需要重点关注的方向。
-                <br /><br />
-                <strong>DP（12–13年级）：</strong>六门学科各自以1–7分评分。此外，课题论文（EE）和知识论（ToK）最多可贡献3分额外加分。总分上限是45分。大多数竞争激烈的大学要求36–40分以上。
-              </div>
-            ) : (
-              <div style={{ fontSize: 13, color: 'var(--ink-2)', lineHeight: 1.7 }}>
-                <strong>MYP (7~11학년):</strong> 모든 과목은 네 가지 준거(A, B, C, D)로 평가됩니다. 각 준거는 8점 만점이며 합산하면 32점 만점의 총점이 됩니다. 이것이 최종 1~7등급으로 변환됩니다. 준거는 과목마다 다른 기술을 측정합니다. 수학에서 준거 A는 "지식과 이해", 준거 D는 "실생활 맥락에서의 수학 적용"입니다. 자녀의 성적표에는 각 준거가 별도로 표시되어 어디에 집중해야 하는지 정확히 알 수 있습니다.
-                <br /><br />
-                <strong>DP (12~13학년):</strong> 여섯 과목이 각 1~7점으로 평가됩니다. 여기에 소논문과 지식이론이 최대 3점의 보너스 점수를 추가합니다. 45점 만점입니다. 대부분의 경쟁력 있는 대학교는 36~40점 이상을 요구합니다.
-              </div>
-            )}
-          </div>
-
-          <GradingSection gradingSystem={activity.gradingSystem} lang={lang} />
-          <SectionFooter />
-        </div>
-      )}
-
-      {/* ── PYP ─────────────────────────────────────────────────────────── */}
-      {activeSection === 'pyp' && activity.pypCards && (
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '1rem', flexWrap: 'wrap' }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--ink)' }}>
-              {lang === 'ar' ? 'PYP والانتقال إلى MYP' : lang === 'zh' ? 'PYP及向MYP的过渡' : lang === 'ko' ? 'PYP와 MYP로의 전환' : 'PYP and the Transition to MYP'}
-            </div>
-            {activeStage === 'pyp-myp' && (
-              <span style={{ fontSize: 10, fontWeight: 700, background: STAGE_COLORS['pyp-myp'], color: 'white', padding: '1px 8px', borderRadius: 10 }}>
-                {lang === 'ar' ? '★ الأكثر صلة بمرحلتك' : lang === 'zh' ? '★ 最适合您当前阶段' : lang === 'ko' ? '★ 현재 단계에 가장 관련' : '★ Most relevant for your stage'}
-              </span>
-            )}
-          </div>
-          <p style={{ fontSize: 13.5, color: 'var(--ink-3)', lineHeight: 1.65, marginBottom: '1.25rem' }}>
-            {lang === 'zh'
-              ? 'PYP（小学阶段课程，3–11岁）与后续课程看起来截然不同。这五张卡片解释了正在发生什么，以及您的孩子正在为MYP及更远的未来积累什么。'
-              : lang === 'ko' ? 'PYP(초등 과정, 3~11세)는 이후에 오는 것과 매우 다르게 보입니다. 이 다섯 장의 카드는 무슨 일이 일어나고 있는지, 그리고 자녀가 MYP와 그 이후를 위해 무엇을 쌓고 있는지를 설명합니다.'
-              : lang === 'ar' ? 'يبدو PYP (برنامج السنوات الأولى، أعمار 3–11) مختلفاً جداً عما يليه. تشرح هذه البطاقات الخمس ما يجري — وما يبنيه طفلك نحو MYP وما بعده.'
-              : 'PYP (Primary Years Programme, ages 3–11) looks very different from what comes after. These five cards explain what is happening — and what your child is building toward MYP and beyond.'}
-          </p>
-          {activity.pypCards.map((card, i) => (
-            <ConceptCard key={card.id} card={card} lang={lang} index={i} activeStage={activeStage} whatToAskNote={activity.meta[lang]?.whatToAskNote} />
-          ))}
-          <SectionFooter />
-        </div>
-      )}
-
-      {/* ── REAL SITUATIONS ─────────────────────────────────────────────── */}
-      {activeSection === 'scenarios' && (
-        <div>
-          <p style={{ fontSize: 13.5, color: 'var(--ink-3)', lineHeight: 1.65, marginBottom: '1.25rem' }}>
-            {lang === 'zh'
-              ? '两个您可能会认出的情境。阅读场景，然后揭示同一时刻在有无这些背景知识的情况下看起来有何不同。'
-              : lang === 'ko' ? '익숙하게 느껴질 수 있는 두 가지 상황입니다. 시나리오를 읽고, 같은 순간이 이 맥락의 유무에 따라 어떻게 달라지는지 확인해 보세요.'
-              : lang === 'ar' ? 'موقفان قد تتعرّف عليهما. اقرأ السيناريو، ثم اكشف كيف يبدو نفس اللحظة بوجود هذا السياق وبدونه.'
-              : 'Two situations you may recognise. Read the scenario, then reveal how the same moment looks with and without this context.'}
-          </p>
-          {activity.reviewScenarios.map((s, i) => (
-            <ReviewScenario key={s.id} scenario={s} lang={lang} index={i} />
-          ))}
-          <SectionFooter />
-        </div>
-      )}
-
-      {/* ── NEXT STEPS ──────────────────────────────────────────────────── */}
-      {activeSection === 'next' && (
-        <div>
-          {done && (
-            <div style={{
-              marginBottom: '1.5rem', padding: '.875rem 1.1rem',
-              background: '#E1F5EE', border: '1px solid #1D9E7544',
-              borderRadius: 'var(--r)', fontSize: 13.5,
-              color: 'var(--teal-dark)', fontWeight: 500,
-            }}>
-              {lang === 'ar' ? '✓ لقد أتممت هذا الدليل.' : lang === 'zh' ? '✓ 您已完成本指南。' : lang === 'ko' ? '✓ 이 안내서를 완료했습니다.' : '✓ You\'ve completed this guide.'}
-            </div>
-          )}
-
-          {/* Stage-aware next steps */}
-          <div style={{ marginBottom: '2rem' }}>
-            <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--ink)', marginBottom: '.5rem' }}>
-              {lang === 'ar' ? 'ثلاثة أشياء تفعلها هذا الأسبوع' : lang === 'zh' ? '本周要做的三件事' : lang === 'ko' ? '이번 주에 할 세 가지' : 'Three things to do this week'}
-            </div>
-            <p style={{ fontSize: 12.5, color: 'var(--ink-4)', marginBottom: '1rem', lineHeight: 1.6 }}>
-              {lang === 'zh'
-                ? (activeStage ? `根据您选择的阶段个性化推荐。` : `在“从这里开始”中选择您的阶段，获取个性化建议。`)
-                : lang === 'ko'
-                  ? (activeStage ? `선택한 단계에 맞게 개인화된 제안입니다.` : `시작하기 섹션에서 단계를 선택하면 맞춤 제안을 받을 수 있습니다.`)
-                  : lang === 'ar'
-                  ? (activeStage ? `مخصَّص لمرحلتك المحددة.` : `اختر مرحلتك في «ابدأ هنا» للحصول على اقتراحات شخصية.`)
-                  : (activeStage ? `Personalised for your selected stage.` : `Select your stage on Start Here for personalised suggestions.`)}
-            </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {nextStepsItems.map((step, i) => (
-                <div key={i} style={{
-                  display: 'flex', gap: '1rem', alignItems: 'flex-start',
-                  padding: '.875rem 1rem', borderRadius: 'var(--r)',
-                  background: 'var(--surface-2)', border: '1px solid var(--border)',
-                }}>
-                  <span style={{
-                    width: 24, height: 24, borderRadius: '50%', flexShrink: 0,
-                    background: 'var(--teal)', color: 'white',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 12, fontWeight: 700,
-                  }}>{i + 1}</span>
-                  <div style={{ fontSize: 13.5, color: 'var(--ink)', lineHeight: 1.7 }}>{step}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Mark complete */}
-          {!done && (
-            <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
-              <button
-                onClick={markDone}
-                style={{
-                  fontSize: 14, fontWeight: 600, color: 'white',
-                  background: 'var(--teal)', border: 'none',
-                  borderRadius: 24, padding: '10px 32px',
-                  cursor: 'pointer', letterSpacing: '.01em',
-                }}
-              >
-                {lang === 'ar' ? '✓ علِّم كمكتمل' : lang === 'zh' ? '✓ 标记为已完成' : lang === 'ko' ? '✓ 완료로 표시' : '✓ Mark as complete'}
-              </button>
             </div>
           )}
 
