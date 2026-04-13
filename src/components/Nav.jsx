@@ -35,7 +35,7 @@ export default function Nav({ tabs }) {
         ))}
       </nav>
 
-      <button className="dpb" onClick={() => setActiveTab('profile')}>
+      <button className="dpb" onClick={editProfile}>
         <div className="dav">{initials}</div>
         <span>{profile.name || 'Profile'}</span>
       </button>
