@@ -1,16 +1,23 @@
 import { Link } from 'react-router-dom'
-import { koreaIbParent }    from '../../../vocab/parent/korea-ib-parent.jsx'
-import { indiaIbParent }    from '../../../vocab/parent/india-ib-parent.jsx'
-import { chinaIbParent }    from '../../../vocab/parent/china-ib-parent.jsx'
-import { ksaIbParent }      from '../../../vocab/parent/ksa-ib-parent.jsx'
-import { vietnamIbParent }  from '../../../vocab/parent/vietnam-ib-parent.jsx'
-import { woodstockParent }  from '../../../vocab/parent/woodstock-parent.jsx'
+import { koreaIbParent }     from '../../../vocab/parent/korea-ib-parent.jsx'
+import { indiaIbParent }     from '../../../vocab/parent/india-ib-parent.jsx'
+import { chinaIbParent }     from '../../../vocab/parent/china-ib-parent.jsx'
+import { ksaIbParent }       from '../../../vocab/parent/ksa-ib-parent.jsx'
+import { vietnamIbParent }   from '../../../vocab/parent/vietnam-ib-parent.jsx'
+import { woodstockParent }   from '../../../vocab/parent/woodstock-parent.jsx'
+import { japanIbParent }     from '../../../vocab/parent/japan-ib-parent.jsx'
+import { indonesiaIbParent } from '../../../vocab/parent/indonesia-ib-parent.jsx'
+import { uaeIbParent }       from '../../../vocab/parent/uae-ib-parent.jsx'
 
 /**
  * /parent — listing of all parent guide modules.
  */
 
-const PARENT_MODULES = [woodstockParent, koreaIbParent, indiaIbParent, chinaIbParent, ksaIbParent, vietnamIbParent]
+const PARENT_MODULES = [
+  woodstockParent,
+  koreaIbParent, indiaIbParent, chinaIbParent, ksaIbParent, vietnamIbParent,
+  japanIbParent, indonesiaIbParent, uaeIbParent,
+]
 
 const COUNTRY_META = {
   korea:         { flag: '🇰🇷', color: '#1D9E75', label: 'Korea' },
@@ -19,9 +26,12 @@ const COUNTRY_META = {
   'saudi-arabia':{ flag: '🇸🇦', color: '#006C35', label: 'Saudi Arabia' },
   vietnam:       { flag: '🇻🇳', color: '#DA251D', label: 'Vietnam' },
   woodstock:     { flag: '🌲', color: '#8B1A1A', label: 'Woodstock · Mussoorie' },
+  japan:         { flag: '🇯🇵', color: '#BC002D', label: 'Japan' },
+  indonesia:     { flag: '🇮🇩', color: '#CE1126', label: 'Indonesia' },
+  uae:           { flag: '🇦🇪', color: '#009A44', label: 'UAE' },
 }
 
-const LANG_CHIP_LABELS = { en: 'English', ko: '한국어', zh: '中文', ar: 'العربية', vi: 'Tiếng Việt' }
+const LANG_CHIP_LABELS = { en: 'English', ko: '한국어', zh: '中文', ar: 'العربية', vi: 'Tiếng Việt', ja: '日本語', id: 'Indonesia' }
 
 export default function ParentHome() {
   return (

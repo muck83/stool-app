@@ -567,4 +567,39 @@ export const koreaIbParent = {
       ko: { full: '창의·활동·봉사', definition: '창의적, 신체적, 봉사 활동에 걸쳐 150시간의 기록된 실세계 참여와 성찰 포트폴리오를 포함하는 필수 DP 졸업장 요건입니다.' },
     },
   ],
+
+  pypBridge: {
+    en: {
+      title: 'The PYP → MYP Transition: What Korean Families Should Know',
+      intro: 'Korean families navigating the PYP to MYP transition often feel the shift most sharply in the report card. PYP reports look informal compared to what Korean parents know from the national curriculum — no percentage, no class rank, no single number to send to grandparents. MYP reports introduce criterion scores and grade boundaries, which are more concrete but still nothing like the Korean system\'s percentage grading. Here is what specifically changes and what to watch for in Year 7.',
+      changes: [
+        { aspect: 'Report format', pyp: 'Narrative descriptions of learning behaviour. No numerical grades. Difficult to compare across students by design.', myp: 'Criterion scores (A–D, 0–8 each). Total maps to grade 1–7. Still no percentage, no class rank — but more structured than PYP.' },
+        { aspect: 'Assessment style', pyp: 'Portfolio-based, student-led. The PYP Exhibition is the capstone — a self-directed inquiry project.', myp: 'Formal summative assessments in each subject, with defined criteria rubrics. Students receive feedback tied to specific performance levels.' },
+        { aspect: 'Subject structure', pyp: 'Cross-curricular units of inquiry. Mathematics, Science, and Humanities often connect under a single central idea.', myp: 'Distinct subject groups with separate grade calculations. Mathematics assessed independently of Sciences. Students begin subject specialisation.' },
+        { aspect: 'Parent meetings', pyp: 'Student-led conferences where the child presents their portfolio. Parent is audience, not recipient of a grade report.', myp: 'Traditional format. Teacher presents evidence. Parent asks criterion-specific questions.' }
+      ],
+      firstYearNote: 'Year 7 MYP is a genuine transition year. Korean families who have had relatives ask "what rank is your child?" will need a new answer. The answer is: "my child is developing strong critical thinking in Criterion C and has room to grow in Criterion D." This takes getting used to — but it is actually more informative than a rank.',
+      whatToAsk: [
+        'What does my child need to do to move from their current score to the next grade in Criterion C in [subject]?',
+        'How is my child approaching the transition from integrated PYP inquiry to subject-specific MYP learning?',
+        'What does the first major summative assessment look like in Year 7 — what should we prepare for?'
+      ],
+    },
+    ko: {
+      title: 'PYP → MYP 전환: 한국 가족이 알아야 할 사항',
+      intro: 'PYP에서 MYP로의 전환을 경험하는 한국 가족들은 성적표에서 가장 급격한 변화를 느낍니다. PYP 성적표는 한국 학부모들이 국가 교육과정에서 알고 있는 것에 비해 비공식적으로 보입니다 — 백분율이 없고, 학급 순위가 없으며, 할머니 할아버지께 보낼 단일 숫자가 없습니다. MYP 성적표는 기준 점수와 성적 경계를 도입하는데, 이는 더 구체적이지만 여전히 한국 교육과정의 백분율 등급 매기기와는 다릅니다. 정확히 어떤 것이 변하는지, 그리고 7학년에서 무엇을 주의해야 하는지 설명하겠습니다.',
+      changes: [
+        { aspect: '성적표 형식', pyp: '학습 행동에 대한 서술적 설명입니다. 수치 등급이 없습니다. 설계상 학생 간 비교가 어렵습니다.', myp: '기준 점수(A–D, 각각 0–8)입니다. 합계는 1–7 등급으로 매핑됩니다. 여전히 백분율이나 학급 순위는 없지만, PYP보다 더 구조화되어 있습니다.' },
+        { aspect: '평가 스타일', pyp: '포트폴리오 기반의 학생 주도 평가입니다. PYP 전시회는 최종 프로젝트 — 학생 주도 탐구 프로젝트입니다.', myp: '각 과목의 정식 총괄 평가입니다. 정의된 기준 루브릭이 있습니다. 학생들은 특정 성취 수준에 연결된 피드백을 받습니다.' },
+        { aspect: '과목 구조', pyp: '교과 융합 탐구 단원입니다. 수학, 과학, 인문학이 종종 단일 중심 아이디어 아래 연결됩니다.', myp: '별도의 성적 계산을 가진 구분된 과목 그룹입니다. 수학은 과학과 독립적으로 평가됩니다. 학생들이 과목 전문화를 시작합니다.' },
+        { aspect: '학부모 상담', pyp: '학생이 주도하는 상담회 — 자녀가 포트폴리오를 제시합니다. 학부모는 청중이지, 성적표를 받는 사람이 아닙니다.', myp: '전통적인 형식입니다. 교사가 증거를 제시합니다. 학부모가 기준 특화 질문을 합니다.' }
+      ],
+      firstYearNote: '7학년 MYP는 진정한 전환 시기입니다. "자녀가 몇 등인가요?"라고 물어본 친척이 있는 한국 가족들은 새로운 답변이 필요합니다. 답변은: "제 자녀는 기준 C에서 비판적 사고력을 강화하고 있으며 기준 D에서 성장할 여지가 있습니다."라는 것입니다. 이것은 익숙해지는 데 시간이 걸리지만 — 실제로는 순위보다 훨씬 더 정보 제공적입니다.',
+      whatToAsk: [
+        '[과목]의 기준 C에서 현재 점수에서 다음 등급으로 이동하기 위해 자녀가 무엇을 해야 하나요?',
+        '자녀가 통합 PYP 탐구에서 과목별 MYP 학습으로의 전환에 어떻게 접근하고 있나요?',
+        '7학년의 첫 번째 주요 총괄 평가는 어떤 모습인가요 — 무엇을 준비해야 하나요?'
+      ],
+    }
+  },
 }

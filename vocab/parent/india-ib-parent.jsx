@@ -393,4 +393,23 @@ export const indiaIbParent = {
       en: { full: 'Creativity, Activity, Service', definition: 'A mandatory DP diploma requirement — not optional enrichment. Requires 150 documented hours across creative, physical, and service activities plus a reflection portfolio. Begins in Year 12. Cannot be waived.' },
     },
   ],
+
+  pypBridge: {
+    en: {
+      title: 'The PYP → MYP Transition: What Families Should Know',
+      intro: 'For families in India, the PYP to MYP transition often coincides with the age at which CBSE or ICSE students begin formal board exam preparation. The contrast can be stark: MYP reports look less structured than CBSE percentage reports, and the absence of a single overall percentage is jarring when extended family asks how the child is doing. This guide explains what actually changes at the transition point and what the first MYP year looks like.',
+      changes: [
+        { aspect: 'Report format', pyp: 'Narrative comments and portfolio evidence. No percentage or class rank. Progress described in learning dispositions and inquiry skills.', myp: 'Criterion scores A–D (0–8 each). Total score maps to grade 1–7. Structured, but fundamentally different from the percentage-based CBSE/ICSE reports relatives expect.' },
+        { aspect: 'Assessment style', pyp: 'Ongoing observation and portfolios integrated throughout learning. Assessment is holistic and developmental.', myp: 'Formal summative assessments at defined points in each subject, assessed against specific criteria. External IB moderation at Year 10 (MYP 5). Students understand the criteria from Day 1.' },
+        { aspect: 'Exam pressure and subject focus', pyp: 'No high-stakes exams. Learning is integrated across subjects. No pressure to narrow focus to "board subjects" versus others.', myp: 'No board exam preparation at this stage. Subjects remain broad. By contrast, CBSE Grade 7 students are already hearing about "science streams" versus "humanities streams." MYP Year 7 is still integrated across eight subject groups.' },
+        { aspect: 'Long-term pathway clarity', pyp: 'IB pathway is not yet fully distinct from national curriculum in family conversation.', myp: 'From Year 7, families must understand that their child is on an IB track (MYP → DP), not a CBSE/ICSE board track. DP (Grades 11–12) is recognized by universities worldwide but is NOT the Indian 12th board exam. This clarity reduces anxiety later.' }
+      ],
+      firstYearNote: 'Year 7 is a transition year, and the report will not look like a CBSE/ICSE percentage report — it will be shorter, more criterion-focused, and will not include a single overall percentage. Do not interpret this as lower standards or lower clarity. MYP criterion assessment is actually more transparent about what your child can do and where they need to grow. In Year 7, focus on understanding what each criterion (A through D) means, and help your child see the connection between effort and growth in specific skills, not just percentages.',
+      whatToAsk: [
+        'What does my child need to do to move from their current criterion score to the next level in [subject]?',
+        'How does the IB pathway differ from the CBSE/ICSE board pathway? What are the long-term university recognition implications?',
+        'What is the transition plan between MYP Year 5 and DP Year 1? When do we make subject choices for the DP?'
+      ],
+    }
+  },
 }

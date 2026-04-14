@@ -453,6 +453,7 @@ export const ksaIbParent = {
         title: 'كيف تعمل درجات MYP',
         intro: 'لا تستخدم مواد MYP نسباً مئوية أو ترتيبات صفية. تستخدم كل مادة أربعة معايير يُقيَّم كل منها من 8. تُجمع تلك الدرجات الأربع إلى مجموع من 32 يتحول إلى درجة نهائية من 1 إلى 7. الخمسة ليست 71%. الأربعة ليست 57%. لا تحوّل.',
         criteriaNote: 'المعايير الأربعة مُسمّاة A وB وC وD — وتقيس أشياء مختلفة في كل مادة. في رياضيات MYP، المعيار A هو «المعرفة والفهم» والمعيار D هو «تطبيق الرياضيات في سياقات الحياة الواقعية». يستطيع الطالب أن يسجّل بقوة في A وبضعف في D. يُظهر التقرير كليهما منفصلَين مما يخبرك بالضبط أين تركّز — شيء لا تستطيع النسبة المئوية قوله أبداً.',
+        boundaryNote: 'يستخدم التحويل من المجموع الخام (من 32) إلى الدرجة النهائية (1–7) حدود درجات تحددها كل مدرسة. ثمة تفاوت أيضاً على مستوى المادة: الرياضيات والعلوم تتطلب عادةً درجات خام أعلى لكل مستوى مقارنةً بالعلوم الإنسانية والفنون. قد تُعطي 24/32 في رياضيات MYP درجةً نهائية مختلفة عن 24/32 في مسرح MYP.',
         watchOut: [
           'الأربعة في MYP تعني «إنجاز كافٍ» — وهي درجة ناجحة لا تكاد تكون قريبة من الرسوب. لا تحوّلها إلى 57%. مقاييس النسب المئوية لا تنطبق على درجات IB.',
           'يمكن أن يسجّل طفلك بشكل مختلف جداً على كل معيار داخل المادة ذاتها. 7/8 في المعيار A و3/8 في المعيار D يُعطي معلومات تشخيصية دقيقة حول ما تركّز عليه — ليس مجرد نتيجة واحدة.',
@@ -496,6 +497,17 @@ export const ksaIbParent = {
         title: 'كيف تعمل درجات DP',
         intro: 'تُسجَّل شهادة IB من أصل 45 نقطة. تُسهم ست مواد بما يصل إلى 42 نقطة (تُقيَّم كل منها من 1–7)، ويمكن لنواة الشهادة — المقالة الموسّعة ونظرية المعرفة — إضافة ما يصل إلى 3 نقاط إضافية. تطلب معظم الجامعات التنافسية عالمياً 36–40 نقطة أو أكثر.',
         subjectStructure: 'يدرس الطلاب ست مواد: ثلاث على مستوى أعلى (HL) وثلاث على المستوى العادي (SL). تتضمن مواد HL محتوى أكثر وساعات تدريس أكثر وتقييماً أعمق. كثير من الجامعات البريطانية والأمريكية والدولية تحدد متطلبات درجات HL دنيا للبرامج التنافسية. تتوقع برامج منح أرامكو السعودية عادةً درجات HL قوية في التخصصات التقنية ذات الصلة.',
+        coreBonus: {
+          title: 'جدول نقاط المقالة الموسّعة + نظرية المعرفة الإضافية',
+          note: 'تُقيَّم كل من المقالة الموسّعة (EE) ونظرية المعرفة (ToK) من A إلى E. يُنتجان معاً 0–3 نقاط إضافية وفق هذا الجدول. درجتا E معاً تعنيان عدم منح الشهادة بصرف النظر عن مجاميع المواد.',
+        },
+        passingRules: [
+          'الحصول على 24 نقطة إجمالية كحد أدنى لمنح الشهادة.',
+          'عدم الحصول على درجة أقل من 2 (SL) أو 3 (HL) في أي مادة — درجة منخفضة جداً واحدة تُرسب الشهادة حتى لو كان مجموع النقاط كافياً.',
+          'يجب استيفاء متطلبات CAS والتوقيع على إتمامها.',
+          'عدم الحصول على درجة E في كل من المقالة الموسّعة ونظرية المعرفة معاً.',
+          'ألا يزيد عدد الدرجات 1 في جميع المواد على ثلاث.',
+        ],
         watchOut: [
           'الطالب الذي لديه 38 نقطة ولكنه يُخفق في شرط (كأن يحصل على 2 في مادة HL) لا يحصل على الشهادة. النقاط وحدها غير كافية.',
           'تُقدّم الجامعات عروضاً مشروطة بناءً على الدرجات التقديرية قبل الامتحانات النهائية. المحادثة مع معلمي المواد في الصف الثاني عشر حول الدرجات التقديرية عالية المخاطر — تعامل معها بجدية لا تقل عن أي تحضير للامتحان النهائي.',
@@ -626,4 +638,39 @@ export const ksaIbParent = {
       ar: { full: 'الإبداع والنشاط والخدمة', definition: 'متطلّب DP إلزامي. يوثّق الطلاب نحو 150 ساعة عبر الإبداع (المساعي الفنية أو الريادية) والنشاط (التحديات البدنية) والخدمة (المساهمة المجتمعية). لا يمكن الإعفاء منه — بدون إتمام CAS موقّعاً، لا تُمنح الشهادة. القيم الإسلامية لخدمة المجتمع وتنمية الإنسان كلّه تتوافق توافقاً وثيقاً مع مقصود CAS.' },
     },
   ],
+
+  pypBridge: {
+    ar: {
+      title: 'انتقال PYP → MYP: ما الذي يتغير للعائلات السعودية',
+      intro: 'الانتقال من برنامج السنوات الابتدائية إلى برنامج السنوات المتوسطة هو اللحظة التي تجد فيها معظم العائلات السعودية الأمور الأكثر إرباكاً. تبدو تقارير PYP مثل تعليقات المعلمين السردية — دافئة وتنموية بدون أرقام. تصل تقارير MYP مع درجات معيارية وحدود درجات وحاوية مفردات لا تشبه تماماً تقرير المنهج الوطني السعودي الذي تفهمه عائلتك الممتدة. يُعدّك هذا الدليل لما يتغير بالتحديد.',
+      changes: [
+        { aspect: 'تنسيق التقرير', pyp: 'تعليقات سردية وأدلة على المحفظة. بلا أرقام درجات. يوصف التقدم من حيث مراجع التعلم ومهارات الاستقصاء.', myp: 'درجات معيارية A–D (كل واحدة من 0–8). درجة إجمالية تُطابِق درجة من 1–7. بلا نسبة مئوية. ردود فعل موسعة مرتبطة بمعايير محددة.' },
+        { aspect: 'أسلوب التقييم', pyp: 'المراقبة المستمرة والمحافظ الطلابية وحفل PYP في نهاية السنة (السنة 5). التقييم متكامل في التعلم — قد لا يعرف الطلاب أنهم يتم تقييمهم.', myp: 'تقييمات تجميعية رسمية. تقييم المواد بشكل مستقل. اعتدال IB الخارجي في MYP 5 (السنة 10). يعرف الطلاب متى يتم تقييمهم.' },
+        { aspect: 'هيكل المادة', pyp: 'وحدات استقصاء متكاملة عبر المواد. قد تجمع وحدة واحدة بين العلوم واللغة الإنجليزية والدراسات الاجتماعية تحت فكرة مركزية واحدة.', myp: 'مجموعات مواد متميزة. الرياضيات مادة خاصة بها معاييرها الخاصة. العلوم منفصلة عن الدراسات الإنسانية. يبدأ الطلاب في التخصص.' },
+        { aspect: 'اتصال الوالدين', pyp: 'مؤتمرات يقودها الطالب ومشاركة المحفظة. يعرض الطفل تعلمه الخاص أمامك.', myp: 'اجتماعات الوالدين والمعلمين التقليدية. يعرض المعلمون الأدلة المعيارية. دورك هو طرح أسئلة معيارية محددة.' }
+      ],
+      firstYearNote: 'السنة 7 سنة تعديل كبيرة. سيبدو بطاقة التقرير أكثر رسمية. لا تقلق من الدرجات من 3 أو 4 في الفصل الدراسي الأول — السنة 1 من MYP هي سنة تعلم النظام. الطالب الذي يترك السنة 7 وهو يفهم ما تعنيه معايير A من خلال D في كل مادة قد أحرز تقدماً هائلاً بغض النظر عن الدرجات المحددة.',
+      whatToAsk: [
+        'ما الذي يحتاج طفلي إلى فعله للانتقال من درجته الحالية إلى الدرجة التالية في المعيار C في [المادة]؟',
+        'كيف يقترب طفلي من الانتقال من الاستقصاء المتكامل في PYP إلى التعلم الخاص بمادة معينة في MYP؟',
+        'كيف يبدو أول تقييم تجميعي كبير في السنة 7 — ماذا يجب أن نستعد له؟'
+      ],
+    },
+    en: {
+      title: 'The PYP → MYP Transition: What Changes for Saudi Families',
+      intro: 'The move from Primary Years to Middle Years Programme is the moment most Saudi families find most disorienting. PYP reports look like narrative teacher comments — warm, developmental, without numbers. MYP reports arrive with criterion scores, grade boundaries, and a vocabulary that looks nothing like the Saudi national curriculum report your extended family understands. This guide prepares you for what specifically changes.',
+      changes: [
+        { aspect: 'Report format', pyp: 'Narrative comments and portfolio evidence. No grade numbers. Progress is described in terms of learning dispositions and inquiry skills.', myp: 'Criterion scores A–D (each 0–8). A total score that maps to a grade 1–7. No percentage. Extended feedback tied to specific criteria.' },
+        { aspect: 'Assessment style', pyp: 'Ongoing observation, student portfolios, the PYP Exhibition (Year 5). Assessment is integrated into learning — students may not know they are being assessed.', myp: 'Formal summative assessments. Subjects assessed independently. External IB moderation at MYP 5 (Year 10). Students know when they are being assessed.' },
+        { aspect: 'Subject structure', pyp: 'Integrated units of inquiry cross subjects. A unit might combine Science, English, and Social Studies under one central idea.', myp: 'Distinct subject groups. Mathematics is its own subject with its own criteria. Sciences separate from Humanities. Students begin to specialise.' },
+        { aspect: 'Parent communication', pyp: 'Student-led conferences, portfolio sharing. The child presents their own learning to you.', myp: 'Traditional parent–teacher meetings. Teachers present criterion evidence. Your role is to ask specific questions about criteria.' }
+      ],
+      firstYearNote: 'Year 7 is a significant adjustment year. The report card will look more formal. Do not be alarmed by scores of 3 or 4 in the first semester — MYP Year 1 is the year of learning the system. A student who leaves Year 7 understanding what criteria A through D mean in each subject has made enormous progress, regardless of the specific scores.',
+      whatToAsk: [
+        'What does my child need to do to move from their current score to the next grade in Criterion C in [subject]?',
+        'How is my child approaching the transition from integrated PYP inquiry to subject-specific MYP learning?',
+        'What does the first major summative assessment look like in Year 7 — what should we prepare for?'
+      ],
+    }
+  },
 };

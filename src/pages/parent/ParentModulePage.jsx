@@ -1,18 +1,24 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { MYP_SUBJECTS, getBand, getSubjectLabel } from '../../data/mypCriteria.js'
-import { koreaIbParent } from '../../../vocab/parent/korea-ib-parent.jsx'
-import { indiaIbParent } from '../../../vocab/parent/india-ib-parent.jsx'
-import { chinaIbParent } from '../../../vocab/parent/china-ib-parent.jsx'
-import { ksaIbParent }     from '../../../vocab/parent/ksa-ib-parent.jsx'
-import { vietnamIbParent } from '../../../vocab/parent/vietnam-ib-parent.jsx'
+import { koreaIbParent }     from '../../../vocab/parent/korea-ib-parent.jsx'
+import { indiaIbParent }     from '../../../vocab/parent/india-ib-parent.jsx'
+import { chinaIbParent }     from '../../../vocab/parent/china-ib-parent.jsx'
+import { ksaIbParent }       from '../../../vocab/parent/ksa-ib-parent.jsx'
+import { vietnamIbParent }   from '../../../vocab/parent/vietnam-ib-parent.jsx'
+import { japanIbParent }     from '../../../vocab/parent/japan-ib-parent.jsx'
+import { indonesiaIbParent } from '../../../vocab/parent/indonesia-ib-parent.jsx'
+import { uaeIbParent }       from '../../../vocab/parent/uae-ib-parent.jsx'
 
 const MODULES = {
-  'korea-ib': koreaIbParent,
-  'india-ib': indiaIbParent,
-  'china-ib': chinaIbParent,
-  'ksa-ib':      ksaIbParent,
-  'vietnam-ib':  vietnamIbParent,
+  'korea-ib':     koreaIbParent,
+  'india-ib':     indiaIbParent,
+  'china-ib':     chinaIbParent,
+  'ksa-ib':       ksaIbParent,
+  'vietnam-ib':   vietnamIbParent,
+  'japan-ib':     japanIbParent,
+  'indonesia-ib': indonesiaIbParent,
+  'uae-ib':       uaeIbParent,
 }
 
 const LS_LANG     = slug => `pd_parent_lang_${slug}`
@@ -98,7 +104,7 @@ const NEXT_STEPS = {
 }
 
 // ─── Language Toggle ────────────────────────────────────────────────────────
-const LANG_LABELS = { en: 'English', ko: '한국어', zh: '中文', ar: 'العربية', vi: 'Tiếng Việt' }
+const LANG_LABELS = { en: 'English', ko: '한국어', zh: '中文', ar: 'العربية', vi: 'Tiếng Việt', ja: '日本語', id: 'Indonesia' }
 
 function LangToggle({ lang, setLang, languages }) {
   const langs = languages && languages.length > 1 ? languages : ['en', 'ko']
@@ -1055,6 +1061,168 @@ function GradingSection({ gradingSystem, lang }) {
   )
 }
 
+
+// ─── PYP Bridge Section ───────────────────────────────────────────────────────────────────────────
+function PypBridgeSection({ pypBridge, lang }) {
+  if (!pypBridge || !pypBridge[lang]) return null
+  const b = pypBridge[lang]
+  return (
+    <div style={{ marginBottom: '2rem' }}>
+      <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--ink)', marginBottom: '.75rem' }}>
+        {b.title}
+      </div>
+      <p style={{ fontSize: 13.5, color: 'var(--ink-2)', lineHeight: 1.75, marginBottom: '1.25rem' }}>
+        {b.intro}
+      </p>
+
+      {/* Changes table */}
+      {b.changes && b.changes.length > 0 && (
+        <div style={{ marginBottom: '1.5rem', border: '1px solid var(--border)', borderRadius: 'var(--r)', overflow: 'hidden' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)', padding: '.75rem 1rem', gap: '1rem' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.07em' }}>
+              {lang === 'ar' ? 'الجانب' : lang === 'zh' ? '方面' : lang === 'ko' ? '항목' : lang === 'id' ? 'Aspek' : lang === 'ja' ? '項目' : 'Aspect'}
+            </div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#BA7517', textTransform: 'uppercase', letterSpacing: '.07em' }}>PYP</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '.07em' }}>MYP</div>
+          </div>
+          {b.changes.map((ch, i) => (
+            <div key={i} style={{
+              display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem',
+              padding: '.875rem 1rem',
+              background: i % 2 === 0 ? 'var(--surface)' : 'var(--surface-2)',
+              borderBottom: i < b.changes.length - 1 ? '1px solid var(--border)' : 'none',
+            }}>
+              <div style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--ink)' }}>{ch.aspect}</div>
+              <div style={{ fontSize: 12, color: 'var(--ink-3)', lineHeight: 1.6 }}>{ch.pyp}</div>
+              <div style={{ fontSize: 12, color: 'var(--ink-2)', lineHeight: 1.6 }}>{ch.myp}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* First year note */}
+      {b.firstYearNote && (
+        <div style={{
+          padding: '.875rem 1rem', marginBottom: '1.25rem',
+          background: '#FFFBEB', border: '1px solid #F0C060', borderRadius: 'var(--r)',
+        }}>
+          <div style={{ fontSize: 11, fontWeight: 600, color: '#92400E', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 5 }}>
+            {lang === 'ar' ? 'ملاحظة السنة الأولى' : lang === 'zh' ? '第一年提示' : lang === 'ko' ? '첫 해 메모' : lang === 'id' ? 'Catatan Tahun Pertama' : lang === 'ja' ? '1年目のメモ' : 'First year note'}
+          </div>
+          <div style={{ fontSize: 13, color: '#78350F', lineHeight: 1.7 }}>{b.firstYearNote}</div>
+        </div>
+      )}
+
+      {/* What to ask */}
+      {b.whatToAsk && b.whatToAsk.length > 0 && (
+        <div style={{ padding: '.875rem 1rem', background: '#FFFBEB', border: '1px solid #F0C060', borderRadius: 'var(--r)' }}>
+          <div style={{ fontSize: 11, fontWeight: 600, color: '#92400E', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 8 }}>
+            {lang === 'ar' ? 'ما تسأل عنه في لقائك القادم' : lang === 'zh' ? '下次面谈时要问的问题' : lang === 'ko' ? '다음 면담에서 물어볼 것' : lang === 'id' ? 'Yang perlu ditanyakan' : lang === 'ja' ? '次の面談で聴くこと' : 'What to ask at your next meeting'}
+          </div>
+          {b.whatToAsk.map((q, i) => (
+            <div key={i} style={{
+              fontSize: 12.5, color: '#78350F', lineHeight: 1.65,
+              paddingLeft: 10, borderLeft: '2px solid #F0C060',
+              marginBottom: i < b.whatToAsk.length - 1 ? 8 : 0,
+            }}>{q}</div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── University Walkthrough ────────────────────────────────────────────────────────────────────────────────
+function UniversityWalkthrough({ walkthrough, lang }) {
+  const [selectedPath, setSelectedPath] = useState(null)
+  if (!walkthrough || !walkthrough[lang]) return null
+  const w = walkthrough[lang]
+  const path = selectedPath ? w.paths.find(p => p.id === selectedPath) : null
+
+  return (
+    <div style={{ marginBottom: '2rem' }}>
+      <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--ink)', marginBottom: '.5rem' }}>
+        {lang === 'ja' ? '大学進学ルートガイド' : lang === 'id' ? 'Panduan Masuk Universitas' : 'University Application Walkthrough'}
+      </div>
+      <p style={{ fontSize: 13.5, color: 'var(--ink-2)', lineHeight: 1.75, marginBottom: '1.25rem' }}>
+        {w.intro}
+      </p>
+
+      <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: '.75rem' }}>
+        {lang === 'ja' ? '進路を選んでください' : lang === 'id' ? 'Pilih jalur Anda' : 'Choose your target path'}
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: '1.5rem' }}>
+        {w.paths.map(p => {
+          const isSelected = selectedPath === p.id
+          return (
+            <button
+              key={p.id}
+              onClick={() => setSelectedPath(isSelected ? null : p.id)}
+              style={{
+                textAlign: 'left', padding: '.875rem 1rem',
+                borderRadius: 'var(--r)', cursor: 'pointer',
+                border: isSelected ? '2px solid var(--teal)' : '1px solid var(--border)',
+                background: isSelected ? 'var(--teal-faint, #E1F5EE)' : 'var(--surface-2)',
+                transition: 'border .15s, background .15s',
+                display: 'flex', alignItems: 'center', gap: '.75rem',
+              }}
+            >
+              <span style={{ fontSize: 20 }}>{p.flag}</span>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 13.5, fontWeight: 600, color: isSelected ? 'var(--teal)' : 'var(--ink)', lineHeight: 1.3 }}>
+                  {p.label}
+                </div>
+                {p.warning && (
+                  <div style={{ fontSize: 11.5, color: '#C0392B', marginTop: 3 }}>⚠ {p.warning}</div>
+                )}
+              </div>
+              <span style={{ fontSize: 12, color: isSelected ? 'var(--teal)' : 'var(--ink-4)', flexShrink: 0 }}>
+                {isSelected ? '▲' : '▼'}
+              </span>
+            </button>
+          )
+        })}
+      </div>
+
+      {path && (
+        <div style={{ border: '1px solid var(--teal)44', borderRadius: 'var(--r)', overflow: 'hidden' }}>
+          <div style={{ padding: '.875rem 1.2rem', background: 'var(--teal-faint, #E1F5EE)', borderBottom: '1px solid var(--teal)33', display: 'flex', alignItems: 'center', gap: '.5rem' }}>
+            <span style={{ fontSize: 18 }}>{path.flag}</span>
+            <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--teal)' }}>{path.label}</span>
+          </div>
+          <div style={{ padding: '1rem 1.2rem' }}>
+            {path.steps.map((step, i) => (
+              <div key={i} style={{ display: 'flex', gap: '1rem', marginBottom: i < path.steps.length - 1 ? '1.25rem' : 0 }}>
+                <div style={{
+                  width: 28, height: 28, borderRadius: '50%',
+                  background: 'var(--teal)', color: 'white',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 12, fontWeight: 700, flexShrink: 0, marginTop: 2,
+                }}>{step.n}</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--ink)', marginBottom: 4 }}>{step.title}</div>
+                  <div style={{ fontSize: 13, color: 'var(--ink-3)', lineHeight: 1.7 }}>{step.detail}</div>
+                </div>
+              </div>
+            ))}
+            {path.honest && (
+              <div style={{
+                marginTop: '1.25rem', padding: '.875rem 1rem',
+                background: '#FEF3F2', border: '1px solid #C0392B44', borderRadius: 'var(--r)',
+              }}>
+                <div style={{ fontSize: 11, fontWeight: 600, color: '#C0392B', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 5 }}>
+                  {lang === 'ja' ? '正直なところ' : lang === 'id' ? 'Catatan jujur' : 'Honest note'}
+                </div>
+                <div style={{ fontSize: 13, color: 'var(--ink-2)', lineHeight: 1.7 }}>{path.honest}</div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function ParentModulePage() {
   const { slug } = useParams()
@@ -1102,7 +1270,7 @@ export default function ParentModulePage() {
   }
 
   const m = activity.meta[lang]
-  const visibleSections = SECTIONS.filter(s => s.id !== 'pyp' || !!activity.pypCards)
+  const visibleSections = SECTIONS.filter(s => s.id !== 'pyp' || !!activity.pypCards || !!activity.pypBridge)
   const currentIdx = visibleSections.findIndex(s => s.id === activeSection)
   const nextSection = currentIdx < visibleSections.length - 1 ? visibleSections[currentIdx + 1] : null
   const recommended = activeStage ? STAGE_RECOMMENDED[activeStage] : null
@@ -1305,6 +1473,138 @@ export default function ParentModulePage() {
           </div>
         </div>
       )}
+
+      {/* ── CORE CONCEPTS ───────────────────────────────────────────────────────────────── */}
+      {activeSection === 'concepts' && (
+        <div>
+          {activity.openingHook && <HookSection hook={activity.openingHook} lang={lang} />}
+          {(activity.cards || []).map((card, i) => (
+            <ConceptCard
+              key={card.id || i}
+              card={card}
+              lang={lang}
+              index={i}
+              activeStage={activeStage}
+              whatToAskNote={null}
+            />
+          ))}
+          <SectionFooter />
+        </div>
+      )}
+
+      {/* ── GRADE SYSTEM ─────────────────────────────────────────────────────────────────── */}
+      {activeSection === 'grades' && (
+        <div>
+          {activity.gradingSystem && (
+            <GradingSection gradingSystem={activity.gradingSystem} lang={lang} />
+          )}
+          {activity.universityWalkthrough && (
+            <UniversityWalkthrough walkthrough={activity.universityWalkthrough} lang={lang} />
+          )}
+          <SectionFooter />
+        </div>
+      )}
+
+      {/* ── PYP BRIDGE ────────────────────────────────────────────────────────────────────── */}
+      {activeSection === 'pyp' && (
+        <div>
+          {activity.pypBridge && (
+            <PypBridgeSection pypBridge={activity.pypBridge} lang={lang} />
+          )}
+          {(activity.pypCards || []).map((card, i) => (
+            <ConceptCard
+              key={card.id || i}
+              card={card}
+              lang={lang}
+              index={i}
+              activeStage={activeStage}
+              whatToAskNote={null}
+            />
+          ))}
+          <SectionFooter />
+        </div>
+      )}
+
+      {/* ── REAL SITUATIONS ─────────────────────────────────────────────────────────────── */}
+      {activeSection === 'scenarios' && (
+        <div>
+          <p style={{ fontSize: 14, color: 'var(--ink-2)', lineHeight: 1.75, marginBottom: '1.5rem' }}>
+            {lang === 'ar'
+              ? 'مواقف حقيقية يواجهها أولياء أمور الطلاب في المدارس الدولية'
+              : lang === 'zh' ? '国际学校家长真实遇到的情境——了解与不了解时的不同处理方式。'
+              : lang === 'ko' ? '국제 학교 학부모들이 실제로 겪는 상황 — 이해한 경우와 이해하지 못한 경우의 대응 방식'
+              : lang === 'ja' ? '実際に起きた状況とその対応のちがい'
+              : lang === 'id' ? 'Situasi nyata yang dihadapi orang tua di sekolah internasional'
+              : 'Real situations that parents at international schools encounter — and how they play out with and without understanding.'}
+          </p>
+          {(activity.scenarios || []).map((scenario, i) => (
+            <ReviewScenario
+              key={scenario.id || i}
+              scenario={scenario}
+              lang={lang}
+              index={i}
+            />
+          ))}
+          <SectionFooter />
+        </div>
+      )}
+
+      {/* ── NEXT STEPS ───────────────────────────────────────────────────────────────────── */}
+      {activeSection === 'next' && (
+        <div>
+          <div style={{ marginBottom: '2rem' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '.1em', marginBottom: '1.25rem' }}>
+              {lang === 'ar' ? 'خطواتك التالية' : lang === 'zh' ? '您的下一步行动' : lang === 'ko' ? '다음 단계' : lang === 'ja' ? '次のステップ' : lang === 'id' ? 'Langkah Anda selanjutnya' : 'Your next steps'}
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '.875rem' }}>
+              {nextStepsItems.map((item, i) => (
+                <div key={i} style={{
+                  display: 'flex', gap: '.875rem', alignItems: 'flex-start',
+                  padding: '.875rem 1rem', borderRadius: 'var(--r)',
+                  background: 'var(--surface-2)', border: '1px solid var(--border)',
+                }}>
+                  <div style={{
+                    width: 24, height: 24, borderRadius: '50%',
+                    background: 'var(--teal)', color: 'white',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 11, fontWeight: 700, flexShrink: 0, marginTop: 1,
+                  }}>{i + 1}</div>
+                  <div style={{ fontSize: 13.5, color: 'var(--ink)', lineHeight: 1.75 }}>{item}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {!done ? (
+            <div style={{ textAlign: 'center', padding: '1.5rem 0' }}>
+              <button
+                onClick={markDone}
+                style={{
+                  fontSize: 13.5, fontWeight: 600, color: 'white',
+                  background: 'var(--teal)', border: 'none',
+                  borderRadius: 24, padding: '10px 28px', cursor: 'pointer',
+                }}
+              >
+                {lang === 'ar' ? '✓ أكملت هذا الدليل' : lang === 'zh' ? '✓ 已完成本指南' : lang === 'ko' ? '✓ 이 안내서 완료' : lang === 'ja' ? '✓ このガイドを完了' : lang === 'id' ? '✓ Panduan selesai' : '✓ Mark this guide complete'}
+              </button>
+            </div>
+          ) : (
+            <div style={{
+              textAlign: 'center', padding: '1.25rem',
+              background: '#E1F5EE', borderRadius: 'var(--r)',
+              border: '1px solid #1D9E7533',
+            }}>
+              <div style={{ fontSize: 14, fontWeight: 600, color: '#1D9E75' }}>
+                {lang === 'ar' ? '✓ أكملت هذا الدليل' : lang === 'zh' ? '✓ 已完成本指南' : lang === 'ko' ? '✓ 이 안내서를 완료했습니다' : '✓ Guide complete'}
+              </div>
+              <div style={{ fontSize: 12, color: 'var(--ink-3)', marginTop: 4 }}>
+                {lang === 'ar' ? 'يمكنك العودة في أي وقت.' : lang === 'zh' ? '您可以随时回顾。' : lang === 'ko' ? '언제든지 다시 돌아올 수 있습니다.' : 'You can come back any time.'}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
 
     </div>
   )

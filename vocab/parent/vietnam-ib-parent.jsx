@@ -676,4 +676,39 @@ export const vietnamIbParent = {
       vi: 'Điểm dự đoán do giáo viên IB cung cấp vào năm 12, được nộp cho các trường đại học như một phần của đơn xin học. Các trường đại học đưa ra đề nghị có điều kiện dựa trên những điểm này. Nếu kết quả thi cuối kỳ giảm đáng kể so với điểm dự đoán, các đề nghị có thể được xem xét lại.',
     },
   ],
+
+  pypBridge: {
+    en: {
+      title: 'The PYP → MYP Transition: What Vietnamese Families Should Know',
+      intro: 'Vietnamese families at IB schools often reach the PYP to MYP transition with a quiet anxiety: their child\'s peers in the Vietnamese national system are now preparing formally for university entrance pathways, and the IB system looks different — less structured, less exam-focused, at exactly the moment when Vietnamese education culture is accelerating. Here is what specifically changes in the transition and what the first year of MYP looks like.',
+      changes: [
+        { aspect: 'Report format', pyp: 'Narrative comments and portfolio evidence. No percentage grades or class rank. Progress described in terms of learning behaviour and inquiry skills.', myp: 'Criterion scores A–D (0–8 each). Total score maps to grade 1–7. More structured than PYP, but no percentage — and no class rank. Incomparable to the national system reports.' },
+        { aspect: 'Assessment style', pyp: 'Ongoing observation, student portfolios, integrated assessment. The PYP Exhibition is the Year 5 capstone.', myp: 'Formal summative assessments in each of eight subject groups. External IB moderation at Year 10 (MYP 5). Assessment is transparent and criterion-referenced, not curve-based or competitive.' },
+        { aspect: 'Exam culture and pressure', pyp: 'No high-stakes entrance exams. Learning is exploratory and inquiry-driven.', myp: 'Still no entrance exams or ranking. By contrast, peers in the Vietnamese national system are beginning formal exam coaching (luyện thi). MYP maintains focus on understanding and critical thinking, not memorisation.' },
+        { aspect: 'University preparation philosophy', pyp: 'Development of the whole learner. IB learner profile and transdisciplinary thinking.', myp: 'Continues IB philosophy. By MYP Year 5 (Grade 10), students are prepared for DP (not Thi Tốt Nghiệp). DP is recognized globally but requires a different mindset than Vietnamese board exam preparation.' }
+      ],
+      firstYearNote: 'Year 7 is a genuine transition year. The report will be shorter and more criterion-focused than what you might expect from national school reports. Do not worry about the absence of percentages or rankings — the criterion feedback is actually more detailed and actionable. Many Vietnamese families experience some anxiety comparing their IB track child to relatives on the national system track. The answer is: "The systems are measuring different things. Our child is developing critical thinking, collaboration, and research skills — skills the board system does not formally assess until university."',
+      whatToAsk: [
+        'What does my child need to do to move from their current criterion score to the next level in [subject]?',
+        'How is my child developing as an independent learner and critical thinker? Can you give me specific examples?',
+        'What is the DP pathway, and how does it differ from the Thi Tốt Nghiệp (Vietnamese board exam) that peers might be preparing for?'
+      ],
+    },
+    vi: {
+      title: 'Chuyển đổi PYP → MYP: Những gì các gia đình Việt Nam nên biết',
+      intro: 'Các gia đình Việt Nam tại các trường IB thường đạt tới giai đoạn chuyển đổi PYP sang MYP với một lo lắng im lặng: những bạn cùng lứa của con em họ trong hệ thống giáo dục quốc gia Việt Nam hiện đang chuẩn bị chính thức cho những con đường vào đại học, và hệ thống IB trông khác — ít có cấu trúc hơn, ít tập trung vào kỳ thi hơn, chính xác vào lúc văn hóa giáo dục Việt Nam đang tăng tốc. Dưới đây là những gì cụ thể thay đổi trong quá trình chuyển đổi và năm đầu tiên của MYP trông như thế nào.',
+      changes: [
+        { aspect: 'Định dạng báo cáo', pyp: 'Nhận xét mô tả và bằng chứng danh mục. Không có điểm số phần trăm hay xếp hạng lớp. Tiến độ được mô tả theo các hành vi học tập và kỹ năng điều tra.', myp: 'Điểm tiêu chí A–D (0–8 mỗi điểm). Điểm tổng cộng ánh xạ tới điểm 1–7. Có cấu trúc hơn PYP, nhưng không phần trăm — và không có xếp hạng lớp. Không thể so sánh với các báo cáo của hệ thống quốc gia.' },
+        { aspect: 'Phong cách đánh giá', pyp: 'Quan sát liên tục, danh mục học sinh, đánh giá tích hợp. Triển lãm PYP là đỉnh cao của năm 5.', myp: 'Đánh giá tổng hợp chính thức trong mỗi nhóm môn học tám điểm. Điều chỉnh IB bên ngoài vào năm 10 (MYP 5). Đánh giá là minh bạch và dựa trên tiêu chí, không phải dựa trên đường cong hay cạnh tranh.' },
+        { aspect: 'Văn hóa thi cử và áp lực', pyp: 'Không có kỳ thi nhập học có độ cược cao. Học tập là thăm dò và hướng tới điều tra.', myp: 'Vẫn không có kỳ thi nhập học hay xếp hạng. Ngược lại, những bạn cùng lứa trong hệ thống quốc gia Việt Nam đang bắt đầu huấn luyện thi chính thức (luyện thi). MYP duy trì sự tập trung vào hiểu biết và tư duy phản biện, không phải ghi nhớ.' },
+        { aspect: 'Triết lý chuẩn bị đại học', pyp: 'Phát triển của toàn bộ học sinh. Hồ sơ học tập IB và tư duy xuyên ngành.', myp: 'Tiếp tục triết lý IB. Bằng năm MYP (lớp 10), học sinh được chuẩn bị cho DP (không phải Thi Tốt Nghiệp). DP được công nhận trên toàn cầu nhưng đòi hỏi một tư duy khác so với chuẩn bị thi ứng viên quốc gia Việt Nam.' }
+      ],
+      firstYearNote: 'Năm 7 là một năm chuyển đổi thực sự. Báo cáo sẽ ngắn hơn và tập trung vào tiêu chí hơn so với những gì bạn có thể mong đợi từ các báo cáo trường quốc gia. Đừng lo lắng về sự vắng mặt của phần trăm hoặc xếp hạng — phản hồi tiêu chí thực tế chi tiết hơn và có thể hành động được. Nhiều gia đình Việt Nam trải qua một số lo lắng khi so sánh con em họ trên đường IB với các thành viên gia đình trên đường hệ thống quốc gia. Câu trả lời là: "Các hệ thống đang đo lường những thứ khác nhau. Con em chúng tôi đang phát triển tư duy phản biện, sự hợp tác và kỹ năng nghiên cứu — những kỹ năng mà hệ thống bảng điểm không đánh giá chính thức cho đến đại học."',
+      whatToAsk: [
+        'Con em tôi cần làm gì để chuyển từ điểm tiêu chí hiện tại của mình lên cấp độ tiếp theo trong [môn học]?',
+        'Con em tôi đang phát triển như thế nào với tư cách là một học sinh độc lập và một nhà tư duy phản biện? Bạn có thể cho tôi các ví dụ cụ thể không?',
+        'Đường dẫn DP là gì, và nó khác với Thi Tốt Nghiệp (kỳ thi ứng viên Việt Nam) mà các bạn cùng lứa có thể chuẩn bị như thế nào?'
+      ],
+    }
+  },
 }

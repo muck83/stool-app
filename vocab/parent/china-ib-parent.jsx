@@ -657,4 +657,39 @@ export const chinaIbParent = {
       zh: { full: '创意·体育·服务', definition: 'DP文凭的强制性要求——不是可选的课外活动。要求在创意、体育和社区服务活动中累计记录150小时，并附有反思档案集。从12年级开始，不可豁免。' },
     },
   ],
+
+  pypBridge: {
+    en: {
+      title: 'The PYP → MYP Transition: What Chinese Families Should Know',
+      intro: 'For Chinese families, the PYP to MYP transition is the moment when comparisons with peers still preparing for the Zhongkao (中考, middle school → high school entrance exam) become sharpest. While your child is moving into criterion-based MYP assessment, their counterparts in China are entering an intensive exam drilling phase. This guide explains what the MYP transition actually means — and why the two paths are measuring genuinely different things.',
+      changes: [
+        { aspect: 'Report format', pyp: 'Narrative comments and portfolio evidence. No percentage grades. Progress described in learning dispositions and inquiry skills.', myp: 'Criterion scores A–D (0–8 each). Total score maps to grade 1–7. Radically different from the percentage-based Zhongkao grading your relatives understand.' },
+        { aspect: 'Assessment style', pyp: 'Ongoing observation and portfolios integrated throughout learning. Students develop agency and self-assessment skills.', myp: 'Formal summative assessments at defined points. Subjects assessed independently by criterion. External IB moderation ensures consistency across schools globally — not just within China.' },
+        { aspect: 'Exam pressure', pyp: 'No high-stakes exams. Students in Grades 6–7 focus on conceptual understanding and inquiry.', myp: 'No early Zhongkao-style cramming. MYP is designed to build thinking skills. Formal summative assessments exist, but they test application and reasoning, not memorisation.' },
+        { aspect: 'Educational purpose', pyp: 'IB inquiry and conceptual learning. The goal is to develop independent learners who ask good questions.', myp: 'Still emphasis on understanding and critical thinking, not test drilling. By Year 10, students are prepared for DP — a different pathway than Gaokao, but equally respected globally.' }
+      ],
+      firstYearNote: 'Year 7 will feel like a significant shift — the report will be shorter, more criterion-focused, and will not look like a Zhongkao progress report. This is intentional. Do not interpret the absence of percentage grades as lower rigour. MYP students at top IB schools consistently outperform their peers on college admissions essays and research skills — skills the percentage system does not measure. Your child\'s focus in Year 7 should be on understanding how criterion A–D work in each subject, not on achieving high percentage totals.',
+      whatToAsk: [
+        'What does my child need to do to move from their current criterion score to the next level in [subject]?',
+        'How does the MYP approach to learning differ from what my relatives see in the national system? What skills is my child building?',
+        'Is there a summer bridge programme before Year 7? How can we support this transition?'
+      ],
+    },
+    zh: {
+      title: 'PYP → MYP 转换：中国家庭应该了解的内容',
+      intro: '对于中国家庭来说，PYP 到 MYP 的转换是与仍在为中考（初中→高中入学考试）做准备的同龄人进行比较变得最尖锐的时刻。当您的孩子进入基于标准的 MYP 评估时，他们在中国的同龄人正在进入一个密集的应试准备阶段。本指南解释了 MYP 转换的真正含义 — 以及为什么这两条路径实际上衡量的是完全不同的东西。',
+      changes: [
+        { aspect: '报告格式', pyp: '叙述性评论和作品集证据。没有百分比等级。进展用学习倾向和探究技能来描述。', myp: '标准等级 A–D（每个 0–8 分）。总分映射到等级 1–7。与您的亲戚了解的基于百分比的中考评分方式有根本不同。' },
+        { aspect: '评估方式', pyp: '持续观察和贯穿学习过程的作品集。学生培养自主性和自我评估技能。', myp: '在规定的时间点进行正式的总结性评估。各科目独立按标准评估。外部 IB 协调确保全球学校的一致性 — 不仅仅是中国境内。' },
+        { aspect: '考试压力', pyp: '没有高风险考试。六七年级的学生专注于概念理解和探究。', myp: '没有早期中考式的强化。MYP 旨在建立思维技能。存在正式的总结性评估，但它们测试的是应用和推理，而不是死记硬背。' },
+        { aspect: '教育目的', pyp: 'IB 探究和概念学习。目标是培养能提出好问题的独立学习者。', myp: '仍然强调理解和批判性思维，而不是应试钻研。到 10 年级时，学生为 DP 做好准备 — 这是一条不同于高考的途径，但在全球范围内同样受尊重。' }
+      ],
+      firstYearNote: '7 年级将感觉是一个重大转变 — 报告会更短、更以标准为中心，看起来不像中考进度报告。这是有意的。不要将缺少百分比等级解释为严谨性降低。顶级 IB 学校的 MYP 学生在大学录取文章和研究技能上的表现始终优于同龄人 — 百分比系统无法衡量的技能。您孩子在 7 年级的重点应该是理解每个科目中标准 A–D 的工作方式，而不是追求高百分比总分。',
+      whatToAsk: [
+        '我的孩子需要做什么才能在[科目]中从当前的标准分数提升到下一个等级？',
+        'MYP 的学习方法与我的亲戚在国家系统中看到的有何不同？我的孩子在培养什么技能？',
+        '7 年级前是否有暑期衔接课程？我们可以如何支持这一转变？'
+      ],
+    }
+  },
 }
