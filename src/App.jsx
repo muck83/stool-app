@@ -40,6 +40,7 @@ import ParentModulePage from './pages/parent/ParentModulePage.jsx'
 import WoodstockParentPage from './pages/parent/WoodstockParentPage.jsx'
 import PTMPrepPage from './pages/parent/PTMPrepPage.jsx'
 import CounselorModulePage from './pages/counselor/CounselorModulePage.jsx'
+import CounselorHome from './pages/counselor/CounselorHome.jsx'
 
 const TABS = [
   { id: 'overview',    label: 'Overview' },
@@ -113,6 +114,7 @@ export default function App() {
         <Route path="/parent/woodstock" element={<WoodstockParentPage />} />
         <Route path="/parent/ptm-prep" element={<PTMPrepPage />} />
         <Route path="/parent/:slug" element={<ParentModulePage />} />
+        <Route path="/learn/counselor" element={<CounselorHome />} />
         <Route path="/counselor/:slug" element={<CounselorModulePage />} />
         <Route path="/learn/:slug/:dimension" element={<DimensionPage />} />
 

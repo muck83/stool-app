@@ -27,8 +27,20 @@ const TRACKS = [
     cta: 'Browse parent guides →',
     href: '/parent',
     color: '#185FA5',
-    tags: ['Korea · IB', 'India · IB', 'China · IB'],
-    tagNote: '3 guides available',
+    tags: ['Korea · IB', 'India · IB', 'China · IB', 'Japan · IB', 'Indonesia · IB', 'UAE · IB'],
+    tagNote: '6 guides available',
+  },
+  {
+    id: 'counselor',
+    emoji: '🧭',
+    label: 'Counselor',
+    title: 'Cultural translation modules',
+    description: 'Frameworks, reframe scripts, and copyable parent-facing language for counselors navigating friction between IB and home-country expectations from Saudi Arabia, China, and Korea.',
+    cta: 'Browse counselor modules →',
+    href: '/learn/counselor',
+    color: '#6D3FC0',
+    tags: ['KSA · IB', 'China · IB', 'Korea · IB'],
+    tagNote: '1 module available',
   },
 ]
 
