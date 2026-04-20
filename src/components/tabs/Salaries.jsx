@@ -613,4 +613,11 @@ export default function Salaries() {
               {TAX_OPTS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
             </select>
           </div>
-          <button className="btn 
+          <button className="btn btn-primary" style={{ width: '100%', marginTop: '.25rem' }} onClick={submit}>Submit anonymously →</button>
+          {msg && <div style={{ fontSize: 12, color: msg.startsWith('✓') ? 'var(--teal-dark)' : 'var(--coral-dark)', marginTop: '.5rem' }}>{msg}</div>}
+        </div>
+
+      </div>
+    </div>
+  )
+}
