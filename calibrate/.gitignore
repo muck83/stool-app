@@ -25,3 +25,4 @@ vite.config.js.timestamp-*
 # Supabase local
 supabase/.temp/
 supabase/.branches/
+dist-check/

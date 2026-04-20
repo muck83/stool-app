@@ -8,12 +8,22 @@ import {
   createInviteBatchRows,
   deleteAssignment,
   getAdminActionItems,
+  getCompletions,
+  getGradeOverrides,
   getModuleQuizAnalytics,
   getModuleQuizQuestions,
+  getUserModuleScores,
   inviteUser,
   refreshAdminActionItems,
   resolveAdminActionItem,
+  updateAssignment,
   updateInviteBatchCounts,
+  upsertCompletion,
+  upsertGradeOverride,
+  getSchoolMembers,
+  updateMemberProfile,
+  getAllSchools,
+  adminSendPasswordReset,
 } from '../lib/supabase'
 import {
   MOCK_USERS, MOCK_ASSIGNMENTS, MODULE_META,
@@ -294,8 +304,10 @@ function CompletionCell({ pct }) {
 
 export default function AdminDashboard() {
   const navigate = useNavigate()
-  const { user, profile } = useAuth()
-  const [roleFilter, setRoleFilter]   = useState('all')   // 'all' | 'teacher' | 'parent'
+  const { user, profile, school, isSuperAdmin } = useAuth()
+  const schoolName = school?.name ?? MOCK_SCHOOL.name
+  const [roleFilter, setRoleFilter]   = useState('all')   // 'all' | 'teacher' | 'parent' | 'admin' | 'superadmin'
+  const [memberSearch, setMemberSearch] = useState('')
   const [adminView,  setAdminView]    = useState('overview') // 'overview' | 'users' | 'assign'
   const [assignForm, setAssignForm]   = useState({ moduleSlug: '', roleTarget: 'teacher', dueDate: '', selectedUserIds: [] })
   const [assignments, setAssignments] = useState(MOCK_ASSIGNMENTS)
@@ -324,6 +336,66 @@ export default function AdminDashboard() {
   const [actionRefreshing, setActionRefreshing] = useState(false)
   const [actionError, setActionError] = useState('')
 
+  // School members — real profiles in prod, mock roster in mock mode. Used by
+  // the Members tab, Assign "Specific users" picker, and per-user lookups.
+  const [members, setMembers] = useState(MOCK_MODE ? MOCK_USERS : [])
+  const [membersLoading, setMembersLoading] = useState(false)
+  const [membersError, setMembersError] = useState('')
+
+  // All schools — populated only for superadmin; used by the edit modal to
+  // let superadmins move a member to a different school.
+  const [allSchools, setAllSchools] = useState([])
+
+  // Per-user edit state — when non-null, the user detail modal shows a
+  // form instead of the read-only profile view.
+  const [editMode, setEditMode]   = useState(false)
+  const [editForm, setEditForm]   = useState({ fullName: '', role: 'teacher', schoolId: '' })
+  const [editSaving, setEditSaving] = useState(false)
+  const [editError, setEditError]   = useState('')
+
+  // "Add new member" modal — invite + optional auto-assign modules with due dates.
+  const [addMemberOpen, setAddMemberOpen] = useState(false)
+  const [addMemberForm, setAddMemberForm] = useState({
+    email: '', fullName: '', role: 'teacher',
+    selectedModules: {}, // { slug: 'yyyy-mm-dd' } — presence = selected
+    welcomeMessage: '',
+    sendEmail: true,
+    initialPassword: '', // empty = no pre-set password (normal invite flow)
+  })
+  const [addMemberSaving, setAddMemberSaving] = useState(false)
+  const [addMemberError, setAddMemberError]   = useState('')
+
+  // Per-user edit state: fetched when the detail modal opens.
+  // completions: { slug: pct }; scores: { slug: { quiz_type: pct } };
+  // overrides: [{ module_slug, quiz_type, override_score, reason, created_at }]
+  const [userCompletions, setUserCompletions] = useState({})
+  const [userScores,      setUserScores]      = useState({})
+  const [userOverrides,   setUserOverrides]   = useState([])
+  const [userDetailLoading, setUserDetailLoading] = useState(false)
+  const [userDetailRefreshKey, setUserDetailRefreshKey] = useState(0)
+
+  // Inline edit state for a single individual assignment due date.
+  const [dueDateEditing, setDueDateEditing] = useState({}) // { [assignmentId]: 'yyyy-mm-dd' }
+  const [dueDateSaving,  setDueDateSaving]  = useState(null)
+
+  // 'Add module' picker inside the user modal.
+  const [addModuleForm, setAddModuleForm] = useState({ slug: '', dueDate: '' })
+  const [addModuleSaving, setAddModuleSaving] = useState(false)
+  const [addModuleError,  setAddModuleError]  = useState('')
+
+  // Per-module progress override input.
+  const [progressEdit,    setProgressEdit]   = useState({}) // { slug: pct }
+  const [progressSaving,  setProgressSaving] = useState(null)
+
+  // Grade override inline form: null when closed.
+  const [gradeOverrideForm, setGradeOverrideForm] = useState(null)
+  // { slug, quizType, score: '', reason: '' }
+  const [gradeOverrideSaving, setGradeOverrideSaving] = useState(false)
+  const [gradeOverrideError,  setGradeOverrideError]  = useState('')
+
+  // Admin-triggered password reset: { status: 'idle'|'sending'|'sent'|'error', message?: string }
+  const [resetStatus, setResetStatus] = useState({ status: 'idle' })
+
   // First-run "what Habterra is (and isn't)" explainer. Dismissal persists per-admin in localStorage.
   const primerKey = `calibrate.adminPrimerDismissed.${user?.id ?? 'anon'}`
   const [primerDismissed, setPrimerDismissed] = useState(() => {
@@ -338,9 +410,14 @@ export default function AdminDashboard() {
   const stats      = getSchoolStats()
   const activeSlugs = getActiveModuleSlugs(roleFilter)
 
-  const visibleUsers = MOCK_USERS.filter(u =>
-    roleFilter === 'all' ? true : u.role === roleFilter
-  )
+  const visibleUsers = members.filter(u => {
+    if (roleFilter !== 'all' && u.role !== roleFilter) return false
+    const q = memberSearch.trim().toLowerCase()
+    if (!q) return true
+    const name  = (u.full_name ?? '').toLowerCase()
+    const email = (u.email     ?? '').toLowerCase()
+    return name.includes(q) || email.includes(q)
+  })
   const csvImportableCount = csvRows.filter(row => row.status === 'pending').length
   const openActionCount = actionItems.length
 
@@ -414,6 +491,99 @@ export default function AdminDashboard() {
     return () => { active = false }
   }, [adminView, profile?.school_id])
 
+  // Load real school members from Supabase. In mock mode the initial state
+  // already holds MOCK_USERS; in prod we fetch from `profiles`. We refetch
+  // whenever the admin switches school or a save in the edit modal flips
+  // `membersRefreshKey`.
+  const [membersRefreshKey, setMembersRefreshKey] = useState(0)
+  useEffect(() => {
+    if (MOCK_MODE) return
+    const schoolId = profile?.school_id
+    if (!schoolId) return
+    let active = true
+    setMembersLoading(true)
+    setMembersError('')
+    getSchoolMembers(schoolId)
+      .then(rows => {
+        if (!active) return
+        setMembers(rows)
+        setMembersLoading(false)
+      })
+      .catch(err => {
+        if (!active) return
+        setMembersError(err?.message ?? 'Failed to load members.')
+        setMembersLoading(false)
+      })
+    return () => { active = false }
+  }, [profile?.school_id, membersRefreshKey])
+
+  // When the detail modal opens (selectedUser set), pull real completions,
+  // quiz scores, and any prior grade overrides. MOCK mode short-circuits.
+  useEffect(() => {
+    if (!selectedUser) {
+      setUserCompletions({})
+      setUserScores({})
+      setUserOverrides([])
+      setProgressEdit({})
+      setGradeOverrideForm(null)
+      setAddModuleForm({ slug: '', dueDate: '' })
+      setAddModuleError('')
+      setDueDateEditing({})
+      return
+    }
+    if (MOCK_MODE) {
+      setUserCompletions({})
+      setUserScores({})
+      setUserOverrides([])
+      return
+    }
+    let cancelled = false
+    setUserDetailLoading(true)
+    ;(async () => {
+      try {
+        const [comp, scores, overrides] = await Promise.all([
+          getCompletions(selectedUser.id),
+          getUserModuleScores(selectedUser.id),
+          getGradeOverrides(selectedUser.id),
+        ])
+        if (cancelled) return
+        const completionsMap = {}
+        for (const row of comp ?? []) completionsMap[row.module_slug] = row.progress_pct ?? 0
+        // scores are per-module-id; invert via MODULE_META's dbId.
+        const moduleIdToSlug = {}
+        for (const [slug, m] of Object.entries(MODULE_META)) if (m.dbId) moduleIdToSlug[m.dbId] = slug
+        const scoreMap = {}
+        for (const row of scores ?? []) {
+          const slug = moduleIdToSlug[row.module_id]
+          if (!slug) continue
+          if (!scoreMap[slug]) scoreMap[slug] = {}
+          scoreMap[slug][row.quiz_type] = { pct: row.pct, correct: row.correct, total: row.total }
+        }
+        setUserCompletions(completionsMap)
+        setUserScores(scoreMap)
+        setUserOverrides(overrides ?? [])
+      } catch (err) {
+        console.warn('[user-detail fetch] failed:', err)
+      } finally {
+        if (!cancelled) setUserDetailLoading(false)
+      }
+    })()
+    return () => { cancelled = true }
+  }, [selectedUser?.id, userDetailRefreshKey])
+
+  // Fetch the full school list so both superadmins (who can move any member)
+  // and regular users (who may need to fix their own school_id) get a picker.
+  // If RLS blocks the read, we fall back to an empty list — the edit modal
+  // injects the caller's current school as a selectable option anyway.
+  useEffect(() => {
+    if (MOCK_MODE) { setAllSchools([MOCK_SCHOOL]); return }
+    let active = true
+    getAllSchools()
+      .then(rows => { if (active) setAllSchools(rows) })
+      .catch(() => { if (active) setAllSchools([]) })
+    return () => { active = false }
+  }, [isSuperAdmin])
+
   // Which slugs each user should have (based on assignments)
   function userSlugs(user) {
     return assignments
@@ -453,7 +623,7 @@ export default function AdminDashboard() {
         setAssignError('Pick at least one person, or switch to a role bucket.')
         return
       }
-      const selected = MOCK_USERS.filter(u => assignForm.selectedUserIds.includes(u.id))
+      const selected = members.filter(u => assignForm.selectedUserIds.includes(u.id))
       const newRows = selected.map(u => ({
         id:          `a${Date.now()}-${u.id}`,
         school_id:   schoolId,
@@ -526,7 +696,7 @@ export default function AdminDashboard() {
     const label = meta?.label ?? assignment.module_slug
     let audience
     if (assignment.user_id) {
-      const targetUser = MOCK_USERS.find(u => u.id === assignment.user_id)
+      const targetUser = members.find(u => u.id === assignment.user_id)
       audience = targetUser?.full_name ?? 'this user'
     } else if (assignment.role_target === 'all') {
       audience = 'everyone'
@@ -545,6 +715,331 @@ export default function AdminDashboard() {
         setAssignments(previous)
         window.alert(err.message ?? 'Failed to remove assignment.')
       }
+    }
+  }
+
+  // Open the edit form inside the user detail modal. Pre-populates from the
+  // currently selected user; only superadmin can move members between schools.
+  function openEditMode() {
+    if (!selectedUser) return
+    setEditForm({
+      fullName: selectedUser.full_name ?? '',
+      role:     selectedUser.role     ?? 'teacher',
+      schoolId: selectedUser.school_id ?? profile?.school_id ?? '',
+    })
+    setEditError('')
+    setEditMode(true)
+  }
+
+  function cancelEditMode() {
+    setEditMode(false)
+    setEditError('')
+  }
+
+  async function saveMemberEdit() {
+    if (!selectedUser) return
+    setEditSaving(true)
+    setEditError('')
+    try {
+      // Superadmins can move any member; non-superadmins can only change the
+      // school on their own record (self-service fix for a bad school_id).
+      const canEditSchool = isSuperAdmin || (profile && selectedUser.id === profile.id)
+      const schoolIdChanging = canEditSchool
+        && editForm.schoolId
+        && editForm.schoolId !== selectedUser.school_id
+      if (!MOCK_MODE) {
+        await updateMemberProfile({
+          userId:   selectedUser.id,
+          fullName: editForm.fullName.trim() || null,
+          role:     editForm.role,
+          ...(schoolIdChanging ? { schoolId: editForm.schoolId } : {}),
+        })
+      }
+      // Optimistic: update the local roster row in place and refresh list.
+      setMembers(prev => prev.map(u => u.id === selectedUser.id ? {
+        ...u,
+        full_name: editForm.fullName.trim() || null,
+        role:      editForm.role,
+        school_id: schoolIdChanging ? editForm.schoolId : u.school_id,
+      } : u))
+      setSelectedUser(u => u ? {
+        ...u,
+        full_name: editForm.fullName.trim() || null,
+        role:      editForm.role,
+        school_id: schoolIdChanging ? editForm.schoolId : u.school_id,
+      } : u)
+      setMembersRefreshKey(k => k + 1)
+      setEditMode(false)
+    } catch (err) {
+      setEditError(err?.message ?? 'Failed to save. Please try again.')
+    } finally {
+      setEditSaving(false)
+    }
+  }
+
+  // "Add new member" modal: open / close / module toggle / submit.
+  function openAddMember() {
+    setAddMemberForm({
+      email: '', fullName: '',
+      role: 'teacher',
+      selectedModules: {},
+      welcomeMessage: '',
+      sendEmail: true,
+      initialPassword: '',
+    })
+    setAddMemberError('')
+    setAddMemberOpen(true)
+  }
+
+  function closeAddMember() {
+    setAddMemberOpen(false)
+    setAddMemberError('')
+  }
+
+  function toggleAddMemberModule(slug) {
+    setAddMemberForm(f => {
+      const next = { ...f.selectedModules }
+      if (slug in next) delete next[slug]
+      else next[slug] = ''
+      return { ...f, selectedModules: next }
+    })
+  }
+
+  function setAddMemberModuleDue(slug, due) {
+    setAddMemberForm(f => ({
+      ...f,
+      selectedModules: { ...f.selectedModules, [slug]: due },
+    }))
+  }
+
+  async function handleAddMember() {
+    const email = addMemberForm.email.trim().toLowerCase()
+    const fullName = addMemberForm.fullName.trim()
+    const role = addMemberForm.role
+    const schoolId = profile?.school_id ?? MOCK_SCHOOL.id
+    const moduleEntries = Object.entries(addMemberForm.selectedModules)
+    const welcomeMessage = addMemberForm.welcomeMessage.trim()
+    const initialPassword = (addMemberForm.initialPassword ?? '').trim()
+
+    setAddMemberError('')
+
+    if (!isValidEmail(email)) {
+      setAddMemberError('Please enter a valid email address.')
+      return
+    }
+    if (!fullName) {
+      setAddMemberError("Please enter the member's full name.")
+      return
+    }
+    if (!schoolId) {
+      setAddMemberError('No school selected. Contact support if this persists.')
+      return
+    }
+    if (initialPassword && initialPassword.length < 8) {
+      setAddMemberError('Initial password must be at least 8 characters.')
+      return
+    }
+
+    setAddMemberSaving(true)
+    try {
+      // When an initial password is set we skip the invite email — the admin
+      // is expected to hand the password over out-of-band. Otherwise honor
+      // the admin's `sendEmail` toggle.
+      const sendEmail = initialPassword ? false : (addMemberForm.sendEmail !== false)
+      const result = await inviteUser({
+        email, fullName, role, schoolId,
+        welcomeMessage: welcomeMessage || undefined,
+        sendEmail,
+        password: initialPassword || undefined,
+        assignedBy: user?.id,
+      })
+      const newUserId = result?.user_id ?? result?.userId ?? null
+
+      // In prod, create assignments for each selected module.
+      if (!MOCK_MODE && newUserId && moduleEntries.length > 0) {
+        for (const [slug, due] of moduleEntries) {
+          try {
+            await createAssignment({
+              schoolId,
+              userId: newUserId,
+              roleTarget: role,
+              moduleSlug: slug,
+              assignedBy: user?.id,
+              dueDate: due || null,
+            })
+          } catch (err) {
+            // Don't abort: surface in console so partial success is recoverable.
+            console.warn(`Failed to assign ${slug} to ${email}:`, err)
+          }
+        }
+      }
+
+      // Optimistic: add the new row so admin sees them immediately, then refresh.
+      setMembers(prev => [
+        ...prev,
+        {
+          id: newUserId ?? `pending-${Date.now()}`,
+          email, full_name: fullName, role, school_id: schoolId,
+          completions: {},
+        },
+      ])
+      setMembersRefreshKey(k => k + 1)
+      setAddMemberOpen(false)
+    } catch (err) {
+      setAddMemberError(err?.message ?? 'Failed to add member. Please try again.')
+    } finally {
+      setAddMemberSaving(false)
+    }
+  }
+
+  // ---------- User detail modal: edit handlers ----------
+
+  async function handleSaveDueDate(assignment) {
+    const newDate = dueDateEditing[assignment.id]
+    if (newDate === undefined) return
+    const dueDate = newDate || null
+    setDueDateSaving(assignment.id)
+    try {
+      if (!MOCK_MODE) await updateAssignment(assignment.id, { dueDate })
+      setAssignments(prev => prev.map(a => a.id === assignment.id ? { ...a, due_date: dueDate } : a))
+      setDueDateEditing(prev => {
+        const next = { ...prev }
+        delete next[assignment.id]
+        return next
+      })
+    } catch (err) {
+      window.alert(err?.message ?? 'Failed to update due date.')
+    } finally {
+      setDueDateSaving(null)
+    }
+  }
+
+  async function handleAddModuleToUser() {
+    if (!selectedUser || !addModuleForm.slug) return
+    const schoolId = profile?.school_id ?? MOCK_SCHOOL.id
+    const dueDate = addModuleForm.dueDate || null
+    setAddModuleError('')
+    setAddModuleSaving(true)
+    try {
+      let newRow
+      if (!MOCK_MODE) {
+        const created = await createAssignment({
+          schoolId,
+          userId: selectedUser.id,
+          roleTarget: selectedUser.role,
+          moduleSlug: addModuleForm.slug,
+          assignedBy: user?.id,
+          dueDate,
+        })
+        // createAssignment returns {id, ...} — build a local row.
+        newRow = {
+          id: created?.id ?? `tmp-${Date.now()}`,
+          school_id: schoolId,
+          user_id:   selectedUser.id,
+          module_slug: addModuleForm.slug,
+          role_target: selectedUser.role,
+          due_date:    dueDate,
+          assigned_at: new Date().toISOString(),
+        }
+      } else {
+        newRow = {
+          id: `a${Date.now()}`,
+          school_id: schoolId,
+          user_id:   selectedUser.id,
+          module_slug: addModuleForm.slug,
+          role_target: selectedUser.role,
+          due_date:    dueDate,
+          assigned_at: new Date().toISOString(),
+        }
+      }
+      setAssignments(prev => [...prev, newRow])
+      setAddModuleForm({ slug: '', dueDate: '' })
+    } catch (err) {
+      setAddModuleError(err?.message ?? 'Failed to add module.')
+    } finally {
+      setAddModuleSaving(false)
+    }
+  }
+
+  async function handleSaveProgress(slug) {
+    if (!selectedUser) return
+    const raw = progressEdit[slug]
+    if (raw === undefined) return
+    const pct = Math.max(0, Math.min(100, Number(raw) || 0))
+    setProgressSaving(slug)
+    try {
+      if (!MOCK_MODE) await upsertCompletion(selectedUser.id, slug, pct)
+      setUserCompletions(prev => ({ ...prev, [slug]: pct }))
+      setProgressEdit(prev => {
+        const next = { ...prev }
+        delete next[slug]
+        return next
+      })
+    } catch (err) {
+      window.alert(err?.message ?? 'Failed to save progress.')
+    } finally {
+      setProgressSaving(null)
+    }
+  }
+
+  function openGradeOverride(slug, quizType, currentScore) {
+    setGradeOverrideForm({
+      slug,
+      quizType,
+      score: currentScore != null ? String(currentScore) : '',
+      reason: '',
+    })
+    setGradeOverrideError('')
+  }
+
+  function closeGradeOverride() {
+    setGradeOverrideForm(null)
+    setGradeOverrideError('')
+  }
+
+  async function handleSaveGradeOverride() {
+    if (!selectedUser || !gradeOverrideForm) return
+    const score = Number(gradeOverrideForm.score)
+    if (!Number.isFinite(score) || score < 0 || score > 100) {
+      setGradeOverrideError('Score must be a number between 0 and 100.')
+      return
+    }
+    setGradeOverrideSaving(true)
+    setGradeOverrideError('')
+    try {
+      if (!MOCK_MODE) {
+        await upsertGradeOverride({
+          userId: selectedUser.id,
+          moduleSlug: gradeOverrideForm.slug,
+          quizType: gradeOverrideForm.quizType,
+          overrideScore: score,
+          reason: gradeOverrideForm.reason.trim() || null,
+          adminId: user?.id,
+        })
+      }
+      // Optimistic: refresh just this user's overrides list.
+      setUserOverrides(prev => {
+        const without = prev.filter(o => !(o.module_slug === gradeOverrideForm.slug && o.quiz_type === gradeOverrideForm.quizType))
+        return [
+          {
+            id: `opt-${Date.now()}`,
+            user_id: selectedUser.id,
+            module_slug: gradeOverrideForm.slug,
+            quiz_type: gradeOverrideForm.quizType,
+            override_score: score,
+            reason: gradeOverrideForm.reason.trim() || null,
+            created_by: user?.id ?? null,
+            created_at: new Date().toISOString(),
+          },
+          ...without,
+        ]
+      })
+      setGradeOverrideForm(null)
+      setUserDetailRefreshKey(k => k + 1)
+    } catch (err) {
+      setGradeOverrideError(err?.message ?? 'Failed to save override. Check that the grade_overrides table exists.')
+    } finally {
+      setGradeOverrideSaving(false)
     }
   }
 
@@ -777,6 +1272,7 @@ export default function AdminDashboard() {
             { key: 'overview',   icon: '▦', label: 'Overview' },
             { key: 'users',      icon: '⊡', label: 'Members' },
             { key: 'actions',    icon: '!', label: `Action Queue${openActionCount ? ` (${openActionCount})` : ''}` },
+            { key: 'modules',    icon: '▲', label: 'Modules' },
             { key: 'assign',     icon: '+', label: 'Assign Modules' },
             { key: 'analytics',  icon: '◈', label: 'Quiz Analytics' },
             { key: 'invite',     icon: '→', label: 'Invite Member' },
@@ -1096,32 +1592,90 @@ export default function AdminDashboard() {
           {/* ════════════════ MEMBERS ════════════════ */}
           {adminView === 'users' && (
             <>
-              <div style={{ marginBottom: 28 }}>
-                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 700, color: 'var(--cal-ink)', marginBottom: 4 }}>Members</h2>
-                <p style={{ fontSize: 13, color: 'var(--cal-muted)' }}>
-                  {MOCK_USERS.length} members enrolled at {MOCK_SCHOOL.name}
-                </p>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 12, marginBottom: 28, flexWrap: 'wrap' }}>
+                <div>
+                  <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 700, color: 'var(--cal-ink)', marginBottom: 4 }}>Members</h2>
+                  <p style={{ fontSize: 13, color: 'var(--cal-muted)' }}>
+                    {members.length} members enrolled at {schoolName}
+                  </p>
+                </div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  {profile && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        // Open the detail modal with the caller's own record so they can edit
+                        // their school, role, assignments, and grades.
+                        const mine = members.find(m => m.id === profile.id)
+                        setSelectedUser(mine ?? {
+                          id: profile.id,
+                          email: profile.email,
+                          full_name: profile.full_name ?? '',
+                          role: profile.role,
+                          school_id: profile.school_id,
+                          completions: {},
+                        })
+                      }}
+                      className="btn"
+                      style={{ fontSize: 12, fontWeight: 600, padding: '9px 16px', background: 'transparent', color: 'var(--cal-ink)', border: '1.5px solid var(--cal-border)', borderRadius: 'var(--r-full)' }}
+                    >
+                      Edit my account
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={openAddMember}
+                    className="btn"
+                    style={{ fontSize: 12, fontWeight: 600, padding: '9px 16px', background: 'var(--cal-teal)', color: '#fff', borderRadius: 'var(--r-full)' }}
+                  >
+                    + Add new member
+                  </button>
+                </div>
               </div>
 
-              {/* Role filter */}
-              <div style={{ display: 'flex', gap: 6, marginBottom: 20 }}>
-                {['all', 'teacher', 'parent'].map(f => (
-                  <button
-                    key={f}
-                    onClick={() => setRoleFilter(f)}
-                    style={{
-                      fontFamily: 'var(--font-display)', fontSize: 12, fontWeight: 600,
-                      padding: '6px 14px', borderRadius: 'var(--r-full)',
-                      border: '1.5px solid',
-                      borderColor: roleFilter === f ? 'var(--cal-teal)' : 'var(--cal-border)',
-                      background: roleFilter === f ? 'var(--cal-teal)' : 'transparent',
-                      color: roleFilter === f ? '#fff' : 'var(--cal-muted)',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    {f === 'all' ? 'All' : f === 'teacher' ? 'Teachers' : 'Parents'}
-                  </button>
-                ))}
+              {/* Role filter + search */}
+              <div style={{ display: 'flex', gap: 10, marginBottom: 20, alignItems: 'center', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  {['all', 'teacher', 'parent', 'admin', 'superadmin'].map(f => (
+                    <button
+                      key={f}
+                      onClick={() => setRoleFilter(f)}
+                      style={{
+                        fontFamily: 'var(--font-display)', fontSize: 12, fontWeight: 600,
+                        padding: '6px 14px', borderRadius: 'var(--r-full)',
+                        border: '1.5px solid',
+                        borderColor: roleFilter === f ? 'var(--cal-teal)' : 'var(--cal-border)',
+                        background: roleFilter === f ? 'var(--cal-teal)' : 'transparent',
+                        color: roleFilter === f ? '#fff' : 'var(--cal-muted)',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {f === 'all' ? 'All'
+                        : f === 'teacher' ? 'Teachers'
+                        : f === 'parent' ? 'Parents'
+                        : f === 'admin' ? 'Admins'
+                        : 'Superadmins'}
+                    </button>
+                  ))}
+                </div>
+                <input
+                  type="text"
+                  value={memberSearch}
+                  onChange={e => setMemberSearch(e.target.value)}
+                  placeholder="Search by name or email…"
+                  style={{
+                    flex: '1 1 240px', minWidth: 220, maxWidth: 360,
+                    padding: '7px 12px', fontSize: 13,
+                    border: '1.5px solid var(--cal-border)',
+                    borderRadius: 'var(--r-full)',
+                    background: '#fff',
+                    fontFamily: 'var(--font-body)',
+                    outline: 'none',
+                  }}
+                />
+                <span style={{ fontSize: 11, color: 'var(--cal-muted)', fontFamily: 'var(--font-display)' }}>
+                  {visibleUsers.length} of {members.length}
+                </span>
               </div>
 
               <div style={{ background: '#fff', borderRadius: 'var(--r-lg)', boxShadow: 'var(--shadow-sm)', overflow: 'hidden' }}>
@@ -1140,10 +1694,12 @@ export default function AdminDashboard() {
                       const slugs = userSlugs(user)
                       const doneCount = slugs.filter(s => (user.completions[s] ?? 0) >= 80).length
                       const overallPct = userOverallPct(user)
+                      const isSelf = profile && user.id === profile.id
                       return (
                         <tr key={user.id} style={{ background: i % 2 === 0 ? '#fff' : 'var(--cal-surface)', cursor: 'pointer' }}
                           onMouseEnter={e => e.currentTarget.style.background = 'var(--cal-teal-lt)'}
                           onMouseLeave={e => e.currentTarget.style.background = i % 2 === 0 ? '#fff' : 'var(--cal-surface)'}
+                          onClick={() => setSelectedUser(user)}
                         >
                           <td style={{ padding: '13px 20px', borderBottom: '1px solid var(--cal-border-lt)' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -1157,7 +1713,17 @@ export default function AdminDashboard() {
                                 {user.full_name.split(' ').map(n => n[0]).join('').slice(0, 2)}
                               </div>
                               <div>
-                                <div style={{ fontSize: 13, fontWeight: 500 }}>{user.full_name}</div>
+                                <div style={{ fontSize: 13, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 8 }}>
+                                  {user.full_name}
+                                  {isSelf && (
+                                    <span style={{
+                                      fontSize: 9, fontWeight: 700, letterSpacing: '0.08em',
+                                      padding: '2px 7px', borderRadius: 'var(--r-full)',
+                                      background: 'var(--cal-teal)', color: '#fff',
+                                      textTransform: 'uppercase',
+                                    }}>You</span>
+                                  )}
+                                </div>
                                 <div style={{ fontSize: 11, color: 'var(--cal-muted)' }}>{user.email}</div>
                               </div>
                             </div>
@@ -1306,6 +1872,154 @@ export default function AdminDashboard() {
             )
           })()}
 
+          {/* ════════════════ MODULES ════════════════ */}
+          {adminView === 'modules' && (
+            <>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
+                <div>
+                  <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 700, color: 'var(--cal-ink)', marginBottom: 4 }}>Modules</h2>
+                  <p style={{ fontSize: 13, color: 'var(--cal-muted)' }}>
+                    Preview each module as a learner sees it, edit its content, and add or remove it from {schoolName}.
+                  </p>
+                </div>
+                {isSuperAdmin && (
+                  <button
+                    type="button"
+                    onClick={() => navigate('/superadmin')}
+                    className="btn"
+                    style={{ fontSize: 12, fontWeight: 600, padding: '9px 16px', background: 'var(--cal-teal)', color: '#fff', borderRadius: 'var(--r-full)' }}
+                  >
+                    Open module editor →
+                  </button>
+                )}
+              </div>
+
+              <div style={{
+                background: '#FFF8E1', border: '1px solid #FFE082', color: '#7C5A00',
+                borderRadius: 'var(--r-sm)', padding: '10px 14px', marginBottom: 20,
+                fontSize: 12, lineHeight: 1.55,
+              }}>
+                <strong>Heads up:</strong> Module content is defined in code. Editing prose and structure is a superadmin task in the <em>module editor</em>.
+                Admins can preview, assign, and remove modules for their school here. To request a brand-new module, reach out to the Habterra team.
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 16 }}>
+                {Object.entries(MODULE_META).map(([slug, meta]) => {
+                  const schoolAssignments = assignments.filter(a => a.module_slug === slug)
+                  const isActive = schoolAssignments.length > 0
+                  const hasIndividual = schoolAssignments.some(a => !!a.user_id)
+                  const hasRole = schoolAssignments.some(a => !a.user_id)
+                  return (
+                    <div key={slug} style={{
+                      background: '#fff', borderRadius: 'var(--r-lg)',
+                      border: '1px solid var(--cal-border-lt)', boxShadow: 'var(--shadow-sm)',
+                      padding: 18, display: 'flex', flexDirection: 'column', gap: 12,
+                      opacity: meta.inDev ? 0.75 : 1,
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <span style={{ fontSize: 28 }}>{meta.flag}</span>
+                          <div>
+                            <div style={{ fontFamily: 'var(--font-display)', fontSize: 15, fontWeight: 700, color: 'var(--cal-ink)' }}>
+                              {meta.label}
+                            </div>
+                            <div style={{ fontSize: 11, color: 'var(--cal-muted)' }}>{meta.lang} · {slug}</div>
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'flex-end' }}>
+                          {meta.inDev && (
+                            <span style={{
+                              fontSize: 9, fontWeight: 700, letterSpacing: '0.08em',
+                              padding: '2px 7px', borderRadius: 'var(--r-full)',
+                              background: '#FFE082', color: '#7C5A00', textTransform: 'uppercase',
+                            }}>In dev</span>
+                          )}
+                          <span style={{
+                            fontSize: 9, fontWeight: 700, letterSpacing: '0.08em',
+                            padding: '2px 7px', borderRadius: 'var(--r-full)',
+                            background: isActive ? 'var(--cal-success-lt)' : 'var(--cal-surface)',
+                            color: isActive ? 'var(--cal-success)' : 'var(--cal-muted)',
+                            textTransform: 'uppercase',
+                          }}>
+                            {isActive ? `${schoolAssignments.length} assigned` : 'Not assigned'}
+                          </span>
+                        </div>
+                      </div>
+                      {meta.desc && (
+                        <div style={{ fontSize: 12, color: 'var(--cal-ink-soft)', lineHeight: 1.5 }}>
+                          {meta.desc}
+                        </div>
+                      )}
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 'auto' }}>
+                        <button
+                          type="button"
+                          onClick={() => window.open(`/module/${slug}`, '_blank', 'noopener')}
+                          className="btn"
+                          style={{ fontSize: 11, padding: '6px 10px', background: 'var(--cal-teal)', color: '#fff', borderRadius: 'var(--r-sm)' }}
+                          title="Open the learner view for this module in a new tab"
+                        >
+                          Preview
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setAssignForm(f => ({ ...f, moduleSlug: slug }))
+                            setAdminView('assign')
+                          }}
+                          className="btn"
+                          style={{ fontSize: 11, padding: '6px 10px', background: 'transparent', color: 'var(--cal-ink)', border: '1px solid var(--cal-border)', borderRadius: 'var(--r-sm)' }}
+                        >
+                          Assign
+                        </button>
+                        {isSuperAdmin && (
+                          <button
+                            type="button"
+                            onClick={() => navigate(`/superadmin?module=${encodeURIComponent(meta.dbId ?? slug)}`)}
+                            className="btn"
+                            style={{ fontSize: 11, padding: '6px 10px', background: 'transparent', color: 'var(--cal-ink)', border: '1px solid var(--cal-border)', borderRadius: 'var(--r-sm)' }}
+                            title="Edit module title, tagline, preamble, and structured content"
+                          >
+                            Edit content
+                          </button>
+                        )}
+                        {isActive && (
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              const count = schoolAssignments.length
+                              const detail = hasIndividual && hasRole
+                                ? 'individual and role-level'
+                                : hasIndividual ? 'individual' : 'role-level'
+                              const ok = window.confirm(
+                                `Remove ${meta.label} from ${schoolName}?\n\n` +
+                                `This deletes ${count} ${detail} assignment${count === 1 ? '' : 's'}. ` +
+                                `Learners keep their existing progress, but the module will no longer appear on their dashboards.`
+                              )
+                              if (!ok) return
+                              try {
+                                for (const a of schoolAssignments) {
+                                  // eslint-disable-next-line no-await-in-loop
+                                  if (!MOCK_MODE) await deleteAssignment(a.id)
+                                }
+                                setAssignments(prev => prev.filter(a => a.module_slug !== slug))
+                              } catch (err) {
+                                window.alert(`Failed to remove: ${err?.message ?? 'unknown error'}`)
+                              }
+                            }}
+                            className="btn"
+                            style={{ fontSize: 11, padding: '6px 10px', background: 'transparent', color: '#C62828', border: '1px solid #F5C2C7', borderRadius: 'var(--r-sm)' }}
+                          >
+                            Remove from school
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </>
+          )}
+
           {/* ════════════════ ASSIGN MODULE ════════════════ */}
           {adminView === 'assign' && (
             <>
@@ -1420,7 +2134,7 @@ export default function AdminDashboard() {
                             border: '1px solid var(--cal-border)', borderRadius: 'var(--r-md)',
                             background: '#fff',
                           }}>
-                            {MOCK_USERS.map((u, i) => {
+                            {members.map((u, i) => {
                               const checked = assignForm.selectedUserIds.includes(u.id)
                               return (
                                 <label
@@ -1428,7 +2142,7 @@ export default function AdminDashboard() {
                                   style={{
                                     display: 'flex', alignItems: 'center', gap: 10,
                                     padding: '8px 12px',
-                                    borderBottom: i < MOCK_USERS.length - 1 ? '1px solid var(--cal-border-lt)' : 'none',
+                                    borderBottom: i < members.length - 1 ? '1px solid var(--cal-border-lt)' : 'none',
                                     cursor: 'pointer',
                                     background: checked ? 'var(--cal-teal-lt)' : 'transparent',
                                   }}
@@ -1501,7 +2215,7 @@ export default function AdminDashboard() {
                     {assignments.map(a => {
                       const meta = MODULE_META[a.module_slug]
                       const days = daysUntil(a.due_date)
-                      const targetUser = a.user_id ? MOCK_USERS.find(u => u.id === a.user_id) : null
+                      const targetUser = a.user_id ? members.find(u => u.id === a.user_id) : null
                       const audienceLabel = targetUser
                         ? `→ ${targetUser.full_name}`
                         : (a.role_target === 'all' ? 'Everyone' : a.role_target + 's')
@@ -1889,9 +2603,50 @@ export default function AdminDashboard() {
                   {selectedUser.email} · {selectedUser.role}
                 </div>
               </div>
+              {!editMode && (
+                <>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      if (!selectedUser?.email) return
+                      if (resetStatus.status === 'sending') return
+                      setResetStatus({ status: 'sending' })
+                      try {
+                        await adminSendPasswordReset(selectedUser.email)
+                        setResetStatus({ status: 'sent', message: `Reset link sent to ${selectedUser.email}` })
+                      } catch (err) {
+                        setResetStatus({ status: 'error', message: err?.message ?? 'Failed to send reset link.' })
+                      }
+                    }}
+                    disabled={resetStatus.status === 'sending'}
+                    title="Send a password reset email to this member"
+                    style={{
+                      background: 'rgba(255,255,255,0.18)', color: '#fff',
+                      border: '1px solid rgba(255,255,255,0.3)',
+                      borderRadius: 'var(--r-sm)', padding: '6px 12px',
+                      fontSize: 12, fontFamily: 'var(--font-display)', fontWeight: 600,
+                      cursor: resetStatus.status === 'sending' ? 'wait' : 'pointer',
+                      marginRight: 8,
+                    }}
+                  >
+                    {resetStatus.status === 'sending' ? 'Sending…' : 'Send reset link'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={openEditMode}
+                    style={{
+                      background: 'rgba(255,255,255,0.18)', color: '#fff',
+                      border: '1px solid rgba(255,255,255,0.3)',
+                      borderRadius: 'var(--r-sm)', padding: '6px 12px',
+                      fontSize: 12, fontFamily: 'var(--font-display)', fontWeight: 600,
+                      cursor: 'pointer', marginRight: 8,
+                    }}
+                  >Edit</button>
+                </>
+              )}
               <button
                 type="button"
-                onClick={() => setSelectedUser(null)}
+                onClick={() => { setEditMode(false); setSelectedUser(null); setResetStatus({ status: 'idle' }) }}
                 aria-label="Close"
                 style={{
                   background: 'transparent', border: 'none', color: '#fff',
@@ -1902,6 +2657,151 @@ export default function AdminDashboard() {
 
             {/* Modal body */}
             <div style={{ padding: '22px 26px' }}>
+
+              {resetStatus.status !== 'idle' && resetStatus.status !== 'sending' && (
+                <div style={{
+                  marginBottom: 14,
+                  padding: '10px 14px',
+                  borderRadius: 'var(--r-sm)',
+                  fontSize: 12,
+                  background: resetStatus.status === 'sent' ? 'var(--cal-success-lt)' : '#FFEBEE',
+                  color: resetStatus.status === 'sent' ? 'var(--cal-success)' : '#C62828',
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8,
+                }}>
+                  <span>
+                    {resetStatus.status === 'sent' ? '\u2713 ' : ''}
+                    {resetStatus.message}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setResetStatus({ status: 'idle' })}
+                    style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'inherit', fontSize: 14, padding: 0 }}
+                    aria-label="Dismiss"
+                  >\u00d7</button>
+                </div>
+              )}
+
+              {editMode && (
+                <div style={{
+                  background: 'var(--cal-surface)', borderRadius: 'var(--r-md)',
+                  padding: 18, marginBottom: 20,
+                  border: '1px solid var(--cal-border-lt)',
+                }}>
+                  <div className="label-caps" style={{ marginBottom: 12 }}>Edit member</div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: 11, fontWeight: 600, fontFamily: 'var(--font-display)', color: 'var(--cal-ink-soft)', marginBottom: 5 }}>
+                        Full name
+                      </label>
+                      <input
+                        className="input"
+                        type="text"
+                        value={editForm.fullName}
+                        onChange={e => setEditForm(f => ({ ...f, fullName: e.target.value }))}
+                        placeholder="e.g. Eric Schoonard"
+                        style={{ width: '100%' }}
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: 11, fontWeight: 600, fontFamily: 'var(--font-display)', color: 'var(--cal-ink-soft)', marginBottom: 5 }}>
+                        Email
+                      </label>
+                      <input
+                        type="email"
+                        value={selectedUser.email ?? ''}
+                        disabled
+                        style={{
+                          width: '100%', padding: '9px 12px', fontSize: 13,
+                          background: '#F5F5F5', color: 'var(--cal-muted)',
+                          border: '1px solid var(--cal-border-lt)', borderRadius: 'var(--r-sm)',
+                        }}
+                      />
+                      <div style={{ fontSize: 10, color: 'var(--cal-muted)', marginTop: 4 }}>
+                        Email is tied to the sign-in and can't be changed from this screen.
+                      </div>
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: 11, fontWeight: 600, fontFamily: 'var(--font-display)', color: 'var(--cal-ink-soft)', marginBottom: 5 }}>
+                        Role
+                      </label>
+                      <select
+                        value={editForm.role}
+                        onChange={e => setEditForm(f => ({ ...f, role: e.target.value }))}
+                        style={{
+                          width: '100%', padding: '9px 12px', fontSize: 13,
+                          border: '1.5px solid var(--cal-border)', borderRadius: 'var(--r-sm)',
+                          background: '#fff', cursor: 'pointer',
+                        }}
+                      >
+                        <option value="teacher">Teacher</option>
+                        <option value="parent">Parent</option>
+                        <option value="admin">Admin</option>
+                        {isSuperAdmin && <option value="superadmin">Superadmin</option>}
+                      </select>
+                    </div>
+
+                    {(isSuperAdmin || (profile && selectedUser && selectedUser.id === profile.id)) && (
+                      <div>
+                        <label style={{ display: 'block', fontSize: 11, fontWeight: 600, fontFamily: 'var(--font-display)', color: 'var(--cal-ink-soft)', marginBottom: 5 }}>
+                          School
+                        </label>
+                        <select
+                          value={editForm.schoolId}
+                          onChange={e => setEditForm(f => ({ ...f, schoolId: e.target.value }))}
+                          style={{
+                            width: '100%', padding: '9px 12px', fontSize: 13,
+                            border: '1.5px solid var(--cal-border)', borderRadius: 'var(--r-sm)',
+                            background: '#fff', cursor: 'pointer',
+                          }}
+                        >
+                          <option value="">— select school —</option>
+                          {allSchools.map(s => (
+                            <option key={s.id} value={s.id}>{s.name}</option>
+                          ))}
+                          {/* Fall back to caller's current school so it stays selectable
+                              even when `getAllSchools()` is gated to superadmin. */}
+                          {!isSuperAdmin && selectedUser?.school_id && !allSchools.some(s => s.id === selectedUser.school_id) && (
+                            <option value={selectedUser.school_id}>
+                              {school?.name ?? 'Current school'}
+                            </option>
+                          )}
+                        </select>
+                        <div style={{ fontSize: 10, color: 'var(--cal-muted)', marginTop: 4 }}>
+                          {isSuperAdmin
+                            ? 'Superadmin only. Moving a member to another school updates their roster and assignments on next sign-in.'
+                            : 'Changing your own school updates your roster on next sign-in. Contact a superadmin if the right school isn\u2019t listed.'}
+                        </div>
+                      </div>
+                    )}
+
+                    {editError && (
+                      <div style={{ background: '#FFEBEE', color: '#C62828', padding: '8px 12px', borderRadius: 'var(--r-sm)', fontSize: 12 }}>
+                        {editError}
+                      </div>
+                    )}
+
+                    <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 4 }}>
+                      <button
+                        type="button"
+                        onClick={cancelEditMode}
+                        disabled={editSaving}
+                        className="btn"
+                        style={{ fontSize: 12, padding: '8px 14px', background: 'transparent', border: '1px solid var(--cal-border)', color: 'var(--cal-ink)' }}
+                      >Cancel</button>
+                      <button
+                        type="button"
+                        onClick={saveMemberEdit}
+                        disabled={editSaving || !editForm.fullName.trim()}
+                        className="btn"
+                        style={{ fontSize: 12, padding: '8px 14px', background: 'var(--cal-teal)', color: '#fff' }}
+                      >{editSaving ? 'Saving…' : 'Save changes'}</button>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Assignments: individual (removable) + inherited from role buckets */}
               <div className="label-caps" style={{ marginBottom: 12 }}>Assignments</div>
@@ -1933,8 +2833,22 @@ export default function AdminDashboard() {
                             <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--cal-ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                               {meta?.label ?? a.module_slug}
                             </div>
-                            <div style={{ fontSize: 10, color: 'var(--cal-muted)' }}>
-                              Individual{a.due_date && ` · Due ${fmtDate(a.due_date)}`}
+                            <div style={{ fontSize: 10, color: 'var(--cal-muted)', display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                              <span>Individual ·</span>
+                              <input
+                                type="date"
+                                value={dueDateEditing[a.id] !== undefined ? dueDateEditing[a.id] : (a.due_date ?? '')}
+                                onChange={e => setDueDateEditing(prev => ({ ...prev, [a.id]: e.target.value }))}
+                                style={{ fontSize: 10, padding: '2px 4px', border: '1px solid var(--cal-border-lt)', borderRadius: 3 }}
+                              />
+                              {dueDateEditing[a.id] !== undefined && dueDateEditing[a.id] !== (a.due_date ?? '') && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleSaveDueDate(a)}
+                                  disabled={dueDateSaving === a.id}
+                                  style={{ fontSize: 10, padding: '2px 8px', background: 'var(--cal-teal)', color: '#fff', border: 'none', borderRadius: 3, cursor: 'pointer' }}
+                                >{dueDateSaving === a.id ? '…' : 'Save'}</button>
+                              )}
                             </div>
                           </div>
                           <button
@@ -2000,32 +2914,234 @@ export default function AdminDashboard() {
                 )
               })()}
 
+              {/* Add module assignment */}
+              <div style={{
+                background: 'var(--cal-surface)', borderRadius: 'var(--r-md)',
+                padding: 12, marginBottom: 22,
+                border: '1px dashed var(--cal-border-lt)',
+              }}>
+                <div className="label-caps" style={{ marginBottom: 8 }}>Add module to this user</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
+                  <select
+                    value={addModuleForm.slug}
+                    onChange={e => setAddModuleForm(f => ({ ...f, slug: e.target.value }))}
+                    style={{
+                      flex: 1, minWidth: 180,
+                      padding: '7px 10px', fontSize: 12,
+                      border: '1.5px solid var(--cal-border)', borderRadius: 'var(--r-sm)',
+                      background: '#fff', cursor: 'pointer',
+                    }}
+                  >
+                    <option value="">— pick a module —</option>
+                    {Object.entries(MODULE_META).filter(([, m]) => !m.inDev).map(([slug, m]) => {
+                      const alreadyAssigned = assignments.some(a => a.user_id === selectedUser.id && a.module_slug === slug)
+                      return (
+                        <option key={slug} value={slug} disabled={alreadyAssigned}>
+                          {m.flag} {m.label?.replace('Understand ', '') ?? slug}{alreadyAssigned ? ' (already assigned)' : ''}
+                        </option>
+                      )
+                    })}
+                  </select>
+                  <input
+                    type="date"
+                    value={addModuleForm.dueDate}
+                    onChange={e => setAddModuleForm(f => ({ ...f, dueDate: e.target.value }))}
+                    title="Due date (optional)"
+                    style={{ fontSize: 12, padding: '6px 8px', border: '1.5px solid var(--cal-border)', borderRadius: 'var(--r-sm)' }}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddModuleToUser}
+                    disabled={!addModuleForm.slug || addModuleSaving}
+                    className="btn"
+                    style={{ fontSize: 12, padding: '7px 14px', background: 'var(--cal-teal)', color: '#fff' }}
+                  >{addModuleSaving ? 'Adding…' : 'Add'}</button>
+                </div>
+                {addModuleError && (
+                  <div style={{ marginTop: 8, fontSize: 11, color: '#C62828' }}>{addModuleError}</div>
+                )}
+              </div>
+
+              {/* Module progress */}
               <div className="label-caps" style={{ marginBottom: 12 }}>Module progress</div>
-              {getActiveModuleSlugs(selectedUser.role === 'parent' ? 'parent' : 'teacher').map(slug => {
-                const pct = selectedUser.completions?.[slug] ?? 0
-                const meta = MODULE_META[slug]
-                return (
-                  <div key={slug} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: '1px solid var(--cal-border-lt)' }}>
-                    <span style={{
-                      fontFamily: 'var(--font-display)', fontSize: 11, fontWeight: 700,
-                      letterSpacing: '0.06em', color: 'var(--cal-teal)',
-                      background: 'var(--cal-surface)', padding: '3px 7px',
-                      borderRadius: 'var(--r-sm)', border: '1px solid var(--cal-border)',
-                    }}>{meta?.flag ?? slug}</span>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 13, color: 'var(--cal-ink)', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {meta?.label ?? slug}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
+                {(() => {
+                  const userAssignmentSlugs = new Set(
+                    assignments
+                      .filter(a => a.user_id === selectedUser.id || (!a.user_id && (a.role_target === 'all' || a.role_target === selectedUser.role)))
+                      .map(a => a.module_slug)
+                  )
+                  const slugs = Array.from(userAssignmentSlugs)
+                  if (slugs.length === 0) {
+                    return (
+                      <div style={{ fontSize: 12, color: 'var(--cal-muted)', fontStyle: 'italic' }}>
+                        No modules assigned yet.
                       </div>
-                      <div className="progress-track" style={{ height: 4 }}>
-                        <div className={`progress-fill ${cellStatus(pct) === 'done' ? 'green' : cellStatus(pct) === 'progress' ? 'amber' : ''}`} style={{ width: `${pct}%` }} />
+                    )
+                  }
+                  return slugs.map(slug => {
+                    const meta = MODULE_META[slug]
+                    const realPct = Math.max(0, Math.min(100, Math.round(userCompletions[slug] ?? 0)))
+                    const editing = progressEdit[slug] !== undefined
+                    const displayPct = editing ? Math.max(0, Math.min(100, Number(progressEdit[slug]) || 0)) : realPct
+                    return (
+                      <div key={slug} style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                        <span style={{
+                          fontFamily: 'var(--font-display)', fontSize: 11, fontWeight: 700,
+                          letterSpacing: '0.06em', color: 'var(--cal-teal)',
+                          background: 'var(--cal-surface)', padding: '3px 7px',
+                          borderRadius: 'var(--r-sm)', border: '1px solid var(--cal-border)',
+                        }}>{meta?.flag ?? slug}</span>
+                        <div style={{ flex: 1, minWidth: 120 }}>
+                          <div style={{ fontSize: 13, color: 'var(--cal-ink)', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {meta?.label ?? slug}
+                          </div>
+                          <div className="progress-track" style={{ height: 4 }}>
+                            <div className={`progress-fill ${cellStatus(displayPct) === 'done' ? 'green' : cellStatus(displayPct) === 'progress' ? 'amber' : ''}`} style={{ width: `${displayPct}%` }} />
+                          </div>
+                        </div>
+                        <input
+                          type="number"
+                          min={0}
+                          max={100}
+                          value={editing ? progressEdit[slug] : realPct}
+                          onChange={e => setProgressEdit(prev => ({ ...prev, [slug]: e.target.value }))}
+                          style={{
+                            width: 60, fontSize: 12, padding: '4px 6px',
+                            border: '1px solid var(--cal-border)', borderRadius: 'var(--r-sm)',
+                            textAlign: 'right',
+                          }}
+                          title="Override progress %"
+                        />
+                        <span style={{ fontSize: 11, color: 'var(--cal-muted)' }}>%</span>
+                        {editing && Number(progressEdit[slug]) !== realPct && (
+                          <button
+                            type="button"
+                            onClick={() => handleSaveProgress(slug)}
+                            disabled={progressSaving === slug}
+                            style={{ fontSize: 11, padding: '3px 10px', background: 'var(--cal-teal)', color: '#fff', border: 'none', borderRadius: 3, cursor: 'pointer' }}
+                          >{progressSaving === slug ? '…' : 'Save'}</button>
+                        )}
                       </div>
-                    </div>
-                    <span style={{ fontFamily: 'var(--font-display)', fontSize: 12, fontWeight: 600, color: 'var(--cal-muted)', minWidth: 40, textAlign: 'right' }}>
-                      {pct}%
-                    </span>
-                  </div>
-                )
-              })}
+                    )
+                  })
+                })()}
+              </div>
+
+              {/* Grades (quiz + final exam) */}
+              <div className="label-caps" style={{ marginBottom: 12 }}>Grades</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
+                {(() => {
+                  const userAssignmentSlugs = new Set(
+                    assignments
+                      .filter(a => a.user_id === selectedUser.id || (!a.user_id && (a.role_target === 'all' || a.role_target === selectedUser.role)))
+                      .map(a => a.module_slug)
+                  )
+                  const slugs = Array.from(userAssignmentSlugs)
+                  if (slugs.length === 0) {
+                    return (
+                      <div style={{ fontSize: 12, color: 'var(--cal-muted)', fontStyle: 'italic' }}>
+                        No modules assigned yet.
+                      </div>
+                    )
+                  }
+                  const QUIZ_TYPES = [
+                    { key: 'checkpoint', label: 'Checkpoints' },
+                    { key: 'final_exam', label: 'Final exam' },
+                  ]
+                  return slugs.map(slug => {
+                    const meta = MODULE_META[slug]
+                    const scoreByType = userScores[slug] ?? {}
+                    return (
+                      <div key={slug} style={{
+                        padding: '10px 12px', borderRadius: 'var(--r-md)',
+                        background: 'var(--cal-surface)',
+                        border: '1px solid var(--cal-border-lt)',
+                      }}>
+                        <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--cal-ink)', marginBottom: 6 }}>
+                          {meta?.flag ?? '🌏'} {meta?.label ?? slug}
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                          {QUIZ_TYPES.map(qt => {
+                            const baseScore = scoreByType[qt.key]
+                            const override = userOverrides.find(o => o.module_slug === slug && o.quiz_type === qt.key)
+                            const hasData = baseScore || override
+                            return (
+                              <div key={qt.key} style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', fontSize: 11 }}>
+                                <span style={{ minWidth: 90, color: 'var(--cal-muted)' }}>{qt.label}</span>
+                                {hasData ? (
+                                  <>
+                                    {override ? (
+                                      <span style={{ fontWeight: 600, color: 'var(--cal-ink)' }}>
+                                        {override.override_score}%
+                                        <span style={{ marginLeft: 6, fontSize: 9, fontWeight: 500, color: '#8e5400', background: '#FFF3E0', padding: '1px 5px', borderRadius: 3 }}>OVERRIDE</span>
+                                        {baseScore && (
+                                          <span style={{ marginLeft: 6, color: 'var(--cal-muted)', textDecoration: 'line-through' }}>{baseScore.pct}%</span>
+                                        )}
+                                      </span>
+                                    ) : (
+                                      <span style={{ fontWeight: 600, color: 'var(--cal-ink)' }}>
+                                        {baseScore.pct}% <span style={{ fontWeight: 400, color: 'var(--cal-muted)' }}>({baseScore.correct}/{baseScore.total})</span>
+                                      </span>
+                                    )}
+                                  </>
+                                ) : (
+                                  <span style={{ color: 'var(--cal-muted)', fontStyle: 'italic' }}>—</span>
+                                )}
+                                <button
+                                  type="button"
+                                  onClick={() => openGradeOverride(slug, qt.key, override?.override_score ?? baseScore?.pct)}
+                                  style={{ marginLeft: 'auto', fontSize: 10, padding: '2px 8px', background: 'transparent', border: '1px solid var(--cal-border)', borderRadius: 3, color: 'var(--cal-ink)', cursor: 'pointer' }}
+                                >{override ? 'Change' : 'Override'}</button>
+                              </div>
+                            )
+                          })}
+                          {gradeOverrideForm && gradeOverrideForm.slug === slug && (
+                            <div style={{
+                              marginTop: 8, padding: 10,
+                              background: '#fff', borderRadius: 'var(--r-sm)',
+                              border: '1.5px solid var(--cal-teal)',
+                              display: 'flex', flexDirection: 'column', gap: 6,
+                            }}>
+                              <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--cal-ink-soft)', fontFamily: 'var(--font-display)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                                Override {gradeOverrideForm.quizType === 'final_exam' ? 'final exam' : 'checkpoints'}
+                              </div>
+                              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                                <input
+                                  type="number" min={0} max={100}
+                                  value={gradeOverrideForm.score}
+                                  onChange={e => setGradeOverrideForm(f => ({ ...f, score: e.target.value }))}
+                                  placeholder="Score"
+                                  style={{ width: 80, fontSize: 12, padding: '5px 8px', border: '1px solid var(--cal-border)', borderRadius: 3 }}
+                                />
+                                <span style={{ fontSize: 11, color: 'var(--cal-muted)' }}>%</span>
+                              </div>
+                              <textarea
+                                value={gradeOverrideForm.reason}
+                                onChange={e => setGradeOverrideForm(f => ({ ...f, reason: e.target.value }))}
+                                placeholder="Reason for override (required for audit)"
+                                rows={2}
+                                style={{ fontSize: 11, padding: '5px 8px', border: '1px solid var(--cal-border)', borderRadius: 3, fontFamily: 'inherit', resize: 'vertical' }}
+                              />
+                              {gradeOverrideError && (
+                                <div style={{ fontSize: 10, color: '#C62828' }}>{gradeOverrideError}</div>
+                              )}
+                              <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
+                                <button type="button" onClick={closeGradeOverride} disabled={gradeOverrideSaving}
+                                  style={{ fontSize: 11, padding: '4px 10px', background: 'transparent', border: '1px solid var(--cal-border)', borderRadius: 3, cursor: 'pointer' }}>Cancel</button>
+                                <button type="button" onClick={handleSaveGradeOverride} disabled={gradeOverrideSaving || !gradeOverrideForm.score}
+                                  style={{ fontSize: 11, padding: '4px 10px', background: 'var(--cal-teal)', color: '#fff', border: 'none', borderRadius: 3, cursor: 'pointer' }}>
+                                  {gradeOverrideSaving ? 'Saving…' : 'Save override'}</button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })
+                })()}
+              </div>
+
               <div style={{ marginTop: 18, display: 'flex', justifyContent: 'flex-end' }}>
                 <button
                   type="button"
@@ -2034,6 +3150,239 @@ export default function AdminDashboard() {
                   style={{ fontSize: 13, padding: '9px 18px', background: 'var(--cal-teal)', color: '#fff' }}
                 >
                   Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ════════════════ ADD NEW MEMBER MODAL ════════════════ */}
+      {addMemberOpen && (
+        <div
+          onClick={closeAddMember}
+          style={{
+            position: 'fixed', inset: 0,
+            background: 'rgba(0,0,0,0.45)',
+            display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
+            padding: '60px 20px 20px', zIndex: 1000, overflowY: 'auto',
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: '#fff', borderRadius: 'var(--r-lg)',
+              maxWidth: 560, width: '100%',
+              boxShadow: 'var(--shadow-lg)',
+              padding: 28,
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 18 }}>
+              <div>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700, color: 'var(--cal-ink)', marginBottom: 4 }}>
+                  Add new member
+                </h3>
+                <p style={{ fontSize: 12, color: 'var(--cal-muted)' }}>
+                  Invite a teacher, parent, or admin and optionally pre-assign modules.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={closeAddMember}
+                aria-label="Close"
+                style={{ border: 'none', background: 'transparent', fontSize: 22, color: 'var(--cal-muted)', cursor: 'pointer', lineHeight: 1 }}
+              >×</button>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div>
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 600, fontFamily: 'var(--font-display)', color: 'var(--cal-ink-soft)', marginBottom: 5 }}>
+                  Full name
+                </label>
+                <input
+                  className="input"
+                  type="text"
+                  value={addMemberForm.fullName}
+                  onChange={e => setAddMemberForm(f => ({ ...f, fullName: e.target.value }))}
+                  placeholder="e.g. Eric Schoonard"
+                  style={{ width: '100%' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 600, fontFamily: 'var(--font-display)', color: 'var(--cal-ink-soft)', marginBottom: 5 }}>
+                  Email
+                </label>
+                <input
+                  className="input"
+                  type="email"
+                  value={addMemberForm.email}
+                  onChange={e => setAddMemberForm(f => ({ ...f, email: e.target.value }))}
+                  placeholder="name@school.org"
+                  style={{ width: '100%' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 600, fontFamily: 'var(--font-display)', color: 'var(--cal-ink-soft)', marginBottom: 5 }}>
+                  Role
+                </label>
+                <select
+                  value={addMemberForm.role}
+                  onChange={e => setAddMemberForm(f => ({ ...f, role: e.target.value }))}
+                  style={{
+                    width: '100%', padding: '9px 12px', fontSize: 13,
+                    border: '1.5px solid var(--cal-border)', borderRadius: 'var(--r-sm)',
+                    background: '#fff', cursor: 'pointer',
+                  }}
+                >
+                  <option value="teacher">Teacher</option>
+                  <option value="parent">Parent</option>
+                  <option value="admin">Admin</option>
+                  {isSuperAdmin && <option value="superadmin">Superadmin</option>}
+                </select>
+              </div>
+
+              {/* Admin-set initial password (optional). Setting one skips the
+                  invite email — the admin hands the password over out-of-band. */}
+              <div>
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 600, fontFamily: 'var(--font-display)', color: 'var(--cal-ink-soft)', marginBottom: 5 }}>
+                  Initial password <span style={{ color: 'var(--cal-muted)', fontWeight: 500 }}>(optional)</span>
+                </label>
+                <input
+                  className="input"
+                  type="text"
+                  autoComplete="new-password"
+                  value={addMemberForm.initialPassword}
+                  onChange={e => setAddMemberForm(f => ({ ...f, initialPassword: e.target.value }))}
+                  placeholder="Leave blank to send an invite email"
+                  style={{ width: '100%' }}
+                />
+                <div style={{ fontSize: 10, color: 'var(--cal-muted)', marginTop: 4, lineHeight: 1.5 }}>
+                  Set a password to create the account silently (no invite email). Min 8 chars.
+                  The user can sign in immediately and change it later from their profile,
+                  or you can trigger a reset link from their detail panel.
+                </div>
+              </div>
+
+              {/* Send-invite toggle. Forced off when an initial password is set. */}
+              <div>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--cal-ink)', cursor: addMemberForm.initialPassword ? 'not-allowed' : 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={!addMemberForm.initialPassword && addMemberForm.sendEmail !== false}
+                    onChange={e => setAddMemberForm(f => ({ ...f, sendEmail: e.target.checked }))}
+                    disabled={!!addMemberForm.initialPassword}
+                    style={{ cursor: addMemberForm.initialPassword ? 'not-allowed' : 'pointer' }}
+                  />
+                  <span>Send Supabase invite email</span>
+                </label>
+                <div style={{ fontSize: 10, color: 'var(--cal-muted)', marginTop: 4, marginLeft: 24 }}>
+                  {addMemberForm.initialPassword
+                    ? 'Disabled — silent create (password above) skips the email.'
+                    : 'Uncheck to create the account without emailing the user.'}
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 600, fontFamily: 'var(--font-display)', color: 'var(--cal-ink-soft)', marginBottom: 8 }}>
+                  Modules to auto-assign <span style={{ color: 'var(--cal-muted)', fontWeight: 500 }}>(optional)</span>
+                </label>
+                <div style={{
+                  border: '1px solid var(--cal-border-lt)', borderRadius: 'var(--r-sm)',
+                  maxHeight: 200, overflowY: 'auto',
+                }}>
+                  {Object.entries(MODULE_META).filter(([, m]) => !m.inDev).map(([slug, m], i, arr) => {
+                    const checked = slug in addMemberForm.selectedModules
+                    return (
+                      <div key={slug} style={{
+                        display: 'flex', alignItems: 'center', gap: 10,
+                        padding: '8px 12px',
+                        borderBottom: i < arr.length - 1 ? '1px solid var(--cal-border-lt)' : 'none',
+                        background: checked ? 'var(--cal-teal-lt)' : 'transparent',
+                      }}>
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => toggleAddMemberModule(slug)}
+                          style={{ cursor: 'pointer' }}
+                        />
+                        <div style={{ flex: 1, fontSize: 12 }}>
+                          <span>{m.flag} {m.label?.replace('Understand ', '') ?? slug}</span>
+                        </div>
+                        {checked && (
+                          <input
+                            type="date"
+                            value={addMemberForm.selectedModules[slug] ?? ''}
+                            onChange={e => setAddMemberModuleDue(slug, e.target.value)}
+                            style={{
+                              fontSize: 11, padding: '4px 6px',
+                              border: '1px solid var(--cal-border)', borderRadius: 'var(--r-sm)',
+                            }}
+                            title="Due date (optional)"
+                          />
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 600, fontFamily: 'var(--font-display)', color: 'var(--cal-ink-soft)', marginBottom: 5 }}>
+                  Welcome message <span style={{ color: 'var(--cal-muted)', fontWeight: 500 }}>(optional)</span>
+                </label>
+                <textarea
+                  value={addMemberForm.welcomeMessage}
+                  onChange={e => setAddMemberForm(f => ({ ...f, welcomeMessage: e.target.value }))}
+                  placeholder="Short note that goes out with the invite email."
+                  rows={3}
+                  style={{
+                    width: '100%', padding: '9px 12px', fontSize: 13,
+                    border: '1.5px solid var(--cal-border)', borderRadius: 'var(--r-sm)',
+                    fontFamily: 'inherit', resize: 'vertical',
+                  }}
+                />
+                <div style={{ fontSize: 10, color: 'var(--cal-muted)', marginTop: 4 }}>
+                  Passed to the invite edge function as <code>welcome_message</code>; ignored until the backend surfaces it.
+                </div>
+              </div>
+
+              {addMemberError && (
+                <div style={{
+                  padding: '9px 12px',
+                  background: '#FFF4E5',
+                  border: '1px solid #F5C27A',
+                  borderRadius: 'var(--r-sm)',
+                  fontSize: 12,
+                  color: '#8A5A14',
+                }}>
+                  {addMemberError}
+                </div>
+              )}
+
+              <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', paddingTop: 6 }}>
+                <button
+                  type="button"
+                  onClick={closeAddMember}
+                  className="btn btn-ghost"
+                  disabled={addMemberSaving}
+                  style={{ fontSize: 13, padding: '9px 18px' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleAddMember}
+                  className="btn"
+                  disabled={addMemberSaving}
+                  style={{
+                    fontSize: 13, padding: '9px 20px',
+                    background: 'var(--cal-teal)', color: '#fff',
+                    opacity: addMemberSaving ? 0.7 : 1,
+                  }}
+                >
+                  {addMemberSaving ? 'Adding…' : 'Add member'}
                 </button>
               </div>
             </div>

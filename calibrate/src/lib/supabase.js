@@ -234,6 +234,31 @@ export async function resetPasswordForEmail(email) {
   if (error) throw error
 }
 
+// Admin helper: trigger a password-reset email for any user (by email).
+// Uses the same standard reset endpoint; the link lands on /login in recovery
+// mode where the user can set a new password.
+export async function adminSendPasswordReset(email) {
+  if (MOCK_MODE) { await wait(150); return { ok: true } }
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${window.location.origin}/login?recovery=1`,
+  })
+  if (error) throw error
+  return { ok: true }
+}
+
+// Update the currently signed-in user's password. Used by the recovery flow
+// after clicking the reset-email link, and by users setting/changing their
+// password from their own account page.
+export async function updateMyPassword(newPassword) {
+  if (MOCK_MODE) { await wait(150); return { ok: true } }
+  if (!newPassword || newPassword.length < 8) {
+    throw new Error('Password must be at least 8 characters.')
+  }
+  const { error } = await supabase.auth.updateUser({ password: newPassword })
+  if (error) throw error
+  return { ok: true }
+}
+
 export async function getProfile(userId) {
   const { data, error } = await supabase
     .from('profiles')
@@ -327,6 +352,51 @@ export async function getSchoolAssignments(schoolId) {
     .select('*')
     .eq('school_id', schoolId)
     .order('assigned_at', { ascending: false })
+  if (error) throw error
+  return data ?? []
+}
+
+// ---------- Admin: members / schools ----------
+
+// Return every profile belonging to a school (admin-only via RLS).
+export async function getSchoolMembers(schoolId) {
+  if (MOCK_MODE) return []
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id, email, full_name, role, school_id')
+    .eq('school_id', schoolId)
+    .order('full_name', { ascending: true, nullsFirst: false })
+  if (error) throw error
+  return (data ?? []).map(row => ({
+    ...row,
+    completions: {},
+  }))
+}
+
+// Update a member's editable profile fields. Callers should pass only
+// the keys they want to change; schoolId is superadmin-only.
+export async function updateMemberProfile({ userId, fullName, role, schoolId }) {
+  if (MOCK_MODE) { await wait(100); return }
+  const payload = {}
+  if (fullName !== undefined) payload.full_name = fullName
+  if (role     !== undefined) payload.role      = role
+  if (schoolId !== undefined) payload.school_id = schoolId
+  if (Object.keys(payload).length === 0) return
+  const { error } = await supabase
+    .from('profiles')
+    .update(payload)
+    .eq('id', userId)
+  if (error) throw error
+}
+
+// Every school in the system. Only used by superadmin UIs; RLS on the
+// `schools` table enforces that regular admins get their own school only.
+export async function getAllSchools() {
+  if (MOCK_MODE) return []
+  const { data, error } = await supabase
+    .from('schools')
+    .select('id, name')
+    .order('name', { ascending: true })
   if (error) throw error
   return data ?? []
 }
@@ -502,14 +572,126 @@ export async function updateInviteBatchCounts(batchId, { imported, failed, statu
   if (error) throw error
 }
 
-export async function inviteUser({ email, fullName, role, schoolId }) {
+export async function inviteUser({ email, fullName, role, schoolId, welcomeMessage, sendEmail = true, password }) {
   if (MOCK_MODE) {
     await wait(150)
     return { ok: true, user_id: `mock-user-${Date.now()}` }
   }
+  // welcome_message is held client-side until the edge function supports it.
+  // Passing unknown keys trips strict-schema validators → non-2xx response.
+  void welcomeMessage
+  const body = {
+    email,
+    full_name: fullName,
+    role,
+    school_id: schoolId,
+  }
+  // Opt-out: skip the invite email and create the user directly. Requires
+  // invite-user edge function to honor the skip_email flag (see
+  // grade_overrides_migration.sql + invite-user/index.ts in /supabase).
+  if (sendEmail === false) body.skip_email = true
+  // Optional admin-set initial password — the edge function uses it with
+  // supabase.auth.admin.createUser({ email_confirm: true }) so the user can
+  // sign in immediately. Setting a password implies no invite email.
+  if (password) {
+    body.password    = password
+    body.skip_email  = true
+  }
   const { data, error } = await supabase.functions.invoke('invite-user', {
-    body: { email, full_name: fullName, role, school_id: schoolId },
+    body,
   })
+  if (error) {
+    // supabase-js wraps the edge-function body inside error.context — try to
+    // surface it so admins see the real message instead of a generic "non-2xx".
+    let detail = error.message ?? 'Invite failed.'
+    try {
+      const ctx = error.context
+      if (ctx && typeof ctx.text === 'function') {
+        const body = await ctx.text()
+        if (body) detail = `${detail} — ${body}`
+      } else if (ctx && typeof ctx === 'object' && 'body' in ctx) {
+        detail = `${detail} — ${JSON.stringify(ctx.body)}`
+      }
+    } catch (_) {
+      // Non-fatal: keep the generic message.
+    }
+    throw new Error(detail)
+  }
+  return data
+}
+
+// ---------- Admin: edit-user helpers (modules / progress / grades) ----------
+
+// Change the due date on an existing individual assignment row.
+export async function updateAssignment(assignmentId, { dueDate }) {
+  if (MOCK_MODE) { await wait(100); return }
+  const { error } = await supabase
+    .from('assignments')
+    .update({ due_date: dueDate ?? null })
+    .eq('id', assignmentId)
+  if (error) throw error
+}
+
+// Aggregate a user's quiz_responses into per-module, per-quiz-type scores.
+// Returns: [{ module_id, quiz_type, correct, total, pct }]
+export async function getUserModuleScores(userId) {
+  if (MOCK_MODE) return []
+  const { data, error } = await supabase
+    .from('quiz_responses')
+    .select('module_id, quiz_type, is_correct')
+    .eq('user_id', userId)
+  if (error) throw error
+  const bucket = new Map()
+  for (const row of data ?? []) {
+    const key = `${row.module_id}::${row.quiz_type}`
+    if (!bucket.has(key)) bucket.set(key, { module_id: row.module_id, quiz_type: row.quiz_type, correct: 0, total: 0 })
+    const b = bucket.get(key)
+    b.total += 1
+    if (row.is_correct) b.correct += 1
+  }
+  return Array.from(bucket.values()).map(b => ({
+    ...b,
+    pct: b.total > 0 ? Math.round((b.correct / b.total) * 100) : 0,
+  }))
+}
+
+// Read any grade overrides the admin has set for this user.
+// If the grade_overrides table doesn't exist yet, returns [] so the UI
+// stays functional until the migration runs.
+export async function getGradeOverrides(userId) {
+  if (MOCK_MODE) return []
+  const { data, error } = await supabase
+    .from('grade_overrides')
+    .select('id, user_id, module_slug, quiz_type, override_score, reason, created_by, created_at')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+  if (error) {
+    // Missing table or RLS block — degrade gracefully.
+    console.warn('[getGradeOverrides] table unavailable:', error.message)
+    return []
+  }
+  return data ?? []
+}
+
+// Insert a new grade override. Preserves the original attempt by keeping
+// quiz_responses untouched; admin-side override is read-on-display.
+export async function upsertGradeOverride({ userId, moduleSlug, quizType, overrideScore, reason, adminId }) {
+  if (MOCK_MODE) { await wait(100); return { id: `mock-${Date.now()}` } }
+  const { data, error } = await supabase
+    .from('grade_overrides')
+    .upsert(
+      {
+        user_id: userId,
+        module_slug: moduleSlug,
+        quiz_type: quizType,
+        override_score: overrideScore,
+        reason: reason ?? null,
+        created_by: adminId ?? null,
+      },
+      { onConflict: 'user_id,module_slug,quiz_type' },
+    )
+    .select('id')
+    .single()
   if (error) throw error
   return data
 }
@@ -612,4 +794,3 @@ export async function updateDimension(dimensionId, { title, content }) {
     .eq('id', dimensionId)
   if (error) throw error
 }
-
