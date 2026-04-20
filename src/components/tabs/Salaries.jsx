@@ -176,6 +176,14 @@ function salaryWarning(sal, countryMedian) {
 
 export default function Salaries() {
   const { profile } = useProfile()
+
+  // Derive unlocked countries from localStorage badges once per mount.
+  // isRowGated() expects an array of country names matching MODULES[].country.
+  const unlockedCountries = useMemo(() => {
+    const ids = allBadgeModuleIds()
+    return MODULES.filter(m => ids.has(m.id)).map(m => m.country)
+  }, [])
+
   const [liveDB, setLiveDB] = useState(SALARY_DB_SEED)
   const [region, setRegion] = useState('')
   const [curr, setCurr] = useState('')
@@ -605,11 +613,4 @@ export default function Salaries() {
               {TAX_OPTS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
             </select>
           </div>
-          <button className="btn btn-primary" style={{ width: '100%', marginTop: '.25rem' }} onClick={submit}>Submit anonymously →</button>
-          {msg && <div style={{ fontSize: 12, color: msg.startsWith('✓') ? 'var(--teal-dark)' : 'var(--coral-dark)', marginTop: '.5rem' }}>{msg}</div>}
-        </div>
-
-      </div>
-    </div>
-  )
-}
+          <button className="btn 
