@@ -677,7 +677,7 @@ export default function MySchool() {
         </div>
 
         {/* ── PD context banner — shown for gated countries, hidden once badge earned ── */}
-        <PDContextBanner country={profile.cc} badges={[...badgeIds]} />
+        <PDContextBanner country={profile.cc} badges={[...allBadgeModuleIds()]} />
 
         {/* ── Hero CTA: rate your school ─────────────────────────────────── */}
         {hasSchool && (
