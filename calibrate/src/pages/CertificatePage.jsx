@@ -124,7 +124,7 @@ export default function CertificatePage() {
             flexShrink: 0,
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              {/* Calibrate wordmark */}
+              {/* Habterra wordmark */}
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
                 <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.6)" strokeWidth="1.5"/>
                 <circle cx="12" cy="12" r="5"  stroke="rgba(255,255,255,0.9)" strokeWidth="1.5"/>
@@ -137,7 +137,7 @@ export default function CertificatePage() {
                 fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 800,
                 color: '#fff', letterSpacing: '-0.02em',
               }}>
-                Calibrate
+                Habterra
               </span>
             </div>
             <span style={{
@@ -222,7 +222,7 @@ export default function CertificatePage() {
               </div>
 
               <div style={{ fontSize: 11, color: 'var(--cal-muted)', lineHeight: 1.8, maxWidth: 440, marginBottom: 20 }}>
-                has successfully completed the Calibrate professional development module
+                has successfully completed the Habterra professional development module
                 and demonstrated cultural literacy for parent engagement in international school settings.
               </div>
 
@@ -268,10 +268,10 @@ export default function CertificatePage() {
             flexShrink: 0,
           }}>
             <span style={{ fontSize: 9, color: 'var(--cal-muted)', fontFamily: 'var(--font-display)', letterSpacing: '0.06em' }}>
-              learn.mystool.org
+              habterra.com
             </span>
             <span style={{ fontSize: 9, color: 'var(--cal-muted)', fontFamily: 'var(--font-display)', letterSpacing: '0.06em' }}>
-              Calibrate · International Teacher Professional Development
+              Habterra · International Teacher Professional Development
             </span>
           </div>
 

@@ -8,13 +8,15 @@ import ErrorState from '../components/ErrorState'
 const FETCH_TIMEOUT_MS = 8000
 
 const MODULE_LABELS = {
-  'india-ib':             '🇮🇳 Understand India',
-  'korea-ib':             '🇰🇷 Understand Korea',
-  'ksa-ib':               '🇸🇦 Understand Saudi Arabia',
-  'china-ib':             '🇨🇳 Understand China',
-  'vietnam-ib':           '🇻🇳 Understand Vietnam',
-  'japan-ib':             '🇯🇵 Understand Japan',
-  'woodstock-transition': '🏔️ Curriculum Transition',
+  'india-ib':             'Understand India',
+  'korea-ib':             'Understand Korea',
+  'ksa-ib':               'Understand Saudi Arabia',
+  'china-ib':             'Understand China',
+  'vietnam-ib':           'Understand Vietnam',
+  'japan-ib':             'Understand Japan',
+  'woodstock-transition': 'Curriculum Transition',
+  'indonesia-ib':         'Understand Indonesia',
+  'uae-ib':               'Understand UAE',
 }
 
 export default function Dashboard() {
@@ -22,18 +24,15 @@ export default function Dashboard() {
   const [assignments, setAssignments]   = useState([])
   const [completions, setCompletions]   = useState({})
   const [loading,     setLoading]       = useState(true)
-  const [loadError,   setLoadError]     = useState(null)   // null | 'timeout' | error string
+  const [loadError,   setLoadError]     = useState(null)
   const [retryCount,  setRetryCount]    = useState(0)
   const [bannerDismissed, setBannerDismissed] = useState(false)
 
   useEffect(() => {
     if (!user || !profile) return
-
     setLoading(true)
     setLoadError(null)
-
     let active = true
-
     const timer = setTimeout(() => {
       if (active) {
         active = false
@@ -51,7 +50,6 @@ export default function Dashboard() {
         if (!active) return
         active = false
         setAssignments(asgn)
-        // Index completions by slug for O(1) lookup
         const idx = {}
         comp.forEach(c => { idx[c.module_slug] = c })
         setCompletions(idx)
@@ -71,7 +69,6 @@ export default function Dashboard() {
   const greeting = greetingWord()
   const firstName = profile?.full_name?.split(' ')[0] ?? profile?.email?.split('@')[0] ?? 'there'
 
-  // Progress summary
   const total     = assignments.length
   const completed = assignments.filter(a => completions[a.module_slug]?.completed_at).length
   const inProg    = assignments.filter(a => {
@@ -82,10 +79,7 @@ export default function Dashboard() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
       <TopBar activePage="modules" />
-
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-
-        {/* ── Sidebar ── */}
         <aside className="app-sidebar" style={{
           width: 'var(--sidebar-w)',
           background: 'var(--cal-surface)',
@@ -124,8 +118,6 @@ export default function Dashboard() {
               </div>
             )
           })}
-
-          {/* Divider */}
           {school && (
             <>
               <div style={{ borderTop: '1px solid var(--cal-border)', margin: '20px 0 14px' }} />
@@ -135,10 +127,7 @@ export default function Dashboard() {
           )}
         </aside>
 
-        {/* ── Main ── */}
         <main style={{ flex: 1, overflowY: 'auto', padding: '32px 36px' }}>
-
-          {/* New assignment banner */}
           {!bannerDismissed && !loading && (() => {
             const DAYS = 7
             const cutoff = new Date(Date.now() - DAYS * 86400000)
@@ -149,7 +138,7 @@ export default function Dashboard() {
             const latest = newAsgns.sort((a, b) => new Date(b.assigned_at) - new Date(a.assigned_at))[0]
             const label  = MODULE_LABELS[latest.module_slug] ?? latest.module_slug
             const due    = latest.due_date
-              ? ` · Due ${new Date(latest.due_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`
+              ? ` - Due ${new Date(latest.due_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`
               : ''
             return (
               <div style={{
@@ -159,10 +148,10 @@ export default function Dashboard() {
                 marginBottom: 20, gap: 12,
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13 }}>
-                  <span style={{ fontSize: 16 }}>📋</span>
+                  <span style={{ fontSize: 16 }}>N</span>
                   <span>
                     <strong style={{ fontFamily: 'var(--font-display)' }}>New assignment</strong>
-                    {' · '}{label}{due}
+                    {' - '}{label}{due}
                   </span>
                   {newAsgns.length > 1 && (
                     <span style={{ background: 'rgba(255,255,255,0.2)', borderRadius: 'var(--r-full)', padding: '2px 8px', fontSize: 11, fontWeight: 600 }}>
@@ -174,12 +163,11 @@ export default function Dashboard() {
                   onClick={() => setBannerDismissed(true)}
                   style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.7)', fontSize: 18, lineHeight: 1, padding: '0 2px' }}
                   aria-label="Dismiss"
-                >×</button>
+                >x</button>
               </div>
             )
           })()}
 
-          {/* Greeting */}
           <div style={{ marginBottom: 28 }}>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 600, color: 'var(--cal-ink)', marginBottom: 4 }}>
               {greeting}, {firstName}.
@@ -189,12 +177,11 @@ export default function Dashboard() {
                 ? 'No modules assigned yet.'
                 : completed === total
                   ? `You've completed all ${total} module${total > 1 ? 's' : ''}. Well done.`
-                  : `${completed} of ${total} module${total > 1 ? 's' : ''} complete${inProg > 0 ? ` · ${inProg} in progress` : ''}.`
+                  : `${completed} of ${total} module${total > 1 ? 's' : ''} complete${inProg > 0 ? ` - ${inProg} in progress` : ''}.`
               }
             </p>
           </div>
 
-          {/* Progress summary bar */}
           {total > 0 && (
             <div style={{
               background: 'var(--cal-white)',
@@ -230,7 +217,6 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* Loading state */}
           {loading && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'var(--cal-muted)', padding: '40px 0' }}>
               <div style={{
@@ -240,12 +226,11 @@ export default function Dashboard() {
                 borderRadius: '50%',
                 animation: 'spin 0.8s linear infinite',
               }} />
-              <span style={{ fontSize: 13 }}>Loading your modules…</span>
+              <span style={{ fontSize: 13 }}>Loading your modules...</span>
               <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
             </div>
           )}
 
-          {/* Error state */}
           {!loading && loadError && (
             <ErrorState
               error={loadError}
@@ -254,7 +239,6 @@ export default function Dashboard() {
             />
           )}
 
-          {/* Module grid */}
           {!loading && !loadError && assignments.length > 0 && (
             <div style={{
               display: 'grid',
@@ -271,14 +255,13 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* Empty state */}
           {!loading && !loadError && assignments.length === 0 && (
             <div style={{
               textAlign: 'center',
               padding: '80px 40px',
               color: 'var(--cal-muted)',
             }}>
-              <div style={{ fontSize: 40, marginBottom: 16 }}>📋</div>
+              <div style={{ fontSize: 40, marginBottom: 16 }}>*</div>
               <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 600, color: 'var(--cal-ink)', marginBottom: 8 }}>
                 No modules assigned yet
               </div>
@@ -297,4 +280,5 @@ function greetingWord() {
   const h = new Date().getHours()
   if (h < 12) return 'Good morning'
   if (h < 17) return 'Good afternoon'
-  return 'Good evenin
+  return 'Good evening'
+}

@@ -690,4 +690,73 @@ export default function ModuleView() {
                   }}>
                     {/* Score display */}
                     <div style={{ textAlign: 'center', marginBottom: 24 }}>
-                      <div style={{ fontFamily: 'var(--font-display)
+                      <div style={{ fontFamily: 'var(--font-display)', fontSize: 56, fontWeight: 800, lineHeight: 1, color: passed ? '#2E7D32' : '#F59E0B' }}>
+                        {finalCorrect}/{finalExam.length}
+                      </div>
+                      <div style={{ fontSize: 14, color: 'var(--cal-muted)', marginTop: 6 }}>{pct}%</div>
+                      <div style={{
+                        display: 'inline-block', marginTop: 12,
+                        fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 700,
+                        color: passed ? '#1B5E20' : '#78350F',
+                        background: passed ? '#C8E6C9' : '#FDE68A',
+                        padding: '5px 14px', borderRadius: 999,
+                      }}>
+                        {passed ? '🎓 Module complete' : '📖 Keep reviewing'}
+                      </div>
+                    </div>
+
+                    {/* Per-question breakdown */}
+                    <div style={{ borderTop: '1px solid rgba(0,0,0,0.07)', paddingTop: 20, marginBottom: 24 }}>
+                      <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--cal-muted)', marginBottom: 12, fontFamily: 'var(--font-display)' }}>
+                        Question breakdown
+                      </div>
+                      {finalExam.map((q, i) => {
+                        const correct = q.options.find(o => o.id === answers[q.id])?.isCorrect ?? false
+                        const prompt  = q.prompt.length > 80 ? q.prompt.slice(0, 80) + '…' : q.prompt
+                        return (
+                          <div key={q.id} style={{
+                            display: 'flex', alignItems: 'flex-start', gap: 10,
+                            padding: '8px 0', borderBottom: i < finalExam.length - 1 ? '1px solid rgba(0,0,0,0.05)' : 'none',
+                          }}>
+                            <span style={{ fontSize: 14, flexShrink: 0, color: correct ? '#43A047' : '#E53935', marginTop: 1 }}>
+                              {correct ? '✓' : '✗'}
+                            </span>
+                            <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--cal-muted)', flexShrink: 0, marginTop: 2 }}>Q{i + 1}</span>
+                            <span style={{ fontSize: 12, color: 'var(--cal-ink)', lineHeight: 1.5 }}>{prompt}</span>
+                          </div>
+                        )
+                      })}
+                    </div>
+
+                    {/* CTA */}
+                    <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                      {passed ? (
+                        <>
+                          <button
+                            className="btn"
+                            onClick={() => navigate(`/certificate/${slug}`)}
+                            style={{ background: 'var(--cal-teal)', color: '#fff', padding: '9px 20px', fontSize: 13 }}
+                          >
+                            🎓 Download Certificate
+                          </button>
+                          <button className="btn btn-ghost" onClick={() => navigate('/dashboard')} style={{ fontSize: 12 }}>
+                            ← Back to modules
+                          </button>
+                        </>
+                      ) : (
+                        <button className="btn btn-ghost" onClick={() => setActiveTab('dimensions')} style={{ fontSize: 12 }}>
+                          ← Review Dimensions
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )
+              })()}
+            </>
+          )}
+
+        </div>}
+      </div>
+    </div>
+  )
+}

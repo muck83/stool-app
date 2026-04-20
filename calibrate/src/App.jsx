@@ -112,4 +112,39 @@ export default function App() {
             }
           />
 
-         
+          <Route
+            path="/certificate/:slug"
+            element={
+              <RequireAuth>
+                <CertificatePage />
+              </RequireAuth>
+            }
+          />
+
+          {/* Protected — admin only */}
+          <Route
+            path="/admin"
+            element={
+              <RequireAdmin>
+                <AdminDashboard />
+              </RequireAdmin>
+            }
+          />
+
+          {/* Protected — superadmin only */}
+          <Route
+            path="/superadmin"
+            element={
+              <SuperAdminRoute>
+                <SuperAdminDashboard />
+              </SuperAdminRoute>
+            }
+          />
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        </Routes>
+        <DevBar />
+      </BrowserRouter>
+    </AuthProvider>
+  )
+}

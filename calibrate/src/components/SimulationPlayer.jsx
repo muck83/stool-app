@@ -475,4 +475,36 @@ export default function SimulationPlayer({ sim }) {
               choicesMade={choices}
               nodes={nodes}
               onCommit={(text) => {
-               
+                setDebriefCommitted(true)
+                saveSimulationResponse({
+                  sessionId, simulationId: sim.id,
+                  nodeId, reflectionText: `[COMMITMENT] ${text}`,
+                }).catch(() => {})
+              }}
+            />
+            {debriefCommitted && (
+              <div style={{
+                background: '#E8F5E9', border: '1px solid #A5D6A7',
+                borderRadius: 'var(--r-md)', padding: '16px 20px', marginTop: 20,
+                display: 'flex', alignItems: 'flex-start', gap: 12,
+              }}>
+                <span style={{ fontSize: 18, lineHeight: 1 }}>OK</span>
+                <div>
+                  <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, color: '#1B5E20', marginBottom: 4 }}>
+                    Scenario complete
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--cal-muted)' }}>
+                    Your commitment and responses have been recorded.
+                  </div>
+                </div>
+              </div>
+            )}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 24 }}>
+              <button className="btn btn-ghost" onClick={handleRestart} style={{ fontSize: 12 }}>Run again</button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
