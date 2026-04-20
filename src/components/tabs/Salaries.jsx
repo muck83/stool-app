@@ -10,10 +10,6 @@ import {
   normaliseHousing, normaliseFlights, normaliseTax, normaliseCurriculum,
 } from '../../data/options.js'
 import { fetchSalarySubmissions, insertSalarySubmission, supabase, supabaseStatus } from '../../lib/supabase.js'
-import { isRowGated, gatedSummary } from '../../lib/pd/applySalaryGate.js'
-import { allBadgeModuleIds } from '../../lib/pd/progress.js'
-import { MODULES } from '../../lib/slugMap.js'
-import SalaryGateCard from '../learn/SalaryGateCard.jsx'
 
 // ── Daily rotating insights computed from live salary data ───────────────
 function buildInsights(db) {
@@ -176,14 +172,6 @@ function salaryWarning(sal, countryMedian) {
 
 export default function Salaries() {
   const { profile } = useProfile()
-
-  // Derive unlocked countries from localStorage badges once per mount.
-  // isRowGated() expects an array of country names matching MODULES[].country.
-  const unlockedCountries = useMemo(() => {
-    const ids = allBadgeModuleIds()
-    return MODULES.filter(m => ids.has(m.id)).map(m => m.country)
-  }, [])
-
   const [liveDB, setLiveDB] = useState(SALARY_DB_SEED)
   const [region, setRegion] = useState('')
   const [curr, setCurr] = useState('')
@@ -260,30 +248,8 @@ export default function Salaries() {
     })
   }, [liveDB, region, curr, search])
 
-  // Split filtered into open rows (visible) and gated groups (locked by country)
-  const { openRows, gatedGroups } = useMemo(() => {
-    const openRows = []
-    const gatedMap = {}
-    for (const row of filtered) {
-      if (isRowGated(row, unlockedCountries)) {
-        const c = row.country
-        if (!gatedMap[c]) gatedMap[c] = []
-        gatedMap[c].push(row)
-      } else {
-        openRows.push(row)
-      }
-    }
-    const gatedGroups = Object.entries(gatedMap).map(([country, rows]) => {
-      const mod = MODULES.find(m => m.country.toLowerCase() === country.toLowerCase())
-      return {
-        country,
-        summary: gatedSummary(rows),
-        moduleSlug: mod?.slug || country.toLowerCase().replace(/\s+/g, '-'),
-        color: mod?.color || '#A35E08',
-      }
-    })
-    return { openRows, gatedGroups }
-  }, [filtered, unlockedCountries])
+  // Gate removed — all filtered rows render directly.
+  const openRows = filtered
 
   const medianUSD = useMemo(() => {
     const vals = liveDB.map(r => r.usd).filter(v => v > 0).sort((a, b) => a - b)
@@ -473,49 +439,13 @@ export default function Salaries() {
                     </td><td>{r.flights}</td><td>{r.tax}</td>
                   </tr>
                 ))}
-                {gatedGroups.map(({ country, summary, moduleSlug, color }) => (
-                  <tr key={`gate-${country}`} style={{ background: `${color}08` }}>
-                    <td colSpan={2} style={{ color: 'var(--ink-3)', fontStyle: 'italic', fontSize: 12 }}>
-                      🔒 {country}
-                    </td>
-                    <td colSpan={4} style={{ fontSize: 12, color: 'var(--ink-3)' }}>
-                      {summary.count} record{summary.count !== 1 ? 's' : ''} locked ·{' '}
-                      range ${summary.minUsd.toLocaleString()}–${summary.maxUsd.toLocaleString()}/mo ·{' '}
-                      <a href={`/learn/${moduleSlug}`} style={{ color, fontWeight: 500, textDecoration: 'none', borderBottom: `1px solid ${color}50` }}>
-                        complete the {country} module to unlock →
-                      </a>
-                    </td>
-                    <td colSpan={3} />
-                  </tr>
-                ))}
               </tbody>
             </table>
           </div>
           <div style={{ fontSize: 12, color: 'var(--ink-4)', marginTop: '.75rem' }}>
             Showing <strong>{openRows.length}</strong> of <strong>{liveDB.length}</strong> records
-            {gatedGroups.length > 0 && (
-              <span style={{ marginLeft: 8, color: 'var(--ink-4)' }}>
-                · {gatedGroups.reduce((n, g) => n + g.summary.count, 0)} locked
-                ({gatedGroups.map(g => g.country).join(', ')})
-              </span>
-            )}
           </div>
         </div>
-
-        {/* Salary gate cards — one per locked country */}
-        {gatedGroups.length > 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '.75rem', marginTop: '1rem' }}>
-            {gatedGroups.map(({ country, summary, moduleSlug }) => (
-              <SalaryGateCard
-                key={country}
-                country={country}
-                percentage={0}
-                threshold={80}
-                moduleSlug={moduleSlug}
-              />
-            ))}
-          </div>
-        )}
 
         {/* Right — contribute form (single-column, sticky) */}
         <div className="card" style={{ position: 'sticky', top: '1rem' }}>
